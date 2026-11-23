@@ -529,10 +529,13 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                     ui.spacing_mut().item_spacing = vec2(4.0, 4.0);
                     for (i, (label, cat)) in made_by.iter().enumerate() {
                         let col = super::catalog::category_color(&p, cat);
-                        let fr = egui::Frame::new().fill(with_alpha(col, 26)).stroke(Stroke::new(1.0, with_alpha(col, 90))).corner_radius(CornerRadius::same(10)).inner_margin(egui::Margin::symmetric(8, 2));
-                        fr.show(ui, |ui| {
-                            ui.add(egui::Label::new(RichText::new(label).size(11.0).color(p.text)).extend());
-                        });
+                        // One painted widget per chip so the wrapping layout can break between chips.
+                        let font = egui::FontId::proportional(11.0);
+                        let g = ui.painter().layout_no_wrap(label.clone(), font.clone(), p.text);
+                        let w = (g.size().x + 16.0).min(ui.available_width().max(60.0));
+                        let (r, _) = ui.allocate_exact_size(vec2(w, 20.0), egui::Sense::hover());
+                        ui.painter().rect(r, CornerRadius::same(10), with_alpha(col, 26), Stroke::new(1.0, with_alpha(col, 90)), egui::StrokeKind::Inside);
+                        ui.painter().with_clip_rect(r.shrink(2.0)).text(r.center(), egui::Align2::CENTER_CENTER, label, font, p.text);
                         if i + 1 < made_by.len() {
                             ui.label(RichText::new("›").color(p.text_faint));
                         }
