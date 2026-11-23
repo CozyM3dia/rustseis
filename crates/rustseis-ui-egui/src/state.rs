@@ -1,0 +1,730 @@
+//! Application state shared by every pane. All engine mutations go through
+//! [`EngineSession::dispatch`] (inline for light table/crosshair commands, on the worker thread
+//! for flows, OPF I/O and copilot calls).
+
+use crate::data::{EnsRange, EnsembleIndex, TraceSource, fmt_count, traces_bytes};
+use crate::flowdoc::{FlowDoc, StepPath};
+use crate::panes::copilot::CopilotState;
+use crate::panes::geometry::GeometryState;
+use crate::panes::inspector::InspectorState;
+use crate::panes::iva::IvaState;
+use crate::panes::project::ProjectState;
+use crate::panes::spectral::SpectralState;
+use crate::panes::statics::StaticsState;
+use crate::panes::viewer::ViewerState;
+use crate::panes::vsp::VspState;
+use crate::specs::SpecLibrary;
+use crate::theme::ThemeMode;
+use crate::worker::{ComputePool, EngineDone, EngineJob, EngineOutcome, EngineWorker};
+use rustseis_engine::{CommandAuditEntry, CrosshairState, EngineCommand, EngineSession};
+use rustseis_flow::{FlowReport, FlowSpec, ToolDescriptor, full_tool_catalog, tier2_tool_catalog};
+use serde_json::{Value, json};
+use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Workspace {
+    Flow,
+    Viewer,
+    Velocity,
+    Spectral,
+    Statics,
+    Survey,
+}
+
+impl Workspace {
+    pub const ALL: [Workspace; 6] = [Self::Flow, Self::Viewer, Self::Velocity, Self::Spectral, Self::Statics, Self::Survey];
+    pub fn title(self) -> &'static str {
+        match self {
+            Self::Flow => "Flow Studio",
+            Self::Viewer => "Trace Viewer",
+            Self::Velocity => "Velocity",
+            Self::Spectral => "Spectral QC",
+            Self::Statics => "Statics & VSP",
+            Self::Survey => "Survey & Copilot",
+        }
+    }
+    pub fn icon(self) -> &'static str {
+        use egui_phosphor::regular as i;
+        match self {
+            Self::Flow => i::FLOW_ARROW,
+            Self::Viewer => i::WAVEFORM,
+            Self::Velocity => i::CHART_LINE_UP,
+            Self::Spectral => i::EQUALIZER,
+            Self::Statics => i::DROP,
+            Self::Survey => i::MAP_TRIFOLD,
+        }
+    }
+    pub fn hint(self) -> &'static str {
+        match self {
+            Self::Flow => "Project, OPF database, 61-tool library and branching flow editor",
+            Self::Viewer => "Gathers and sections, before/after compare, mute / first-break / kill picking",
+            Self::Velocity => "Semblance, live-NMO supergather or PSTM CIG, CVS strips and Dix QC",
+            Self::Spectral => "Amplitude spectrum, F-K fan / polygon, Radon tau-q demultiple",
+            Self::Statics => "Refraction / residual statics, surface-consistent amplitude, VSP / DAS",
+            Self::Survey => "Trace-header spreadsheet, crooked-line basemap and MCP copilot",
+        }
+    }
+}
+
+pub enum EngineSlot {
+    Ready(Box<EngineSession>),
+    Busy { label: String, started: Instant, eta_ms: Option<u128> },
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum JobPurpose {
+    Flow { flow_name: String },
+    OpenData { label: String },
+    TraceEdit,
+    Opf,
+    Copilot,
+    Project,
+}
+
+#[derive(Clone, Debug)]
+pub struct JobRecord {
+    pub label: String,
+    pub elapsed: Duration,
+    pub ok: bool,
+    pub summary: String,
+    pub finished: chrono_like::Stamp,
+}
+
+/// Tiny wall-clock stamp so the UI crate does not depend on chrono directly.
+pub mod chrono_like {
+    #[derive(Clone, Copy, Debug)]
+    pub struct Stamp(pub u64);
+    impl Stamp {
+        pub fn now() -> Self {
+            Self(std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0))
+        }
+        pub fn hms(self) -> String {
+            let s = self.0 % 86_400;
+            format!("{:02}:{:02}:{:02} UTC", s / 3600, (s / 60) % 60, s % 60)
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Level {
+    Info,
+    Ok,
+    Warn,
+    Error,
+}
+
+#[derive(Clone, Debug)]
+pub struct LogLine {
+    pub level: Level,
+    pub text: String,
+    pub stamp: chrono_like::Stamp,
+}
+
+#[derive(Clone, Debug)]
+pub struct Toast {
+    pub level: Level,
+    pub text: String,
+    pub born: f64,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct DataFocus {
+    pub source: TraceSource,
+    pub key: String,
+    pub ens: usize,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct DataSummary {
+    pub n_traces: usize,
+    pub n_samples: usize,
+    pub dt_ms: f32,
+    pub bytes: usize,
+    pub ffid: Option<(i32, i32)>,
+    pub cdp: Option<(i32, i32)>,
+    pub buffers: usize,
+}
+
+impl DataSummary {
+    pub fn of(session: &EngineSession) -> Self {
+        let t = &session.active_traces;
+        let mm = |f: &dyn Fn(&rustseis_core::Trace) -> i32| -> Option<(i32, i32)> {
+            if t.is_empty() {
+                return None;
+            }
+            let (mut lo, mut hi) = (i32::MAX, i32::MIN);
+            for tr in t.iter().step_by((t.len() / 20_000).max(1)) {
+                let v = f(tr);
+                lo = lo.min(v);
+                hi = hi.max(v);
+            }
+            Some((lo, hi))
+        };
+        Self {
+            n_traces: t.len(),
+            n_samples: t.first().map(|x| x.samples.len()).unwrap_or(0),
+            dt_ms: t.first().map(|x| x.dt_ms()).unwrap_or(0.0),
+            bytes: traces_bytes(t),
+            ffid: mm(&|x| x.headers.ffid),
+            cdp: mm(&|x| x.headers.cdp),
+            buffers: session.context.buffers.len(),
+        }
+    }
+    pub fn headline(&self) -> String {
+        if self.n_traces == 0 {
+            return "No traces loaded".into();
+        }
+        format!(
+            "{} tr · {} smp · {:.1} ms · {:.2} s",
+            fmt_count(self.n_traces),
+            fmt_count(self.n_samples),
+            self.dt_ms,
+            (self.n_samples.saturating_sub(1)) as f32 * self.dt_ms / 1000.0
+        )
+    }
+}
+
+pub struct AppState {
+    pub theme: ThemeMode,
+    pub engine: EngineSlot,
+    pub worker: EngineWorker,
+    pub compute: ComputePool,
+    /// Bumped whenever trace data may have changed (flows, undo, edits).
+    pub rev: u64,
+    /// Bumped whenever OPF tables / panels may have changed.
+    pub tables_rev: u64,
+    pub catalog: Vec<ToolDescriptor>,
+    pub tier2: HashSet<String>,
+    pub specs: SpecLibrary,
+    pub flow: FlowDoc,
+    pub flow_sel: Option<StepPath>,
+    pub report: Option<FlowReport>,
+    /// Top-level node uids at the time `report` was produced (maps step telemetry to cards).
+    pub report_uids: Vec<u64>,
+    pub history: Vec<JobRecord>,
+    pub audit: Vec<CommandAuditEntry>,
+    pub log: Vec<LogLine>,
+    pub toasts: Vec<Toast>,
+    pub crosshair: CrosshairState,
+    pub focus: DataFocus,
+    pub index: EnsembleIndex,
+    pub summary: DataSummary,
+    pub flow_eta: HashMap<String, u128>,
+    pub busy_purpose: Option<JobPurpose>,
+    pub workspace_request: Option<Workspace>,
+    pub flow_dirs: Vec<PathBuf>,
+    pub time: f64,
+    pub viewer: ViewerState,
+    pub iva: IvaState,
+    pub spectral: SpectralState,
+    pub statics: StaticsState,
+    pub vsp: VspState,
+    pub geometry: GeometryState,
+    pub copilot: CopilotState,
+    pub project: ProjectState,
+    pub inspector: InspectorState,
+}
+
+impl AppState {
+    pub fn new(ctx: &egui::Context) -> Self {
+        let catalog = full_tool_catalog();
+        let tier2 = tier2_tool_catalog().into_iter().map(|t| t.menu_id).collect();
+        let specs = SpecLibrary::discover();
+        let mut flow_dirs = Vec::new();
+        if let Some(root) = specs.root.as_ref().and_then(|r| r.parent()) {
+            flow_dirs.push(root.join("flows"));
+        }
+        if let Ok(cwd) = std::env::current_dir() {
+            let f = cwd.join("flows");
+            if !flow_dirs.contains(&f) {
+                flow_dirs.push(f);
+            }
+        }
+        let mut s = Self {
+            theme: ThemeMode::Dark,
+            engine: EngineSlot::Ready(Box::new(EngineSession::new())),
+            worker: EngineWorker::spawn(ctx.clone()),
+            compute: ComputePool::spawn(ctx.clone(), 2),
+            rev: 1,
+            tables_rev: 1,
+            catalog,
+            tier2,
+            specs,
+            flow: FlowDoc::default(),
+            flow_sel: None,
+            report: None,
+            report_uids: Vec::new(),
+            history: Vec::new(),
+            audit: Vec::new(),
+            log: Vec::new(),
+            toasts: Vec::new(),
+            crosshair: CrosshairState::default(),
+            focus: DataFocus { source: TraceSource::Active, key: "FFID".into(), ens: 0 },
+            index: EnsembleIndex::default(),
+            summary: DataSummary::default(),
+            flow_eta: HashMap::new(),
+            busy_purpose: None,
+            workspace_request: None,
+            flow_dirs,
+            time: 0.0,
+            viewer: ViewerState::default(),
+            iva: IvaState::default(),
+            spectral: SpectralState::default(),
+            statics: StaticsState::default(),
+            vsp: VspState::default(),
+            geometry: GeometryState::default(),
+            copilot: CopilotState::default(),
+            project: ProjectState::default(),
+            inspector: InspectorState::default(),
+        };
+        s.log(Level::Info, format!(
+            "RustSeis workstation ready · {} tools ({} Tier 2) · {} ProMAX specs",
+            s.catalog.len(),
+            s.tier2.len(),
+            s.specs.len()
+        ));
+        s
+    }
+
+    // ---------------------------------------------------------------- engine access
+
+    pub fn session(&self) -> Option<&EngineSession> {
+        match &self.engine {
+            EngineSlot::Ready(s) => Some(s),
+            EngineSlot::Busy { .. } => None,
+        }
+    }
+
+    pub fn session_mut(&mut self) -> Option<&mut EngineSession> {
+        match &mut self.engine {
+            EngineSlot::Ready(s) => Some(s),
+            EngineSlot::Busy { .. } => None,
+        }
+    }
+
+    pub fn is_busy(&self) -> bool {
+        matches!(self.engine, EngineSlot::Busy { .. })
+    }
+
+    pub fn busy_info(&self) -> Option<(&str, Duration, Option<u128>)> {
+        match &self.engine {
+            EngineSlot::Busy { label, started, eta_ms } => Some((label.as_str(), started.elapsed(), *eta_ms)),
+            _ => None,
+        }
+    }
+
+    /// Hand the session to the worker. Returns false (with a toast) if it is already away.
+    pub fn submit(&mut self, job: EngineJob, purpose: JobPurpose) -> bool {
+        let label = job.label();
+        let eta = match &purpose {
+            JobPurpose::Flow { flow_name } => self.flow_eta.get(flow_name).copied(),
+            _ => None,
+        };
+        let slot = std::mem::replace(&mut self.engine, EngineSlot::Busy { label: label.clone(), started: Instant::now(), eta_ms: eta });
+        match slot {
+            EngineSlot::Ready(session) => {
+                self.worker.submit(session, job);
+                self.busy_purpose = Some(purpose);
+                self.log(Level::Info, format!("▶ {label}"));
+                true
+            }
+            busy => {
+                self.engine = busy;
+                self.toast(Level::Warn, "Engine is busy — wait for the current job to finish");
+                false
+            }
+        }
+    }
+
+    pub fn run_flow(&mut self, spec: FlowSpec, purpose: JobPurpose) -> bool {
+        self.submit(EngineJob::Command(EngineCommand::RunFlow(spec)), purpose)
+    }
+
+    /// Run the editor's flow document.
+    pub fn run_current_flow(&mut self) {
+        if self.flow.nodes.is_empty() {
+            self.toast(Level::Warn, "Flow is empty — add tools from the library first");
+            return;
+        }
+        let spec = self.flow.to_spec();
+        self.report_uids = self.flow.nodes.iter().map(|n| n.uid).collect();
+        let name = spec.name.clone();
+        self.run_flow(spec, JobPurpose::Flow { flow_name: name });
+    }
+
+    /// Light commands (table upserts, crosshair) dispatched inline on the UI thread.
+    pub fn dispatch_now(&mut self, cmd: EngineCommand) -> Result<Value, String> {
+        let is_table = matches!(
+            cmd,
+            EngineCommand::UpsertVelocityTable(_)
+                | EngineCommand::UpsertMuteTable(_)
+                | EngineCommand::UpsertFirstBreakTable(_)
+                | EngineCommand::UpsertStaticsTable(_)
+                | EngineCommand::UpsertScAmpTable(_)
+        );
+        let Some(session) = self.session_mut() else {
+            return Err("engine busy".into());
+        };
+        let r = session.dispatch(cmd).map_err(|e| e.to_string());
+        self.audit = session.audit_log.clone();
+        if is_table && r.is_ok() {
+            self.tables_rev += 1;
+        }
+        r
+    }
+
+    /// Commit the UI crosshair to the engine bus (audited). Hover updates stay UI-local.
+    pub fn commit_crosshair(&mut self) {
+        let ch = self.crosshair.clone();
+        if self.session().is_some() {
+            let _ = self.dispatch_now(EngineCommand::SetCrosshair(ch));
+        }
+    }
+
+    pub fn undo(&mut self) {
+        let did = self.session_mut().map(|s| s.undo()).unwrap_or(false);
+        if did {
+            self.rev += 1;
+            self.after_data_change();
+            self.toast(Level::Info, "Undo · restored previous trace set");
+        } else {
+            self.toast(Level::Warn, "Nothing to undo");
+        }
+    }
+
+    pub fn redo(&mut self) {
+        let did = self.session_mut().map(|s| s.redo()).unwrap_or(false);
+        if did {
+            self.rev += 1;
+            self.after_data_change();
+            self.toast(Level::Info, "Redo");
+        } else {
+            self.toast(Level::Warn, "Nothing to redo");
+        }
+    }
+
+    fn after_data_change(&mut self) {
+        if let Some(s) = self.session() {
+            self.summary = DataSummary::of(s);
+        }
+        let src_ok = match &self.focus.source {
+            TraceSource::Active => true,
+            TraceSource::Buffer(n) => self.session().is_some_and(|s| s.context.buffers.contains_key(n)),
+        };
+        if !src_ok {
+            self.focus.source = TraceSource::Active;
+        }
+    }
+
+    /// Drain finished engine jobs. Returns true if a job finished this frame.
+    pub fn poll_engine(&mut self) -> bool {
+        let Some(done) = self.worker.poll() else { return false };
+        let EngineDone { session, label, outcome, elapsed } = done;
+        self.audit = session.audit_log.clone();
+        self.engine = EngineSlot::Ready(session);
+        let purpose = self.busy_purpose.take();
+        let mut ok = true;
+        let mut summary = String::new();
+        match outcome {
+            EngineOutcome::Command(Ok(v)) => {
+                if let Some(rep) = self.session().and_then(|s| s.last_report.clone()) {
+                    if v.get("flow_name").is_some() {
+                        summary = format!("{} traces · {}", fmt_count(rep.final_trace_count), crate::data::fmt_ms(rep.total_elapsed_ms as f64));
+                        self.flow_eta.insert(rep.flow_name.clone(), rep.total_elapsed_ms);
+                        self.report = Some(rep);
+                    }
+                }
+                if summary.is_empty() {
+                    summary = compact_json(&v, 120);
+                }
+            }
+            EngineOutcome::Command(Err(e)) => {
+                ok = false;
+                summary = e;
+            }
+            EngineOutcome::Mcp { call_id, result } => {
+                ok = result.is_ok();
+                summary = match &result {
+                    Ok(v) => compact_json(v, 120),
+                    Err(e) => e.clone(),
+                };
+                if result.as_ref().is_ok_and(|v| v.get("flow_name").is_some()) {
+                    if let Some(rep) = self.session().and_then(|s| s.last_report.clone()) {
+                        self.report = Some(rep);
+                        self.report_uids.clear();
+                    }
+                }
+                self.copilot.on_result(call_id, result);
+            }
+            EngineOutcome::Project(r) => {
+                ok = r.is_ok();
+                summary = match r {
+                    Ok(v) => {
+                        self.project.manifest = Some(v.clone());
+                        compact_json(&v, 120)
+                    }
+                    Err(e) => e,
+                };
+            }
+        }
+        // Any engine job may have touched traces or tables.
+        self.rev += 1;
+        self.tables_rev += 1;
+        self.after_data_change();
+        self.history.push(JobRecord { label: label.clone(), elapsed, ok, summary: summary.clone(), finished: chrono_like::Stamp::now() });
+        if ok {
+            self.log(Level::Ok, format!("✓ {label} · {}", crate::data::fmt_ms(elapsed.as_secs_f64() * 1000.0)));
+            match &purpose {
+                Some(JobPurpose::OpenData { label }) => {
+                    self.focus.ens = 0;
+                    self.viewer.request_refit = true;
+                    self.toast(Level::Ok, format!("Loaded {label} · {}", self.summary.headline()));
+                    self.workspace_request = Some(Workspace::Viewer);
+                }
+                Some(JobPurpose::Flow { .. }) => {
+                    self.viewer.request_refit = true;
+                    self.toast(Level::Ok, format!("{label} finished · {summary}"));
+                }
+                Some(JobPurpose::TraceEdit) => self.toast(Level::Ok, "Trace edits applied (Ctrl+Z to undo)"),
+                Some(JobPurpose::Opf) => self.toast(Level::Ok, format!("{label} · {summary}")),
+                _ => {}
+            }
+        } else {
+            self.log(Level::Error, format!("✗ {label}: {summary}"));
+            self.toast(Level::Error, format!("{label} failed: {summary}"));
+        }
+        true
+    }
+
+    // ---------------------------------------------------------------- data focus
+
+    /// Rebuild the ensemble index for the focus source/key if stale.
+    pub fn ensure_index(&mut self) {
+        let Some(session) = self.session() else { return };
+        if !self.index.matches(&self.focus.source, &self.focus.key, self.rev) {
+            let traces = self.focus.source.traces(session);
+            let idx = EnsembleIndex::build(traces, self.focus.source.clone(), &self.focus.key, self.rev);
+            self.index = idx;
+            if self.focus.ens >= self.index.ranges.len() {
+                self.focus.ens = self.index.ranges.len().saturating_sub(1);
+            }
+        }
+    }
+
+    pub fn focus_range(&self) -> Option<EnsRange> {
+        self.index.ranges.get(self.focus.ens).copied()
+    }
+
+    pub fn step_ensemble(&mut self, delta: i64) {
+        let n = self.index.ranges.len() as i64;
+        if n == 0 {
+            return;
+        }
+        self.focus.ens = (self.focus.ens as i64 + delta).clamp(0, n - 1) as usize;
+    }
+
+    /// Jump the focus to the ensemble containing absolute trace `idx` of the focus source.
+    pub fn focus_trace(&mut self, idx: usize) {
+        self.ensure_index();
+        if let Some(e) = self.index.find_trace(idx) {
+            self.focus.ens = e;
+        }
+        let hdr = self.session().and_then(|s| self.focus.source.traces(s).get(idx).map(|t| t.headers.clone()));
+        {
+            if let Some(h) = hdr.as_ref() {
+                self.crosshair.trace_index = Some(idx);
+                self.crosshair.ffid = Some(h.ffid);
+                self.crosshair.cdp = Some(h.cdp);
+                self.crosshair.chan = Some(h.chan);
+                self.crosshair.offset_m = Some(h.offset);
+                self.crosshair.map_x = Some(h.cdp_x);
+                self.crosshair.map_y = Some(h.cdp_y);
+                if h.rec_dep != 0.0 {
+                    self.crosshair.depth_m = Some(h.rec_dep);
+                }
+            }
+        }
+        self.commit_crosshair();
+    }
+
+    /// Update the UI crosshair from a hovered absolute trace index (no audit entry).
+    pub fn hover_trace(&mut self, abs_idx: usize, time_ms: Option<f32>) {
+        let Some(h) = self.session().and_then(|s| self.focus.source.traces(s).get(abs_idx).map(|t| t.headers.clone())) else { return };
+        let h = &h;
+        let label = self.focus.source.label();
+        let ch = &mut self.crosshair;
+        ch.active_dataset = Some(label);
+        ch.trace_index = Some(abs_idx);
+        ch.ffid = Some(h.ffid);
+        ch.cdp = Some(h.cdp);
+        ch.chan = Some(h.chan);
+        ch.offset_m = Some(h.offset);
+        ch.time_ms = time_ms;
+        ch.map_x = Some(if h.cdp_x != 0.0 { h.cdp_x } else { h.rec_x });
+        ch.map_y = Some(if h.cdp_y != 0.0 { h.cdp_y } else { h.rec_y });
+        ch.depth_m = if h.rec_dep != 0.0 { Some(h.rec_dep) } else { None };
+    }
+
+    // ---------------------------------------------------------------- notifications
+
+    pub fn toast(&mut self, level: Level, text: impl Into<String>) {
+        let text = text.into();
+        self.toasts.retain(|t| t.text != text);
+        self.toasts.push(Toast { level, text, born: self.time });
+        if self.toasts.len() > 4 {
+            self.toasts.remove(0);
+        }
+    }
+
+    pub fn log(&mut self, level: Level, text: impl Into<String>) {
+        self.log.push(LogLine { level, text: text.into(), stamp: chrono_like::Stamp::now() });
+        if self.log.len() > 2000 {
+            self.log.drain(0..500);
+        }
+    }
+
+    // ---------------------------------------------------------------- file actions
+
+    pub fn open_seismic_dialog(&mut self) {
+        let file = rfd::FileDialog::new()
+            .set_title("Open seismic data")
+            .add_filter("Seismic", &["sgy", "segy", "segd", "rsds"])
+            .add_filter("All files", &["*"])
+            .pick_file();
+        if let Some(path) = file {
+            self.open_seismic(&path, None);
+        }
+    }
+
+    pub fn open_segd_dir_dialog(&mut self) {
+        if let Some(dir) = rfd::FileDialog::new().set_title("Open SEG-D shot directory").pick_folder() {
+            let max = self.project.segd_max_shots;
+            self.open_seismic(&dir, Some(max));
+        }
+    }
+
+    /// Load data through a one-step flow so it lands in the session like any other flow output.
+    pub fn open_seismic(&mut self, path: &Path, max_shots: Option<usize>) {
+        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
+        let p = path.display().to_string();
+        let step = if path.is_dir() || ext == "segd" {
+            json!({"tool": "segd_read", "params": {"path": p, "max_shots": max_shots, "live_only": true}})
+        } else if ext == "rsds" {
+            json!({"tool": "diskread2", "params": {"path": p}})
+        } else {
+            json!({"tool": "segy_read", "params": {"path": p, "max_traces": null}})
+        };
+        let label = path.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or(p.clone());
+        let spec: FlowSpec = match serde_json::from_value(json!({"name": format!("open_{label}"), "steps": [step]})) {
+            Ok(s) => s,
+            Err(e) => {
+                self.toast(Level::Error, e.to_string());
+                return;
+            }
+        };
+        self.focus.source = TraceSource::Active;
+        if ext == "sgy" || ext == "segy" {
+            // Post-stack sections have no shot grouping; view them whole.
+            self.focus.key = crate::data::SECTION_KEY.into();
+        } else {
+            self.focus.key = "FFID".into();
+        }
+        self.run_flow(spec, JobPurpose::OpenData { label });
+    }
+
+    pub fn open_flow_dialog(&mut self) {
+        let mut dlg = rfd::FileDialog::new().set_title("Open flow").add_filter("Flow", &["json", "toml"]);
+        if let Some(dir) = self.flow_dirs.iter().find(|d| d.is_dir()) {
+            dlg = dlg.set_directory(dir);
+        }
+        if let Some(path) = dlg.pick_file() {
+            self.open_flow(&path);
+        }
+    }
+
+    pub fn open_flow(&mut self, path: &Path) {
+        match FlowDoc::load(path) {
+            Ok(doc) => {
+                self.toast(Level::Ok, format!("Opened flow {} · {} steps", doc.name, doc.count()));
+                self.flow = doc;
+                self.flow_sel = None;
+                self.report_uids.clear();
+                self.workspace_request = Some(Workspace::Flow);
+            }
+            Err(e) => self.toast(Level::Error, format!("Cannot open flow: {e}")),
+        }
+    }
+
+    pub fn save_flow(&mut self, save_as: bool) {
+        let target = if save_as || self.flow.path.is_none() {
+            let mut dlg = rfd::FileDialog::new()
+                .set_title("Save flow")
+                .add_filter("JSON flow", &["json"])
+                .add_filter("TOML flow", &["toml"])
+                .set_file_name(format!("{}.json", self.flow.name));
+            if let Some(dir) = self.flow_dirs.iter().find(|d| d.is_dir()) {
+                dlg = dlg.set_directory(dir);
+            }
+            dlg.save_file()
+        } else {
+            self.flow.path.clone()
+        };
+        if let Some(path) = target {
+            match self.flow.save(&path) {
+                Ok(()) => self.toast(Level::Ok, format!("Saved {}", path.display())),
+                Err(e) => self.toast(Level::Error, format!("Save failed: {e}")),
+            }
+        }
+    }
+
+    pub fn open_opf_dialog(&mut self) {
+        if let Some(path) = rfd::FileDialog::new().set_title("Load OPF database").add_filter("OPF SQLite", &["sqlite", "db"]).pick_file() {
+            self.load_opf(path);
+        }
+    }
+
+    pub fn load_opf(&mut self, path: PathBuf) {
+        self.project.opf_path = Some(path.clone());
+        self.submit(EngineJob::Command(EngineCommand::LoadOpfDatabase { db_path: path }), JobPurpose::Opf);
+    }
+
+    pub fn save_opf_dialog(&mut self) {
+        let path = self.project.opf_path.clone().or_else(|| {
+            rfd::FileDialog::new()
+                .set_title("Save OPF database")
+                .add_filter("OPF SQLite", &["sqlite"])
+                .set_file_name("project.opf.sqlite")
+                .save_file()
+        });
+        if let Some(path) = path {
+            self.project.opf_path = Some(path.clone());
+            self.submit(EngineJob::Command(EngineCommand::SaveOpfDatabase { db_path: path }), JobPurpose::Opf);
+        }
+    }
+
+    /// Insert a catalog tool after the selected step (or at the end).
+    pub fn insert_tool(&mut self, menu_id: &str) {
+        let Some(desc) = self.catalog.iter().find(|t| t.menu_id == menu_id).cloned() else { return };
+        let node = self.flow.new_node(&desc.menu_id, desc.default_params.clone());
+        let sel = self.flow_sel.clone();
+        let path = self.flow.insert_after(sel.as_ref(), node);
+        self.flow_sel = Some(path);
+    }
+
+    pub fn tool(&self, menu_id: &str) -> Option<&ToolDescriptor> {
+        let id = menu_id.to_ascii_lowercase();
+        self.catalog.iter().find(|t| t.menu_id == id)
+    }
+}
+
+pub fn compact_json(v: &Value, max: usize) -> String {
+    let s = v.to_string();
+    if s.chars().count() > max {
+        let cut: String = s.chars().take(max).collect();
+        format!("{cut}…")
+    } else {
+        s
+    }
+}

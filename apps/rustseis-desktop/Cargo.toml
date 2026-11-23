@@ -1,0 +1,13 @@
+[package]
+name = "rustseis-desktop"
+version.workspace = true
+edition.workspace = true
+description = "RustSeis native desktop workstation (eframe host for rustseis-ui-egui)."
+
+[[bin]]
+name = "rustseis-desktop"
+path = "src/main.rs"
+
+[dependencies]
+eframe.workspace = true
+rustseis-ui-egui.workspace = true
