@@ -336,6 +336,9 @@ fn tables(s: &mut AppState, ui: &mut Ui, p: &Palette) {
         v
     };
     groups.push(("Velocities", icon::CHART_LINE_UP, Doc::Velocity, "vel", sorted(ctx.velocities.iter().map(|(k, v)| (k.clone(), format!("{} locations", v.functions.len()))).collect())));
+    groups.push(("Depth grids", icon::GRID_FOUR, Doc::Viewer, "vgrid", sorted(ctx.velocity_grids.iter().map(|(k, v)| (k.clone(), format!("{}×{}", v.nx, v.nz))).collect())));
+    groups.push(("AVO summaries", icon::CHART_BAR, Doc::Viewer, "avo", sorted(ctx.avo_summaries.iter().map(|(k, v)| (k.clone(), format!("{} CDPs", v.n_cdps))).collect())));
+    groups.push(("Well ties", icon::DROP, Doc::Viewer, "welltie", sorted(ctx.well_ties.iter().map(|(k, v)| (k.clone(), format!("r={:.2}", v.correlation))).collect())));
     groups.push(("Mutes", icon::SCISSORS, Doc::Viewer, "mute", sorted(ctx.mutes.iter().map(|(k, v)| (k.clone(), format!("{} points", v.picks.len().max(v.surgical_picks.len())))).collect())));
     groups.push(("First breaks", icon::LIGHTNING, Doc::Statics, "fb", sorted(ctx.first_breaks.iter().map(|(k, v)| (k.clone(), format!("{} picks", fmt_count(v.picks.len())))).collect())));
     groups.push(("Statics", icon::RULER, Doc::Statics, "stat", sorted(ctx.statics.iter().map(|(k, v)| (k.clone(), format!("misfit {:.2} ms", v.rms_residual_ms))).collect())));

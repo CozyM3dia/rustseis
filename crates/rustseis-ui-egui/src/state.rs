@@ -280,6 +280,7 @@ pub struct AppState {
     pub summary: DataSummary,
     pub flow_eta: HashMap<String, u128>,
     pub busy_purpose: Option<JobPurpose>,
+    pub job_control: rustseis_core::JobControl,
     pub doc_request: Option<Doc>,
     pub stage_request: Option<Workspace>,
     pub flow_dirs: Vec<PathBuf>,
@@ -337,6 +338,7 @@ impl AppState {
             summary: DataSummary::default(),
             flow_eta: HashMap::new(),
             busy_purpose: None,
+            job_control: rustseis_core::JobControl::new(),
             doc_request: None,
             stage_request: None,
             flow_dirs,
@@ -394,7 +396,9 @@ impl AppState {
         };
         let slot = std::mem::replace(&mut self.engine, EngineSlot::Busy { label: label.clone(), started: Instant::now(), eta_ms: eta });
         match slot {
-            EngineSlot::Ready(session) => {
+            EngineSlot::Ready(mut session) => {
+                self.job_control.reset();
+                session.context.job_control = Some(self.job_control.clone());
                 self.worker.submit(session, job);
                 self.busy_purpose = Some(purpose);
                 self.log(Level::Info, format!("▶ {label}"));
@@ -405,6 +409,13 @@ impl AppState {
                 self.toast(Level::Warn, "Engine is busy — wait for the current job to finish");
                 false
             }
+        }
+    }
+
+    pub fn cancel_job(&mut self) {
+        if self.is_busy() {
+            self.job_control.cancel();
+            self.toast(Level::Warn, "Cancelling current job…");
         }
     }
 
@@ -661,9 +672,9 @@ impl AppState {
                 }
             }
             Workspace::Imaging => {
-                if ran(&["kirtime2d", "kirtime2dstk", "fdmig", "fkmig2d", "dmofkpanel"]) {
+                if ran(&["kirtime2d", "kirtime2dstk", "fdmig", "fkmig2d", "dmofkpanel", "eikonal_psdm", "rtm2d"]) {
                     StageStatus::Done
-                } else if ran(&["stack"]) {
+                } else if ran(&["stack", "crooked_stack"]) {
                     StageStatus::Attention
                 } else {
                     StageStatus::NotStarted

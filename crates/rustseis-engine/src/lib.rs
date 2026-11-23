@@ -233,6 +233,9 @@ impl EngineSession {
                 for sc in self.context.sc_amps.values() {
                     db.save_sc_amp(sc)?;
                 }
+                for vg in self.context.velocity_grids.values() {
+                    db.save_velocity_grid(vg)?;
+                }
                 if let Some(ref rep) = self.last_report {
                     let rjson = serde_json::to_string(rep).unwrap_or_default();
                     db.record_flow_run(&rep.flow_name, rep.total_elapsed_ms, rep.final_trace_count, &rjson)?;
@@ -266,6 +269,10 @@ impl EngineSession {
                     self.context.sc_amps.insert(k, v);
                     count += 1;
                 }
+                for (k, v) in db.load_all_velocity_grids()? {
+                    self.context.velocity_grids.insert(k, v);
+                    count += 1;
+                }
                 (
                     format!("LoadOpfDatabase({})", db_path.display()),
                     serde_json::json!({"db_path": db_path, "loaded_tables": count}),
@@ -273,17 +280,29 @@ impl EngineSession {
             }
             EngineCommand::RunFlow(spec) => {
                 let flow_name = spec.name.clone();
-                if !self.active_traces.is_empty() {
+                let had_prev = !self.active_traces.is_empty();
+                if had_prev {
                     self.undo_stack.push(self.active_traces.clone());
                     self.redo_stack.clear();
                 }
                 let prev = std::mem::take(&mut self.active_traces);
-                let (out_traces, report) = execute_flow(&spec, prev, &mut self.context)?;
-                self.active_traces = out_traces;
-                self.last_report = Some(report.clone());
-                let val = serde_json::to_value(&report)
-                    .map_err(|e| SeismicError::Serialization(e.to_string()))?;
-                (format!("RunFlow({flow_name})"), val)
+                match execute_flow(&spec, prev, &mut self.context) {
+                    Ok((out_traces, report)) => {
+                        self.active_traces = out_traces;
+                        self.last_report = Some(report.clone());
+                        let val = serde_json::to_value(&report)
+                            .map_err(|e| SeismicError::Serialization(e.to_string()))?;
+                        (format!("RunFlow({flow_name})"), val)
+                    }
+                    Err(e) => {
+                        if had_prev {
+                            if let Some(restored) = self.undo_stack.pop() {
+                                self.active_traces = restored;
+                            }
+                        }
+                        return Err(e);
+                    }
+                }
             }
             EngineCommand::RenderGatherPng { output_path, config } => {
                 let img = render_seismic_gather(&self.active_traces, &config)?;

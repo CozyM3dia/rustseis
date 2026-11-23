@@ -107,7 +107,11 @@ fn stage_commands(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
             }
         }
         Workspace::Process => {
-            ui.add_enabled_ui(!busy, |ui| {
+            if busy {
+                if cmd(ui, p, icon::X, "Cancel job", false).clicked() {
+                    app.state.cancel_job();
+                }
+            } else {
                 if cmd_primary(ui, p, icon::PLAY, "Run flow").on_hover_text("Ctrl+Enter").clicked() {
                     app.state.run_current_flow();
                     app.jobs_open = true;
@@ -115,7 +119,7 @@ fn stage_commands(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                 if cmd(ui, p, icon::SKIP_FORWARD, "Run to here", false).on_hover_text("Run up to the selected step").clicked() {
                     run_to_selection(&mut app.state);
                 }
-            });
+            }
             if cmd(ui, p, icon::CHECK_CIRCLE, "Check", false).clicked() {
                 check_flow(&mut app.state);
             }
@@ -126,7 +130,7 @@ fn stage_commands(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
             add_menu(app, ui, p, icon::WAVES, "Noise", &["Editing", "Data Enhancement"]);
             add_menu(app, ui, p, icon::RULER, "Statics", &["Statics"]);
             add_menu(app, ui, p, icon::CHART_LINE_UP, "Velocity", &["Velocity"]);
-            add_menu(app, ui, p, icon::STACK, "Imaging", &["Stacking", "Migration", "Modeling"]);
+            add_menu(app, ui, p, icon::STACK, "Imaging", &["Stacking", "Migration", "Modeling", "AVO", "Well Tie"]);
             add_menu(app, ui, p, icon::GIT_BRANCH, "Branch", &["Flow Control", "Extensibility"]);
         }
         Workspace::Velocity => {
@@ -187,7 +191,17 @@ fn stage_commands(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
         }
         Workspace::Imaging => {
             dim_label(ui, p, "ADD");
-            for (id, label) in [("nmo", "NMO"), ("stack", "Stack"), ("kirtime2d", "Time migration"), ("fdmig", "Steep-dip migration"), ("fkmig2d", "F-K migration"), ("dmofkpanel", "DMO")] {
+            for (id, label) in [
+                ("nmo", "NMO"),
+                ("stack", "Stack"),
+                ("crooked_stack", "Crooked stack"),
+                ("vel_to_depth", "Depth model"),
+                ("kirtime2d", "Time mig"),
+                ("eikonal_psdm", "Kirchhoff PSDM"),
+                ("rtm2d", "2D RTM (GPU)"),
+                ("fkmig2d", "F-K mig"),
+                ("dmofkpanel", "DMO"),
+            ] {
                 if cmd(ui, p, "", label, false).clicked() {
                     add_step(app, id);
                 }
@@ -208,6 +222,13 @@ fn stage_commands(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
             if cmd(ui, p, icon::COLUMNS, "Compare", app.state.viewer.compare).clicked() {
                 app.state.viewer.compare = !app.state.viewer.compare;
                 app.open(Doc::Viewer);
+            }
+            cmd_sep(ui, p);
+            if cmd(ui, p, icon::CHART_LINE_UP, "AVO", false).on_hover_text("Add AVO Intercept/Gradient step to the flow").clicked() {
+                add_step(app, "avo_analysis");
+            }
+            if cmd(ui, p, icon::DROP, "Well tie", false).on_hover_text("Add LAS Well Tie step to the flow").clicked() {
+                add_step(app, "well_tie");
             }
             cmd_sep(ui, p);
             if cmd(ui, p, icon::MAP_TRIFOLD, "Survey map", false).clicked() {

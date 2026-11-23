@@ -298,3 +298,300 @@ pub struct SurfaceConsistentAmpTable {
     pub channel_factors: BTreeMap<i32, f32>,
     pub rms_log_residual: f32,
 }
+
+/// Gridded 2D depth interval velocity model `V(x, z)` (m/s) in row-major `[iz * nx + ix]` order.
+/// Shared foundation for Kirchhoff PSDM, 2D acoustic RTM, AVO ray-parameter conversion, and depth well-tie.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VelocityGrid2D {
+    pub name: String,
+    pub nx: usize,
+    pub nz: usize,
+    pub x0_m: f32,
+    pub dx_m: f32,
+    pub z0_m: f32,
+    pub dz_m: f32,
+    /// Interval velocity in m/s, length `nx * nz`, indexed as `iz * nx + ix`.
+    pub v_mps: Vec<f32>,
+}
+
+impl VelocityGrid2D {
+    pub fn constant(
+        name: impl Into<String>,
+        nx: usize,
+        nz: usize,
+        x0_m: f32,
+        dx_m: f32,
+        z0_m: f32,
+        dz_m: f32,
+        v_mps: f32,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            nx,
+            nz,
+            x0_m,
+            dx_m,
+            z0_m,
+            dz_m,
+            v_mps: vec![v_mps; nx * nz],
+        }
+    }
+
+    /// Analytical linear depth-gradient model `V(z) = v0 + grad_s_inv * (z - z0)`.
+    pub fn linear_gradient(
+        name: impl Into<String>,
+        nx: usize,
+        nz: usize,
+        x0_m: f32,
+        dx_m: f32,
+        z0_m: f32,
+        dz_m: f32,
+        v0_mps: f32,
+        grad_per_s: f32,
+    ) -> Self {
+        let mut v = vec![0.0f32; nx * nz];
+        for iz in 0..nz {
+            let z = z0_m + iz as f32 * dz_m;
+            let vz = (v0_mps + grad_per_s * (z - z0_m)).max(300.0);
+            for ix in 0..nx {
+                v[iz * nx + ix] = vz;
+            }
+        }
+        Self {
+            name: name.into(),
+            nx,
+            nz,
+            x0_m,
+            dx_m,
+            z0_m,
+            dz_m,
+            v_mps: v,
+        }
+    }
+
+    #[inline]
+    pub fn x_at(&self, ix: usize) -> f32 {
+        self.x0_m + ix as f32 * self.dx_m
+    }
+
+    #[inline]
+    pub fn z_at(&self, iz: usize) -> f32 {
+        self.z0_m + iz as f32 * self.dz_m
+    }
+
+    #[inline]
+    pub fn get(&self, ix: usize, iz: usize) -> f32 {
+        self.v_mps[iz.min(self.nz - 1) * self.nx + ix.min(self.nx - 1)]
+    }
+
+    #[inline]
+    pub fn set(&mut self, ix: usize, iz: usize, val: f32) {
+        if ix < self.nx && iz < self.nz {
+            self.v_mps[iz * self.nx + ix] = val;
+        }
+    }
+
+    /// Bilinear interpolation of interval velocity at `(x_m, z_m)` with edge clamping.
+    pub fn sample(&self, x_m: f32, z_m: f32) -> f32 {
+        if self.nx == 0 || self.nz == 0 || self.v_mps.is_empty() {
+            return 1500.0;
+        }
+        let fx = ((x_m - self.x0_m) / self.dx_m.max(1e-6)).clamp(0.0, (self.nx - 1) as f32);
+        let fz = ((z_m - self.z0_m) / self.dz_m.max(1e-6)).clamp(0.0, (self.nz - 1) as f32);
+        let ix0 = fx.floor() as usize;
+        let iz0 = fz.floor() as usize;
+        let ix1 = (ix0 + 1).min(self.nx - 1);
+        let iz1 = (iz0 + 1).min(self.nz - 1);
+        let tx = fx - ix0 as f32;
+        let tz = fz - iz0 as f32;
+        let v00 = self.get(ix0, iz0);
+        let v10 = self.get(ix1, iz0);
+        let v01 = self.get(ix0, iz1);
+        let v11 = self.get(ix1, iz1);
+        let v0 = v00 + tx * (v10 - v00);
+        let v1 = v01 + tx * (v11 - v01);
+        v0 + tz * (v1 - v0)
+    }
+
+    pub fn v_min_max(&self) -> (f32, f32) {
+        let mut vmin = f32::INFINITY;
+        let mut vmax = f32::NEG_INFINITY;
+        for &v in &self.v_mps {
+            if v.is_finite() {
+                vmin = vmin.min(v);
+                vmax = vmax.max(v);
+            }
+        }
+        if !vmin.is_finite() { (1500.0, 1500.0) } else { (vmin, vmax) }
+    }
+
+    /// Separable boxcar smoothing (2 passes ≈ triangular, 3 passes ≈ Gaussian) to stabilize
+    /// Eikonal ray tracing and prevent artificial internal reflections in RTM.
+    pub fn smooth(&mut self, rx: usize, rz: usize, passes: usize) {
+        if self.nx == 0 || self.nz == 0 || passes == 0 || (rx == 0 && rz == 0) {
+            return;
+        }
+        let mut tmp = vec![0.0f32; self.nx * self.nz];
+        for _ in 0..passes {
+            if rx > 0 {
+                for iz in 0..self.nz {
+                    let row = iz * self.nx;
+                    for ix in 0..self.nx {
+                        let lo = ix.saturating_sub(rx);
+                        let hi = (ix + rx).min(self.nx - 1);
+                        let mut sum = 0.0f64;
+                        for j in lo..=hi {
+                            sum += self.v_mps[row + j] as f64;
+                        }
+                        tmp[row + ix] = (sum / (hi - lo + 1) as f64) as f32;
+                    }
+                }
+                self.v_mps.copy_from_slice(&tmp);
+            }
+            if rz > 0 {
+                for ix in 0..self.nx {
+                    for iz in 0..self.nz {
+                        let lo = iz.saturating_sub(rz);
+                        let hi = (iz + rz).min(self.nz - 1);
+                        let mut sum = 0.0f64;
+                        for j in lo..=hi {
+                            sum += self.v_mps[j * self.nx + ix] as f64;
+                        }
+                        tmp[iz * self.nx + ix] = (sum / (hi - lo + 1) as f64) as f32;
+                    }
+                }
+                self.v_mps.copy_from_slice(&tmp);
+            }
+        }
+    }
+
+    /// Convert a picked RMS `VelocityTable` (indexed by CDP and TWT ms) into a gridded depth
+    /// interval velocity model `V(x, z)` via Dix conversion and monotonic time-to-depth stretch.
+    ///
+    /// `cdp_x_pairs` maps `(cdp, x_m)` along the line (if empty, `x = cdp * cdp_spacing_m`).
+    #[allow(clippy::too_many_arguments)]
+    pub fn from_velocity_table(
+        table: &VelocityTable,
+        name: impl Into<String>,
+        x0_m: f32,
+        dx_m: f32,
+        nx: usize,
+        z0_m: f32,
+        dz_m: f32,
+        nz: usize,
+        cdp_x_pairs: &[(i32, f32)],
+        cdp_spacing_m: f32,
+        v_min_clamp: f32,
+        v_max_clamp: f32,
+        smooth_x_cells: usize,
+        smooth_z_cells: usize,
+    ) -> Self {
+        let mut grid = Self::constant(name, nx, nz, x0_m, dx_m, z0_m, dz_m, 1500.0);
+        if nx == 0 || nz == 0 {
+            return grid;
+        }
+        let v_lo = v_min_clamp.max(300.0);
+        let v_hi = v_max_clamp.max(v_lo + 100.0);
+
+        // Map x_m -> approximate CDP number
+        let x_to_cdp = |x: f32| -> f32 {
+            if cdp_x_pairs.len() >= 2 {
+                if x <= cdp_x_pairs[0].1 {
+                    return cdp_x_pairs[0].0 as f32;
+                }
+                let last = cdp_x_pairs[cdp_x_pairs.len() - 1];
+                if x >= last.1 {
+                    return last.0 as f32;
+                }
+                for w in cdp_x_pairs.windows(2) {
+                    let (c0, x0) = (w[0].0 as f32, w[0].1);
+                    let (c1, x1) = (w[1].0 as f32, w[1].1);
+                    if (x >= x0 && x <= x1) || (x >= x1 && x <= x0) {
+                        let span = x1 - x0;
+                        if span.abs() < 1e-6 {
+                            return c0;
+                        }
+                        return c0 + (x - x0) / span * (c1 - c0);
+                    }
+                }
+                last.0 as f32
+            } else if cdp_x_pairs.len() == 1 {
+                cdp_x_pairs[0].0 as f32
+            } else {
+                x / cdp_spacing_m.max(1e-3)
+            }
+        };
+
+        // Determine max time needed to cover depth z_max
+        let z_max = z0_m + (nz.saturating_sub(1)) as f32 * dz_m;
+        let max_t_s = ((2.0 * z_max / v_lo) as f64).clamp(1.0, 20.0);
+        let dt_s = 0.004f64;
+        let nt = ((max_t_s / dt_s).ceil() as usize).max(32);
+
+        for ix in 0..nx {
+            let x = x0_m + ix as f32 * dx_m;
+            let cdp_f = x_to_cdp(x);
+            let cdp_lo = cdp_f.floor() as i32;
+            let cdp_hi = cdp_f.ceil() as i32;
+            let frac = cdp_f - cdp_lo as f32;
+
+            // Sample smooth RMS velocity curve v_rms(t) at this x
+            let v_rms_at = |t_ms: f32| -> f64 {
+                let va = table.velocity_at(cdp_lo, t_ms) as f64;
+                let vb = table.velocity_at(cdp_hi, t_ms) as f64;
+                va + frac as f64 * (vb - va)
+            };
+
+            // Compute Dix interval velocity V_int(t) and integrate z(t) = 0.5 * integral V_int dt
+            let mut z_of_t = Vec::with_capacity(nt);
+            let mut vint_of_t = Vec::with_capacity(nt);
+            let mut z_cur = 0.0f64;
+            let mut prev_v2t = 0.0f64;
+            let mut prev_vint = v_rms_at(0.0).clamp(v_lo as f64, v_hi as f64);
+            for it in 0..nt {
+                let t_s = it as f64 * dt_s;
+                let vr = v_rms_at((t_s * 1000.0) as f32);
+                let v2t = vr * vr * t_s;
+                let vint = if it == 0 {
+                    vr.clamp(v_lo as f64, v_hi as f64)
+                } else {
+                    let dv2t = v2t - prev_v2t;
+                    if dv2t > 0.0 {
+                        (dv2t / dt_s).sqrt().clamp(v_lo as f64, v_hi as f64)
+                    } else {
+                        prev_vint
+                    }
+                };
+                if it > 0 {
+                    z_cur += 0.5 * 0.5 * (prev_vint + vint) * dt_s;
+                }
+                z_of_t.push(z_cur);
+                vint_of_t.push(vint as f32);
+                prev_v2t = v2t;
+                prev_vint = vint;
+            }
+
+            // Resample V_int(z) onto uniform depth grid
+            let mut k = 0usize;
+            for iz in 0..nz {
+                let z = (z0_m + iz as f32 * dz_m).max(0.0) as f64;
+                while k + 1 < z_of_t.len() && z_of_t[k + 1] < z {
+                    k += 1;
+                }
+                let val = if k + 1 >= z_of_t.len() {
+                    vint_of_t[vint_of_t.len() - 1]
+                } else {
+                    let dz_seg = (z_of_t[k + 1] - z_of_t[k]).max(1e-9);
+                    let w = ((z - z_of_t[k]) / dz_seg).clamp(0.0, 1.0) as f32;
+                    vint_of_t[k] + w * (vint_of_t[k + 1] - vint_of_t[k])
+                };
+                grid.set(ix, iz, val);
+            }
+        }
+
+        if smooth_x_cells > 0 || smooth_z_cells > 0 {
+            grid.smooth(smooth_x_cells, smooth_z_cells, 2);
+        }
+        grid
+    }
+}

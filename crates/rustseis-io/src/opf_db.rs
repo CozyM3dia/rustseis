@@ -1,7 +1,7 @@
 use rusqlite::{Connection, params};
 use rustseis_core::{
     FirstBreakTable, MuteTable, Result, SeismicError, StaticsTable, SurfaceConsistentAmpTable,
-    VelocityTable,
+    VelocityGrid2D, VelocityTable,
 };
 use serde::{Serialize, de::DeserializeOwned};
 use std::path::Path;
@@ -174,6 +174,16 @@ impl OpfDatabase {
     }
     pub fn load_all_sc_amps(&self) -> Result<Vec<(String, SurfaceConsistentAmpTable)>> {
         self.load_all_typed("SCAMP")
+    }
+
+    pub fn save_velocity_grid(&self, grid: &VelocityGrid2D) -> Result<()> {
+        self.upsert_typed("VELGRID", &grid.name, grid)
+    }
+    pub fn load_velocity_grid(&self, name: &str) -> Result<Option<VelocityGrid2D>> {
+        self.load_typed("VELGRID", name)
+    }
+    pub fn load_all_velocity_grids(&self) -> Result<Vec<(String, VelocityGrid2D)>> {
+        self.load_all_typed("VELGRID")
     }
 
     pub fn record_flow_run(

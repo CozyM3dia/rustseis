@@ -22,10 +22,12 @@ authors = ["RustSeis Contributors"]
 
 [workspace.dependencies]
 anyhow = "1"
+bytemuck = { version = "1", features = ["derive"] }
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 memmap2 = "0.9"
 png = "0.17"
+pollster = "0.4"
 rayon = "1.10"
 rusqlite = { version = "0.32", features = ["bundled"] }
 rustfft = "6.2"
@@ -35,6 +37,7 @@ thiserror = "2"
 tiny-skia = "0.11"
 toml = "0.8"
 uuid = { version = "1", features = ["v4", "serde"] }
+wgpu = "24"
 
 rustseis-core = { path = "crates/rustseis-core" }
 rustseis-io = { path = "crates/rustseis-io" }

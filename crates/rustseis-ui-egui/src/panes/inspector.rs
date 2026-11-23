@@ -31,6 +31,7 @@ pub fn enum_choices(tool: &str, key: &str) -> Option<&'static [&'static str]> {
         ("vsp_wavefield_sep", "method") => &["MedianAlign", "FkDip"],
         ("stack", "method") => &["Mean", "Median"],
         ("fkmig2d", "method") => &["stolt", "phase_shift"],
+        ("avo_analysis", "output") => &["Intercept", "Gradient", "Product", "FluidFactor", "Curvature", "AngleStack"],
         (_, "output") => &["Upgoing", "Downgoing", "UpgoingTwoWayAligned"],
         (_, "direction") => &["Forward", "Inverse"],
         ("agc", "basis") => &["Rms", "Mean", "Median"],
@@ -162,6 +163,7 @@ fn last_run(s: &AppState, path: &[usize]) -> Option<rustseis_flow::StepReport> {
 /// Names of session tables for reference-field suggestions.
 pub struct TableNames {
     pub velocities: Vec<String>,
+    pub velocity_grids: Vec<String>,
     pub mutes: Vec<String>,
     pub buffers: Vec<String>,
     pub others: Vec<String>,
@@ -169,14 +171,16 @@ pub struct TableNames {
 
 impl TableNames {
     fn from(s: &AppState) -> Self {
-        let mut t = Self { velocities: vec![], mutes: vec![], buffers: vec![], others: vec![] };
+        let mut t = Self { velocities: vec![], velocity_grids: vec![], mutes: vec![], buffers: vec![], others: vec![] };
         if let Some(sess) = s.session() {
             let c = &sess.context;
             t.velocities = c.velocities.keys().cloned().collect();
+            t.velocity_grids = c.velocity_grids.keys().cloned().collect();
             t.mutes = c.mutes.keys().cloned().collect();
             t.buffers = c.buffers.keys().cloned().collect();
             t.others = c.first_breaks.keys().chain(c.statics.keys()).chain(c.sc_amps.keys()).chain(c.radon_panels.keys()).cloned().collect();
             t.velocities.sort();
+            t.velocity_grids.sort();
             t.mutes.sort();
             t.buffers.sort();
         }
@@ -185,6 +189,7 @@ impl TableNames {
     fn for_key(&self, key: &str) -> Option<&[String]> {
         match key {
             "velocity_table" => Some(&self.velocities),
+            "velocity_grid" => Some(&self.velocity_grids),
             "mute_table" => Some(&self.mutes),
             "model_buffer" => Some(&self.buffers),
             _ => None,

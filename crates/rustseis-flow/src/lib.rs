@@ -1,14 +1,14 @@
 pub mod catalog;
 pub mod python_node;
 
-pub use catalog::{full_tool_catalog, tier1_tool_catalog, tier2_tool_catalog};
+pub use catalog::{full_tool_catalog, tier1_tool_catalog, tier2_tool_catalog, tier3_tool_catalog};
 pub use python_node::{PythonNodeParams, execute_python_node};
 
 use rayon::prelude::*;
 use rustseis_core::{
-    CrookedLineGeometry2D, Ensemble, FirstBreakTable, LandGeometry2D, MarineGeometry2D, MuteTable,
-    Result, SeismicError, StaticsTable, SurfaceConsistentAmpTable, Trace, TraceStats, VelocityTable,
-    trace_stats,
+    CrookedLineGeometry2D, Ensemble, FirstBreakTable, JobControl, LandGeometry2D, MarineGeometry2D,
+    MuteTable, Result, SeismicError, StaticsTable, SurfaceConsistentAmpTable, Trace, TraceStats,
+    VelocityGrid2D, VelocityTable, trace_stats,
 };
 use rustseis_dsp::{
     AdaptiveSubParams, AgcParams, AirBlastParams, BandpassParams, CurveletDenoiseParams,
@@ -17,11 +17,12 @@ use rustseis_dsp::{
     TimeVariantBandpassParams, TraceEditParams, TvsParams, TvwParams,
 };
 use rustseis_imaging::{
-    Afd2dParams, AutostatMethod, AutostatParams, DmoFkParams, FdMig2dParams, FirstBreakPickParams,
-    Kirchhoff2dParams, KirchhoffPstm2dParams, NmoParams, RefractionStaticsParams, SemblancePanel,
-    StackParams, StoltMigParams, Synth2dParams, TrimStatParams, VelocityScanParams,
+    Afd2dParams, AutostatMethod, AutostatParams, AvoOutputMode, AvoParams, AvoSummary,
+    CrookedStackParams, DmoFkParams, FdMig2dParams, FirstBreakPickParams, Kirchhoff2dParams,
+    KirchhoffPsdm2dParams, KirchhoffPstm2dParams, NmoParams, RefractionStaticsParams, Rtm2dParams,
+    SemblancePanel, StackParams, StoltMigParams, Synth2dParams, TrimStatParams, VelocityScanParams,
     VspCorridorStackParams, VspDeconParams, VspGeometryParams, VspSlownessParams,
-    VspSlownessProfile, VspWavefieldSepParams,
+    VspSlownessProfile, VspWavefieldSepParams, WellTieParams, WellTieResult,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -111,28 +112,36 @@ pub struct FlowReport {
 #[derive(Debug, Clone, Default)]
 pub struct FlowContext {
     pub velocities: HashMap<String, VelocityTable>,
+    pub velocity_grids: HashMap<String, VelocityGrid2D>,
     pub mutes: HashMap<String, MuteTable>,
     pub first_breaks: HashMap<String, FirstBreakTable>,
     pub statics: HashMap<String, StaticsTable>,
     pub sc_amps: HashMap<String, SurfaceConsistentAmpTable>,
     pub radon_panels: HashMap<String, RadonPanel>,
     pub vsp_profiles: HashMap<String, VspSlownessProfile>,
+    pub avo_summaries: HashMap<String, AvoSummary>,
+    pub well_ties: HashMap<String, WellTieResult>,
     pub buffers: HashMap<String, Vec<Trace>>,
     pub ensemble_key: String,
+    pub job_control: Option<JobControl>,
 }
 
 impl FlowContext {
     pub fn new() -> Self {
         Self {
             velocities: HashMap::new(),
+            velocity_grids: HashMap::new(),
             mutes: HashMap::new(),
             first_breaks: HashMap::new(),
             statics: HashMap::new(),
             sc_amps: HashMap::new(),
             radon_panels: HashMap::new(),
             vsp_profiles: HashMap::new(),
+            avo_summaries: HashMap::new(),
+            well_ties: HashMap::new(),
             buffers: HashMap::new(),
             ensemble_key: "FFID".to_string(),
+            job_control: None,
         }
     }
 }
@@ -186,7 +195,15 @@ pub fn execute_flow(
     let mut radon_panels = Vec::new();
     let mut vsp_profiles = Vec::new();
 
+    let total_steps = spec.steps.len().max(1);
     for (idx, step) in spec.steps.iter().enumerate() {
+        if let Some(jc) = &ctx.job_control {
+            jc.check_cancelled()?;
+            jc.set_progress(
+                idx as f32 / total_steps as f32,
+                format!("Step {}/{} · {}", idx + 1, total_steps, step.tool),
+            );
+        }
         let t_step = Instant::now();
         let n_in = traces.len();
         if !step.enabled {
@@ -852,6 +869,182 @@ pub fn execute_flow(
             "python_node" => {
                 let p: PythonNodeParams = parse_nested_or_flat(&step.params, "python_node")?;
                 traces = execute_python_node(traces, &p)?;
+            }
+
+            // =========================================================================
+            // TIER 3 — DEPTH VELOCITY MODEL, AVO, WELL TIE, CROOKED STACK, PSDM & RTM
+            // =========================================================================
+            "vel_to_depth" => {
+                let vt = resolve_velocity(&step.params, ctx);
+                let save_grid = step
+                    .params
+                    .get("save_grid")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("depth_vel");
+                let dx_m = step.params.get("dx_m").and_then(|v| v.as_f64()).unwrap_or(25.0).max(1.0) as f32;
+                let dz_m = step.params.get("dz_m").and_then(|v| v.as_f64()).unwrap_or(10.0).max(1.0) as f32;
+                let z0_m = step.params.get("z0_m").and_then(|v| v.as_f64()).unwrap_or(0.0) as f32;
+                let z_max_m = step.params.get("z_max_m").and_then(|v| v.as_f64()).unwrap_or(3000.0).max(100.0) as f32;
+                let smooth_x = step.params.get("smooth_x").and_then(|v| v.as_u64()).unwrap_or(3) as usize;
+                let smooth_z = step.params.get("smooth_z").and_then(|v| v.as_u64()).unwrap_or(3) as usize;
+
+                // Infer lateral extent and (cdp, x_m) mapping from active traces if present
+                let mut x_min = f32::INFINITY;
+                let mut x_max = f32::NEG_INFINITY;
+                let mut cdp_x_map: std::collections::BTreeMap<i32, (f64, usize)> = std::collections::BTreeMap::new();
+                for tr in &traces {
+                    for &x in &[tr.headers.sou_x as f32, tr.headers.rec_x as f32, tr.headers.cdp_x as f32] {
+                        if x.is_finite() && x != 0.0 {
+                            x_min = x_min.min(x);
+                            x_max = x_max.max(x);
+                        }
+                    }
+                    let e = cdp_x_map.entry(tr.headers.cdp).or_insert((0.0, 0));
+                    e.0 += tr.headers.cdp_x;
+                    e.1 += 1;
+                }
+                let x0_m = step
+                    .params
+                    .get("x0_m")
+                    .and_then(|v| v.as_f64())
+                    .map(|v| v as f32)
+                    .unwrap_or_else(|| if x_min.is_finite() { x_min } else { 0.0 });
+                let x_end = step
+                    .params
+                    .get("x_max_m")
+                    .and_then(|v| v.as_f64())
+                    .map(|v| v as f32)
+                    .unwrap_or_else(|| if x_max.is_finite() && x_max > x0_m { x_max } else { x0_m + 2000.0 });
+                let nx = (((x_end - x0_m) / dx_m).ceil() as usize + 1).clamp(16, 4096);
+                let nz = (((z_max_m - z0_m) / dz_m).ceil() as usize + 1).clamp(16, 2048);
+                let cdp_pairs: Vec<(i32, f32)> = cdp_x_map
+                    .into_iter()
+                    .map(|(c, (sx, n))| (c, (sx / n as f64) as f32))
+                    .collect();
+                let grid = VelocityGrid2D::from_velocity_table(
+                    &vt,
+                    save_grid,
+                    x0_m,
+                    dx_m,
+                    nx,
+                    z0_m,
+                    dz_m,
+                    nz,
+                    &cdp_pairs,
+                    dx_m * 0.5,
+                    1200.0,
+                    6500.0,
+                    smooth_x,
+                    smooth_z,
+                );
+                ctx.velocity_grids.insert(save_grid.to_string(), grid);
+            }
+            "avo_analysis" => {
+                let p: AvoParams = parse_nested_or_flat(&step.params, "avo_analysis")?;
+                let vt = resolve_velocity(&step.params, ctx);
+                let save_summary = step
+                    .params
+                    .get("save_summary")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("avo_qc");
+                let out = rustseis_imaging::compute_avo_2d(&traces, &vt, &p, save_summary)?;
+                if let Some(gb) = step.params.get("save_gradient_buffer").and_then(|v| v.as_str()) {
+                    if !gb.is_empty() {
+                        ctx.buffers.insert(gb.to_string(), out.gradient.clone());
+                    }
+                }
+                if let Some(fb) = step.params.get("save_fluid_buffer").and_then(|v| v.as_str()) {
+                    if !fb.is_empty() {
+                        ctx.buffers.insert(fb.to_string(), out.fluid_factor.clone());
+                    }
+                }
+                ctx.avo_summaries.insert(save_summary.to_string(), out.summary);
+                traces = match p.output {
+                    AvoOutputMode::Intercept => out.intercept,
+                    AvoOutputMode::Gradient => out.gradient,
+                    AvoOutputMode::Product => out.product,
+                    AvoOutputMode::FluidFactor => out.fluid_factor,
+                    AvoOutputMode::Curvature => out.curvature,
+                    AvoOutputMode::AngleStack => out.angle_stack,
+                };
+            }
+            "well_tie" => {
+                let p: WellTieParams = parse_nested_or_flat(&step.params, "well_tie")?;
+                let save_tie = step
+                    .params
+                    .get("save_tie")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("well_tie");
+                let res = rustseis_imaging::compute_well_tie_from_file(&traces, &p)?;
+                let synth_tr = rustseis_imaging::well_tie_to_trace(&res);
+                ctx.well_ties.insert(save_tie.to_string(), res);
+                if step
+                    .params
+                    .get("append_synthetic_trace")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false)
+                {
+                    traces.push(synth_tr);
+                }
+            }
+            "crooked_stack" => {
+                let p: CrookedStackParams = parse_nested_or_flat(&step.params, "crooked_stack")?;
+                traces = rustseis_imaging::stack_crooked_line_2d(&traces, &p)?;
+            }
+            "eikonal_psdm" => {
+                let p: KirchhoffPsdm2dParams = parse_nested_or_flat(&step.params, "eikonal_psdm")?;
+                let grid_name = step
+                    .params
+                    .get("velocity_grid")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("depth_vel");
+                let grid = ctx
+                    .velocity_grids
+                    .get(grid_name)
+                    .or_else(|| ctx.velocity_grids.values().next())
+                    .cloned()
+                    .ok_or_else(|| {
+                        SeismicError::NotFound(format!(
+                            "VelocityGrid2D '{grid_name}' not found (run vel_to_depth first)"
+                        ))
+                    })?;
+                let out = rustseis_imaging::kirchhoff_psdm_2d(
+                    &traces,
+                    &grid,
+                    &p,
+                    ctx.job_control.as_ref(),
+                )?;
+                if let Some(cb) = step.params.get("save_cig_buffer").and_then(|v| v.as_str()) {
+                    if !cb.is_empty() && !out.cig_traces.is_empty() {
+                        ctx.buffers.insert(cb.to_string(), out.cig_traces);
+                    }
+                }
+                traces = out.image_traces;
+            }
+            "rtm2d" => {
+                let p: Rtm2dParams = parse_nested_or_flat(&step.params, "rtm2d")?;
+                let grid_name = step
+                    .params
+                    .get("velocity_grid")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("depth_vel");
+                let grid = ctx
+                    .velocity_grids
+                    .get(grid_name)
+                    .or_else(|| ctx.velocity_grids.values().next())
+                    .cloned()
+                    .ok_or_else(|| {
+                        SeismicError::NotFound(format!(
+                            "VelocityGrid2D '{grid_name}' not found (run vel_to_depth first)"
+                        ))
+                    })?;
+                let out = rustseis_imaging::rtm_2d(
+                    &traces,
+                    &grid,
+                    &p,
+                    ctx.job_control.as_ref(),
+                )?;
+                traces = out.image_traces;
             }
 
             other => {

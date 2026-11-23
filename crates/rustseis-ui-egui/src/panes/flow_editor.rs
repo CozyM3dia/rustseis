@@ -124,19 +124,36 @@ fn header(s: &mut AppState, ui: &mut Ui, p: &Palette, reps: &[Option<StepReport>
 
 fn running_banner(s: &AppState, ui: &mut Ui, p: &Palette) {
     if let Some((label, elapsed, eta)) = s.busy_info() {
+        let (prog, stage_msg) = s.job_control.snapshot();
         Frame::new().fill(with_alpha(p.accent, 18)).inner_margin(Margin::symmetric(12, 6)).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.add(egui::Spinner::new().size(14.0).color(p.accent));
                 ui.label(RichText::new(label).strong());
+                if !stage_msg.is_empty() {
+                    ui.label(RichText::new(format!("· {stage_msg}")).size(11.5).color(p.text));
+                }
                 let el = elapsed.as_secs_f64() * 1000.0;
-                let txt = match eta {
-                    Some(e) => format!("{} of about {}", fmt_ms(el), fmt_ms(e as f64)),
-                    None => fmt_ms(el),
+                let txt = if prog > 0.01 {
+                    format!("{} · {:.0}%", fmt_ms(el), prog * 100.0)
+                } else {
+                    match eta {
+                        Some(e) => format!("{} of about {}", fmt_ms(el), fmt_ms(e as f64)),
+                        None => fmt_ms(el),
+                    }
                 };
                 ui.label(RichText::new(txt).font(font_mono(11.5)).color(p.text_muted));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if widgets::cmd(ui, p, icon::X, "Cancel", false).clicked() {
+                        s.job_control.cancel();
+                    }
+                });
             });
-            let frac = eta.map(|e| (elapsed.as_secs_f64() * 1000.0 / e.max(1) as f64).min(0.97) as f32);
+            let frac = if prog > 0.01 {
+                Some(prog.clamp(0.0, 1.0))
+            } else {
+                eta.map(|e| (elapsed.as_secs_f64() * 1000.0 / e.max(1) as f64).min(0.97) as f32)
+            };
             widgets::progress_line(ui, p, ui.available_width(), frac);
         });
     }

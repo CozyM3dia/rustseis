@@ -3,11 +3,19 @@ name = "rustseis-imaging"
 version.workspace = true
 edition.workspace = true
 
+[features]
+default = ["gpu"]
+gpu = ["dep:wgpu", "dep:pollster", "dep:bytemuck"]
+
 [dependencies]
+bytemuck = { workspace = true, optional = true }
+pollster = { workspace = true, optional = true }
 rayon.workspace = true
 rustfft.workspace = true
 rustseis-core.workspace = true
 rustseis-dsp.workspace = true
+rustseis-io.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+wgpu = { workspace = true, optional = true }

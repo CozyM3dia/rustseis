@@ -7,10 +7,11 @@ use rustseis_dsp::{
     ScDeconParams, Srme2dParams, TarParams, TeqParams, TvwParams,
 };
 use rustseis_imaging::{
-    Afd2dParams, AutostatParams, DmoFkParams, FdMig2dParams, FirstBreakPickParams,
-    Kirchhoff2dParams, KirchhoffPstm2dParams, NmoParams, RefractionStaticsParams, StackParams,
-    Synth2dParams, TrimStatParams, VelocityScanParams, VspCorridorStackParams, VspDeconParams,
-    VspGeometryParams, VspSlownessParams, VspWavefieldSepParams,
+    Afd2dParams, AutostatParams, AvoParams, CrookedStackParams, DmoFkParams, FdMig2dParams,
+    FirstBreakPickParams, Kirchhoff2dParams, KirchhoffPsdm2dParams, KirchhoffPstm2dParams,
+    NmoParams, RefractionStaticsParams, Rtm2dParams, StackParams, Synth2dParams, TrimStatParams,
+    VelocityScanParams, VspCorridorStackParams, VspDeconParams, VspGeometryParams,
+    VspSlownessParams, VspWavefieldSepParams, WellTieParams,
 };
 use serde_json::json;
 
@@ -519,9 +520,89 @@ pub fn tier2_tool_catalog() -> Vec<ToolDescriptor> {
     ]
 }
 
-/// Complete unified Tier 1 + Tier 2 tool catalog (shared by CLI, MCP, and future Opus `egui` GUI).
+/// Tier 3 depth imaging, AVO, well-tie, and wave-equation migration tools (6 tools).
+pub fn tier3_tool_catalog() -> Vec<ToolDescriptor> {
+    vec![
+        ToolDescriptor {
+            menu_id: "vel_to_depth".into(),
+            label: "RMS to Depth Velocity Grid".into(),
+            category: "Velocity / Depth Model".into(),
+            archetype: ToolArchetype::Complex,
+            description: "Convert a picked RMS velocity table to a smoothed 2D depth interval velocity grid V(x,z) via Dix conversion.".into(),
+            default_params: json!({
+                "velocity_table": "auto_vel",
+                "save_grid": "depth_vel",
+                "dx_m": 25.0,
+                "dz_m": 10.0,
+                "z_max_m": 3000.0,
+                "smooth_x": 3,
+                "smooth_z": 3
+            }),
+        },
+        ToolDescriptor {
+            menu_id: "avo_analysis".into(),
+            label: "AVO Intercept / Gradient".into(),
+            category: "AVO / Reservoir".into(),
+            archetype: ToolArchetype::Ensemble,
+            description: "Offset-to-angle Shuey regression on NMO-corrected CDP gathers producing Intercept (R0), Gradient (G), Fluid Factor, and angle stacks.".into(),
+            default_params: json!({
+                "velocity_table": "auto_vel",
+                "save_summary": "avo_qc",
+                "save_gradient_buffer": "avo_gradient",
+                "save_fluid_buffer": "avo_fluid_factor",
+                "params": serde_json::to_value(AvoParams::default()).unwrap()
+            }),
+        },
+        ToolDescriptor {
+            menu_id: "well_tie".into(),
+            label: "Seismic-to-Well Tie (LAS)".into(),
+            category: "Well Tie / Borehole".into(),
+            archetype: ToolArchetype::Complex,
+            description: "Read a LAS 2.0/3.0 sonic & density log, build a synthetic seismogram, and correlate bulk shift & phase against the stack.".into(),
+            default_params: json!({
+                "save_tie": "well_tie",
+                "append_synthetic_trace": false,
+                "params": serde_json::to_value(WellTieParams::default()).unwrap()
+            }),
+        },
+        ToolDescriptor {
+            menu_id: "crooked_stack".into(),
+            label: "Crooked-Line Slalom Stack".into(),
+            category: "Stacking / Ensembles".into(),
+            archetype: ToolArchetype::Ensemble,
+            description: "Fold-normalized crooked-line stack with crossline corridor rejection, cosine offset weighting, and azimuth filtering.".into(),
+            default_params: serde_json::to_value(CrookedStackParams::default()).unwrap(),
+        },
+        ToolDescriptor {
+            menu_id: "eikonal_psdm".into(),
+            label: "2D Kirchhoff Depth Migration (PSDM)".into(),
+            category: "Migration / Depth".into(),
+            archetype: ToolArchetype::Complex,
+            description: "Pre-stack Kirchhoff depth migration using Fast Sweeping 2D Eikonal traveltimes on a V(x,z) depth velocity grid.".into(),
+            default_params: json!({
+                "velocity_grid": "depth_vel",
+                "save_cig_buffer": null,
+                "params": serde_json::to_value(KirchhoffPsdm2dParams::default()).unwrap()
+            }),
+        },
+        ToolDescriptor {
+            menu_id: "rtm2d".into(),
+            label: "2D Acoustic RTM (CPU / GPU)".into(),
+            category: "Migration / Depth".into(),
+            archetype: ToolArchetype::Complex,
+            description: "2D acoustic Reverse Time Migration (8th-order FD, illumination compensation, Laplacian filter, native wgpu GPU acceleration).".into(),
+            default_params: json!({
+                "velocity_grid": "depth_vel",
+                "params": serde_json::to_value(Rtm2dParams::default()).unwrap()
+            }),
+        },
+    ]
+}
+
+/// Complete unified Tier 1 + Tier 2 + Tier 3 tool catalog (67 tools).
 pub fn full_tool_catalog() -> Vec<ToolDescriptor> {
     let mut all = tier1_tool_catalog();
     all.extend(tier2_tool_catalog());
+    all.extend(tier3_tool_catalog());
     all
 }

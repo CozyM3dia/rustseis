@@ -22,6 +22,9 @@ pub enum SeismicError {
 
     #[error("Serialization error: {0}")]
     Serialization(String),
+
+    #[error("Operation cancelled")]
+    Cancelled,
 }
 
 pub type Result<T> = std::result::Result<T, SeismicError>;
