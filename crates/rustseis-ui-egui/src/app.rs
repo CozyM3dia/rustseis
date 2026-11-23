@@ -210,11 +210,11 @@ impl RustSeisApp {
 
     fn top_bar(&mut self, ui: &mut Ui, p: &Palette) {
         ui.horizontal_centered(|ui| {
-            ui.spacing_mut().item_spacing.x = 10.0;
+            ui.spacing_mut().item_spacing.x = 8.0;
             ui.add_space(4.0);
             let brand_resp = ui
                 .horizontal(|ui| {
-                    ui.spacing_mut().item_spacing.x = 8.0;
+                    ui.spacing_mut().item_spacing.x = 7.0;
                     widgets::logo(ui, p, 24.0);
                     ui.label(RichText::new("RustSeis").font(font_semibold(15.0)).color(p.text));
                 })
@@ -226,10 +226,11 @@ impl RustSeisApp {
                 self.start_tab = crate::panes::start::StartTab::Start;
                 self.open(Doc::Start);
             }
-            self.project_chip(ui, p);
+            ui.add_space(4.0);
+            self.quick_access_bar(ui, p);
 
             let pills_w = stage_pills_width(ui, p);
-            let right_w = 430.0;
+            let right_w = 390.0;
             let free = ui.available_width() - right_w;
             ui.add_space(((free - pills_w) * 0.5).max(8.0));
             self.stage_pills(ui, p);
@@ -253,56 +254,86 @@ impl RustSeisApp {
         });
     }
 
-    fn project_chip(&mut self, ui: &mut Ui, p: &Palette) {
-        let (area, line) = match &self.state.project.manifest {
-            Some(m) => (
-                m.get("area").and_then(|v| v.as_str()).unwrap_or("Project").to_string(),
-                m.get("line").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-            ),
-            None => ("Untitled project".to_string(), if self.state.summary.n_traces > 0 { self.state.focus.source.label() } else { String::new() }),
-        };
-        let text = if line.is_empty() { format!("{}  {area}  {}", icon::STACK, icon::CARET_DOWN) } else { format!("{}  {area}  /  {line}  {}", icon::STACK, icon::CARET_DOWN) };
-        let btn = egui::Button::new(RichText::new(text).size(12.5).color(p.text_muted))
-            .fill(p.panel)
-            .stroke(Stroke::new(1.0, p.border))
-            .corner_radius(CornerRadius::same(8))
-            .min_size(vec2(0.0, 30.0));
-        let resp = ui.add(btn);
-        egui::Popup::menu(&resp).show(|ui| {
-            ui.set_min_width(240.0);
-            if ui.button(format!("{}  Start page", icon::HOUSE)).clicked() {
-                self.open(Doc::Start);
+    /// RustGIS-style Quick Access Toolbar: New, Open, Save, Undo, Redo, History.
+    fn quick_access_bar(&mut self, ui: &mut Ui, p: &Palette) {
+        use crate::icons::Icon;
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 2.0;
+            if qat_icon(ui, p, Icon::NewFile, "New project…", false, true).clicked() {
+                self.state.project.new_project = Some(crate::panes::project::NewProject {
+                    area: "Survey".into(),
+                    line: "Line 01".into(),
+                    ..Default::default()
+                });
             }
-            ui.separator();
-            if ui.button(format!("{}  Open seismic data…", icon::FOLDER_OPEN)).clicked() {
+            if qat_icon(ui, p, Icon::OpenData, "Open seismic data… (Ctrl+O)", false, true).clicked() {
                 self.state.open_seismic_dialog();
             }
-            if ui.button(format!("{}  Open SEG-D shot folder…", icon::FOLDERS)).clicked() {
-                self.state.open_segd_dir_dialog();
+            if qat_icon(ui, p, Icon::SaveFile, "Save flow (Ctrl+S)", false, true).clicked() {
+                self.state.save_flow(false);
             }
-            if ui.button(format!("{}  Open flow…", icon::FLOW_ARROW)).clicked() {
-                self.state.open_flow_dialog();
+            let can_undo = if self.active == Doc::Flow {
+                !self.state.flow_undo.is_empty()
+            } else {
+                self.state.session().is_some_and(|s| s.can_undo())
+            };
+            if qat_icon(ui, p, Icon::Undo, "Undo (Ctrl+Z)", false, can_undo).clicked() && can_undo {
+                if self.active == Doc::Flow {
+                    self.state.undo_flow();
+                } else {
+                    self.state.undo();
+                }
             }
-            ui.separator();
-            if ui.button(format!("{}  New project…", icon::PLUS)).clicked() {
-                self.state.project.new_project = Some(crate::panes::project::NewProject { area: "Survey".into(), line: "Line 01".into(), ..Default::default() });
+            let can_redo = if self.active == Doc::Flow {
+                !self.state.flow_redo.is_empty()
+            } else {
+                self.state.session().is_some_and(|s| s.can_redo())
+            };
+            if qat_icon(ui, p, Icon::Redo, "Redo (Ctrl+Y)", false, can_redo).clicked() && can_redo {
+                if self.active == Doc::Flow {
+                    self.state.redo_flow();
+                } else {
+                    self.state.redo();
+                }
             }
-            if ui.button(format!("{}  Open project database…", icon::DATABASE)).clicked() {
-                self.state.open_opf_dialog();
-            }
-            if ui.button(format!("{}  Save project database", icon::FLOPPY_DISK)).clicked() {
-                self.state.save_opf_dialog();
+            if qat_icon(ui, p, Icon::History, "Job history (Ctrl+J)", self.jobs_open, true).clicked() {
+                self.jobs_open = !self.jobs_open;
             }
         });
     }
 
     fn stage_pills(&mut self, ui: &mut Ui, p: &Palette) {
         let font = egui::FontId::proportional(13.0);
+        let proj_font = font_semibold(12.5);
+        let proj_w = ui.painter().layout_no_wrap("Project".into(), proj_font.clone(), p.text).size().x + 22.0;
         let widths: Vec<f32> = Workspace::ALL.iter().map(|w| ui.painter().layout_no_wrap(w.title().to_string(), font.clone(), p.text).size().x + 34.0).collect();
-        let total = vec2(widths.iter().sum::<f32>() + 8.0, 34.0);
+        let total = vec2(proj_w + 8.0 + widths.iter().sum::<f32>() + 8.0, 34.0);
         let (outer, _) = ui.allocate_exact_size(total, Sense::hover());
         ui.painter().rect(outer, CornerRadius::same(10), p.panel, Stroke::new(1.0, p.border), StrokeKind::Inside);
+
         let mut x = outer.left() + 4.0;
+        // Dedicated "Project" tab to the left of Data -> opens full-window Backstage Start page.
+        let pr = egui::Rect::from_min_size(pos2(x, outer.top() + 3.0), vec2(proj_w, outer.height() - 6.0));
+        let presp = ui
+            .interact(pr, egui::Id::unique("stage_project_tab"), Sense::click())
+            .on_hover_cursor(egui::CursorIcon::PointingHand)
+            .on_hover_text("Project & Start page");
+        let rust_accent = egui::Color32::from_rgb(176, 70, 42);
+        let proj_fill = if presp.hovered() {
+            mix(rust_accent, egui::Color32::WHITE, 0.14)
+        } else {
+            rust_accent
+        };
+        ui.painter().rect_filled(pr, CornerRadius::same(7), proj_fill);
+        ui.painter().text(pr.center(), Align2::CENTER_CENTER, "Project", proj_font, egui::Color32::WHITE);
+        if presp.clicked() {
+            self.start_tab = crate::panes::start::StartTab::Start;
+            self.open(Doc::Start);
+        }
+        x += proj_w + 4.0;
+        ui.painter().vline(x, (outer.top() + 7.0)..=(outer.bottom() - 7.0), Stroke::new(1.0, p.border_strong));
+        x += 4.0;
+
         for (i, (w, wd)) in Workspace::ALL.iter().zip(widths).enumerate() {
             let r = egui::Rect::from_min_size(pos2(x, outer.top() + 3.0), vec2(wd, outer.height() - 6.0));
             let resp = ui.interact(r, egui::Id::unique(("stage", i)), Sense::click()).on_hover_text(format!("{} — {} (Ctrl+{})", w.title(), w.hint(), i + 1));
@@ -853,7 +884,41 @@ impl eframe::App for RustSeisApp {
 
 fn stage_pills_width(ui: &Ui, p: &Palette) -> f32 {
     let font = egui::FontId::proportional(13.0);
-    Workspace::ALL.iter().map(|w| ui.painter().layout_no_wrap(w.title().to_string(), font.clone(), p.text).size().x + 34.0).sum::<f32>() + 8.0
+    let proj_w = ui.painter().layout_no_wrap("Project".into(), font_semibold(12.5), p.text).size().x + 22.0;
+    proj_w + 8.0 + Workspace::ALL.iter().map(|w| ui.painter().layout_no_wrap(w.title().to_string(), font.clone(), p.text).size().x + 34.0).sum::<f32>() + 8.0
+}
+
+/// Quick Access Toolbar multi-color icon button (matches RustGIS top-left bar).
+fn qat_icon(ui: &mut Ui, p: &Palette, ic: crate::icons::Icon, tip: &str, active: bool, enabled: bool) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(28.0, 28.0), Sense::click());
+    let hovered = resp.hovered() && enabled;
+    let fill = if active {
+        p.accent_soft
+    } else if hovered {
+        p.raised
+    } else {
+        egui::Color32::TRANSPARENT
+    };
+    let stroke = if active {
+        Stroke::new(1.0, p.accent_line)
+    } else if hovered {
+        Stroke::new(1.0, p.border_strong)
+    } else {
+        Stroke::NONE
+    };
+    if fill != egui::Color32::TRANSPARENT || stroke != Stroke::NONE {
+        ui.painter().rect(rect, CornerRadius::same(6), fill, stroke, StrokeKind::Inside);
+    }
+    let ic_rect = egui::Rect::from_center_size(rect.center(), vec2(18.0, 18.0));
+    if enabled {
+        crate::icons::paint(ui.painter(), ic_rect, ic, p);
+        resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text(tip)
+    } else {
+        let mut muted_ui = ui.new_child(egui::UiBuilder::new().max_rect(rect));
+        muted_ui.multiply_opacity(0.32);
+        crate::icons::paint(muted_ui.painter(), ic_rect, ic, p);
+        resp.on_hover_text(tip)
+    }
 }
 
 fn hline(ui: &mut Ui, p: &Palette) {

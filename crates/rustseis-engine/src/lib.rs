@@ -374,6 +374,14 @@ impl EngineSession {
         Ok(output)
     }
 
+    pub fn can_undo(&self) -> bool {
+        !self.undo_stack.is_empty()
+    }
+
+    pub fn can_redo(&self) -> bool {
+        !self.redo_stack.is_empty()
+    }
+
     pub fn undo(&mut self) -> bool {
         if let Some(prev) = self.undo_stack.pop() {
             let cur = std::mem::replace(&mut self.active_traces, prev);
