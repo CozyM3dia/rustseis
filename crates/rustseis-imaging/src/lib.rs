@@ -1,7 +1,9 @@
 pub mod avo;
 pub mod crooked;
+pub mod fwi;
 pub mod geometry;
 pub mod migration;
+pub mod mistie;
 pub mod modeling;
 pub mod nmo;
 pub mod psdm;
@@ -20,6 +22,7 @@ pub use avo::{
     sin_incidence_angle,
 };
 pub use crooked::{CrookedStackParams, stack_crooked_line_2d};
+pub use fwi::{Fwi2dOutput, Fwi2dParams, fwi_2d};
 pub use geometry::{
     assign_crooked_line_geometry_2d, assign_land_geometry_2d, assign_marine_geometry_2d,
     inline_sort,
@@ -28,11 +31,15 @@ pub use migration::{
     Kirchhoff2dParams, StoltMigParams, kirchhoff_poststack_2d, phase_shift_migrate_2d,
     stolt_migrate_2d,
 };
+pub use mistie::{
+    LineMistieCorrection, MistieIntersection, MistieParams, MistieReport,
+    analyze_and_balance_misties, measure_pair_mistie,
+};
 pub use modeling::{
     Afd2dParams, Synth2dParams, SynthDiffractor, SynthReflector, generate_synthetic_2d,
     ricker_wavelet, run_afd_2d,
 };
-pub use nmo::{NmoDirection, NmoParams, apply_nmo, apply_nmo_trace};
+pub use nmo::{NmoDirection, NmoParams, apply_nmo, apply_nmo_trace, nmo_traveltime_s};
 pub use psdm::{KirchhoffPsdm2dParams, PsdmOutput, kirchhoff_psdm_2d, solve_eikonal_2d};
 pub use pstm::{
     DmoFkParams, FdMig2dParams, KirchhoffPstm2dParams, dmo_fk_2d, fd_migrate_2d, kirchhoff_pstm_2d,

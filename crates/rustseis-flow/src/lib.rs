@@ -13,16 +13,17 @@ use rustseis_core::{
 use rustseis_dsp::{
     AdaptiveSubParams, AgcParams, AirBlastParams, BandpassParams, CurveletDenoiseParams,
     DeconParams, ElevationStaticsParams, FkFilterParams, FxDeconParams, GroundRollParams,
-    RadonPanel, RadonParams, ScAmpParams, ScDeconParams, Srme2dParams, TarParams, TeqParams,
-    TimeVariantBandpassParams, TraceEditParams, TvsParams, TvwParams,
+    PhaseRotParams, QCompParams, RadonPanel, RadonParams, ScAmpParams, ScDeconParams, Srme2dParams,
+    TarParams, TeqParams, TimeVariantBandpassParams, TraceEditParams, TvsParams, TvwParams,
 };
 use rustseis_imaging::{
     Afd2dParams, AutostatMethod, AutostatParams, AvoOutputMode, AvoParams, AvoSummary,
-    CrookedStackParams, DmoFkParams, FdMig2dParams, FirstBreakPickParams, Kirchhoff2dParams,
-    KirchhoffPsdm2dParams, KirchhoffPstm2dParams, NmoParams, RefractionStaticsParams, Rtm2dParams,
-    SemblancePanel, StackParams, StoltMigParams, Synth2dParams, TrimStatParams, VelocityScanParams,
-    VspCorridorStackParams, VspDeconParams, VspGeometryParams, VspSlownessParams,
-    VspSlownessProfile, VspWavefieldSepParams, WellTieParams, WellTieResult,
+    CrookedStackParams, DmoFkParams, FdMig2dParams, FirstBreakPickParams, Fwi2dParams,
+    Kirchhoff2dParams, KirchhoffPsdm2dParams, KirchhoffPstm2dParams, MistieParams, MistieReport,
+    NmoParams, RefractionStaticsParams, Rtm2dParams, SemblancePanel, StackParams, StoltMigParams,
+    Synth2dParams, TrimStatParams, VelocityScanParams, VspCorridorStackParams, VspDeconParams,
+    VspGeometryParams, VspSlownessParams, VspSlownessProfile, VspWavefieldSepParams, WellTieParams,
+    WellTieResult,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -121,6 +122,8 @@ pub struct FlowContext {
     pub vsp_profiles: HashMap<String, VspSlownessProfile>,
     pub avo_summaries: HashMap<String, AvoSummary>,
     pub well_ties: HashMap<String, WellTieResult>,
+    pub fwi_misfits: HashMap<String, Vec<f64>>,
+    pub mistie_reports: HashMap<String, MistieReport>,
     pub buffers: HashMap<String, Vec<Trace>>,
     pub ensemble_key: String,
     pub job_control: Option<JobControl>,
@@ -139,6 +142,8 @@ impl FlowContext {
             vsp_profiles: HashMap::new(),
             avo_summaries: HashMap::new(),
             well_ties: HashMap::new(),
+            fwi_misfits: HashMap::new(),
+            mistie_reports: HashMap::new(),
             buffers: HashMap::new(),
             ensemble_key: "FFID".to_string(),
             job_control: None,
@@ -1045,6 +1050,66 @@ pub fn execute_flow(
                     ctx.job_control.as_ref(),
                 )?;
                 traces = out.image_traces;
+            }
+            "fwi2d" => {
+                let p: Fwi2dParams = parse_nested_or_flat(&step.params, "fwi2d")?;
+                let grid_name = step
+                    .params
+                    .get("velocity_grid")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("depth_vel");
+                let save_grid = step
+                    .params
+                    .get("save_grid")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("fwi_vel");
+                let grid = ctx
+                    .velocity_grids
+                    .get(grid_name)
+                    .or_else(|| ctx.velocity_grids.values().next())
+                    .cloned()
+                    .ok_or_else(|| {
+                        SeismicError::NotFound(format!(
+                            "VelocityGrid2D '{grid_name}' not found (run vel_to_depth first)"
+                        ))
+                    })?;
+                let mut out = rustseis_imaging::fwi_2d(
+                    &traces,
+                    &grid,
+                    &p,
+                    ctx.job_control.as_ref(),
+                )?;
+                out.velocity.name = save_grid.to_string();
+                ctx.velocity_grids.insert(save_grid.to_string(), out.velocity);
+                ctx.fwi_misfits.insert(save_grid.to_string(), out.misfit_history);
+                if step
+                    .params
+                    .get("output_model_traces")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false)
+                {
+                    traces = out.model_traces;
+                } else {
+                    ctx.buffers.insert(format!("{save_grid}_traces"), out.model_traces);
+                }
+            }
+            "qcomp" => {
+                let p: QCompParams = parse_nested_or_flat(&step.params, "qcomp")?;
+                rustseis_dsp::apply_qcomp(&mut traces, &p);
+            }
+            "phase_rot" => {
+                let p: PhaseRotParams = parse_nested_or_flat(&step.params, "phase_rot")?;
+                rustseis_dsp::apply_phase_rot(&mut traces, &p);
+            }
+            "mistie" => {
+                let p: MistieParams = parse_nested_or_flat(&step.params, "mistie")?;
+                let save_report = step
+                    .params
+                    .get("save_report")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("mistie_qc");
+                let rep = rustseis_imaging::analyze_and_balance_misties(&mut traces, &p)?;
+                ctx.mistie_reports.insert(save_report.to_string(), rep);
             }
 
             other => {

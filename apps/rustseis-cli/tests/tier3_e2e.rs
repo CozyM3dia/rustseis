@@ -27,7 +27,7 @@ use std::time::Instant;
 
 #[test]
 fn test_wave3a_velocity_grid_and_avo_ground_truth() {
-    assert_eq!(tier3_tool_catalog().len(), 6);
+    assert_eq!(tier3_tool_catalog().len(), 10);
 
     // 1. Dix RMS -> Depth VelocityGrid2D recovery
     // Two-layer analytical model: v1 = 1500 m/s for t in [0, 0.6s] (z = 0..450m),
@@ -489,4 +489,256 @@ fn test_wave3_real_nias_avo_psdm_and_gpu_rtm() {
     let _ = render_seismic_gather(&sess.active_traces, &cfg).and_then(|im| im.save_png(qc_dir.join("nias_avo_intercept.png")));
     let _ = render_seismic_gather(&psdm.image_traces, &cfg).and_then(|im| im.save_png(qc_dir.join("nias_kirchhoff_psdm.png")));
     let _ = render_seismic_gather(&rtm.image_traces, &cfg).and_then(|im| im.save_png(qc_dir.join("nias_gpu_rtm2d.png")));
+}
+
+#[test]
+fn test_wave3c_fwi2d_synthetic_anomaly_recovery_and_cancel() {
+    let nx = 41;
+    let nz = 31;
+    let dx = 20.0f32;
+    let dz = 20.0f32;
+
+    // Smooth vertical background v(z) = 1800 + 1.4*z (m/s) so diving rays cleanly sample the anomaly
+    let mut v_init = VelocityGrid2D::constant("fwi_init", nx, nz, 0.0, dx, 0.0, dz, 2000.0);
+    for iz in 0..nz {
+        let vz = 1800.0 + iz as f32 * dz * 1.4;
+        for ix in 0..nx {
+            v_init.set(ix, iz, vz);
+        }
+    }
+    // True model adds a +320 m/s Gaussian velocity anomaly centered at (x=400m, z=220m)
+    let mut v_true = v_init.clone();
+    v_true.name = "fwi_true".into();
+    for iz in 0..nz {
+        let z = iz as f32 * dz;
+        for ix in 0..nx {
+            let x = ix as f32 * dx;
+            let r2 = ((x - 400.0) / 110.0).powi(2) + ((z - 220.0) / 70.0).powi(2);
+            let dv = 320.0 * (-0.5 * r2).exp();
+            v_true.set(ix, iz, v_init.get(ix, iz) + dv);
+        }
+    }
+
+    let shots_x = vec![100.0, 220.0, 340.0, 460.0, 580.0, 700.0];
+    let recs_x: Vec<f32> = (3..38).map(|i| i as f32 * dx).collect();
+    let obs = forward_afd_grid_2d(&v_true, &shots_x, &recs_x, 20.0, 20.0, 4000, 140, 12.0).unwrap();
+
+    let mut sess = EngineSession::new();
+    sess.active_traces = obs.clone();
+    sess.context.velocity_grids.insert("depth_vel".into(), v_init.clone());
+
+    let spec: FlowSpec = serde_json::from_value(json!({
+        "name": "FWI_2D_Synthetic_GroundTruth",
+        "steps": [{
+            "tool": "fwi2d",
+            "params": {
+                "velocity_grid": "depth_vel",
+                "save_grid": "fwi_vel",
+                "output_model_traces": false,
+                "params": {
+                    "dominant_freq_hz": 12.0,
+                    "freq_stages_hz": [8.0, 14.0],
+                    "iters_per_stage": 5,
+                    "max_step_mps": 45.0,
+                    "mute_depth_m": 60.0,
+                    "smooth_sigma_cells": 2.0,
+                    "estimate_source_scale": false,
+                    "pad_cells": 16
+                }
+            }
+        }]
+    }))
+    .unwrap();
+
+    let t0 = Instant::now();
+    sess.dispatch(EngineCommand::RunFlow(spec)).unwrap();
+    let elapsed_s = t0.elapsed().as_secs_f64();
+
+    let v_inv = sess.context.velocity_grids.get("fwi_vel").expect("fwi_vel saved");
+    let misfits = sess.context.fwi_misfits.get("fwi_vel").expect("fwi misfit history saved");
+    assert!(misfits.len() >= 3, "expected multi-iteration misfit history");
+
+    // Compute L2 model error before & after inversion inside the imaged interior
+    let mut err_init = 0.0f64;
+    let mut err_inv = 0.0f64;
+    let mut anom_dv_sum = 0.0f64;
+    let mut anom_cnt = 0usize;
+    for iz in 5..(nz - 4) {
+        for ix in 5..(nx - 5) {
+            let vt = v_true.get(ix, iz) as f64;
+            let v0 = v_init.get(ix, iz) as f64;
+            let vi = v_inv.get(ix, iz) as f64;
+            err_init += (v0 - vt).powi(2);
+            err_inv += (vi - vt).powi(2);
+            let x = ix as f32 * dx;
+            let z = iz as f32 * dz;
+            if (x - 400.0).abs() <= 80.0 && (z - 220.0).abs() <= 50.0 {
+                anom_dv_sum += vi - v0;
+                anom_cnt += 1;
+            }
+        }
+    }
+    let rms_init = (err_init / ((nx - 10) * (nz - 9)) as f64).sqrt();
+    let rms_inv = (err_inv / ((nx - 10) * (nz - 9)) as f64).sqrt();
+    let mean_anom_dv = anom_dv_sum / anom_cnt.max(1) as f64;
+    let final_misfit = *misfits.last().unwrap();
+    let init_misfit = misfits[0];
+    println!(
+        "[2D FWI] {:.2}s | misfit {init_misfit:.3e} -> {final_misfit:.3e} ({:.1}% drop) | model RMS {rms_init:.1} -> {rms_inv:.1} m/s | anomaly dv={mean_anom_dv:+.1} m/s",
+        elapsed_s,
+        (1.0 - final_misfit / init_misfit.max(1e-12)) * 100.0
+    );
+    assert!(final_misfit < init_misfit * 0.6, "FWI misfit did not decrease enough");
+    assert!(rms_inv < rms_init, "FWI must reduce model RMS error ({rms_inv:.1} vs {rms_init:.1})");
+    assert!(mean_anom_dv > 25.0, "FWI should recover positive velocity update inside anomaly (got {mean_anom_dv:.1} m/s)");
+
+    // Cancellation check
+    let jc = JobControl::new();
+    jc.cancel();
+    let cancelled = rustseis_imaging::fwi_2d(&obs, &v_init, &rustseis_imaging::Fwi2dParams::default(), Some(&jc));
+    assert!(matches!(cancelled, Err(SeismicError::Cancelled)));
+}
+
+#[test]
+fn test_wave3c_vti_nmo_qcomp_phase_rot_and_mistie_e2e() {
+    use rustseis_dsp::{QCompMode, QCompParams, apply_forward_q_trace};
+    use rustseis_imaging::{NmoDirection, NmoParams, apply_nmo, nmo_traveltime_s};
+
+    // 1. VTI Non-Hyperbolic NMO (Alkhalifah & Tsvankin 1995, eta = 0.20)
+    let dt_us = 2000;
+    let dt_s = 0.002f64;
+    let ns = 1000;
+    let t0_true = 1.0f64;
+    let v_nmo = 2000.0f64;
+    let eta_true = 0.20f64;
+    let vt = VelocityTable::constant(2000.0);
+
+    let offsets: Vec<f32> = (0..16).map(|i| i as f32 * 200.0).collect(); // 0..3000 m (far offset x/z = 3!)
+    let build_vti_gather = || -> Vec<Trace> {
+        offsets
+            .iter()
+            .enumerate()
+            .map(|(i, &x)| {
+                let tx = nmo_traveltime_s(t0_true, x as f64, v_nmo, eta_true);
+                let mut s = vec![0.0f32; ns];
+                for k in 0..ns {
+                    let t = k as f64 * dt_s - tx;
+                    let u = std::f64::consts::PI * 25.0 * t;
+                    s[k] = ((1.0 - 2.0 * u * u) * (-u * u).exp()) as f32;
+                }
+                let mut tr = Trace::new(dt_us, s);
+                tr.headers.traceno = (i + 1) as i32;
+                tr.headers.cdp = 1;
+                tr.headers.offset = x;
+                tr.headers.aoffset = x.abs();
+                tr
+            })
+            .collect()
+    };
+
+    let mut hyp_gather = build_vti_gather();
+    apply_nmo(&mut hyp_gather, &vt, &NmoParams { stretch_mute_pct: 0.0, eta: 0.0, ..Default::default() });
+    let mut vti_gather = build_vti_gather();
+    apply_nmo(&mut vti_gather, &vt, &NmoParams { stretch_mute_pct: 0.0, eta: eta_true as f32, ..Default::default() });
+
+    let peak_time_ms = |tr: &Trace| -> f64 {
+        let (idx, _) = tr.samples.iter().enumerate().max_by(|a, b| a.1.total_cmp(b.1)).unwrap();
+        idx as f64 * dt_s * 1000.0
+    };
+    let far_hyp_err = (peak_time_ms(hyp_gather.last().unwrap()) - 1000.0).abs();
+    let far_vti_err = (peak_time_ms(vti_gather.last().unwrap()) - 1000.0).abs();
+    println!("[VTI NMO] Far offset 3000 m residual: hyperbolic={far_hyp_err:.1} ms vs VTI(eta=0.20)={far_vti_err:.1} ms");
+    assert!(far_hyp_err > 15.0, "Far offset should exhibit strong non-hyperbolic hockey-stick ({far_hyp_err} ms)");
+    assert!(far_vti_err <= 2.5, "VTI NMO must flatten far offset within 2.5 ms (got {far_vti_err} ms)");
+
+    // Round-trip inverse VTI NMO
+    let mut inv_vti = vti_gather.clone();
+    apply_nmo(&mut inv_vti, &vt, &NmoParams { direction: NmoDirection::Inverse, stretch_mute_pct: 0.0, eta: eta_true as f32, ..Default::default() });
+    let orig_far_t = peak_time_ms(build_vti_gather().last().unwrap());
+    let inv_far_t = peak_time_ms(inv_vti.last().unwrap());
+    assert!((orig_far_t - inv_far_t).abs() <= 4.0, "Inverse VTI NMO round-trip mismatch ({orig_far_t} vs {inv_far_t})");
+
+    // 2. Inverse-Q Compensation (`qcomp`) + Constant Phase Rotation (`phase_rot`) via Flow Runner
+    let mut q_traces = build_vti_gather()[..4].to_vec();
+    let orig_tr = q_traces[0].samples.clone();
+    let q_params = QCompParams { q_value: 65.0, reference_freq_hz: 50.0, max_gain_db: 30.0, mode: QCompMode::Both, window_ms: 200.0, ..Default::default() };
+    for tr in &mut q_traces {
+        apply_forward_q_trace(tr, &q_params);
+    }
+    let mut sess = EngineSession::new();
+    sess.active_traces = q_traces;
+    let q_flow: FlowSpec = serde_json::from_value(json!({
+        "name": "QComp_And_PhaseRot",
+        "steps": [
+            { "tool": "qcomp", "params": { "q_value": 65.0, "reference_freq_hz": 50.0, "max_gain_db": 30.0, "mode": "Both", "window_ms": 200.0 } },
+            { "tool": "phase_rot", "params": { "phase_deg": 40.0, "shift_ms": 6.0, "invert_polarity": false, "gain": 1.0 } },
+            { "tool": "phase_rot", "params": { "phase_deg": -40.0, "shift_ms": -6.0, "invert_polarity": false, "gain": 1.0 } }
+        ]
+    }))
+    .unwrap();
+    sess.dispatch(EngineCommand::RunFlow(q_flow)).unwrap();
+    let q_corr = zero_lag_correlation(&orig_tr, &sess.active_traces[0].samples);
+    println!("[QComp + PhaseRot] Recovery correlation = {q_corr:.4}");
+    assert!(q_corr > 0.95, "QComp + PhaseRot recovery correlation too low: {q_corr}");
+
+    // 3. 2D Multi-Line Mistie Balancing (`mistie`) across 3 intersecting lines via Flow Runner
+    let base = build_vti_gather()[0].clone();
+    let mut multi_lines = Vec::new();
+    // Line 1 (master): West-East at Y = 500 m
+    for ix in 0..11 {
+        let mut tr = base.clone();
+        tr.headers.iline_no = 1;
+        tr.headers.cdp = ix + 1;
+        tr.headers.cdp_x = ix as f64 * 100.0;
+        tr.headers.cdp_y = 500.0;
+        multi_lines.push(tr);
+    }
+    // Line 2: South-North at X = 300 m (shifted +12 ms, +30 deg, 0.7x)
+    for iy in 0..11 {
+        let mut tr = base.clone();
+        rustseis_dsp::apply_phase_rot_trace(&mut tr, &rustseis_dsp::PhaseRotParams { phase_deg: 30.0, shift_ms: 12.0, invert_polarity: false, gain: 0.7 });
+        tr.headers.iline_no = 2;
+        tr.headers.cdp = iy + 1;
+        tr.headers.cdp_x = 300.0;
+        tr.headers.cdp_y = iy as f64 * 100.0;
+        multi_lines.push(tr);
+    }
+    // Line 3: South-North at X = 700 m (shifted -8 ms, -25 deg, 1.3x)
+    for iy in 0..11 {
+        let mut tr = base.clone();
+        rustseis_dsp::apply_phase_rot_trace(&mut tr, &rustseis_dsp::PhaseRotParams { phase_deg: -25.0, shift_ms: -8.0, invert_polarity: false, gain: 1.3 });
+        tr.headers.iline_no = 3;
+        tr.headers.cdp = iy + 1;
+        tr.headers.cdp_x = 700.0;
+        tr.headers.cdp_y = iy as f64 * 100.0;
+        multi_lines.push(tr);
+    }
+
+    let mut msess = EngineSession::new();
+    msess.active_traces = multi_lines;
+    let m_flow: FlowSpec = serde_json::from_value(json!({
+        "name": "MultiLine_Mistie_Balance",
+        "steps": [{
+            "tool": "mistie",
+            "params": {
+                "save_report": "mistie_qc",
+                "params": { "reference_line": 1 }
+            }
+        }]
+    }))
+    .unwrap();
+    msess.dispatch(EngineCommand::RunFlow(m_flow)).unwrap();
+    let rep = msess.context.mistie_reports.get("mistie_qc").expect("mistie report saved");
+    println!(
+        "[2D Mistie] {} intersections | dt RMS {:.2} -> {:.3} ms | phase RMS {:.1} -> {:.2} deg",
+        rep.intersections.len(),
+        rep.rms_dt_before_ms,
+        rep.rms_dt_after_ms,
+        rep.rms_phase_before_deg,
+        rep.rms_phase_after_deg
+    );
+    assert_eq!(rep.intersections.len(), 2);
+    assert!(rep.rms_dt_before_ms > 8.0);
+    assert!(rep.rms_dt_after_ms < 0.25);
+    assert!(rep.rms_phase_after_deg < 1.0);
 }

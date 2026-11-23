@@ -56,6 +56,13 @@ pub struct NmoParams {
     /// Apply remaining `NA_STAT` header static during NMO (ProMAX `DO_STAT` default true).
     #[serde(default = "default_true")]
     pub do_stat: bool,
+    /// VTI anellipticity parameter `eta` (Alkhalifah & Tsvankin 1995 non-hyperbolic moveout).
+    /// `0.0` (default) reduces identically to standard hyperbolic NMO.
+    #[serde(default)]
+    pub eta: f32,
+    /// Optional time-varying `[(t0_ms, eta), ...]` profile; overrides scalar `eta` when non-empty.
+    #[serde(default)]
+    pub eta_profile: Vec<(f32, f32)>,
 }
 
 fn default_stretch() -> f32 {
@@ -75,8 +82,44 @@ impl Default for NmoParams {
             stretch_mute_pct: 30.0,
             stretch_taper_samples: 8,
             do_stat: true,
+            eta: 0.0,
+            eta_profile: Vec::new(),
         }
     }
+}
+
+/// Evaluate VTI anellipticity `eta(t0)` from scalar or piecewise-linear `eta_profile`.
+#[inline]
+fn eta_at_ms(params: &NmoParams, t0_ms: f32) -> f64 {
+    if params.eta_profile.is_empty() {
+        return params.eta as f64;
+    }
+    let prof = &params.eta_profile;
+    if t0_ms <= prof[0].0 {
+        return prof[0].1 as f64;
+    }
+    for w in prof.windows(2) {
+        if t0_ms <= w[1].0 {
+            let frac = ((t0_ms - w[0].0) / (w[1].0 - w[0].0).max(1e-6)) as f64;
+            return w[0].1 as f64 + frac * (w[1].1 as f64 - w[0].1 as f64);
+        }
+    }
+    prof.last().unwrap().1 as f64
+}
+
+/// Alkhalifah & Tsvankin (1995) VTI non-hyperbolic traveltime `t(x; t0, v_nmo, eta)`.
+#[inline]
+pub fn nmo_traveltime_s(t0_s: f64, x_m: f64, v_nmo: f64, eta: f64) -> f64 {
+    let x2 = x_m * x_m;
+    let v2 = v_nmo * v_nmo;
+    let t02 = t0_s * t0_s;
+    let hyp = t02 + x2 / v2;
+    if eta.abs() < 1e-7 {
+        return hyp.sqrt();
+    }
+    let denom = v2 * (t02 * v2 + (1.0 + 2.0 * eta) * x2).max(1e-12);
+    let nonhyp = (hyp - (2.0 * eta * x2 * x2) / denom).max(0.0);
+    nonhyp.sqrt()
 }
 
 /// 8-point Hann-windowed sinc interpolation at fractional sample position `pos` (L1-cached LUT fast path).
@@ -146,8 +189,10 @@ pub fn apply_nmo_trace(trace: &mut Trace, vel: &VelocityTable, params: &NmoParam
         NmoDirection::Forward => {
             for i in 0..n {
                 let t0 = i as f64 * dt_s;
-                let v = vel.velocity_at(cdp, (t0 * 1000.0) as f32).max(100.0) as f64;
-                let tx = (t0 * t0 + (x / v) * (x / v)).sqrt();
+                let t0_ms = (t0 * 1000.0) as f32;
+                let v = vel.velocity_at(cdp, t0_ms).max(100.0) as f64;
+                let eta = eta_at_ms(params, t0_ms);
+                let tx = nmo_traveltime_s(t0, x, v, eta);
                 let stretch = if t0 > 1e-6 { (tx - t0) / t0 } else { f64::INFINITY };
                 if let Some(lim) = stretch_limit {
                     if stretch > lim {
@@ -178,15 +223,33 @@ pub fn apply_nmo_trace(trace: &mut Trace, vel: &VelocityTable, params: &NmoParam
             }
         }
         NmoDirection::Inverse => {
-            // Inverse NMO: map NMO-corrected time t0 back to offset time tx
+            // Inverse NMO: map NMO-corrected time t0 back to offset time tx (supports VTI eta via Newton refinement).
             for i in 0..n {
                 let tx = i as f64 * dt_s;
                 let v = vel.velocity_at(cdp, (tx * 1000.0) as f32).max(100.0) as f64;
+                let eta = eta_at_ms(params, (tx * 1000.0) as f32);
                 let t0_sq = tx * tx - (x / v) * (x / v);
-                if t0_sq < 0.0 {
+                if t0_sq < 0.0 && eta.abs() < 1e-7 {
                     continue;
                 }
-                let t0 = t0_sq.sqrt();
+                let mut t0 = t0_sq.max(0.0).sqrt();
+                if eta.abs() >= 1e-7 {
+                    for _ in 0..5 {
+                        let f = nmo_traveltime_s(t0, x, v, eta) - tx;
+                        if f.abs() < 1e-7 {
+                            break;
+                        }
+                        let h = 1e-4;
+                        let df = (nmo_traveltime_s(t0 + h, x, v, eta) - nmo_traveltime_s((t0 - h).max(0.0), x, v, eta))
+                            / (t0 + h - (t0 - h).max(0.0)).max(1e-9);
+                        if df.abs() > 1e-6 {
+                            t0 = (t0 - f / df).max(0.0);
+                        }
+                    }
+                    if (nmo_traveltime_s(t0, x, v, eta) - tx).abs() > 2.0 * dt_s {
+                        continue;
+                    }
+                }
                 out[i] = sinc_interp(&src, (t0 + stat_s) / dt_s);
             }
         }

@@ -5,6 +5,7 @@ pub mod fk;
 pub mod fxdecon;
 pub mod gain;
 pub mod noise;
+pub mod qcomp;
 pub mod radon;
 pub mod srme;
 pub mod surface_consistent;
@@ -28,6 +29,10 @@ pub use gain::{
 pub use noise::{
     AirBlastParams, CurveletDenoiseParams, GroundRollParams, apply_airblast_attenuation,
     apply_curvelet_denoise, apply_ground_roll_attenuation,
+};
+pub use qcomp::{
+    PhaseRotParams, QCompMode, QCompParams, apply_forward_q_trace, apply_phase_rot,
+    apply_phase_rot_trace, apply_qcomp, apply_qcomp_trace,
 };
 pub use radon::{
     RadonFilterAction, RadonMode, RadonPanel, RadonParams, apply_radon_filter_gather,

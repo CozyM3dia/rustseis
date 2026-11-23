@@ -447,6 +447,12 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                     {
                         add_step(app, "scamp2");
                     }
+                    if ribbon::small_button(ui, p, Icon::Statics, "Multi-line mistie", false, false)
+                        .on_hover_text("Add 2D multi-line mistie analysis and balancing step")
+                        .clicked()
+                    {
+                        add_step(app, "mistie");
+                    }
                 });
             });
             ribbon::divider(ui, p);
@@ -467,6 +473,12 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                     .clicked()
                 {
                     add_step(app, "vel_to_depth");
+                }
+                if ribbon::large_button(ui, p, Icon::VelocityField, "2D FWI", "Inversion", false, false, false)
+                    .on_hover_text("Add multi-scale 2D Acoustic Full Waveform Inversion step")
+                    .clicked()
+                {
+                    add_step(app, "fwi2d");
                 }
                 if ribbon::large_button(ui, p, Icon::KirchhoffPsdm, "Kirchhoff", "PSDM", false, false, false)
                     .on_hover_text("Add 2D Eikonal Kirchhoff Pre-Stack Depth Migration step")

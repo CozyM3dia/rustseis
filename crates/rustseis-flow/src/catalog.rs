@@ -3,15 +3,15 @@ use crate::{ToolArchetype, ToolDescriptor};
 use rustseis_core::MarineGeometry2D;
 use rustseis_dsp::{
     AdaptiveSubParams, AgcParams, AirBlastParams, BandpassParams, CurveletDenoiseParams,
-    DeconParams, FkFilterParams, FxDeconParams, GroundRollParams, RadonParams, ScAmpParams,
-    ScDeconParams, Srme2dParams, TarParams, TeqParams, TvwParams,
+    DeconParams, FkFilterParams, FxDeconParams, GroundRollParams, PhaseRotParams, QCompParams,
+    RadonParams, ScAmpParams, ScDeconParams, Srme2dParams, TarParams, TeqParams, TvwParams,
 };
 use rustseis_imaging::{
     Afd2dParams, AutostatParams, AvoParams, CrookedStackParams, DmoFkParams, FdMig2dParams,
-    FirstBreakPickParams, Kirchhoff2dParams, KirchhoffPsdm2dParams, KirchhoffPstm2dParams,
-    NmoParams, RefractionStaticsParams, Rtm2dParams, StackParams, Synth2dParams, TrimStatParams,
-    VelocityScanParams, VspCorridorStackParams, VspDeconParams, VspGeometryParams,
-    VspSlownessParams, VspWavefieldSepParams, WellTieParams,
+    FirstBreakPickParams, Fwi2dParams, Kirchhoff2dParams, KirchhoffPsdm2dParams,
+    KirchhoffPstm2dParams, MistieParams, NmoParams, RefractionStaticsParams, Rtm2dParams,
+    StackParams, Synth2dParams, TrimStatParams, VelocityScanParams, VspCorridorStackParams,
+    VspDeconParams, VspGeometryParams, VspSlownessParams, VspWavefieldSepParams, WellTieParams,
 };
 use serde_json::json;
 
@@ -596,10 +596,50 @@ pub fn tier3_tool_catalog() -> Vec<ToolDescriptor> {
                 "params": serde_json::to_value(Rtm2dParams::default()).unwrap()
             }),
         },
+        ToolDescriptor {
+            menu_id: "fwi2d".into(),
+            label: "2D Acoustic FWI".into(),
+            category: "Velocity / Depth Model".into(),
+            archetype: ToolArchetype::Complex,
+            description: "Multi-scale 2D acoustic Full Waveform Inversion (adjoint-state L-BFGS with illumination preconditioning and Gaussian regularization).".into(),
+            default_params: json!({
+                "velocity_grid": "depth_vel",
+                "save_grid": "fwi_vel",
+                "output_model_traces": false,
+                "params": serde_json::to_value(Fwi2dParams::default()).unwrap()
+            }),
+        },
+        ToolDescriptor {
+            menu_id: "qcomp".into(),
+            label: "Inverse-Q Compensation".into(),
+            category: "Deconvolution".into(),
+            archetype: ToolArchetype::SimpleTrace,
+            description: "Stabilized Gabor STFT inverse-Q filtering for seismic amplitude attenuation and Kjartansson phase dispersion.".into(),
+            default_params: serde_json::to_value(QCompParams::default()).unwrap(),
+        },
+        ToolDescriptor {
+            menu_id: "phase_rot".into(),
+            label: "Phase Rotation & Shift".into(),
+            category: "Filtering / Transforms".into(),
+            archetype: ToolArchetype::SimpleTrace,
+            description: "Apply exact Hilbert constant-phase rotation, fractional-sample time shift, polarity reversal, and scalar gain.".into(),
+            default_params: serde_json::to_value(PhaseRotParams::default()).unwrap(),
+        },
+        ToolDescriptor {
+            menu_id: "mistie".into(),
+            label: "2D Multi-Line Mistie Balancing".into(),
+            category: "Statics".into(),
+            archetype: ToolArchetype::Complex,
+            description: "Detect 2D line intersections by coordinates, measure time, phase, and gain misties, and apply a global least-squares balance.".into(),
+            default_params: json!({
+                "save_report": "mistie_qc",
+                "params": serde_json::to_value(MistieParams::default()).unwrap()
+            }),
+        },
     ]
 }
 
-/// Complete unified Tier 1 + Tier 2 + Tier 3 tool catalog (67 tools).
+/// Complete unified Tier 1 + Tier 2 + Tier 3 tool catalog (71 tools).
 pub fn full_tool_catalog() -> Vec<ToolDescriptor> {
     let mut all = tier1_tool_catalog();
     all.extend(tier2_tool_catalog());
