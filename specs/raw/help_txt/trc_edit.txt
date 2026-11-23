@@ -1,0 +1,113 @@
+Trace Kill/Reverse2010
+
+ProMAX® Reference
+
+Trace Kill/Reverse
+Trace Kill/Reverse kills or reverses traces.
+
+Theory
+The list of traces for editing may be retrieved from database
+entries created by earlier interactive screen selection, or you
+may use the editor to specify trace numbers for editing.
+
+Usage
+Trace Kill/Reverse can also be used to ﬁnd traces in which all
+samples are zero and ﬂag those traces as dead. This will
+facilitate remuting in migration, DMO and other modules.
+Data read from a foreign source often have killed traces but
+do not have the trace header ﬂag set. Scanning for dead
+traces immediately upon input is suggested.
+
+Parameters
+Trace editing MODE
+Select the trace editing mode from the following:
+• Kill kills traces.
+• Reverse reverses traces.
+• Kill Zero Traces kills traces if all samples are zero or if
+TRC_TYPE=2.
+Get edits from the DATABASE
+Select Yes to retrieve a ﬁle from the database. There may be
+more than one list of trace edits in the database for this line.
+SELECT trace Kill parameter ﬁle
+This appears if Yes to Get edits from the database. Select a
+TRACE KILL edit ﬁle from the ﬁle menu.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Kill/Reverse2011
+
+ProMAX® Reference
+
+Trace selection MODE
+This appears if No to Get edits from the Database. Select
+the trace selection mode for following processes. The choices
+are:
+• Kill/Reverse traces in select list
+Kill kills all listed traces and excludes them from future
+processing. All unlisted traces are passed to subsequent
+processes.
+Reverse reverses the polarity of all listed traces. All
+unlisted traces are passed with their original polarity.
+• Kill/Reverse traces NOT in select list
+Kill passes all listed traces to subsequent processes. All
+unlisted traces are killed and excluded from future
+processing
+Reverse reverses the polarity all traces except those
+traces in the list.
+PRIMARY edit list header word
+This appears if No to Get edits from the Database. Select a
+header word as the primary key for specifying traces to be
+edited. You may select from the main list of header words or
+the alternate list.
+SECONDARY edit list header word
+This appears if No to Get edits from the Database. Select a
+header word as the secondary key for specifying traces to be
+edited. You may select from the main list of header words or
+the alternate list. This parameter is optional. For example if
+you want to kill all traces within one shot, you need only
+specify the shot number as a primary key, with no secondary
+key.
+TERTIARY edit list header word
+This appears if No to Get edits from the Database. Select a
+header word as the tertiary key for specifying traces to be
+edited. You may select from the main list of header words or
+the alternate list. This parameter is optional.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Kill/Reverse2012
+
+ProMAX® Reference
+
+SPECIFY traces to be edited
+This appears if No to Get edits from the Database. Access
+the text editor and deﬁne traces to edit. The primary,
+secondary and tertiary keys for each set of edits are
+separated by colons. Each set of trace edits is separated by a
+slash.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Kill/Reverse2013
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

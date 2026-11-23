@@ -1,0 +1,154 @@
+F-X Deconvolution165
+
+ProMAX® Reference
+
+F-X Deconvolution
+F-X Deconvolution applies a Fourier transform to each trace
+of an input ensemble or stacked data. It applies a complex,
+Wiener, unit prediction ﬁlter in distance for each frequency in
+a speciﬁed range, and then inverse transforms each resulting
+frequency trace back to the time domain. This process
+produces output with less random noise than the input data.
+
+Theory
+When the data is transformed from time and distance to
+frequency (f) and distance (x), a time slice is converted to a
+frequency slice. Each sample in the transformed data has
+both real and imaginary components. Events with similar
+dips appear as a sinusoidally complex signal along a given
+frequency slice. That is, they can be described in the form:
+cos wt + i sin wt. Therefore, this signal is predictable. In the
+F-X deconvolution process, a complex prediction ﬁlter is used
+to predict the signal one trace ahead, across the frequency
+slice. Any difference between the predicted waveform and the
+actual one can be classiﬁed as noise, and removed.
+In practice, the prediction ﬁlter is run in one direction across
+the traces in each overlapping design/application window,
+and then run again in the opposite direction in that same
+design/application window. The resulting predictions are
+averaged, in order to reduce prediction errors.
+The time section is divided into small segments, or windows,
+to better approximate the assumption of constant linear dip.
+Using a window extension, or overlap, equal to the prediction
+ﬁlter length reduces edge effect errors as it ensures that even
+the ﬁrst and last traces in the window have full length
+prediction ﬁlters for both directions, except at the beginning
+and end of the ensemble.
+
+Usage
+F-X decon can be applied to ensembles or to stacked data.
+However, when applying F-X Decon to ensembles only,
+ensembles with traces greater than two times the ﬁlter length
+are ﬁltered. Ensembles with fewer than two times the ﬁlter
+length are passed unﬁltered.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-X Deconvolution166
+
+ProMAX® Reference
+
+Data may need some pre-conditioning prior to applying F-X
+decon. For example, a very strong spike can cause operator
+instability, potentially damaging the result for the traces in
+the design window containing it.
+
+References
+Treitel, S., 1974, The Complex Weiner Filter: Geophysics, 39-2, 169-173.
+Canales, 1984, Random Noise Reduction, paper presented at the Society of
+Exploration Geophysicists 54th Annual International Meeting, Atlanta, GA.
+Cowan, C. F. N. and Grant, P. M., 1985, Adaptive Filters: Prentice-Hall, New Jersey.
+Gulunay, Necati, 1986, F-X Decon and the Complex Weiner Prediction Filter for
+Random Noise Reduction on Stacked Data, paper presented at the Society of
+Exploration Geophysicists 56th Annual International Meeting, Houston, TX.
+
+Parameters
+TYPE of ﬁlter
+Select the type of prediction ﬁlter to use:
+• Wiener Levinson applies a complex Wiener Levinson
+prediction ﬁlter.
+• L2 Norm Adaptive applies an LMS L2 norm adaptive
+prediction ﬁlter.
+Percentage of white noise
+This appears if Weiner Levinson to Type of ﬁlter. Enter the
+percentage of white noise added to the zero lag
+autocorrelation value. Normally, a value of 0 is used. Adding
+10 to 50 percent white noise will increase the amount of
+noise reduction, at the cost of making the data look more
+mixed.
+Rate of adaptation
+This appears if L2 Norm Adaptive to Type of ﬁlter. Enter
+the rate of adaptation of the complex adaptive prediction
+ﬁlter. A reasonable starting value is 0.1. A larger value will
+cause faster adaptation, and result in less noise reduction.
+Conversely, a smaller value will cause slower adaptation,
+resulting in an increase in noise reduction. If ﬁlter
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-X Deconvolution167
+
+ProMAX® Reference
+
+coefﬁcients exceed 1.0e04, you will get a message stating,
+“Reduce rate of adaptation”.
+Horizontal window length
+Enter the number of traces in the horizontal F-X prediction
+window. This value must be greater than the number of ﬁlter
+samples.
+Number of ﬁlter samples
+Enter the number of samples in the complex prediction ﬁlter.
+The recommended minimum value is 4 samples; a larger
+number should be used if there are conﬂicting dips in the
+data. In any case, this number must be smaller than the
+horizontal window length. Values between 1 and 7 are
+acceptable.
+Time window length
+Enter the time gate length in ms of the prediction windows. If
+the input ensemble has both conﬂicting dips and event
+curvature, the time window length should be kept below 300
+ms. However, if event dips have the same slope, and event
+curvature is minimal, the time window length can be allowed
+to be the full length of the traces.
+Time window overlap
+Enter the window extension in ms of time gates for prediction
+windows. This window extension is added to both the top and
+bottom of each time window for the purpose of vertical
+blending.
+F-X ﬁlter start frequency
+Enter the minimum frequency of any signal or noise in the
+seismic data. For small time window lengths, such as 300
+ms, this number should be at least 6 Hz. Frequencies below
+the start frequency will be attenuated.
+F-X ﬁlter end frequency
+Enter the maximum frequency of any signal or noise in the
+seismic data. Higher frequencies will be attenuated.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-X Deconvolution168
+
+ProMAX® Reference
+
+Reapply trace mute after ﬁlter?
+Select Yes to reapply trace mutes, such as surgical and ﬁrst
+break suppression mutes, after T-X ﬁltering.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

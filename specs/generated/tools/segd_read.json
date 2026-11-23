@@ -1,0 +1,354 @@
+{
+  "menu_id": "segd_read",
+  "tool_name": "SEG_READ",
+  "label": "SEG-D Input",
+  "parameter_count": 46,
+  "parameters": [
+    {
+      "name": "FILENUM",
+      "prompt": "Starting sequential FILE number",
+      "kind": "typein",
+      "default": "1",
+      "help": "Which SEQUENTIAL field record number do you wish to start with on this tape? (1st?, 2nd?, 10th?)"
+    },
+    {
+      "name": "IMULTIPL",
+      "prompt": "SEG-D tape format",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Specify the SEG-D tape format."
+    },
+    {
+      "name": "SCSI1",
+      "prompt": "MAXIMUM data block size in bytes",
+      "kind": "typein",
+      "default": "65535",
+      "help": "Maximum size of a data block in bytes that will be encountered. For values greater than 65536, you must have a long block driver."
+    },
+    {
+      "name": "SCSI2",
+      "prompt": "MAXIMUM data block size in bytes",
+      "kind": "typein",
+      "default": "4000000",
+      "help": "Maximum size of a data block in bytes that will be encountered. For values greater than 65536, you must have a long block driver."
+    },
+    {
+      "name": "SEGDDBUG",
+      "prompt": "Turn on SEGD debug option?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "SEGD will show general header(s), channel set(s), trace header and extended trace header information."
+    },
+    {
+      "name": "OMITFATL",
+      "prompt": "Bypass Fatal Errors?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "SEGD will ignore fatal errors, skip the record and keep going."
+    },
+    {
+      "name": "SEGDOGH",
+      "prompt": "Override the Additional General Header Block count (GH)?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "In some rare cases, SEGD input data may incorrectly specify the number of additional general header blocks."
+    },
+    {
+      "name": "SEGDNGH",
+      "prompt": "Number of additional general header blocks",
+      "kind": "typein",
+      "default": "0",
+      "help": "Enter the number of additional 32 byte general header blocks."
+    },
+    {
+      "name": "EXHGEOM",
+      "prompt": "Extract geometry from extended trace headers?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "The extended trace header integer source and receiver station and line values are good, use them."
+    },
+    {
+      "name": "EXHXGEOM",
+      "prompt": "Extract extended geometry from extended trace headers?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "The extended trace header fractional source and receiver station and line values are good, use them."
+    },
+    {
+      "name": "SEGD_THE",
+      "prompt": "Honor the Trace Header Extension value (THE)?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "SEGD (default) will honor THE only when the values in the channel set and trace header match.  This option signals SEGD that the value in the trace header is good and to use it (USE with SERCEL 368)."
+    },
+    {
+      "name": "SEGDOTHE",
+      "prompt": "Override the Trace Header Extension value (THE)?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "In some rare cases, SEGD input data may incorrectly specify the number of trace header extensions in both the channel set and the trace header."
+    },
+    {
+      "name": "SEGDNTHE",
+      "prompt": "Number of trace header extensions",
+      "kind": "typein",
+      "default": "0",
+      "help": "Enter the number of 32 byte trace header extension blocks on each trace."
+    },
+    {
+      "name": "ADJTRLEN",
+      "prompt": "Auto adjust incorrect trace data length?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If the chan set start/end times are incorrect, traces may not be read. If this condition is detected, this option will attempt to adjust the data and/or header length so the traces can be decoded correctly."
+    },
+    {
+      "name": "OMITREC",
+      "prompt": "Omit records of type.",
+      "kind": "edit",
+      "default": "-1",
+      "help": "This is a record rejection method based upon the general header record type. '-1' disables the option otherwise records of these type will be skipped."
+    },
+    {
+      "name": "SEISCN",
+      "prompt": "Specify Seismic Data Channel Type(s)",
+      "kind": "edit",
+      "default": "1",
+      "help": "Change the default seismic data channel type '1'."
+    },
+    {
+      "name": "AUXCN",
+      "prompt": "Specify Auxiliary Channel Type(s)",
+      "kind": "edit",
+      "default": "8",
+      "help": "Change the default aux channel type '8'."
+    },
+    {
+      "name": "ZEROCN",
+      "prompt": "Specify Zero or Pad Channel Type(s)",
+      "kind": "edit",
+      "default": "-1",
+      "help": "Enter channel types defined as Pad/Zero Traces. '-1' disables the option."
+    },
+    {
+      "name": "ABORT",
+      "prompt": "Number of errors in a row before ABORTING job?",
+      "kind": "typein",
+      "default": "10",
+      "help": "Specify the number of errors in a row before aborting. '0' means ignore all errors. Greater than '0' will output dead traces until number of errors is reached."
+    },
+    {
+      "name": "HEAD_LEN",
+      "prompt": "SEG-D main header length (bytes)",
+      "kind": "typein",
+      "default": "0",
+      "help": "The SEG-D main header length in bytes. Enter 0 to calculate from header values."
+    },
+    {
+      "name": "DISPFLAG",
+      "prompt": "Display ensemble information?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Specify whether to display information for each ensemble input into ProMAX."
+    },
+    {
+      "name": "FORMAT",
+      "prompt": "SEG-D DATA format code?",
+      "kind": "pop_choose",
+      "default": "Get from header",
+      "help": "Specify the format code (data recording method) of the data samples on tape. 80?? is for demultiplexed and 00?? is for multiplexed formats."
+    },
+    {
+      "name": "MAXDTR",
+      "prompt": "MAXIMUM traces per record",
+      "kind": "typein",
+      "default": "0",
+      "help": "Maximum number of traces per record (shot). Enter 0 to calculate from header values."
+    },
+    {
+      "name": "AUXOPT",
+      "prompt": "Input AUXILIARY traces?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Auxiliary traces may either be input normally or ignored.  (Include in above parameter.)"
+    },
+    {
+      "name": "TMAX",
+      "prompt": "RECORD LENGTH to input",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Amount of data to input, in milliseconds. (Enter 0.0 to read all available data!)"
+    },
+    {
+      "name": "SERCEL",
+      "prompt": "SERCEL instrument type?",
+      "kind": "pop_choose",
+      "default": "Not Sercel",
+      "help": "Sercel uses alternate locations than standard SEG-D for critical parameters."
+    },
+    {
+      "name": "MPFACTOR",
+      "prompt": "Apply pre-amplifier gain (2 ** MP factor)?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Specify whether to apply the pre-amplifier gain to the trace data.gain = 2. ** MP. The MP factor occupies byte 8 of the channel set descriptor."
+    },
+    {
+      "name": "TMULTIPL",
+      "prompt": "Scan correction option (sample skew statics)?",
+      "kind": "pop_choose",
+      "default": "Get from header",
+      "help": "Specify method for getting scan corrections (sample skew statics)."
+    },
+    {
+      "name": "STATIC",
+      "prompt": "Specify multiplex scan corrections list",
+      "kind": "edit",
+      "default": "1:62/48:1531/49:62/96:1532",
+      "help": "Access the text editor to define the scan corrections for each channel. Static times must be in microseconds."
+    },
+    {
+      "name": "TTRACE",
+      "prompt": "Get CHANNEL NUMBER from trace headers?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Do you wish to get the channel number from the trace headers or number the channel sequentially in a ensemble?"
+    },
+    {
+      "name": "INKEYNAM",
+      "prompt": "Input PRIMARY selection choice?",
+      "kind": "pop_choose",
+      "default": "GET_ALL",
+      "help": "How (based on what SEG-D or ProMAX header word) is the primary input record list specified?"
+    },
+    {
+      "name": "PMODE",
+      "prompt": "Primary selection MODE",
+      "kind": "circular",
+      "default": null,
+      "help": "The records in the list can be either INCLUDED or EXCLUDED from the following processes.",
+      "choices": [
+        {
+          "label": "Include",
+          "value": "0",
+          "help": "INCLUDE the records in the list."
+        },
+        {
+          "label": "Exclude",
+          "value": "1",
+          "help": "EXCLUDE the records in the list."
+        }
+      ]
+    },
+    {
+      "name": "TRC_LIST",
+      "prompt": "Specify PRIMARY input records list",
+      "kind": "edit",
+      "default": "1-100/",
+      "help": "Access the text editor to define the records that are to be read in."
+    },
+    {
+      "name": "CHAN_KEY",
+      "prompt": "Input SECONDARY selection choice?",
+      "kind": "pop_choose",
+      "default": "NONE",
+      "help": "The SEG-D record can be secondary sorted by input channel/trace number."
+    },
+    {
+      "name": "SMODE",
+      "prompt": "Channel selection MODE",
+      "kind": "circular",
+      "default": null,
+      "help": "The channels in the list can be either INCLUDED or EXCLUDED from the following processes.",
+      "choices": [
+        {
+          "label": "Include",
+          "value": "0",
+          "help": "INCLUDE the channels in the list."
+        },
+        {
+          "label": "Exclude",
+          "value": "1",
+          "help": "EXCLUDE the channels in the list."
+        }
+      ]
+    },
+    {
+      "name": "CHANLIST",
+      "prompt": "Specify CHANNEL input list",
+      "kind": "edit",
+      "default": "1-100/",
+      "help": "Access the text editor to define the channels/traces that are to be read in."
+    },
+    {
+      "name": "STRMLCHN",
+      "prompt": "Streamline CHANNEL selection?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "If Yes, SEG-D Input quickly forward spaces its input to the next record once it encounters channels beyond the selected range."
+    },
+    {
+      "name": "IOVER",
+      "prompt": "Remap SEGD main header values?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Choose 'YES' to input/override SEGD main header values."
+    },
+    {
+      "name": "OVERRIDE",
+      "prompt": "Input/override main header entries",
+      "kind": "edit",
+      "default": "cab_off,cable shipboard offset,4RIBM,,,793/cab_num,cable number,1I,,32,865/",
+      "help": "Enter: 1-8 char keyword, 1-32 char description, 1I 2I 4I #B #C 4RIBM 4RIEEE 8R, channel set delimiter, byte increment, byte start/ ... /"
+    },
+    {
+      "name": "ITOVER",
+      "prompt": "Remap SEGD trace header values?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Choose 'YES' to input/override SEGD trace header values."
+    },
+    {
+      "name": "TOVERRID",
+      "prompt": "Input/override trace header entries",
+      "kind": "edit",
+      "default": "cab_off,cable shipboard offset,4RIBM,,,793/cab_num,cable number,1I,,32,865/",
+      "help": "Enter: 1-8 char keyword, 1-32 char description, 1I 2I 4I #B #C 4RIBM 4RIEEE 8R, channel set delimiter, byte increment, byte start/ ... /"
+    },
+    {
+      "name": "COORREF",
+      "prompt": "Input Global XY reference coordinates?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Specify whether to input the global reference coordinates 'xref' and 'yref'. If 'NO', then these parameters are not used."
+    },
+    {
+      "name": "XREF",
+      "prompt": "Global X reference coordinate",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the global X reference coordinate. All X coordinates will have this reference subtracted from their original value."
+    },
+    {
+      "name": "YREF",
+      "prompt": "Global Y reference coordinate",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the global Y reference coordinate. All Y coordinates will have this reference subtracted from their original value."
+    },
+    {
+      "name": "NGAIN",
+      "prompt": "Save trace IFP values for NGAIN Instrument Test?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Choose 'YES' to save the trace sample IFP values to a file. The file is required to run the Ngain Instrument Test."
+    },
+    {
+      "name": "GAINFILE",
+      "prompt": "Enter NGAIN disk file path name",
+      "kind": "edit",
+      "default": "ngain_data",
+      "help": "This specifies the disk file path name to save the IFP values for the Ngain Instrument Test  The full path is not necessary if the file is in the database."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "menu_id": "ens_define",
+  "tool_name": "ENS_DEFINE",
+  "label": "Ensemble Redefine",
+  "parameter_count": 4,
+  "parameters": [
+    {
+      "name": "CMODE",
+      "prompt": "Mode of application",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose condition on which to reset ensemble boundaries."
+    },
+    {
+      "name": "PRIM_KEY",
+      "prompt": "Select PRIMARY key to re-define output ensembles",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header word from the headers menu as the PRIMARY key for re-defining input ensembles."
+    },
+    {
+      "name": "ADIFF",
+      "prompt": "Header difference",
+      "kind": "typein",
+      "default": "10.0",
+      "help": "What is the absolute difference in trace headers which defines a new ensemble?"
+    },
+    {
+      "name": "MAXTR",
+      "prompt": "Maximum traces per output ensemble",
+      "kind": "typein",
+      "default": "0",
+      "help": "What is the maximum number of traces per output ensemble AFTER re-defining the ensembes?"
+    }
+  ]
+}

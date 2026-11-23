@@ -1,0 +1,126 @@
+Surface Wave Noise Attenuation2006
+
+ProMAX® Reference
+
+Surface Wave Noise Attenuation
+Surface Wave Noise Attenuation attenuates surface-wave
+noise by forming low-frequency arrays.
+
+Theory
+Given the surface velocity and the frequency cutoff of the
+noise, Surface Wave Noise Attenuation transforms the data
+from the time-space domain to the frequency-space domain,
+where it performs a frequency dependent mix of adjacent
+traces. At each frequency the number of traces to mix is
+determined by the relation
+mix = velocity / (frequency * trace spacing)
+Frequency components higher than the cutoff frequency
+remain unchanged. Finally, the data are transformed back to
+the time-space domain.
+Surface Wave Noise Attenuation operates on the data in
+panels, which are overlapped and merged together. Each
+panel normally contains Panel size traces. The ﬁrst and last
+Panel edge traces overlap with adjacent panels. Within the
+panel edges, Panel mix traces from adjacent panels are
+mixed and output. Remaining traces in the edges are
+discarded. For example,
+Panel size = 12, Panel edge = 3, Panel mix = 1
+OOOOOOOOOMXX
+XXMOOOOOOMXX
+XXMOOOOOOOOO
+O = Output, M = Mixed, X = Discarded
+
+Panels come in to play when the maximum number of traces
+per ensemble (MAXDTR) is 1 (MAXDTR = 1 is the normal
+value for poststack data) or when MAXDTR is greater than
+panel size. If MAXDTR > 1, panels do not cross ensemble
+boundaries. If the number of traces in an ensemble is less
+than the panel size, the ensemble is processed as a single
+panel with no overlap or mix.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Wave Noise Attenuation2007
+
+ProMAX® Reference
+
+Usage
+You can run this process on both prestack and poststack
+data.
+In some cases, to achieve better noise suppression, it is
+recommended to apply gain to the data prior to noise
+attenuation. The high cutoff frequency can be obtained from
+amplitude spectra.
+
+Parameters
+Velocity
+Enter the apparent velocity of the noise wave to attenuate in
+ft./s or m/s.
+Trace spacing
+Enter the trace spacing in ft. or m. Enter 0. to have the
+program calculate the average trace spacing for each panel
+from OFFSET values in the trace headers.
+Note: the program assumes that all traces in a panel are
+equally spaced. Noise attenuation decreases if trace spacing
+varies within a panel and where there are gaps in the data.
+Low frequency (Hz)
+Enter the lowest frequency in the noise wave to attenuate.
+Generally this should be zero. However, at zero frequency the
+number of traces mixed is always equal to the panel size.
+High frequency (Hz)
+Enter the highest frequency in the noise wave to attenuate.
+On most data it should not exceed 25-30 Hz.
+Blend width (Hz)
+Enter a bandwidth to blend up to the high frequency to
+preserve continuity at the cutoff.
+Set trace mix limit?
+Select Yes to put an upper limit on the number of traces
+mixed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Wave Noise Attenuation2008
+
+ProMAX® Reference
+
+Maximum number of traces to mix
+This appears if Yes to Set trace mix limit. Enter the largest
+number of traces to mix. The number must be odd.
+Panel size
+Enter the number of traces in each panel.
+Panel edge
+Enter the number of traces at the edge of each panel that are
+inﬂuenced by the edge effect and must be overlapped. Panel
+edge must be less than one-half Panel size. Panel edge
+should be one-half of the maximum trace mix. If it is less,
+noise attenuation may decrease at panel boundaries.
+Panel mix
+Enter the number of traces in the overlap zones between
+panels to be mixed with adjacent panels’ overlap zones and
+output. Panel mix cannot be greater than Panel edge.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Wave Noise Attenuation2009
+
+Other Docs
+
+Search Page
+
+ProMAX® Reference
+
+Known Problems
+
+

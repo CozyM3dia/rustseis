@@ -1,0 +1,15 @@
+[package]
+name = "rustseis-flow"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rayon.workspace = true
+rustseis-core.workspace = true
+rustseis-dsp.workspace = true
+rustseis-imaging.workspace = true
+rustseis-io.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+toml.workspace = true

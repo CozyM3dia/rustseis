@@ -1,0 +1,210 @@
+{
+  "menu_id": "fk_anal",
+  "tool_name": "fk_anal",
+  "label": "FK Analysis (NEW)",
+  "parameter_count": 22,
+  "parameters": [
+    {
+      "name": "N_TRACES",
+      "prompt": "Panel width in traces",
+      "kind": "typein",
+      "default": "200",
+      "help": "Number of traces to process at one time; use number of traces per ensemble for pre-stack."
+    },
+    {
+      "name": "T_START",
+      "prompt": "Starting time for analysis",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "This is the minimum time which will be used in the analysis."
+    },
+    {
+      "name": "T_END",
+      "prompt": "Ending time for analysis",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "This is the maximum time which will be used in the analysis.  If zero (0.0), the maximum time of input data will be used."
+    },
+    {
+      "name": "XSPACING",
+      "prompt": "Distance between input traces",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Distance between input traces, default to 0.0 for value from global parameters.  Check View in flow (job.output) for value used."
+    },
+    {
+      "name": "CONFIG",
+      "prompt": "Starting display configuration",
+      "kind": "pop_choose",
+      "default": "0",
+      "help": "Choose one of four display configurations."
+    },
+    {
+      "name": "K0CENTER",
+      "prompt": "Position of zero wavenumber in display",
+      "kind": "circular",
+      "default": null,
+      "help": "Zero wavenumber may be positioned on left or in center of display.",
+      "choices": [
+        {
+          "label": "CENTER",
+          "value": "1",
+          "help": "Zero wavenumber (K=0) will be in center of display."
+        },
+        {
+          "label": "LEFT",
+          "value": "0",
+          "help": "Zero wavenumber (K=0) will be on left side."
+        }
+      ]
+    },
+    {
+      "name": "F0BOTTOM",
+      "prompt": "Position of zero frequency in display:",
+      "kind": "circular",
+      "default": "1",
+      "help": "Zero frequency may be positioned at top or bottom of display.",
+      "choices": [
+        {
+          "label": "BOTTOM",
+          "value": "1",
+          "help": "Zero frequency (K=0) will be at bottom of display."
+        },
+        {
+          "label": "TOP",
+          "value": "0",
+          "help": "Zero frequency (F=0) will be at top of display."
+        }
+      ]
+    },
+    {
+      "name": "DBSCALE",
+      "prompt": "Plot FK,TK,TX panels in DB or Linear:",
+      "kind": "circular",
+      "default": "1",
+      "help": "Amplitudes of FK, TK, TX data panels may be plotted using either a Linear or dB (logarithmic) scale.",
+      "choices": [
+        {
+          "label": "DBSCALE",
+          "value": "1",
+          "help": "Plot using logarithmic DB scale."
+        },
+        {
+          "label": "LINEAR",
+          "value": "0",
+          "help": "Plot using linear amplitude scale."
+        }
+      ]
+    },
+    {
+      "name": "TXPCTGAN",
+      "prompt": "Initial TX gain setting (percentile)",
+      "kind": "typein",
+      "default": "98.",
+      "help": "Gain is set as a percentile of the input trace amplitudes, ( 90 to 100)."
+    },
+    {
+      "name": "FKGAINMX",
+      "prompt": "Initial FK maximum gain setting (db)",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Upper limit for color scale when displaying FK data."
+    },
+    {
+      "name": "FKGAINMN",
+      "prompt": "Initial FK minimum gain setting (db)",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Lower limit for color scale when displaying FK data."
+    },
+    {
+      "name": "XFLATPCT",
+      "prompt": "Percent flat for trace ramping",
+      "kind": "typein",
+      "default": "100.",
+      "help": "The offsets may be tapered prior to K-space transform to minimize FFT edge effects (100.0 = no ramping)."
+    },
+    {
+      "name": "TFLATPCT",
+      "prompt": "Percent flat for time ramping",
+      "kind": "typein",
+      "default": "100.",
+      "help": "The traces may be tapered prior to the frequency transform to minimize FFT edge effects (100.0 = no ramping)."
+    },
+    {
+      "name": "OLDTABLE",
+      "prompt": "Edit OLD polygon table or create NEW one?",
+      "kind": "circular",
+      "default": "1",
+      "help": "The polygon table specifies the regions to keep or reject\nusing FK filters. Create a new one or modify an old one."
+    },
+    {
+      "name": "FKPTABLE",
+      "prompt": "Select mute polygon table",
+      "kind": "function",
+      "default": "NONE",
+      "help": "Use Mouse Button 1 to select a polygon (mute) parameter file description from the parameter file menu."
+    },
+    {
+      "name": "NEWTABLE",
+      "prompt": "Input new polygon table name",
+      "kind": "edit",
+      "default": "fk_polygon1",
+      "help": "Type in the name a new table to be created for polygon storage."
+    },
+    {
+      "name": "PASS",
+      "prompt": "Mode of F-K filter operation",
+      "kind": "circular",
+      "default": null,
+      "help": "F-K filter can either pass or reject the specified F-K regions.",
+      "choices": [
+        {
+          "label": "REJECT",
+          "value": "0",
+          "help": "Reject the specified F-K region."
+        },
+        {
+          "label": "ACCEPT",
+          "value": "1",
+          "help": "Pass the specified F-K region."
+        }
+      ]
+    },
+    {
+      "name": "PCTFLAT",
+      "prompt": "Percent flat for F-K filter windowing",
+      "kind": "typein",
+      "default": "90.0",
+      "help": "The F-K filter may be ramped (in T-X) to control the smoothness of the filter."
+    },
+    {
+      "name": "NWINT",
+      "prompt": "Time length of F-K filter (ms)",
+      "kind": "typein",
+      "default": "500.0",
+      "help": "The F-K filter is transformed to T-X domain and windowed.  This will be the time extent of the filter."
+    },
+    {
+      "name": "NWINX",
+      "prompt": "Spatial extent of F-K filter (traces)",
+      "kind": "typein",
+      "default": "50",
+      "help": "The F-K filter is transformed to T-X domain and windowed.  This will be the spatial extent of the filter."
+    },
+    {
+      "name": "program",
+      "prompt": "Program executable name",
+      "kind": "edit",
+      "default": "fk_anal.exe",
+      "help": "Type path name of program executable.  If the path doesn't start wi\nth a /, the main ProMAX executable directory is used."
+    },
+    {
+      "name": "DEBUG",
+      "prompt": "Debug mode?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "To debug program, enter YES.  You will have to debug the program yo\nurself"
+    }
+  ]
+}

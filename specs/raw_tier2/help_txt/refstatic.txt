@@ -1,0 +1,682 @@
+Refraction Statics2490
+
+ProMAX® Reference
+
+Refraction Statics
+Refraction Statics provides for ﬁrst break pick editing on
+linearly moved out shot records, layer selection and editing,
+refractor velocity analysis and editing, refractor delay time
+computation and editing, quality control displays of various
+solutions, depth model display and editing, shot and receiver
+static display, and database output.
+Note: This process requires an Xserver capable of providing
+an 8-bit Pseudo-color display to run. Please see section titled
+Running Older Pseudo-color Tools in the Display Color
+section of the System Administration Guide.
+
+Theory
+Refraction Statics supports the following three static solution
+methods:
+• Diminishing residual matrices (DRM).
+• Generalized reciprocal method (GRM) is appropriate for
+splitspread shooting. It is recommended to use GRM and
+delay times to increase the statistics for a better velocity
+and static solution.
+• Delay times is essential for end-on data or for optional
+deep hole solution.
+Note: This processes uses surface stations rather than XY
+coordinates. Poor solutions may be calculated for crooked
+line data with greater than 30 degree bends. Results from
+geometries with smaller angles should be carefully examined
+and edited using Database Display before application.
+
+Usage
+Database output includes edited ﬁrst break picks, layer
+picks, V0 and refractor velocities, raw delay times from
+surface, refractor depths from surface, source and receiver
+statics to ﬁnal datum, and source and receiver residual
+statics. The term residual implies source refraction statics to
+ﬁnal datum is equal to source elevation statics to ﬁnal datum
+plus source residual refraction statics, provided the same
+replacement velocity and ﬁnal datum elevation were used in
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2491
+
+ProMAX® Reference
+
+both elevation and refraction statics. You must run Apply
+Elevation Statics before running Refraction Statics* to
+place S_STATIC in the SIN Geometry database and R_STATIC
+in the SRF Geometry database. These are the elevation static
+values Refraction Statics* uses to compute residual
+refraction statics. The residual refraction statics are placed in
+the SIN STATIC and SRF STATIC databases to use in Apply
+Residual Statics.
+Note: First breaks must be picked from topography with no
+statics applied or whatever statics are applied must be
+removed from the ﬁrst break picks before they are used to
+calculate refraction statics.
+For more information about datum and residual statics, refer
+to the Residual Statics Overview.
+All selection and editing is interactive. You can easily jump
+back to previous steps in order to change parameters or to
+edit data. Five layers is the maximum number of layers
+allowed in the solution.
+Note: If the dataset used in refraction statics was derived by
+Extract Database Files and is in random sort order, sort the
+input dataset to FFID (or source): CHAN before running
+Extract Database Files.
+
+References
+Gulunay, N., 1985, A new method for the surface consistent decomposition of statics using diminishing residual matrices (DRM), 55th meeting of the International
+Society of Exploration Geophysicists, Washington, D.C.
+Hollingshead, G. W., and Slater, R. R., A novel method of deriving weathering
+statics from ﬁrst arrival refractions, SEG New Orleans.
+Lawton, D. C., 1989, Computation of refraction static corrections using ﬁrst-break
+traveltime differences: Geophysics. 54. 1289-1296.
+Palmer, Derecke, 1986, Refraction Seismics; Geophysical Press, vol. 13. Palmer,
+Derecke, 1980, The Generalized Reciprocal Method of Seismic Refraction Interpretation, Society of Exp. Geophysicist, Tulsa, Ok.
+
+Parameters
+Select Display Device
+Enter the display device. The default is This Screen.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2492
+
+ProMAX® Reference
+
+Select First Break Times ﬁle
+Select ﬁrst break times from TRC order, F_B_PICK or
+NN_PICK information type, and the PICK parameter ﬁle.
+Get Layer Picks from Database?
+Select Yes if output from a previous execution are input from
+the SIN Geometry database.
+Select layer pick ﬁle
+This appears if Yes to Get Layer Picks from Database.
+Select a layer pick ﬁle from the SIN OPF. These ﬁles will have
+a description such as LST,LED,RST, or RED.
+Get Refractor Velocities from Database?
+Select Yes to get the velocity set from the SRF database.
+Select Refractor velocities ﬁle
+This appears if Yes to Get Refractor Velocities from
+Database. Select a velocity ﬁle (VEL1) from the SRF OPF.
+Select Trace data ﬁle
+Select a trace data ﬁle from the datasets menu. This dataset
+needs to be the same source ordered dataset previously used
+for ﬁrst break picking.
+Compute V0 from Uphole data?
+Select Yes to compute V0 using uphole data previously
+entered in the geometry assignment ﬁle for each shot. Select
+No to enter source depth and VO.
+Specify VO
+This appears if No to Compute VO from Uphole data. Enter
+Station:V0 pairs, where Station is the surface map location
+as recorded in the SEG-P1, UKOOA, or survey notes. The
+corresponding database entry is SRF GEOMETRY STATION,
+and the trace header word is SRF_SLOC. VO is the
+weathering velocity (uphole velocity) at this station.
+101:3000/201:3500/351:4000/
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2493
+
+ProMAX® Reference
+
+Compute uphole time using VO
+This appears if No to Compute VO from Uphole data. Select
+Yes to use VO and shot depth to compute the uphole times
+for subsurfaces.
+Number of layers
+Enter the number of layers to model. Typically 1 or 2 layers
+are pickable across most shots. Usually the largest statics
+are caused by thickness and/or velocity changes within the
+ﬁrst layer near the surface. The maximum number of layers
+allowed is 5.
+Use Delay Times in velocity/depth model?
+Select Yes to use Delay Times to compute the depth model.
+GRM plus delay times can be used if data were acquired split
+spread.
+Use Deep Hole algorithm in depth model?
+Select Yes to use the deep hole delay times algorithm, if the
+sources were near the base of the weathering. This algorithm
+affects only the delay time solution for sources and receivers.
+Receiver delay times are computed using the two term delay
+time equation T = Xsr/V1 + Tdr, where T is the ﬁrst break
+time, Xsr is the source to receiver distance, V1 is the refractor
+velocity and Tdr is the receiver delay time. The delay time
+depths and statics with this method may differ noticeably
+from GRM or DRM depths and statics when the sources are
+near the base of the weathering zone.
+Use GRM in velocity/depth model?
+Select Yes to use GRM as one of the solutions for refractor
+velocity and time depths. GRM should not be used if data is
+not split spread.
+Specify GRM minimum XY distance
+This appears if Yes to Use GRM in velocity/depth model.
+Enter minimum xy distance value in GRM time-depth
+solutions. It is recommended to use 0.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2494
+
+ProMAX® Reference
+
+Specify GRM maximum XY distance
+This appears if Yes to Use GRM in velocity/depth model.
+Enter maximum xy distance value in GRM time-depth
+solutions. It is recommended to use 0. In low fold shooting
+the maximum xy value may be increased to 5 times the group
+interval
+Specify GRM distance increment
+This appears if Yes to Use GRM in velocity/depth model.
+Typically the GRM distance increment is set to the group
+interval. It must exceed 0.
+Final datum elevation
+Enter the ﬁnal datum elevation. This may be a constant
+numerical value, or the character name of a variable ﬁnal
+datum elevation already in the SRF database.
+Replacement velocity
+Enter the replacement velocity to use from top of deepest
+refractor to ﬁnal datum. This may be a constant numerical
+value, or the character name of a variable replacement
+velocity already in the SRF database. Best results are
+obtained if this replacement velocity is approximately equal
+to the average velocity of the deepest refractor.
+Note: In a ﬂow where Apply Refraction Statics is selected,
+the ﬁnal datum elevation and replacement velocity in
+Refraction Statics should automatically appear.
+Use Uphole Time in source statics algorithm?
+Select Yes to use uphole time in the source statics. Select No
+to compute source statics without uphole times.
+Create a New database entry for each run
+Select No to overwrite a previous database entry. This will
+save space on the disk. Select Yes to write new database
+values for each run. This allows the option of returning to a
+previous set of residual static values, but uses more storage
+space.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2495
+
+ProMAX® Reference
+
+Enter 4 digit ID number
+This appears if Yes to Create a new database entry for each
+run. Enter a 4 digit number to identify the database output
+parameters, such as GRMXXXX or DRMXXXX. Where XXXX
+is a character or number.
+Caution: This job will not run if you use a blank for one of
+the digits.
+
+Interactive Display
+Command Menu
+When you execute Refraction Statics, the following command
+menu appears:
+
+Basic pick editing
+To begin pick editing, click on Edit Picks. Edit Picks
+updates ﬁrst break time picks on linearly moved out common
+source records. Update picks in the FB Time Edit On mode.
+You will be able to manually edit picks in the display that
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2496
+
+ProMAX® Reference
+
+follows. Using MB1, you will be able to snap to the peak
+nearest the cursor line. To kill the pick use MB2.
+• MB2 increments the displayed range of sources,
+• MB3 decrements the displayed range of sources.
+The icons on the upper right hand side of the display are the
+command buttons. These buttons control some of this
+process’ major functionality. For example, you can change
+display parameters, pick layers instead of ﬁrst arrivals, turn
+on and off the wiggle trace display, rescale the display to
+remove anomalous picks, and change the phase of the
+waveform.
+.
+
+Changing display parameters
+Command Button 1 presents a new screen that changes the
+current shot record display parameters. You can enter the
+desired value from the keyboard followed by Return. Display
+options include:
+• current starting source SIN number
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2497
+
+ProMAX® Reference
+
+• current ending source SIN number
+• sources are (are not) aligned
+• number of sources in overlap
+• moveout velocity
+• minimum offset (from source)
+• maximum offset (from source)
+• despike time from median
+After the display parameters are set, you may exit this
+window with MB2.
+FB Time Edit / Layer Pick
+Command Button 2 switches between editing ﬁrst break
+picks and deﬁning refractor layers in the shot record domain.
+While in the mode Layer Pick On, any previous layer picks
+will be displayed. Layers are numbered 1, 2,... away from the
+source. The button help message is B1 = select layer, B2 =
+increment source range, and B3 = decrement source range.
+You must enter the layer number from the keypad followed by
+a Return. The layer can now be edited or deﬁned with MB1
+for layer start, MB2 for layer end, and MB3 for exiting
+edit/select for that layer.
+While in FB Time Edit mode, the window shows Despike.
+Select to despike all displayed ﬁrst breaks. This is done on a
+spread side basis by:
+• moveout correcting the ﬁrst break times of a side of a
+spread with the current moveout velocity,
+• computing the median value of all the corrected ﬁrst
+break times,
+• killing any ﬁrst break times that either exceed the
+median time plus the Despike time or is less than the
+median time minus the Despike time.
+Despike time can be changed in Change Display
+Parameters.
+Kill or Revive shots
+Command Button 4 switches between killing or reviving
+shots for computations.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2498
+
+ProMAX® Reference
+
+Add Traces/Remove Traces
+Command Button 5 adds or removes traces to the pick
+display. It is useful to display the seismic traces to QC arrival
+times by comparing patterns in ﬁrst break picks from shot to
+shot. These surface consistent patterns are most evident
+when sources are displayed in their proper spatial location.
+This is the default.
+Note: Command Button 6 has cycle functions. You can
+specify how MB1, MB2, and MB3 change the ﬁrst break
+picks. For example, pick update functions for MB1 include
+snap to the nearest peak or trough, or snap to the nearest
+positive or negative zero crossing. The button functionality
+changes back by removing traces.
+Exit Edit Picks
+Command Button 7 exits Edit Picks. If you have changed
+any picks, you are given the opportunity to write the updates
+to the database. Enter a ﬁle name of up to 8 characters
+followed by a Return.
+Deﬁne Layers
+To generate pick refractor layers, click on Deﬁne Layers from
+the main menu. You can also quality control your picks from
+the previous step.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2499
+
+ProMAX® Reference
+
+Changing display parameters
+Command Button 1 presents a new screen that changes the
+current layer display parameters. MB2 exits display
+parameter selection back to the moved out spread display
+with the updated display parameters.
+Assigning ﬁrst breaks to the appropriate refractor
+Deﬁne Layers is speciﬁcally used to select which ﬁrst breaks
+are from head waves traveling along the bottom of which
+layer. Command Button 2 displays the left spreads in blue
+in the top display and all the right spreads in red in the
+bottom display. Layers for all spreads can be selected by
+pointing and dragging the mouse.
+Note: The Refractor Velocity is computed from the GRM
+and/or Delay Times. The velocities shown on the Deﬁne
+Layers screen are displayed to help guide layer picking. Only
+the end points of the drag lines are used by the program as
+layer boundaries. Any previously selected layers will appear
+on the moved out ﬁrst break picks in grey.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2500
+
+ProMAX® Reference
+
+Other Button functions
+With the cursor inside either spread box, your can use MB1
+to select layers, MB2 to remove layers, and MB3 to smooth
+the ﬁrst break picks. Moving the cursor above, below, or to
+the left of the boxes allows you to use MB2 to increment the
+source range, and MB3 to decrement the source range. The
+Done button will exit with all current picks saved.
+Layer Selection Hints
+Layer selection can be done in two places: Edit Picks or
+Deﬁne Layers. It is recommended to make the initial
+selection of layers in Deﬁne Layers. Then, if needed, return
+to Edit Picks to review the initial layer selection. In Deﬁne
+Layers, when a layer seems to disappear, pick it over a very
+small distance range. Unless you have strong justiﬁcation
+that more than one layer is present, pick one layer starting
+near the source and stopping at a change in the ﬁrst break
+slope.
+Refractor Velocity
+To compute refractor velocity, click on Refractor Velocity
+from the main menu. The velocity results are displayed with
+all stations and refractors. The black lines represent the
+median of all velocity values for the station, and the colored
+numbers near the black line are the refractor number. If GRM
+appears in red, the program found GRM solutions. If LSDT
+appears in blue and/or RSDT appears in green, delay time
+velocity solutions were found.
+Note: If the data were shot end-on, no GRM solution will be
+found. It is essential that Delay Times be speciﬁed for endon data otherwise no static solutions will be found. At least
+one method must be speciﬁed in split-spread data otherwise
+no solutions are found.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2501
+
+ProMAX® Reference
+
+Zoom window selection and movement
+Select the corner of a new zoom window. B1 = Mark corner of
+new zoom window, B2 = move center of zoom window to
+cursor. MB1 completes the selection of the new zoom
+window. MB2 will move the current zoom window center to
+the cursor position. You can make the zoom window the same
+size as the upper display.
+Editing refractor velocity
+Select the refractor velocity to edit. B1 = edit value, or drag
+for multiple edits, B2 = median smooth refractor velocity, B3
+= kill or revive source. An MB1 drag will change the velocity
+over the drag range. MB2 on the refractor velocity line will
+cause the velocity line to be smoothed by an 11 point median
+smoother. Smoothing can be run multiple times to remove
+spikes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2502
+
+ProMAX® Reference
+
+Killing shots based on V0 and the Deep Hole Option
+Missing 0 symbols indicate more than one source at the same
+location. The symbols in magenta indicate killed sources.
+MB3 on these symbols revives the source and, if live, kills the
+source. This allows you to kill sources based on V0. Those
+sources showing abnormally high V0 have gone below the
+weathering and perhaps should be eliminated from velocity
+and static solution. If all or most of the sources exploded
+below the weathering, you should invoke Deep Hole, which
+uses equations modiﬁed for the deep hole situation in the
+static solution. In this case, all sources exploding at or below
+the weathering should be used in velocity and depth
+computations.
+Exit refractor velocity display and edit
+Done exits and query you to output velocities to the
+database. Select Yes the velocities will by output to the SRF
+database for future use.
+View Statics Solution
+To compute and displays layer delay times, click on View
+Statics Solution from the main menu. The upper graph
+shows all delay time solutions selected in the menu for the
+whole line. The bottom display is the expanded part of the
+solutions inside the black zoom box of the upper display.
+Command Button 2 edits the DRM solution. In the graphs,
+all blue lines are an average of the Left Spread and Right
+Spread delay time solutions, and the green lines are the GRM
+solutions. Command Button 3 changes from a DRM solution
+to the average of left and right spread delay times solution.
+Command Button 4 changes back to the GRM time depth
+solution. This GRM solution may be ﬂat at the ends due to
+lack of reverse spread coverage near the end of the line.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2503
+
+ProMAX® Reference
+
+”
+
+Editing solutions
+MB1 in the zoomed graph is used to drag or single point edit
+the current solution. Use colored numbers from the other
+solutions to extend the GRM to the ends. Where reverse
+coverage is present and the sources went off in the weathered
+zone, all three solutions should look similar. The DRM
+solution is usually somewhat better due to its iterative
+nature. When the sources went off at the base of, or below
+the weathered zone and Deep Hole is used, the delay times
+solution produces the best results because of its modiﬁed
+equation. You are encouraged to try all solutions to ﬁnd the
+best for the particular dataset.
+Zoom window selection and movement
+Select the corner of a new zoom window. B1 = Mark corner of
+new zoom window, B2 = move center of zoom window to
+cursor. MB1 completes the selection of the new zoom
+window. MB2 will move the current zoom window center to
+the cursor position. You can make the zoom window the same
+size as the upper display.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2504
+
+ProMAX® Reference
+
+Solution smoothing
+Using MB2 in the zoomed display produces a three point
+smoothing to the refractor delay time. Do not edit or smooth
+delay times or time depths unless the solution is very
+unreliable or noisy.
+Exit and Quality Control Displays of the chosen solution
+Done will exit to allow you to choose to view quality control
+displays. If Yes, a display similar to Edit Picks appears with
+the ﬁrst ﬁve sources linearly moved out and graphed. For
+each source, the black lines are the raw linearly moved out
+ﬁrst break picks. The red lines are those same raw picks with
+the DRM delay times removed, then the average of all DRM
+delay times removed is added back in to shift the red line
+back to near the black line. Similarly, the blue line is for the
+DLT solution and the green line for the GRM solution. If the
+ﬁrst break time picks were good and the layers selected were
+good, the colored lines should be smoother and straighter
+than the black line. The difference basically shows the statics
+being removed. If the black and colored lines overlay, then no
+statics are being removed. Large jumps in all lines may
+indicate bad ﬁrst break time picks for that source, in which
+case you should return to Edit Picks to make corrections.
+Controlling the source range of the QC display and exit
+MB2 will increment the source range of the display, MB3 will
+decrement the source range, Command Button 1 will allow
+you to select a new source range, and Command Button 2
+exits back to the main menu.
+Source delay time display
+After the receiver display is either selected and viewed, or
+rejected, a source delay time display appears for the DRM,
+and if selected, the STD (delay time) solutions. These delay
+times are from the surface. The SIN and station number of
+the source is displayed. The delay times are editable as
+explained by the button helps when the cursor is in the
+bottom zoom display. If STD delay times were computed and
+the delay times track the DRM solution, the ﬁrst break picks
+and layers selected were good, and the velocity edits were
+good. If the solutions do not track, the ﬁrst break picks may
+need attention, the layer picks may need extra editing and/or
+the refractor velocities may need a second look. The edited
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2505
+
+ProMAX® Reference
+
+solution is changed, as described above, for the receiver
+solution display. Notice that Command Button 3 reads, “No
+GRM”, meaning that no source delay times are computed by
+the GRM method. Command Button 4 will exit this display
+and a screen will appear asking you for a shot solution QC
+display.
+Common Receiver delay time QC display
+This display is analogous to the receiver QC display, but with
+linearly moved out common receiver gathers rather than
+source gathers. The same rules of interpretation apply as for
+the receiver QC display. Since the ﬁrst break picks are sorted
+into common receiver order, this option may require a
+noticeable time delay before appearing on the screen for large
+lines. Command Button 2 will return to the main menu.
+Refractor Depth Model
+Elevation display of surface and refractors
+To produce an elevation display of the surface in black and
+all refractor solutions in color, click on Refractor Depth
+Model. The zoomed lower display is used for a detailed view
+plus editing of the geometry of the ﬁrst refractor. The solution
+being edited is color coded. To change the solution for edit,
+cycle to the desired solution. MB1 in the zoom display will
+cause point by point or drag edit of the bottom of the ﬁrst
+layer of the editable solution. MB2 will cause a running
+average smoothing ﬁlter to be applied to the bottom of the
+ﬁrst layer. The length of the smoothing ﬁlter may be changed
+with MB3.
+Note: After either editing or smoothing, the edited ﬁrst layer
+depth values are honored and all depths for that solution are
+recalculated. The variation in the ﬁrst layer depth removed by
+smoothing and editing are used to update V0.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2506
+
+ProMAX® Reference
+
+.
+
+Depth display of the refractors
+Command Button 1 will redisplay the graphs with the
+surface ﬂattened at 0 depth. This allows you to see the true
+refractor depth variation. Toggle to restore the graphs to
+elevation proﬁles.
+Change editable solution
+Cycle through the computed solutions. The solution shown is
+currently editable using MB1 in the zoom window for drag
+edits, or MB2 for ﬁrst refractor smoothing. MB3 changes the
+smoothing ﬁlter length.
+Exit refractor depth model
+Done exits to a screen asking you if the receiver depths are to
+be output to the database. Yes results in the depths output
+to the SRF Geometry database as DDR, DDT, or DGR
+parameters. Yes or No will return you to the main menu.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics2507
+
+ProMAX® Reference
+
+Output Statics
+To compute statics from surface to ﬁnal datum and display
+for sources and receivers, click on Output Statics from the
+main menu. Yes places the source statics in the SIN order,
+GEOMETRY information type, and SDRM, SDLT, and SGRM
+parameters of the database. Similarly the receiver statics are
+placed in the SRF order, Geometry information type, and
+RDRM, RDLT, and RGRM parameters of the database. YES
+also places raw source and receiver delay times for each layer
+to the same respective databases. The residual refraction
+statics are placed in the SIN Statics and SRF Statics
+databases. No means no statics are output to the database.
+
+Exit
+Command Button 7 exits refraction statics back to the ﬂow
+section.
+Note: From Deﬁne Layers on, you can return to previous
+options and progress downward again.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

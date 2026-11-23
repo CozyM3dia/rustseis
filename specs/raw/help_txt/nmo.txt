@@ -1,0 +1,347 @@
+Normal Moveout Correction391
+
+ProMAX® Reference
+
+Normal Moveout Correction
+Normal Moveout Correction applies NMO correction from a
+space-variant velocity ﬁeld.
+
+Theory
+Velocities are interpolated for each CDP. Any fractional
+sample rate statics found in the header attribute NA_STAT
+are incorporated in the time corrections in this process. The
+NMO process does not apply any other statics shifts or datum
+corrections. It is assumed that the incoming traces are
+already referenced to the desired datum, which typically is
+the ﬂoating NMO datum for land data.
+Refer to the Statics Overview for further details on datum
+corrections and statics application.
+Normal moveout is applied according to the following
+formula:
+Tx =
+
+X
+2
+T 0 +  ----
+V
+
+2
+
+Tx = The actual reﬂection time of the seismic event due
+to NMO effects
+To = The zero offset reﬂection time of the seismic event
+X = The actual source-receiver offset distance
+V = The NMO or stacking velocity for this reﬂection
+event.
+The NMO correction described above is referred to as
+hyperbolic normal moveout. Studies have found that for long
+offsets, and/or in the presence of anisotropy, moveout may
+not be hyperbolic. Two methods are given to apply
+corrections for this non-hyperbolic moveout:
+• long offset corrections
+• anisotropy corrections
+Long offset normal moveout may be applied using one of
+several published methods. These methods all add a third
+term to the standard NMO equation shown above. This third
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction392
+
+ProMAX® Reference
+
+term is dependent on higher powers of velocity and offset to
+the fourth power, hence these methods are often known as
+fourth order corrections. The methods available here are:
+• Al-Chalabi’s third term. This method uses the simplest
+third term and should be the most efﬁcient long offset
+correction method. Al-Chalabi showed that, by inclusion
+of this third term, greater accuracy is given than by
+including all terms up through seven in his expansion.
+• Castle’s shifted hyperbola. Castle’s correction is normally applied as a shifted hyperbola before applying twoterm NMO. This correction has been incorporated
+directly into ProMAX® NMO. This method does not
+appear to be as accurate as Al-Chalabi’s, when compared to exact results for a linear velocity gradient, and
+should require more computation time.
+• Harlan correction. This correction allows for good accuracy and the inclusion of anisotropic corrections, at the
+expense of a longer run time.
+• Tvankin and Thomsen’s correction. This correction
+allows for the greatest accuracy and the inclusion of
+anisotropic corrections, at the expense of the longest run
+time.
+Since all of these long-offset NMO methods require higher
+powers of velocity, and sums of these velocities, they are all
+sensitive to variations in velocity above any given event. That
+is, the long-offset moveout correction of an event changes if
+the velocities above that event are changed, even if the
+moveout velocity speciﬁed at the event has not changed.
+Anisotropic normal moveout can be applied using Harlan’s
+method for near offsets or Tsvankin and Thomsen’s method
+for long offsets. This requires the input of a single parameter,
+eta, to describe the anisotropy. The eta parameter has been
+deﬁned in terms of Thomsen’s anisotropic parameters
+epsilon and delta as:
+
+η ≡ (ε – δ) ⁄ (1 + 2δ)
+Since epsilon is greater than delta for most rocks, eta is
+generally expected to be a positive quantity. Larger values of
+eta will decrease the amount of NMO time correction.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction393
+
+ProMAX® Reference
+
+Usage
+The velocity function used for the normal moveout correction
+is obtained by the following method:
+A sample-by sample velocity is built at each of the locations
+where you have deﬁned time-velocity pairs. For any
+intermediate locations, the velocity is linearly interpolated on
+a sample-by-sample basis from the locations on either side.
+For any point before the ﬁrst velocity location, or beyond the
+last location, the ﬁrst or last time-velocity function is used.
+Once the correct velocity function has been interpolated, the
+exact moveout at each sample is computed based on the
+actual source-to-receiver offset and velocity at that time
+sample. If indicated by menu choice, the value of the header
+attribute NA_STAT is also included in the computation. The
+program then goes to the calculated time on the input data to
+interpolate the correct amplitude. The eight nearest samples
+to the computed time are found and an eight point sinc
+function interpolation is used to determine the correct output
+trace amplitude.
+Optionally a stretch mute is available whereby the program
+automatically mutes data when the stretch caused by normal
+moveout correction exceeds a speciﬁed limit. It also detects
+and mutes traces where a combination of velocities and
+offsets causes data to crossover. This phenomenon usually
+happens if there are signiﬁcant rapid decreases in the rate of
+change of velocity resulting in imaginary interval velocities.
+This can cause damaging effects on the stack section if the
+data is moved out strictly according to the velocity ﬁeld with
+no sample crossover muting.
+If the stretch mute is turned off, all events are moved out
+according to the velocity speciﬁed, even if the velocity used
+requires the events to be crossing before NMO application.
+The program resets mute header entries TLIVE_S, TFULL_S,
+TFULL_E and TLIVE_E, then applies the mute. Output mute
+times are computed by applying the hyperbolic normal
+moveout equation to input mute times to shift them up
+(forward NMO) or down (inverse NMO). For forward NMO, the
+output top mute (TLIVE_S and TFULL_S) is set to the greater
+of the NMO-corrected input mute and the stretch mute. For
+inverse NMO, setting parameter Stretch mute percentage to
+0.0 turns off the reset and application of the mute.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction394
+
+ProMAX® Reference
+
+Partial NMO to any non-zero offset header can be performed,
+in which case OFFSET and AOFFSET are reset to the
+indicated header. Partial NMO application in the REVERSE
+direction is not allowed.
+Long offset and anisotropic corrections may be required if the
+reﬂection events can be ﬂattened to an offset approximately
+equal to the reﬂector depth, but beyond this offset the
+reﬂections can not be ﬂattened. It may be possible to ﬂatten
+events which have been overcorrected by two-term NMO at
+offsets greater than the reﬂector depth. Anisotropic
+corrections may have a similar effect, and the choice of the
+type of correction will depend on the geology in the speciﬁc
+area.
+The header word, NMO_APLD, is created and ﬂagged to
+indicate that NMO has been applied to your data. The ﬂags
+are:
+• NMO_APLD = 1 (NMO has been applied to data)
+• NMO_APLD = 0 (NMO has not been applied to data)
+
+References
+Al-Chalabi, M., 1973, Series approximation in velocity and traveltime computations: Geophysical Prospecting, 21, 783-795.
+Castle, R. J., 1994, Theory of normal moveout: Geophysics, 59, 983-999.
+Dix, C. H., 1955, Seismic velocities from surface measurements: Geophysics, 20,
+68-86.
+Harlan, W. S., 1995, Flexible seismic traveltime tomography applied to diving
+waves, Appendix A:SEP-89, 163-165.
+Sheriff, R. E., and Geldart, L. P., 1983, Exploration Seismology Vol 2: Data Processing 18-20, 49-50: Cambridge University Press.
+Tsvankin, I. and Thomsen, L., 1994, Nonhyperbolic reﬂection moveout in anisotropic media: Geophysics, 59, 1290-1304.
+
+Parameters
+Direction for NMO application
+Select the direction for NMO application. The choices are:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction395
+
+ProMAX® Reference
+
+• Forward applies NMO. This is the normal application
+mode.
+• Inverse removes previously applied NMO.
+Stretch mute percentage
+If Forward to Direction for NMO application, enter the
+percentage of stretch to allow in the output traces after the
+velocity correction has been applied. A larger value means
+more stretch and less muting. Enter a value of 0.0 as a
+special ﬂag to turn off the stretch mute. If 0.0 is speciﬁed, all
+events will be moved out, regardless of stretch or crossover of
+the events.
+If Inverse to Direction for NMO application, the value for
+stretch mute percentage is not used when applying the
+inverse NMO correction. The value is only used as a ﬂag for
+whether or not to reset the mute header entries and apply the
+mute. Enter a value of 0.0 to turn off the reset and not apply
+the mute. Enter any other value to reset the mute header
+entries and apply the mute.
+The stretching of waveforms is an undesirable but
+unavoidable artifact of the NMO application process. At
+shallow times and at the far offsets, data will become so
+stretched out that it will degrade the stack and distort the
+frequency content of the shallow data. The option
+automatically mutes any data stretched excessively. Any data
+point whose sample interval is altered by a percentage greater
+than the speciﬁed value will be muted.
+Apply any remaining static during NMO?
+This appears if Forward to Direction for NMO application.
+If Yes is selected then any static remaining in the NA_STAT
+header will be applied with NMO sample interpolation.
+Disable check for previously applied NMO?
+Normally you do not want to apply NMO twice or remove
+NMO from data that have not been NMO corrected. When
+Direction for NMO application is Forward, the program
+issues a warning or fatal error if header entry NMO_APLD
+exists and equals 1. When Direction for NMO application is
+Inverse, the program issues a warning or fatal error if header
+entry NMO_APLD does not exist or equals 0.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction396
+
+ProMAX® Reference
+
+Select Yes to get a warning, No to get a fatal error.
+Get 3D dip velocities?
+This appears if the 3-D ﬂag is set in the LIN order of the
+database. Select Yes to apply 3D NMO dip velocity correction.
+Apply bin center corrections?
+This appears if Yes to Get 3D dip velocities. Select Yes to
+apply bin center corrections to 3D NMO dip velocity
+correction.
+Apply partial NMO?
+This appears if Forward to Direction for NMO application
+and No to Get 3D dip velocities. Select Yes to correct the
+data to a non-zero offset. This may be used in a situation in
+which another processing tool requires the data to be binned
+by offset, with each trace within each bin having exactly the
+same offset.
+Header entry with desired non-zero offset
+This appears if Yes to Apply partial NMO. Select a header
+entry from the headers menu containing non-zero offsets. If
+you apply partial NMO, each trace is corrected to a non-zero
+offset and trace headers OFFSET and AOFFSET is reset to
+this new offset. The non-zero offset must be stored as a trace
+header entry. The default is Offset bin center, which
+corrects all traces to the center of each offset bin.
+Long offset correction?
+This appears if No to Get 3D dip velocities and No to Apply
+partial NMO. Select the method for long offset NMO
+application:
+• None applies two-term, hyperbolic NMO. This is standard NMO as normally applied.
+• Al-Chalabi applies Al-Chalabi’s third term correction.
+(fastest)
+• Castle applies Castle’s shifted hyperbola correction.
+(slow, least accurate)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction397
+
+ProMAX® Reference
+
+• Harlan applies Harlan’s anisotropic third term (slower,
+good accuracy).
+• Tsvankin applies Tsvankin and Thomsen’s non-hyperbolic correction. (slowest, most accurate)
+All of these methods are more fully described in the Theory
+section of this document.
+Constant or variable ETA anisotropy?
+This appears if Harlan or Tsvankin to Long offset
+correction. Select the source of ETA anisotropy correction
+parameter from the following:
+• Constant applies a constant value for ETA
+• Variable retrieves ETA from a table
+Anisotropy correction parameter ETA
+This appears if Constant to Constant or variable ETA
+anisotropy. Enter the value for the anisotropy parameter,
+eta. This value is normally between 0 and 0.1. A value of 0
+indicates no anisotropy. If Long offset correction is Harlan
+and eta is 0, then two-term NMO is applied instead.
+Parameter table with ETA parameters
+This appears if Variable to Constant or variable ETA
+anisotropy. Select an ETA parameter ﬁle for anisotropic
+corrections.
+Get velocities from the database?
+This appears if No to Get 3D dip velocities. Select Yes to get
+an NMO stacking velocity function from the database. Select
+No if you want to enter the velocity function. 3D dip velocities
+must be read from a database parameter table.
+SELECT Velocity parameter ﬁle
+This appears if Yes to Get velocities from the database or
+Yes to Get 3D dip velocities. Select a stacking velocity
+function parameter ﬁle from the Parameter Files menu.
+If you are running the ProMAX® NMO process in the
+SeisSpace® system, you also have the option of selecting a
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Normal Moveout Correction398
+
+ProMAX® Reference
+
+JavaSeis Table. For more information about JavaSeis tables
+please see JavaSeis Table Introduction.
+SPECIFY NMO velocity function(s)
+This appears if No to Get velocities from the database.
+Enter the velocity functions. The times must be given in ms.
+The units for velocity will be ft. or m/sec, depending on the
+dataset. It is best to specify a velocity for the last data
+sample, so you will know exactly what function is applied.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

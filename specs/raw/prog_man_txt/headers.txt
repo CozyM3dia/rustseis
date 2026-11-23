@@ -1,0 +1,2233 @@
+181
+
+Developer’s Programming Guide
+
+Trace Headers
+
+This chapter describes trace headers, the primary form of
+inter-tool communication within the ProMAX system.
+
+Topics covered in this chapter:
+
+➲ Overview of Trace Headers
+➲ Deﬁnition and Usage of Standard Header Entries
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Trace Headers182
+
+Developer’s Programming Guide
+
+Overview of Trace Headers
+Trace headers are the primary form of inter-tool communication
+within the ProMAX system. They are typically used to
+communicate information which is unique to individual traces
+of the current dataset.. Global variables, another form of intertool communication, are typically used to communicate
+information that is shared by all traces of the current dataset.
+The Ordered Database, a third form of inter-tool
+communication, is typically used to communicate information
+that is global to all datasets within the line (unless the datasets
+are ﬂagged as not matching the Ordered Database).
+Convenience is a governing factor in the form of
+communication that is used. For example, geometry
+information that is placed in the parameter database can be
+conveniently accessed by stand-alone programs that do not wish
+to read trace data.
+Trace headers within ProMAX are very ﬂexible. Individual
+entries may have any length, order, or format. This has proven
+to be a tremendous beneﬁt in accommodating new ideas as the
+system evolves. (We prefer to use the term trace header entry
+rather than trace header word to avoid the notion of ﬁxed
+length.)
+The concept of an ensemble within the Executive is facilitated
+by trace headers. An ensemble is deﬁned as any collection of
+traces which (normally) share the same primary sort key value.
+Typical examples are shot records, CDP gathers, and commonreceiver gathers. All of the traces within an ensemble have the
+header entry END_ENS set to false (NLASTpz in FORTRAN
+and NLAST in C), except the last trace, where it is set to true
+(LASTTRpz in FORTRAN and LASTTR in C). The global
+variable MAXDTRz (maxdtr in C) is the maximum number of
+traces per ensemble, which must be greater than the number of
+contiguous traces that have END_ENS set to NLASTpz, or else
+the trace executive will stop the ﬂow with an error.
+You may be surprised to learn that when a ﬂow is initially
+executed, nothing exists in the trace header. All trace header
+entries are created one-at-a-time during initialization phase by
+calls to the routine HDR_ADD (hdrAdd in C) or
+HDR_STD_ADD (hdrAddStd in C). This is done primarily by
+the input tool, which has special responsibility for creating all
+of the header entries that existed when a dataset was written out
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Trace Headers183
+
+Developer’s Programming Guide
+
+in a prior ﬂow. But any tool can create new trace header entries.
+The decision to create a new header entry is left entirely in the
+hands of the applications programmers whenever some piece of
+information should be passed downstream in the processing
+ﬂow to other tools.
+Trace headers are passed from tool to tool in an array, but the
+format of the individual entries can vary. Currently supported
+formats are integer, real, double precision real (seldom used),
+logical (seldom used), and character (stuffed into integers).
+Each header entry can actually be an array of values, although
+the length must be a whole number of words. Complicated
+entities such as C structures can also be included in the trace
+headers.
+For convenience, the trace header is presented in the calling
+arguments of the execution routine of every tool in both integer
+AND real format to avoid the need for juggling the formats of
+common trace header entries (the integer and real array are
+equivalent within the toolcall routine and therefore occupy the
+same memory).
+Any tool may access the trace header entries that were added by
+tools that occur earlier in the ﬂow, but ﬁrst the tool must know
+where to ﬁnd the entries and what their lengths and formats are.
+This information is provided by the routine HDR_NAMINFO
+(or hdrInfo in C), which returns the description, length, format,
+and index of a trace header entry that was speciﬁed by name.
+The routine HDR_INDINFO (or hdrIndexInfo in C) returns the
+name, description, length, and format of a trace header entry
+that was speciﬁed by index.
+For programmers to communicate via trace headers, there must
+be some agreement on what the names and deﬁnitions of
+headers are. A standard list can be found in the ﬁle
+$PROMAX_PORT_MISC/header.list. It is important to note
+that this is not the list of headers that WILL exist during any
+given ﬂow, it is just a list of what certain headers will look like
+if they DO exist. It is also important to remind yourself that the
+order of the headers may be different between any two ﬂows
+and has nothing to do with the order that they appear in
+header.list. The strict deﬁnition and use of all of the standard
+header entries is presented in at the end of this chapter.
+There is a subset of the standard trace header entries known as
+the guaranteed headers that are always guaranteed to exist in a
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Trace Headers184
+
+Developer’s Programming Guide
+
+ﬂow (although their positions may vary). The names,
+descriptions, and initial values of these headers are as follows:
+Guaranteed Headers
+Name
+
+Description
+
+Initial Values
+
+SEQNO
+
+Sequence number in ensemble.
+
+(variable)
+
+END_ENS
+
+End-of-ensemble ﬂag.
+
+(variable)
+
+EOJ
+
+End-of-job ﬂag.
+
+(variable)
+
+TRACENO
+
+Trace number in seismic line.
+
+(INULLpz)
+
+TRC_TYPE
+
+Trace type (data, aux, etc.).
+
+(ILIVEpz)
+
+TLIVE_S
+
+Start time of live samples.
+
+(0.0)
+
+TFULL_S
+
+Start time of full samples.
+
+(0.0)
+
+TFULL_E
+
+End time of full samples.
+
+(end of trace)
+
+TLIVE_E
+
+End time of live samples.
+
+(end of trace)
+
+LEN_SURG
+
+Length of surgical mute taper.
+
+(0.0)
+
+TOT_STAT
+
+Total static for this trace.
+
+(0.0)
+
+NA_STAT
+
+Portion of static not applied.
+
+(0.0)
+
+AMP_NORM
+
+Amplitude normalization factor.
+
+(1.0)
+
+TR_FOLD
+
+Current trace fold.
+
+(1.0)
+
+SKEWSTAT
+
+Multiplex skew static correction.
+
+(0.0)
+
+LINE_NO
+
+Line number (hashed line name)*.
+
+(hashed line name)
+
+LSEG_END
+
+Line segment end*.
+
+(NLASTpz)
+
+LSEG_SEQ
+
+Line segment sequence number*.
+
+(1)
+
+The initial values are the values to which the headers are
+initialized before some tool in the ﬂow changes them. The
+initial values for other (non-guaranteed) header entries must be
+explicitly set in the execution phase by the tool that created
+them. If the tool does not supply values, the Executive will
+insert system-wide null values (INULLpz or RNULLpz in
+FORTRAN and INULL and RNULL in C). This does not
+necessarily indicate that a bug is present. For example, if new
+header entries are created in one side of a branched ﬂow, the
+header entries will be deﬁned in the other side of the ﬂow, but
+their values will be null.
+In most cases, tools call HDR_NAMINFO (hdrIndex in C)
+simply to ﬁnd out where a standard header entry can be found
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Trace Headers185
+
+Developer’s Programming Guide
+
+during the current ﬂow. Since this use is widespread, the indices
+of the standard headers is placed in a C structure or FORTRAN
+COMMON block for easy access. Use of any of these function
+requires inclusion of header.inc or cglobal.h. C programmers
+should note that the array index values provided for the standard
+headers in cglobal.h point to the same place in memory as the
+FORTRAN common block and that the array index values are
+appropriate for FORTRAN. A value of 1 must therefore be
+subtracted from a standard header index value to be correctly
+used in a ProMAX module written in C. The following macro is
+deﬁned in cpromax.h to aid in making code clear when using
+standard headers in C:
+#define STDHDR(x) ( (stdHdr->x)-1)
+
+in which “x” is a member of the StdHdr structure deﬁned in
+cglobal.h, such as icdp.
+Headers can be deleted from the ﬂow via a two step process in
+the Executive. In the init phase, the header entry is removed
+using EX_HDR_DELETE, but no traces are processed until the
+exec phase. HDR_DELETE_UPDATE actually deletes the trace
+header in the exec routine.
+The use of the trace header routines is not restricted to tools that
+are linked into the exec. Stand-alone programs can use them in
+exactly the same way.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries186
+
+Developer’s Programming Guide
+
+Deﬁnition and Usage of Standard Header Entries
+Header entries adhere to the following general rules:
+•
+
+All standard header entries are one word in length.
+
+•
+
+Some header entries should not be modiﬁed by the user
+(except indirectly); they contain an asterisk in the
+description. Think of these as read-only.
+
+•
+
+All times are in milliseconds.
+
+•
+
+All elevations are relative to sea level and should be
+negative for headers such as the source elevation in marine
+shooting.
+
+•
+
+It is the convention within ProMAX that a negative static
+shifts data up (towards time 0.0), and a positive static shifts
+data down (away from time 0.0).
+
+•
+
+Other standard header entries may be added in future
+releases. For a more complete list of header values used by
+ProMAX see the ﬁle
+$PROMAX_HOME/port/misc/header.list.
+
+•
+
+For a list of valid variable names that can be used within
+functions like STDHDR(x), see
+$PROMAX_HOME/port/include/(cglobal.h and
+header.inc)
+
+Alphabetical Reference of Trace Header Entries
+The following table lists all currently deﬁned standard trace
+header entries. Each entry is followed by its sequential number
+as listed in the Sequential Reference.
+Standard Trace Header Entries
+AMP_NORM (12)
+
+FB_PICK (71)
+
+OFFSET (45)
+
+SOU_H2OD (41)
+
+AOFFSET (46)
+
+FFID (18)
+
+PR_STAT (68)
+
+SOU_SLOC (28)
+
+AVO_ATTR (79)
+
+FK_WAVEL (81)
+
+PS_STAT (69)
+
+SOU_STAT (65)
+
+RCDP (22)
+
+FK_WAVEN (80)
+
+REC_DEP (52)
+
+SOU_X (35)
+
+CDP( 21)
+
+FNL_STAT (62)
+
+REC_ELEV (34)
+
+SOU_Y (36)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries187
+
+Developer’s Programming Guide
+
+Standard Trace Header Entries (Continued)
+CDP_ELEV (44)
+
+FRN_TRNO (7)
+
+REC_H2OD (40)
+
+SG_CDP (23)
+
+CDP_NFLD (24)
+
+FT_FREQ (82)
+
+REC_NFLD (30)
+
+SR_AZIM (53)
+
+CDP_SLOC (31)
+
+GEO_COMP (49)
+
+REC_SLOC (25)
+
+TFULL_E (75)
+
+CDP_X (42)
+
+ILINE_NO (54)
+
+REC_STAT (64)
+
+TFULL_S (74)
+
+CDP_Y (43)
+
+PAD_TRC (78)
+
+REC_X (32)
+
+TLIVE_E (76)
+
+CHAN (19)
+
+LEN_SURG (77)
+
+REC_Y (33)
+
+TLIVE_S (73)
+
+CR_STAT (67)
+
+LINE_NO (6)
+
+REPEAT (5)
+
+TOT_STAT (60)
+
+CS_STAT (66)
+
+LSEG_END (8)
+
+SEQNO (2)
+
+TRACENO (4)
+
+DEPTH (38)
+
+LSEG_SEQ (9)
+
+SEQ_DISK (16)
+
+TRC_TYPE (11)
+
+DISKITER (14)
+
+NA_STAT (58)
+
+SIN (10)
+
+TRIMSTAT (70)
+
+DMOOFF (83)
+
+NCHANS (20)
+
+SKEWSTAT (63)
+
+TR_FOLD (13)
+
+DS_SEQNO (15)
+
+NMO_STAT (61)
+
+SOURCE (17)
+
+UPHOLE (39)
+
+END_ENS (1)
+
+OFB_CNTR (48)
+
+SOU_COMP (50)
+
+XLINE_NO (56)
+
+EOJ (3)
+
+OFB_NO (47)
+
+SOU_ELEV (37)
+
+SLC_TIME (84)
+
+S_LINE (27)
+
+RILINE_N (55)
+
+RXLINE_N (57)
+
+R_LINE (26)
+
+N_DATUM (59)
+
+FRN_TRNO (7)
+
+SRF_SLOC (29)
+
+WB_TIME (72)
+
+ANG_VALU (88)
+
+CDP_XD (89)
+
+CDP_YD (90)
+
+REC_XD (91)
+
+REC_YD (92)
+
+SOU_XD (93)
+
+SOU_YD (94)
+
+TZERO (87)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries188
+
+Developer’s Programming Guide
+
+Sequential Reference of Trace Header Entries
+The tables on the following pages provide detailed descriptions
+of the trace header entries in sequential order. The ﬁrst table
+describes system-related headers.
+System-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+1
+
+END_ENS
+
+End-of-ensemble
+ﬂag*
+
+integer
+
+An ensemble is deﬁned within the exec as
+any collection of traces which (normally)
+share the same primary sort key. Typical
+examples are shot records, CDP gathers,
+and common-receiver gathers. All of the
+traces within an ensemble have ENS_ENS
+set to false (NLASTpz), except the last
+trace, where it is set to true (LASTTRpz).
+The global variable MAXDTRz is the
+maximum number of traces per ensemble
+which must concur with the number of
+contiguous traces that have ENS_ENS set to
+NLASTpz.
+
+2
+
+SEQNO
+
+Sequence number in
+ensemble
+
+integer
+
+The sequence number of an individual trace
+within the current ensemble.
+
+3
+
+EOJ
+
+End of job ﬂag*
+
+integer
+
+The header entry EOJ is set to false
+(NLASTpx) for every trace in a ﬂow, except
+under certain circumstances when complex
+tools will receive a dummy trace (and trace
+header) with EOJ set to true (LASTTRpz).
+The dummy trace (and trace header) should
+not be returned by the complex tool.
+
+4
+
+TRACENO
+
+Trace number in
+seismic line*
+
+integer
+
+An internal reference number that is
+assigned by the system when the database is
+initialized. It represents the unique
+sequential trace number within the dataset
+that is used to initialize the database.
+TRACENO is undeﬁned (and set to
+INULLpz) after stack. The value of
+TRACENO in the headers can be used to
+reference the TRC ordered parameter ﬁle in
+the parameter database if the global variable
+ITRNO_VALIDz is true (=1).
+
+Search Page
+
+Known Problems
+
+Other Docs
+
+Definition and Usage of Standard Header Entries189
+
+Developer’s Programming Guide
+
+System-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+5
+
+REPEAT
+
+REPEATED data
+copy number
+
+integer
+
+Set by the Reproduce Traces processing
+directive to reﬂect the copy number when
+ensembles or all data is repeated.
+(Subsequent processing frequently keys on
+the REPEAT copy number for purposes of
+comparison.) The Reproduce Traces
+directive creates and sets the header
+REPEAT_T when traces are repeated on an
+individual basis.
+
+6
+
+LINE_NO
+
+Line number (hashed
+line name)*
+
+integer
+
+Represents the hashed line (or survey) name
+to uniquely identify lines. (Individual
+inlines and crosslines of a 3D survey are
+part of the same survey and would have the
+same LINE_NO.) LINE_NO is used in
+operations that involve processing or
+storage of data from multiple lines.
+LINE_NO is over-ridden by the GeoQuest
+IES Input tool to reﬂect the hashed line
+name of the IES line. In that case, each
+version number of each inline or crossline
+receives a different LINE_NO.
+
+7
+
+FRN_TRNO
+
+Foreign tracenumber-within line
+
+integer
+
+Used to store trace numbers from nonProMAX sources (such as the GeoQuest
+IES System or SeisWorks) to distinguish
+between traces with a common LINE_NO.
+
+8
+
+LSEG_END
+
+Line segment end*
+
+integer
+
+A line segment is deﬁned as a portion of the
+data in a ﬂow (including all of the data) that
+should be processed as a continuous piece.
+For example, if two different lines were read
+into the same ﬂow and a runmix were
+applied, LSEG_END would be used to
+ensure that data was not smeared from one
+line into the next. LSEG_END is set to false
+(NLASTpz) for all traces except the last
+trace in a segment, where it is set to true
+(LASTTRpz). When multiple lines are
+imported via the GeoQuest IES Input tool,
+the LSEG_END entry is set to true for the
+last trace of each inline, crossline, time
+slice, reconstruction cut, or 2D line.
+
+9
+
+LSEG_SEQ
+
+Line segment
+sequence number*
+
+integer
+
+The sequence number of the current line
+segment in a processing ﬂow. See
+discussion of LSEG_END.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries190
+
+Developer’s Programming Guide
+
+System-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+10
+
+SIN
+
+Source index number
+(internal)*
+
+integer
+
+An internal reference number that is
+assigned by the system when the database is
+initialized. It represents the unique
+sequential source number (including test
+records, bad shots, etc.) within the dataset
+that is used to initialize the database. The
+value of SIN in the headers can be used to
+reference the SIN ordered parameter ﬁle in
+the parameter database if the global variable
+IGEOM_MATCHz is true (=1).
+
+11
+
+TRC_TYPE
+
+Trace type (data, aux,
+etc.)
+
+integer
+
+Used most commonly to distinguish
+between live traces, dead traces, and aux
+traces. Other valid trace types include
+dummy, time break, uphole, sweep, timing,
+water break, and unknown (other).
+
+12
+
+AMP_NORM
+
+Amplitude
+normalization factor
+
+real
+
+Deﬁned as the average amplitude
+normalization that has been applied to a
+trace. For example, if a time-variant gain
+increased the amplitude of each sample of a
+trace by an average factor of 2.0, then it
+should also multiply the value of
+AMP_NORM by 2.0.
+
+13
+
+TR_FOLD
+
+Actual trace fold
+
+real
+
+The number of traces that were summed to
+form the current trace. TR_FOLD should
+reﬂect the actual number of traces that were
+summed, even if the theoretical fold is
+different (in a process such as a weighted
+stack). Note that TR_FOLD is NOT an
+integer.
+
+The following table describes input-related headers.
+Input-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+14
+
+DISKITER
+
+Disk Data Input
+iteration*
+
+integer
+
+If Disk Data Input (or Tape Data Input)
+reads through the data multiple times (for
+the beneﬁt of tools such as autostatics),
+DISKITER will reﬂect the current iteration
+number.
+
+Search Page
+
+Known Problems
+
+Other Docs
+
+Definition and Usage of Standard Header Entries191
+
+Developer’s Programming Guide
+
+Input-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+15
+
+DS_SEQNO
+
+Input dataset
+sequence number*
+
+integer
+
+If Disk Data Input or Tape Data Input are
+reading multiple datasets, DS_SEQNO
+reﬂects from which dataset a trace was
+originally read.
+
+16
+
+SEQ_DISK
+
+Trace sequence
+number from disk
+
+integer
+
+Reﬂects the actual sequence number that a
+trace was read from tape or disk, if the input
+tool was Disk Data Input or Tape Data
+Input. SEQ_DISK is unique for every input
+trace, even in the case of multiple iterations
+or multiple datasets. For example, if a
+dataset containing 10 traces was read twice,
+on the second iteration the ﬁrst trace would
+have SEQ_DISK equal to 11.
+
+The following table describes geometry-related headers.
+Geometry-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+17
+
+SOURCE
+
+Live source number
+(usr-deﬁned)
+
+integer
+
+Assigned by the user when the geometry is
+written and installed, and represents a
+number that the user wishes to use to refer
+to a given record. SINs that are not assigned
+a SOURCE number are not part of the live
+data and have SOURCE set equal to
+INULLpz.
+
+18
+
+FFID
+
+Field ﬁle ID number
+
+integer
+
+The FFID of each SIN is extracted from the
+headers of the ﬁeld data and stored in the
+parameter database for user reference. It is
+largely unused because it (unfortunately)
+cannot be assumed to be unique.
+
+19
+
+CHAN
+
+Recording channel
+number
+
+integer
+
+The CHAN of each trace is extracted from
+the headers of the ﬁeld data. CHAN is one
+of the few headers for which the values from
+the ﬁeld data are trusted (although they can
+be corrected if in error). CHAN numbers
+can be used to reference the CHN ordered
+parameter ﬁle in the parameter database if
+the global parameter IGEOM_MATCHz is
+true (=1).
+
+20
+
+NCHANS
+
+Number of channels
+of source
+
+integer
+
+The number of channels found within the
+SIN to which the current trace belongs. This
+is a seldom-used header entry.
+
+Search Page
+
+Known Problems
+
+Other Docs
+
+Definition and Usage of Standard Header Entries192
+
+Developer’s Programming Guide
+
+Geometry-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+21
+
+CDP
+
+CDP bin number
+
+integer
+
+Also known as the CMP, this is assigned by
+whatever method the user chooses to do
+binning. Note that the increment between
+CDP numbers is allowed to be greater than
+one. CDP numbers can be used to reference
+the CDP ordered parameter ﬁle in the
+parameter database if the global variable
+IGEOM_MATCHz is true (=1).
+
+22
+
+RCDP
+
+Real/alias CDP bin
+number
+
+real
+
+This is a ﬂoating point version of CDP for
+use with the TBL2 table routines.
+
+23
+
+SG_CDP
+
+Supergather Bin
+Number
+
+integer
+
+The center CDP location of this supergather,
+typically used with various velocity analysis
+programs.
+
+24
+
+CDP_NFLD
+
+Number of traces in
+CDP bin
+
+integer
+
+The fold of the CDP to which the trace
+belongs (as deﬁned by the global geometry
+for the line). This is a seldom-used header
+entry.
+
+25
+
+REC_SLOC
+
+Receiver index
+number (internal)*
+
+integer
+
+An internal reference number that is
+assigned when the database is initialized. It
+represents the unique sequential receiver
+number within the dataset that is used to
+initialize the database. The value of
+REC_SLOC in the headers can be used to
+reference the SRF ordered parameter ﬁle in
+the parameter database if the global variable
+IGEOM_MATCHz is true (=1).
+
+26
+
+R_LINE
+
+Receiver line number
+
+integer
+
+The receiver line this trace was recorded on.
+
+27
+
+S_LINE
+
+Swath or sail line
+number
+
+integer
+
+The sail line this trace was recorded on.
+
+28
+
+SOU_SLOC
+
+External source
+location number
+
+integer
+
+Typically the ﬁeld station number assigned
+to sources. It may or may not be on a similar
+station grid as the receivers.
+
+29
+
+SRF_SLOC
+
+External receiver
+location number
+
+integer
+
+Typically the ﬁeld station number assigned
+to receiver positions. It may or may not be
+on a similar station grid as the sources.
+
+30
+
+REC_NFLD
+
+Receiver fold
+
+integer
+
+The fold of the receiver gather at which the
+current trace was recorded. This is a
+seldom-used header entry.
+
+31
+
+CDP_SLOC
+
+External CDP
+location number
+
+integer
+
+Typically the ﬁeld station number assigned
+to CDP locations. It may or may not be on a
+similar station grid as the sources and
+receivers.
+
+Search Page
+
+Known Problems
+
+Other Docs
+
+Definition and Usage of Standard Header Entries193
+
+Developer’s Programming Guide
+
+Geometry-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+32
+
+REC_X
+
+Receiver X
+coordinate
+
+real
+
+Always the actual coordinates, not the
+receiver surﬂoc coordinates (if they are not
+coincident, as in the case of marine 3D). All
+coordinates are relative to reference
+coordinates in the parameter database
+(XREFz and YREFz).
+
+33
+
+REC_Y
+
+Receiver Y
+coordinate
+
+real
+
+See discussion of coordinates under
+REC_X.
+
+34
+
+REC_ELEV
+
+Receiver elevation
+
+real
+
+Should reﬂect the actual receiver elevation
+and NOT the elevation of the surface at the
+receiver X,Y (if the receiver is in a
+borehole). For marine shooting, the
+REC_ELEV should reﬂect the water depth
+of the cable (and should be a negative
+number). See further discussion of
+coordinates under REC_X.
+
+35
+
+SOU_X
+
+Source X coordinate
+
+real
+
+Always the actual coordinates, not the
+coordinates of the nearest surﬂoc. All
+coordinates are relative to reference
+coordinates in the parameter database
+(XREFz and YREFz).
+
+36
+
+SOU_Y
+
+Source Y coordinate
+
+real
+
+See discussion of coordinates under
+SOU_X.
+
+37
+
+SOU_ELEV
+
+Source elevation
+
+real
+
+The elevation of the SURFACE at the X,Y
+of the source (and does NOT reﬂect a hole
+depth; see DEPTH), except that for marine
+shooting SOU_ELEV should reﬂect the
+water depth of the source (and should be a
+negative number). See further discussion of
+coordinates under SOU_X.
+
+38
+
+DEPTH
+
+Source depth
+
+real
+
+The HOLE depth of the source. It should be
+deﬁned as 0.0 if no hole exists. DEPTH
+should be 0.0 for marine shooting,
+regardless of the water depth of the source.
+
+39
+
+UPHOLE
+
+Source uphole time
+
+real
+
+The uphole time observed for a buried
+source.
+
+40
+
+REC_H2OD
+
+Water depth at
+receiver
+
+real
+
+In marine shooting, the water depth at the
+X,Y of the receiver (not routinely assigned).
+
+41
+
+SOU_H2OD
+
+Water depth at source
+
+real
+
+In marine shooting, the water depth at the
+X,Y of the source (not routinely assigned).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries194
+
+Developer’s Programming Guide
+
+Geometry-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+42
+
+CDP_X
+
+X coordinate of CDP
+
+real
+
+The bin center (not the center of mass of the
+contributing traces). All coordinates are
+relative to reference coordinates in the
+parameter database (XREFz and YREFz).
+
+43
+
+CDP_Y
+
+Y coordinate of CDP
+
+real
+
+See discussion of CDP_X.
+
+44
+
+CDP_ELEV
+
+Elevation of CDP
+
+real
+
+Elevations of CDPs are problematic because
+they are not speciﬁed and may be difﬁcult to
+interpolate. Historically, the elevation of
+each CDP was taken as the elevation of the
+nearest surﬂoc. The elevations of CDPs are
+interpolated from the elevations of surﬂocs.
+
+45
+
+OFFSET
+
+Signed sourcereceiver offset
+
+real
+
+The separation between source and receiver
+for a given trace. If the source is at a lower
+surﬂoc than the receiver then the offset is
+positive, otherwise the offset is negative (the
+convention is the same for 3D, although the
+sign of OFFSET has little meaning).
+
+46
+
+AOFFSET
+
+Absolute value of
+offset
+
+real
+
+Literally abs(OFFSET). AOFFSET is a
+convenience for users for specifying
+parameters in some situations.
+
+47
+
+OFB_NO
+
+Offset bin number
+
+integer
+
+The sequential bin number of offset bins
+that are created during geometry
+installation. OFB_NO can be used to
+reference the OFB ordered parameter ﬁle in
+the parameter database if the global variable
+IGEOM_MATCHz is true (=1).
+
+48
+
+OFB_CNTR
+
+Offset bin center
+
+real
+
+The offset of the center of an offset bin. See
+discussion of OFB_NO.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries195
+
+Developer’s Programming Guide
+
+The following table describes special geometry-related headers
+for VSP/Crosshole, 3D, and multi-component recording.
+Special Geometry-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+49
+
+GEO_COMP
+
+Geophone
+component (x,y,z)
+
+integer
+
+For multi-component recording,
+GEO_COMP is set to 1 for the vertical
+component of motion, 2 for the east-west
+(or inline for 3D) component of motion, and
+3 for the north-south (or crossline for 3D)
+component of motion.
+
+50
+
+SOU_COMP
+
+Source component
+(x,y,z)
+
+integer
+
+For multi-component shooting,
+SOU_COMP is set to 1 for the vertical
+component of motion, 2 for the east-west
+(or inline for 3D) component of motion, and
+3 for the north-south (or crossline for 3D)
+component of motion.
+
+51
+
+SRC_DEP
+
+Source depth below
+surface
+
+real
+
+For borehole sources, SRC_DEP is the
+depth of the source below the surface.
+
+52
+
+REC_DEP
+
+Receiver depth below
+surface
+
+real
+
+For borehole receivers, REC_DEP is the
+depth of the receiver below the surface.
+
+53
+
+SR_AZIM
+
+Source to receiver
+azimuth
+
+real
+
+In 3D surveys, SR_AZIM is deﬁned as the
+azimuth FROM the source to the receiver,
+clockwise, where 0.0 is north (or the Y axis
+of the survey coordinate system). The units
+are radians.
+
+54
+
+ILINE_NO
+
+3D inline number
+
+integer
+
+In 3D surveys, ILINE_NO is deﬁned as the
+number of the common inline to which a
+trace belongs, where inlines and crosslines
+are deﬁned by the CDP binning, but the
+inline direction is the direction of source
+motion (if applicable). For example, in a
+marine 3D survey, a single sail line with a
+single streamer would tend to produce a set
+of traces with a common INLINE_NO but
+varying XLINE_NO.
+
+55
+
+RILINE_N
+
+Real/alias 3D inline
+number
+
+real
+
+The ﬂoating point version of ILINE_NO for
+use typically with parameter table routines.
+
+56
+
+XLINE_NO
+
+3D crossline number
+
+integer
+
+In 3D surveys, XLINE_NO is deﬁned as the
+number of the common crossline to which a
+trace belongs. See the discussion of
+ILINE_NO.
+
+57
+
+RXLINE_N
+
+Real/alias 3D
+crossline number
+
+real
+
+The ﬂoating point version of XLINE_NO
+for use typically with parameter table
+routines.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries196
+
+Developer’s Programming Guide
+
+The following table describes statics-related headers.
+Statics-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+58
+
+NA_STAT
+
+Portion of static not
+applied*
+
+real
+
+Statics are normally not fully applied
+within ProMAX, except to the nearest
+whole sample interval (for efﬁciency, and
+to avoid the effects of multiple
+interpolations). NA_STAT represents the
+fractional sample portion of the static that
+is not applied. NA_STAT is applied
+during NMO in normal processing, but
+must also be applied by any application
+that is sensitive to small static shifts (such
+as velocity analysis). The Apply Fraction
+Statics tool can also be used for this
+purpose, either by users or in a menu
+macro process.
+
+59
+
+N_DATUM
+
+Elevation of ﬂoating
+datum
+
+real
+
+The elevation of the ﬂoating datum at this
+CDP. Typically added by the module
+Datum Statics Apply. This trace is
+datumed at this elevation.
+
+60
+
+TOT_STAT
+
+Total static for this
+trace*
+
+real
+
+Represents the total static that SHOULD
+be applied to the trace (minus NA_STAT).
+TOT_STAT can be used to remove
+previously applied statics.
+
+61
+
+NMO_STAT
+
+NMO datum static
+(do not apply)
+
+real
+
+The static that WAS applied to move from
+NO datum (the original data) to the NMO
+datum.
+
+62
+
+FNL_STAT
+
+Static to move to
+ﬁnal datum
+
+real
+
+The static that will be (or was) applied to
+move from the NMO datum to the ﬁnal
+datum. This is typically applied after CDP
+stack by the stacking tool.
+
+63
+
+SKEWSTAT
+
+Multiplex skew static
+
+real
+
+The multiplex skew static (channel static
+due to differential delays in older
+recording systems) that is assigned during
+input of the ﬁeld data.
+
+64
+
+REC_STAT
+
+Total static for
+receiver
+
+real
+
+The portion of TOT_STAT that is
+attributed to the receiver (from elevation
+statics).
+
+65
+
+SOU_STAT
+
+Total static for source
+
+real
+
+The total portion of TOT_STAT that is
+attributed to the source (from elevation
+statics).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries197
+
+Developer’s Programming Guide
+
+Statics-Related Headers (Continued)
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+66
+
+CS_STAT
+
+Corr. autostatics
+source static
+
+real
+
+The source static that was computed by a
+correlation autostatics program. It exists
+for convenience during parameterization
+of the process that applies autostatics
+solutions to the data. CS_STAT was
+dropped for Releases 5.0+ (see
+AS_STAT).
+
+67
+
+CR_STAT
+
+Corr. autostatics
+recvr static
+
+real
+
+The receiver static that was computed by
+a correlation autostatics program. See
+also CS_STAT. CR_STAT was dropped
+for Releases 5.0+ (see AR_STAT).
+
+68
+
+PS_STAT
+
+Power autostatics
+source static
+
+real
+
+The source static that was computed by a
+power autostatics program. It exists for
+convenience during parameterization of
+the process that applies autostatics
+solutions to the data. PS_STAT was
+dropped for releases 5.0+ (see
+AS_STAT).
+
+69
+
+PR_STAT
+
+Power autostatics
+recvr static
+
+real
+
+The receiver static that was computed by
+a power autostatics program. See also
+PS_STAT. PR_STAT was dropped for
+releases 5.0+ (see AR_STAT).
+
+70
+
+TRIMSTAT
+
+Trim static
+
+real
+
+The static that was computed by a trim
+statics (non-surface consistent) program.
+
+71
+
+FB_PICK
+
+First break pick time
+
+real
+
+The ﬁrst break pick time of the trace.
+
+72
+
+WB_TIME
+
+Water bottom time at
+mid-point
+
+real
+
+The time of the water bottom at this CDP.
+There are several programs which use this
+for things such as adjusting time window
+start and end times.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries198
+
+Developer’s Programming Guide
+
+The following table describes mute-related headers.
+Mute-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+73
+
+TLIVE_S
+
+Start time of live
+samples
+
+real
+
+The time of the ﬁrst live (non-zero)
+sample, if a top mute was applied. The
+difference between TFULL_S and
+TLIVE_S indicates the taper length of a
+top mute, if one was applied. The value of
+TLIVE_S does NOT enter the equation
+for conversion from sample number to
+time, or vice versa (it is NOT a recording
+delay time).
+
+74
+
+TFULL_S
+
+Start time of full
+samples
+
+real
+
+The time of the ﬁrst full untapered
+sample, whose amplitude is totally
+unaffected by a top mute if one was
+applied. The difference between
+TFULL_S and TLIVE_S indicates the
+taper length of a top mute, if one was
+applied.
+
+75
+
+TFULL_E
+
+End time of full
+samples
+
+real
+
+The time of the last full untapered sample,
+whose amplitude is totally unaffected by a
+bottom mute if one was applied. The
+difference between TLIVE_E and
+TFULL_E indicates the taper length of a
+bottom mute, if one was applied.
+
+76
+
+TLIVE_E
+
+End time of live
+samples
+
+real
+
+The time of the last live (non-zero)
+sample, if a bottom mute was applied.
+The difference between TLIVE_E and
+TFULL_E indicates the taper length of a
+bottom mute, if one was applied.
+
+77
+
+LEN_SURG
+
+Length of surgical
+mute taper
+
+real
+
+The length of the taper of a surgical mute
+if one was applied. If multiple surgical
+mutes were applied with different taper
+lengths (which is discouraged),
+LEN_SURG will represent the last
+applied.
+
+78
+
+PAD_TRC
+
+Artiﬁcially padded
+trace
+
+integrer
+
+The value of this header word is 1 if this
+trace was padded, otherwise the value is
+0.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries199
+
+Developer’s Programming Guide
+
+The following table describes special applications-related
+headers.
+Special Applications-Related Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+79
+
+AVO_ATTR
+
+AVO Attribute
+number
+
+integer
+
+The value of this number indicates the
+particular computes AVO attribute, like
+slope or gradient.
+
+80
+
+FK_WAVEN
+
+Wavenumber of F-K
+domain trace
+
+real
+
+The common wavenumber of a series of
+amplitudes (a trace) after transformation to
+the F-K domain.
+
+81
+
+FK_WAVEL
+
+Wavelength of F-K
+domain trace
+
+real
+
+The common wavelength of a series of
+amplitudes (a trace) after transformation to
+the F-K domain.
+
+82
+
+FT_FREQ
+
+Frequency of F-T
+domain trace
+
+real
+
+The common frequency of a series of
+amplitudes (a trace) after conversion to the
+F-T domain.
+
+83
+
+DMOOFF
+
+Offset bin for DMO
+
+real
+
+The offset of a common offset bin that is
+created for purposes common offset DMO.
+
+84
+
+SLC_TIME
+
+Time of time slice
+
+real
+
+The time in milliseconds of this 3D time
+slice sample.
+
+The following table describes non-standard headers.
+Non-Standard Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+85
+
+AS_STAT
+
+Autostatics source
+static
+
+real
+
+The source static that was computed by an
+autostatics program. It exists for
+convenience during parameterization of the
+process that applies autostatics solutions to
+the data. AS_STAT replaces PS_STAT and
+CS_STAT.
+
+86
+
+AR_STAT
+
+Autostatics receiver
+static
+
+real
+
+The receiver static that was computed by an
+autostatics program. See also AS_STAT.
+NOTE: AS_STAT replaces PR_STAT and
+CR_STAT.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Definition and Usage of Standard Header Entries200
+
+Developer’s Programming Guide
+
+The following table describes newly added headers.
+Newly Added Headers
+#
+
+Header
+
+Name
+
+Type
+
+Description
+
+87
+
+TZERO
+
+Time of zero of time
+series
+
+real
+
+Given a time series samples an a constant
+interval, this is time values within that series
+which represents time zero, say for an
+autocorrelation function.
+
+88
+
+ANG_VALU
+
+AVO Angle of
+incidence
+
+real
+
+When generating AVO angle gathers or
+stacks, the value of this trace header
+represents a particular AVO angle.
+
+89
+
+CDP_XD
+
+X coordinate of CDP
+(double)
+
+real*8
+
+The bin center (not the center of mass of the
+contributing traces). All coordinates are
+relative to reference coordinates in the
+parameter database (XREFz and YREFz).
+
+90
+
+CDP_YD
+
+Y coordinate of CDP
+(double)
+
+real*8
+
+See discussion of CDP_XD.
+
+91
+
+REC_XD
+
+X coordinate of
+receiver (double)
+
+real*8
+
+Always the actual coordinates, not the
+receiver surﬂoc coordinates (if they are not
+coincident, as in the case of marine 3D). All
+coordinates are relative to reference
+coordinates in the parameter database
+(XREFz and YREFz).
+
+92
+
+REC_YD
+
+Y coordinate of
+receiver (double)
+
+real*8
+
+See discussion of coordinates under
+REC_XD.
+
+93
+
+SOU_XD
+
+X coordinate of
+source (double)
+
+real*8
+
+Always the actual coordinates, not the
+coordinates of the nearest surﬂoc. All
+coordinates are relative to reference
+coordinates in the parameter database
+(XREFz and YREFz).
+
+94
+
+SOU_YD
+
+Y coordinate of
+receiver (double)
+
+real*8
+
+See discussion of coordinates under
+SOU_XD.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

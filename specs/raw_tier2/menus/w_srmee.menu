@@ -1,0 +1,50 @@
+;; 1 IIID IVD DEV DEPTHC
+'(
+name: W_SRMEE
+label: "SRME F-X to T-X"
+value_tab: 50
+
+parameter: MAXFREQ
+text: "Maximum Frequency to process"
+type: typein:
+type_desc: ( real: 9 nil nil )
+value: 0.0
+mouse_text: "Maximum frequency to process (hz).  0.0 implies Nyquist."
+plot_label: t
+
+parameter: PFREQT
+text: "Frequency taper"
+type: typein:
+type_desc: ( real: 9 0.0 100.0 )
+value: 5.0
+mouse_text: "Frequency taper (% of maximum frequency)."
+plot_label: t
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', you must execute this program yourself using a debugger."
+
+exec_data:
+	("ST_W_SRMEE"
+		("GENERAL"
+			("program"   implicit: "w_srmee.exe" )
+			("DEBUG"     implicit: (if (value 'DEBUG) 2 0 ) )
+			("version"   implicit: "ProMAX $Id: w_srmee.menu 43993 2009-02-26 17:51:37Z David Johnston $ $Revision: 43993 $ $Date: 2009-02-26 10:51:37 -0700 (Thu, 26 Feb 2009) $")
+;  variables after here are user parameters
+			("MAXFREQ"   implicit: (value 'MAXFREQ))
+			("PFREQT"    implicit: (value 'PFREQT))
+		)
+	)
+
+rules: 	(
+
+(socket_debug_rule t
+		(if (= (printenv 'SOCKET_DEBUG) "t")
+			(do_show 'DEBUG)
+			(do_not_show 'DEBUG) )  )
+
+	)
+
+)

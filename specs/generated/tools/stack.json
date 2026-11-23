@@ -1,0 +1,64 @@
+{
+  "menu_id": "stack",
+  "tool_name": "STACK",
+  "label": "CDP/Ensemble Stack",
+  "parameter_count": 8,
+  "parameters": [
+    {
+      "name": "SRT_ORDR",
+      "prompt": "Sort order of input ensembles",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Use MB1 to pop up a menu of choices for the input traces' primary sort order (normally CDP)."
+    },
+    {
+      "name": "SUM_MODE",
+      "prompt": "METHOD for trace summing",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "This parameter specifies the method for estimating the output 'stack' trace."
+    },
+    {
+      "name": "SUM_ROOT",
+      "prompt": "Root power scalar for stack normalization",
+      "kind": "typein",
+      "default": "0.5",
+      "help": "This is the power exponent for contributing sample normalization (use 0.5 for square root scaling)."
+    },
+    {
+      "name": "DIVR_AGC",
+      "prompt": "Diversity scalar operator length",
+      "kind": "typein",
+      "default": "50.0",
+      "help": "This is the sliding gate operator length (similar to an AGC) used to compute the diversity scalars."
+    },
+    {
+      "name": "WGHT_HDR",
+      "prompt": "SELECT Header Word for Trace Weighting",
+      "kind": "function",
+      "default": "USR_WGHT",
+      "help": "Use MB1 to select a header word to multiply its value times the trc samples before summing. See Header Weighting."
+    },
+    {
+      "name": "PERCENT",
+      "prompt": "PERCENT of samples to exclude",
+      "kind": "typein",
+      "default": "25.0",
+      "help": "For Alpha-trimmed Mean stk, a 25% exclusion would reject the largest 12.5% and the smallest 12.5% of the samples."
+    },
+    {
+      "name": "DO_STAT",
+      "prompt": "Apply final datum statics after stack?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If 'Yes', the data will be shifted to the final datum after stacking, using header entry FNL_STAT."
+    },
+    {
+      "name": "NMO_APLD",
+      "prompt": "Has NMO been applied?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Normally, you will want to have applied NMO before stacking, but some exceptions may exist."
+    }
+  ]
+}

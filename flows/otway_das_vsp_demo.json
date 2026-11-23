@@ -1,0 +1,44 @@
+{
+  "name": "Otway_CO2CRC_DAS_VSP_Wavefield_Sep",
+  "description": "Real Otway CO2CRC borehole DAS SEG-Y field validation: Bandpass + Debias + VSP Geometry + F-K Upgoing/Downgoing Wavefield Separation + F-X Decon",
+  "steps": [
+    {
+      "tool": "segy_read",
+      "params": {
+        "path": "C:\\Kuliah\\Jurnal Pak Bagus\\Jurnal 1\\CCS-DAS\\data\\otway_zenodo_7574468\\RAW_seismograms\\event_10_3_strain_geom.sgy",
+        "max_traces": 950
+      }
+    },
+    {
+      "tool": "vsp_geom",
+      "params": { "start_depth_m": 0.0, "channel_spacing_m": 1.0, "source_offset_m": 50.0, "preserve_existing_depth": false }
+    },
+    { "tool": "flow_filter", "params": { "header": "REC_DEP", "min": 250.0, "max": 850.0 } },
+    { "tool": "trace_len", "params": { "length_ms": 2000.0 } },
+    { "tool": "debias", "params": {} },
+    {
+      "tool": "filter",
+      "params": { "spec_type": "Ormsby", "phase": "Zero", "freqs": [12.0, 20.0, 100.0, 140.0], "pad_pct": 25.0 }
+    },
+    { "tool": "agc", "params": { "operator_ms": 250.0, "basis": "Rms", "anchor": "Center" } },
+    {
+      "tool": "segy_write",
+      "params": {
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\otway_das_conditioned.sgy",
+        "comment": "Otway CO2CRC DAS Conditioned Borehole Gather"
+      }
+    },
+    {
+      "tool": "vsp_wavefield_sep",
+      "params": { "method": "FkDip", "output": "Upgoing", "fk_taper_frac": 0.05 }
+    },
+    { "tool": "fxdecon", "params": { "filter_len": 5, "horiz_window_traces": 32, "time_window_ms": 300.0 } },
+    {
+      "tool": "segy_write",
+      "params": {
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\otway_das_upgoing.sgy",
+        "comment": "Otway CO2CRC DAS Separated Upgoing + FX-Decon"
+      }
+    }
+  ]
+}

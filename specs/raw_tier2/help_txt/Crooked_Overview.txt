@@ -1,0 +1,195 @@
+Crooked Line Overview1562
+
+ProMAX® Reference
+
+Crooked Line Overview
+Crooked Line geometry assignment gives a truer picture of
+the subsurface than other geometry packages because it
+takes into account the angular relationships between the
+shots and their receivers.
+
+Tracks and Bins
+Landmark developed the Crooked Line suite of processes to
+provide a batch method for creating tracks and building bins
+for a crooked line geometry assignment. Thus, providing you
+with several options for creating tracks and building bins. We
+also provide tools in XYGraph, for interactively creating and
+viewing them.
+In addition, various analysis tools are available for spider
+plots or hodograms and the bins content and display of the
+geometric relationships between shots, midpoints, and
+receivers.
+The following sequence is a general overview of how the
+database is created using crooked line:
+• Midpoints representing the scatter of an attribute are
+assigned
+• Segments are tracked through the midpoints
+• Bins are hung along these segments
+• Bin and ﬁnalize the database
+Track and Bin Database
+In all the Crooked Line menus, the Track and Bin window
+contains the names of all tracks or bins in the database plus
+any additional names from TRK_NAME or BIN_NAME.
+TRK_NAME and BIN_NAME are shared by all the menus.
+Whenever you type in a new track or bin name, it is added to
+the database and appears in the list for all other menus. This
+is done so that you can enter a new name as output in one
+process, then select it from the list as input in the next, even
+though the track or bin has not yet been created and does
+not yet exist in the database. TRK_NAME and BIN_NAME
+remain in memory, even when you change ﬂows or even lines.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Overview1563
+
+ProMAX® Reference
+
+The only way to clear them completely is to exit the the
+ProMAX® user interface, then reenter.
+Tracks
+A track is nothing more than a segment of your seismic line.
+You choose one of several options for tracking a segment
+through the midpoints. The following is an example of a track
+using Track Resample:
+
+Track Average of a 4000 to 4100 Src-Rec Offset.
+Bins
+A bin is a window about a track or line segment. It is used for
+capturing midpoints about the segment for crooked line
+geometry. That is, a bin is one of a set of discrete areas into
+which a survey area is divided. Bins are built using one of
+several methods provided by Landmark. The following shows
+the bins about 2 track segments.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Overview1564
+
+ProMAX® Reference
+
+t
+
+Bin layout around two track segments
+
+Tracking
+The ﬁrst process in your workﬂow is always:
+Assign Midpoints reads a dataset deﬁned by an attribute
+
+We then provide the following options for building a track:
+XYGraph builds a track with interactive picks. It is also used to edit any
+track created or imported.
+Track Collect builds a track from a deﬁned attribute
+Track Model builds a track using a line or curve as a model
+Track Average builds a track by averaging attributes in a speciﬁed range
+Track Offset builds a track using a percentage or ﬁxed offset along the
+shot
+
+You can also read or write an existing track with:
+Track Import or Track Export
+
+Once you have created a track, you can resample and smooth
+it by using the following processes:
+Track Resample resamples to a regular increment
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Overview1565
+
+ProMAX® Reference
+
+Track Mix performs a running or simple average mix on the track
+coordinates
+Track Spline generates and smooths a bicubic spline to the coordinates
+
+To clean work ﬁles after creating your track, place the
+following process in your workﬂow:
+Track Utility lists and deletes speciﬁed ﬁles
+
+Binning
+Landmark provides the following options for building bins:
+Geometric Bin Layout builds bins using the track component points as
+bin centers
+Nearest Center Bin Layout builds bins based on a search for the
+midpoints nearest to the bin center
+Fill Range Bin Layout builds bins based upon a search for the midpoints
+nearest to the bin center and a range of attribute values
+LMS Cluster Bin Layout builds bins based upon a search for the least
+mean square distance in a cluster. Each cluster is seeded by the input
+track. The output bin coordinates are weighted to the cluster centers.
+
+To clean work ﬁles after creating your bins, place the
+following process in your workﬂow:
+Bin Utility lists and deletes speciﬁed ﬁles
+
+Once you have generated a binspace, you must run:
+Finalize Bins builds bins in the ProMAX® database from a binspace. It
+also generates all OPF and lookup entries.Many binspaces can exist
+concurrently but only one is loaded by the ﬁnalize bins step into the
+ProMAX® OPF database.
+
+XYGraph
+Crooked Line XYgraph displays tracks and bins for creating,
+editing, and quality control. This process also allows:
+• overplotting of a track
+• overplotting of a binspace
+Currently the bins in the binspace are displayed in outline.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Overview1566
+
+ProMAX® Reference
+
+Workﬂow
+Landmark suggests the following workﬂow as a good starting
+point for most crooked lines:
+For Building a Track
+Assign Midpoints
+Track Average (based on a select SRC-REC offset)
+Track Mix
+Track Resample
+Crooked Line XYgraph (use to QC the track built by the above processes)
+
+For Building a Bin
+Geometric Bin Layout
+Finalize Bins
+Crooked Line XYgraph (use to QC bin layout)
+
+For Deleting unnecessary track and bin ﬁles
+Track Utility
+Bin Utility
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Overview1567
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,385 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: ispecana
+label: "Interactive Spectral Analysis"
+value_tab: 55
+
+parameter: selection_method
+text: "Data selection method"
+type: pop_choose:
+type_desc: (
+ ("Simple"           1 "Accept traces directly for analysis.")
+ ("Single Subset"    2 "Interactively select a single subset for analysis.")
+ ("Multiple Subsets" 3 "Interactively select multiple subsets for analysis.") )
+mouse_text: "Choose a method to select the data to be analyzed."
+
+parameter: freeze
+text: "  Freeze the selected subset?"
+type: boolean:
+value: nil
+mouse_text: "Do you want analysis windows to freeze their selected subsets? (If no, analysis windows update for each new selection.)"
+
+parameter: pan_type
+text: "Display data by traces or ensembles?"
+type: choose:
+type_desc: (
+ ("Traces"       0 "Control data display by number of traces.")
+ ("Ensembles"    1 "Control data display by number of ensembles.") )
+mouse_text: "Choose whether to control the trace display by traces or ensembles."
+
+parameter: num_traces
+text: "  Number of traces per analysis location"
+type: typein:
+type_desc: ( int: 5 1 10000 )
+value: 100
+mouse_text: "Enter the number of traces to display for each analysis location."
+ 
+parameter: trace_pan_inc
+text: "  Number of traces between analysis locations"
+type: typein:
+type_desc: ( int: 4 0 9999 )
+value: 0
+mouse_text: "Enter the number of traces between successive analyses. For 0, number of traces per location is used."
+
+parameter: num_ensembles
+text: "  Number of ensembles per analysis location"
+type: typein:
+type_desc: (int: 4 1 1000)
+value: 1
+mouse_text: "Enter the number of ensembles to display for each analysis location."
+
+parameter: ens_pan_inc
+text: "  Number of ensembles between analysis locations"
+type: typein:
+type_desc: (int: 4 0 1000)
+value: 0
+mouse_text: "Enter the number of ensembles between successive analyses. For 0, number of ensembles per location is used."
+
+parameter: prim_key
+text: "Primary header for sorting and trace label"
+type: function:
+type_desc: (header_list headers)
+value: "SOURCE  "
+selected_item: "Live Source Number"
+mouse_text: "Select the primary header for the trace annotation. WARNING! The traces will be sorted by this header value for display."
+
+parameter: sec_key
+text: "Secondary header for sorting and trace label"
+type: function:
+type_desc: (header_list headers)
+value: "CHAN    "
+selected_item: "Recording channel number"
+mouse_text: "Select a header for the trace annotation. WARNING! The traces will be sorted by this header value for display."
+
+;;jrl  parameter: direction
+;;jrl  text: "DIRECTION of trace plotting"
+;;jrl  type: circular:
+;;jrl  type_desc: (
+;;jrl  	    ("Left to right" 1 "Display traces with low numbers on the LEFT-hand side of the screen.")
+;;jrl  	    ("Right to left" 0 "Display traces with low numbers on the RIGHT-hand side of the screen."))
+;;jrl  value: 1
+;;jrl  mouse_text: "Use MB1 to switch between choices for flipping the direction of the trace plot."
+
+parameter: show_ave_power
+text: "Display the average power spectrum?"
+type: boolean:
+value: t
+mouse_text: "Do you want to display the average power spectrum initially?"
+
+parameter: power_type
+text: "Type of scaling for power spectrum"
+type: pop_choose:
+value: 0
+type_desc: (
+ ("dB Power     "  0 "Display power in dB down from reference power. (for raw dB, set reference power to 1.0)")
+ ("Percent Power"  1 "Display power as percentage of the reference power.")
+ ("Raw Power    "  2 "Display raw power values.") )
+mouse_text: "Do you want to display the power spectrum in decibels or percentage of the reference power?"
+
+parameter: power_mapping
+text: "Type of mapping for power spectrum"
+type: pop_choose:
+value: 0
+type_desc: (
+ ("Linear     "  0 "Display frequency with Linear scale")
+ ("Logarithmic"  1 "Display frequency with Logarithmic scale") )
+mouse_text: "Do you want to display the frequency axis with linear or log scale?"
+
+
+parameter: ref_power
+text: "  Reference power"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: -1.0
+mouse_text: "Reference power. (For negative input, reference power is set to the maximum power.)"
+
+parameter: show_ave_phase
+text: "Display the average phase spectrum?"
+type: boolean:
+value: t
+mouse_text: "Do you want to display the average phase spectrum initially?"
+
+parameter: shift_option
+text: "Time, sample, linear or no phase shift?"
+type: pop_choose:
+type_desc: (
+ ("None "               0 "Phase spectrum time zero is first sample of the selected data.")
+ ("Linear Phase Shift"  1 "Apply linear phase shift of the specified slope.") 
+ ("Time Shift "         2 "Shift time zero by the specified time.")
+ ("Sample shift "       3 "Shift time zero the specified number of samples.") )
+mouse_text: "Select a linear phase shift, a time shift, or a sample shift to be applied to the phase spectrum."
+
+parameter: deg_per_hz
+text: "  Linear phase shift slope (degrees/Hz)"
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the slope of the linear phase shift applied to the phase spectrum in degrees per Hertz."
+
+parameter: time_shift
+text: "  Time shift"
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the time to shift the data in msec."
+
+parameter: sample_shift
+text: "  Number of samples to shift"
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the number of samples to shift the data (-=up, +=down)."
+
+parameter: unwrap
+text: "Unwrap the phase spectrum?"
+type: boolean:
+value: nil
+mouse_text: "Do you want to unwrap the phase spectrum? (Add or subtract multiples of 360 degrees to make phase continuous.)"
+
+parameter: show_trace_data
+text: "Display the selected trace data?"
+type: boolean:
+value: t
+mouse_text: "Do you want to display the selected trace data initially?"
+
+parameter: show_fx_power
+text: "Display the FX power spectrum?"
+type: boolean:
+value: t
+mouse_text: "Do you want to display the  FX power spectrum initially?"
+
+parameter: show_data_taper
+text: "Display the pre-FFT time window?"
+type: boolean:
+value: nil
+mouse_text: "Do you want to display the pre-FFT time window initially?"
+
+parameter: tap_type
+text: "Pre-FFT time window taper type"
+type: pop_choose:
+value: 1
+type_desc: (
+ ("Hanning "  1 "Apply a Hanning taper to the pre-FFT time window. (cosine taper with edge value = 0.0)" )
+ ("Bartlett " 2 "Apply a Bartlett taper to the pre-FFT time window. (linear taper with edge value = 0.0)" ) 
+ ("Hamming "  3 "Apply a Hamming taper to the pre-FFT time window. (cosine taper with edge value = 0.08)" )
+ ("Boxcar "   0 "Apply a Boxcar taper to the pre-FFT time window. (This merely truncates the window.)" ) )
+mouse_text: "Select your desired method of tapering the pre-FFT time window to reduce FFT 'edge' effects."
+
+parameter: pct_flat
+text: "  Percent flat for the pre-FFT time window"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 80.0
+mouse_text: "Enter the percentage of the pre-FFT time window which is NOT tapered. (100.0 = no taper)."
+
+;  Don't allow manual frequency specification for now because it breaks XYPlot
+parameter: auto_freq_range
+text: "Set frequency display ranges automatically?"
+type: boolean:
+value: t
+mouse_text: "By default, displayed frequency ranges are set automatically. Select NO if you want to set the frequency range yourself."
+
+parameter: min_freq
+text: "  Minimum frequency."
+type: typein:
+type_desc: ( real: 10 0.0 nil )
+value: 0.0
+mouse_text: "Enter the minimum frequency (in Hz) for spectral displays ."
+
+parameter: max_freq
+text: "  Maximum frequency."
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the maximum frequency (in Hz) for spectral displays ."
+
+parameter: auto_power_range
+text: "Set power display ranges automatically?"
+type: boolean:
+value: t
+mouse_text: "By default, displayed power ranges are set automatically. Select NO if you want to set the power range yourself."
+
+parameter: min_power
+text: "  Minimum power."
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the minimum power on power displays (dB, percentage, or raw power depending on the type of power scaling)."
+
+parameter: max_power
+text: "  Maximum power."
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the maximum power on power displays (dB, percentage, or raw power depending on the type of power scaling)."
+
+parameter: auto_phase_range
+text: "Set phase display ranges automatically?"
+type: boolean:
+value: t
+mouse_text: "By default, displayed phase ranges are set automatically. Select NO if you want to set the phase range yourself."
+
+parameter: min_phase
+text: "  Minimum phase."
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the minimum phase (in degrees) on phase displays ."
+
+parameter: max_phase
+text: "  Maximum phase."
+type: typein:
+type_desc: ( real: 10 nil nil )
+value: 0.0
+mouse_text: "Enter the maximum phase (in degrees) on phase displays ."
+
+;;
+;; The next two parameters are hidden parameters to control which
+;; color map editor to use.  To activate an editor, uncomment the
+;; value entry.  To deactivate, comment out the value entry.
+;;
+parameter: promax_color_editor
+;;text: "Use ProMAX Color Table Editor?"
+;;type: boolean:
+value: t
+showp: nil
+;;mouse_text: "Select YES to have ProMAX Color Table Editor available."
+
+parameter: openworks_color_editor
+;;text: "Use OpenWorks Color Table Editor?"
+;;type: boolean:
+;;value: t
+showp: nil
+;;mouse_text: "Select YES to have OpenWorks Color Table Editor available."
+
+;;
+;; The following parameter inverts the amplitude to pixel mapping.  Setting
+;; this parameter to t (true) allows ISA to match the SeisWorks color mapping.
+;;
+parameter: invert
+;;text: "Invert amplitude to pixel mapping?"
+;;type: boolean:
+value: nil
+showp: nil
+;;mouse_text: "Select YES to match the SeisWorks color mapping."
+
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "To debug program, enter YES.  You will have to debug the program yourself."
+
+
+;  The string "SOCKET_TOOL" specifies that this is a socket tool
+exec_data: ("ST_SPEC_ANALYSIS"
+	         ("GENERAL"
+		   	("version" implicit: "ProMAX $Id: inter_spect.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+	                ("sel_meth"  implicit: ( value 'selection_method ) )
+			("freeze"    implicit: ( if ( value 'freeze ) 1 0 ) )
+			("sh_data"   implicit: ( if (value 'show_trace_data) 1 0 ) )
+			("pan_type"  implicit: ( value 'pan_type ) )
+			("n_traces"  implicit: ( value 'num_traces ) )
+			("trac_inc"  implicit: ( value 'trace_pan_inc ) )
+			("n_ensmbl"  implicit: ( value 'num_ensembles))
+			("ens_inc"   implicit: ( value 'ens_pan_inc))
+			("prim_key"  implicit: ( value 'prim_key))
+			("sec_key"   implicit: ( value 'sec_key))
+;;jrl  			("l2r"       implicit: ( value 'direction))
+			("show_pow"  implicit: ( if (value 'show_ave_power) 1 0 ) )
+			("pow_type"  implicit: (value 'power_type) )
+			("pow_map"  implicit: (value 'power_mapping) )
+			("ref_pow"   implicit: (value 'ref_power) )
+			("sh_phase"  implicit: ( if (value 'show_ave_phase) 1 0 ) )
+			("shft_opt"  implicit: (value 'shift_option) )
+			("deg_p_hz"  implicit: (value 'deg_per_hz) )
+			("tim_shft"  implicit: (value 'time_shift) )
+			("smp_shft"  implicit: (value 'sample_shift) )
+			("unwrap"    implicit: ( if (value 'unwrap) 1 0 ) )
+			("sh_fxpow"  implicit: ( if (value 'show_fx_power) 1 0 ) )
+			("sh_taper"  implicit: ( if (value 'show_data_taper) 1 0 ) )
+			("tap_type"  implicit: ( value 'tap_type ) )
+			("pct_flat"  implicit: ( value 'pct_flat ) )
+			("auto_frq"  implicit: ( if (value 'auto_freq_range) 1 0 ) )
+			("min_freq"  implicit: (value 'min_freq) )
+			("max_freq"  implicit: (value 'max_freq) )
+			("auto_pow"  implicit: ( if (value 'auto_power_range) 1 0 ) )
+			("min_powr"  implicit: (value 'min_power) )
+			("max_powr"  implicit: (value 'max_power) )
+			("auto_phs"  implicit: ( if (value 'auto_phase_range) 1 0 ) )
+			("min_phas"  implicit: (value 'min_phase) )
+			("max_phas"  implicit: (value 'max_phase) )
+			("pm_color"  implicit: (if (value 'promax_color_editor) 1 0 ) )
+			("ow_color"  implicit: (if (value 'openworks_color_editor) 1 0 ) )
+		   	("invert"    implicit: (if (value 'invert) 1 0 ) )
+			("program"   implicit: "inter_spect.exe" )
+		   	("DEBUG"     implicit: ( if (value 'DEBUG) 3 0 ) )
+		)
+	   )
+
+rules: (
+	(sel_method_rule   ( = ( value 'selection_method ) 3 ) (do_show 'freeze) (do_not_show 'freeze) ) 
+	(pan_type_rule   ( = ( value 'pan_type ) 0 ) 
+			 ( progn (do_show 'num_traces) 
+				 (do_show 'trace_pan_inc) 
+				 (do_not_show 'num_ensembles) 
+				 (do_not_show 'ens_pan_inc) ) 
+			 ( progn (do_not_show 'num_traces) 
+				 (do_not_show 'trace_pan_inc) 
+				 (do_show 'num_ensembles) 
+				 (do_show 'ens_pan_inc) )			 
+			 ) 
+	(power_type_rule   ( = ( value 'power_type ) 2 ) (do_not_show 'ref_power) (do_show 'ref_power) ) 
+	(show_deg_per_hz_rule   ( = ( value 'shift_option ) 1 ) (do_show 'deg_per_hz) (do_not_show 'deg_per_hz) ) 
+	(show_time_shift_rule   ( = ( value 'shift_option ) 2 ) (do_show 'time_shift) (do_not_show 'time_shift) ) 
+	(show_sample_shift_rule   ( = ( value 'shift_option ) 3 ) (do_show 'sample_shift) (do_not_show 'sample_shift) ) 
+	(auto_freq_rule ( value 'auto_freq_range ) 
+			 ( progn ( do_not_show 'min_freq )
+				 ( do_not_show 'max_freq ) )
+			 ( progn ( do_show 'min_freq )
+				 ( do_show 'max_freq ) )
+			 )
+	(auto_power_rule ( value 'auto_power_range ) 
+			 ( progn ( do_not_show 'min_power )
+				 ( do_not_show 'max_power ) )
+			 ( progn ( do_show 'min_power )
+				 ( do_show 'max_power ) )
+			 )
+	(auto_phase_rule ( value 'auto_phase_range ) 
+			 ( progn ( do_not_show 'min_phase )
+				 ( do_not_show 'max_phase ) )
+			 ( progn ( do_show 'min_phase )
+				 ( do_show 'max_phase ) )
+			 )
+
+;  This rule says that the DEBUG parameter should be shown only if
+;  the environment variable SOCKET_DEBUG is set to "t"
+ (socket_debug_rule t
+        (if (= (printenv 'SOCKET_DEBUG) "t")
+                (do_show 'DEBUG)
+                (do_not_show 'DEBUG) )  )
+
+       )
+
+)
+

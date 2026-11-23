@@ -1,0 +1,240 @@
+Datum Statics Calculation2296
+
+ProMAX® Reference
+
+Datum Statics Calculation
+Datum Statics Calculation is a standalone process that
+computes elevation statics or inputs total refraction statics.
+
+Theory
+Elevation and total refraction statics are total statics
+representing the time shifts needed at the shot and receiver
+locations to correct traces to appear as though they were
+collected with the shots and receivers at the ﬁnal datum
+elevation. This process outputs the statics as user deﬁned
+names. Elevation statics are newly computed numbers,
+refraction statics are copied to new attributes.
+This program also computes the CDP mean static based on
+the mean of all the shot and receiver statics contributing to
+the CDP. It can also be computed by estimating a smooth
+surface based on spatially smoothing the true topography
+and then computing the time difference between the smooth
+surface (N_DATUM) and the ﬁnal datum. In either case, the
+attribute C_STATIC is computed as a single value per CDP
+and written to the CDP OPF.
+For elevation static calculations, this program uses surface
+elevation and uphole data, if available, to compute ﬂoating
+and ﬁnal datum trace statics. You must specify the ﬁnal
+datum elevation, datum velocity, and elevation smoother
+length for the ﬂoating datum calculation. Use Datum Statics
+Apply in a ﬂow to apply the statics computed by Datum
+Statics Calculation.
+For more information about datum statics within the
+ProMAX® processing system, refer to the Statics Overview.
+
+Usage
+Input
+This process creates C_STATIC, R_STATIC, and S_STATIC if
+they do not exist in the database when the process is run. If
+C_STATIC, R_STATIC, and S_STATIC exist they will be
+overwritten by this process.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Datum Statics Calculation2297
+
+ProMAX® Reference
+
+Output
+This process creates three parameters: SIN GEOMETRY
+S_STATXX, SRF GEOMETRY R_STATXX and CDP
+GEOMETRY C_STATXX. XX is a numerical identiﬁer. The
+parameter descriptions have time, date, replacement velocity,
+elevation of ﬁnal datum, and CDP statics method and statics
+label. These parameters are then input to Datum Static
+Apply.
+If refraction statics exist and C_STATIC does not need to be
+recomputed, then you do not need to run this process. Run
+this process if a change is made to the CDP smoothing, the
+replacement velocity, the ﬁnal datum elevation, or the CDP
+mean computation method. In the refraction statics mode,
+this process only computes C_STATIC based on the
+N_DATUM, the ﬁnal datum (F_DATUM) and the replacement
+velocity. If these three values did not change after running
+this program in elevation mode, then C_STATIC would not
+change.
+
+Parameters
+Elevation or refraction
+Select to compute elevation statics or to input existing
+refraction statics to ﬁnal datum:
+• Elevation statics are computed to ﬁnal datum. This
+computes shot, receiver, and CDP mean statics.
+• Refraction statics are input to ﬁnal datum. This copies
+shot and receiver statics from an existing attribute and
+computes CDP mean statics.
+Final datum elevation
+Enter the ﬁnal datum elevation. You can enter a constant
+value or a ﬁle from the SRF-GEOMETRY database. This is
+one method of using a laterally variable ﬁnal datum.
+Note: Use care in deﬁning this as a parameter in 3D.
+Replacement velocity
+Enter the replacement velocity to correct the traces to the
+ﬁnal datum. You can enter a constant value or a ﬁlename
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Datum Statics Calculation2298
+
+ProMAX® Reference
+
+from the SRF-GEOMETRY database. This is one method of
+using a laterally variable ﬁnal datum.
+Note: Use care in deﬁning this as a parameter in 3D.
+Database math method for elevation statics
+This appears if Elevation to Elevation or Refraction. Select
+the method for calculating and assigning statics from the
+elevation information. The choices are:
+• Shot Holes Using Uphole Info uses the standard ProMAX® method for computing elevation statics. This is
+the default; it is the database math ﬁle, elev_stat_math.
+• Shot Holes Ignoring Uphole Times uses the ProMAX®
+method but estimates uphole times from a weathering
+velocity plus shot depths. This method is used if you
+consider the uphole times to be unreliable. The database
+math ﬁle, noup_stat_math, is used.
+• Surface Source uses the database math ﬁle,
+surf_stat_math, and moves sources and receivers
+directly to ﬁnal datum. Shots are assumed to be at or
+near the surface; uphole times and shot depths are not
+used.
+• Other (User-deﬁned) allows you to build your own database math ﬁle.
+Database math method for refraction statics
+This appears if Refraction to Elevation or Refraction. Select
+the method for calculating and assigning statics from the
+elevation information. The choices are:
+• Use the default ref_stat_math ﬁle uses the standard
+ProMAX® method for computing handling refraction
+statics. This is the default; it is the database math ﬁle,
+ref_stat_math.
+• Other (User-deﬁned) allows you to build your own database math ﬁle.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Datum Statics Calculation2299
+
+ProMAX® Reference
+
+Specify Weathering Velocity
+This appears if Shot Holes Ignoring Uphole Times to
+Database math method. Enter the weathering velocity in
+Station,Wvelocity pairs. For example:
+101:3300/205:3100/.../506:2800/
+
+Database math ﬁle for elevation statics
+This appears if Elevation to Elevation or refraction and
+Other to Database math method. Enter a ﬁlename for
+database math to generate elevation statics in the following
+format:
+/ path / ﬁlename
+/usr/johndoe/elev_stat_method2
+Default: /advance/port/misc/elev_stat_math
+
+For Elevation, the default is:
+/promax_home/port/misc/elev_stat_math
+
+Database math ﬁle for refraction statics
+This appears if Other to Database math method. Enter a
+ﬁlename for database math to generate elevation statics in
+the following format:
+/ path / ﬁlename such as /usr/johndoe/elev_stat_method2
+The default is: /promax_home/port/misc/ref_stat_math
+
+For Refraction, the default is:
+/advance/port/misc/ref_stat_math
+
+NMO static method
+Select the method for computing C_STATIC (CDP statics) and
+N_DATUM (NMO datum):
+• Elevation smooths the source elevations (N_DATUM)
+and then computes C_STATIC based on the difference
+between N_DATUM and F_DATUM (Final datum) and the
+Replacement Velocity.
+• Mean Statics takes the source and receiver statics from
+the ﬁrst option, computes the mean of the source and
+receiver statics for each CDP (C_STATIC), then recom-
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Datum Statics Calculation2300
+
+ProMAX® Reference
+
+putes the N_DATUM based on C_STATIC, F_DATUM,
+and Replacement Velocity.
+Length of smoother
+Enter the odd number of CDPs over which to smooth the
+datum. The smoothing operation is performed in the CDP
+domain to achieve a regularly sampled grid in 3D. This
+parameter projects elevations of surface locations in either
+2D or 3D into CDP, and then smooths.
+Select source statics
+This appears if Refraction to Elevation or Refraction. Select
+a source refraction static at ﬁnal datum, such as SIN
+GEOMETRY SSTAT00X from Refraction Statics
+Calculation*.
+Select receiver statics
+This appears if Refraction to Elevation or Refraction. Select
+a source refraction static at ﬁnal datum, such as SRF
+GEOMETRY RSTAT00X from Refraction Statics
+Calculation*.
+Processing DATUM
+Select the processing datum from the following options:
+• NMO datum computes a non-zero CDP mean static
+based on the NMO static method. When statics are
+applied with Datum Statics Apply the data are referenced to the smooth surface elevation (N_DATUM).
+• Final datum computes a zero valued C_STATIC for all
+CDPs. When statics are applied with Datum Statics
+Apply, the data are referenced to the ﬁnal datum
+(F_DATUM).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Datum Statics Calculation2301
+
+ProMAX® Reference
+
+Run ID
+Enter a two character identiﬁcation number to append to the
+statics parameter name. For example, using 01 will output
+the following static parameters:
+SIN GEOMETRY S_STAT01
+SRF GEOMETRY R_STAT01
+CDP GEOMETRY C_STAT01
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

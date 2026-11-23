@@ -1,0 +1,12 @@
+[package]
+name = "rustseis-dsp"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rayon.workspace = true
+rustfft.workspace = true
+rustseis-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

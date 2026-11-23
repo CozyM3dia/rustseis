@@ -1,0 +1,142 @@
+{
+  "menu_id": "datum_stat_calc",
+  "tool_name": "DATUM_STAT_CALC",
+  "label": "Datum Statics Calculation*",
+  "parameter_count": 14,
+  "parameters": [
+    {
+      "name": "STATTYPE",
+      "prompt": "Elevation or Refraction",
+      "kind": "circular",
+      "default": null,
+      "help": "Elevation will compute shot, recv and cdp statics -- Refraction will copy shot and rcvr but compute cdp statics",
+      "choices": [
+        {
+          "label": "Elevation",
+          "value": "1",
+          "help": "Compute Elevation statics to final datum."
+        },
+        {
+          "label": "Refraction",
+          "value": "2",
+          "help": "Input Refraction statics to final datum"
+        }
+      ]
+    },
+    {
+      "name": "FNL_ELEV",
+      "prompt": "Final datum elevation",
+      "kind": "typein",
+      "default": null,
+      "help": "Enter final datum elevation constant value or PARAMETER from the SRF GEOMETRY DataBase. See help for other suggestions."
+    },
+    {
+      "name": "REPL_VEL",
+      "prompt": "Replacement velocity",
+      "kind": "typein",
+      "default": null,
+      "help": "Enter replacement velocity constant value or PARAMETER from the SRF GEOMETRY DataBase. See help for other suggestions."
+    },
+    {
+      "name": "METHOD",
+      "prompt": "Database math method for elevation statics",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select the method to use to compute the statics.  The different methods have slightly different computation algoriths"
+    },
+    {
+      "name": "METHOD1",
+      "prompt": "Database math method for refraction statics",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select the math_file to be used for working with the refraction statics."
+    },
+    {
+      "name": "W_VELOC",
+      "prompt": "Specify Weathering velocity",
+      "kind": "edit",
+      "default": "101:3000/201:3500/351:4000/",
+      "help": "Enter groups of STATION-Weathering Velocity values. **SEE EXAMPLE!!!**"
+    },
+    {
+      "name": "MATHFILE",
+      "prompt": "Database math file for elevation statics",
+      "kind": "edit",
+      "default": "/promax_home/port/misc/elev_stat_math",
+      "help": "This specifies the name of the file that is used for database math to generate elevation statics."
+    },
+    {
+      "name": "MATHFIL1",
+      "prompt": "Database math file for refraction statics",
+      "kind": "edit",
+      "default": "/promax_home/port/misc/ref_stat_math",
+      "help": "Specify the file name for the appropriate refraction static solution calculation."
+    },
+    {
+      "name": "NMO_METH",
+      "prompt": "NMO static method",
+      "kind": "circular",
+      "default": null,
+      "help": "Select the method for creating the NMO statics.  See the help file for more explanation.",
+      "choices": [
+        {
+          "label": "Elevations",
+          "value": "1",
+          "help": "Use the smoothed surface elevations (NMO datum)."
+        },
+        {
+          "label": "Mean Statics",
+          "value": "2",
+          "help": "Use the smoothed mean of source and receiver statics of contributing traces in a CDP."
+        }
+      ]
+    },
+    {
+      "name": "NSMOOTH",
+      "prompt": "Length of smoother",
+      "kind": "typein",
+      "default": "51",
+      "help": "Enter the length of the smoother (in CDPs).  Use an odd number."
+    },
+    {
+      "name": "S_STATIC",
+      "prompt": "Select SOURCE statics",
+      "kind": "action",
+      "default": null,
+      "help": "Use Mouse Button 1 to select a SOURCE Statics file description (SDRM, SDLT, SGRM)from the SIN GEOMETRY database."
+    },
+    {
+      "name": "R_STATIC",
+      "prompt": "Select RECEIVER statics",
+      "kind": "action",
+      "default": null,
+      "help": "Use Mouse Button 1 to select a RECEIVER Statics file description (RDRM, RDLT, RGRM)from the SRF GEOMETRY database."
+    },
+    {
+      "name": "DATUM1",
+      "prompt": "Processing DATUM",
+      "kind": "circular",
+      "default": null,
+      "help": "Select datum to which the data will be referenced after running Apply Datum Statics.",
+      "choices": [
+        {
+          "label": "NMO DATUM",
+          "value": "1",
+          "help": "Compute non-zero cdp mean (C_STATIC)- when statics are applied, the data will be referenced to Smooth Surface (N_DATUM)"
+        },
+        {
+          "label": "FINAL DATUM",
+          "value": "2",
+          "help": "Compute zero cdp mean (C_STATIC)- when statics are applied, the data will be referenced to FINAL DATUM. NMO_DATUM = FINAL DATUM"
+        }
+      ]
+    },
+    {
+      "name": "DB_NUM",
+      "prompt": "Run ID",
+      "kind": "typein",
+      "default": "01",
+      "help": "Enter a 2 characters (number) identifying the database output parameters as S_STATXX, R_STATXX, C_STATXX."
+    }
+  ]
+}

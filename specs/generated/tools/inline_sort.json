@@ -1,0 +1,202 @@
+{
+  "menu_id": "inline_sort",
+  "tool_name": "INLINE_SORT",
+  "label": "Inline Sort",
+  "parameter_count": 16,
+  "parameters": [
+    {
+      "name": "SORTKEY1",
+      "prompt": "Select new PRIMARY sort key",
+      "kind": "function",
+      "default": "CDP     ",
+      "help": "Use MB1 to select a header entry from the headers menu as the new PRIMARY sort key."
+    },
+    {
+      "name": "S_ORDER1",
+      "prompt": "PRIMARY sort order",
+      "kind": "circular",
+      "default": null,
+      "help": "This dictates the order of the output ensembles.",
+      "choices": [
+        {
+          "label": "Ascending",
+          "value": "1",
+          "help": "Output ensembles in ASCENDING order."
+        },
+        {
+          "label": "Descending",
+          "value": "-1",
+          "help": "Output ensembles in DESCENDING order."
+        }
+      ]
+    },
+    {
+      "name": "SORTKEY2",
+      "prompt": "Select new SECONDARY sort key",
+      "kind": "function",
+      "default": "OFFSET  ",
+      "help": "Use MB1 to select a header entry from the headers menu as the new SECONDARY sort key."
+    },
+    {
+      "name": "S_ORDER2",
+      "prompt": "SECONDARY sort order",
+      "kind": "circular",
+      "default": null,
+      "help": "This dictates the order of the output ensembles.",
+      "choices": [
+        {
+          "label": "Ascending",
+          "value": "1",
+          "help": "Output ensembles in ASCENDING order."
+        },
+        {
+          "label": "Descending",
+          "value": "-1",
+          "help": "Output ensembles in DESCENDING order."
+        }
+      ]
+    },
+    {
+      "name": "SORTKEY3",
+      "prompt": "Select new TERTIARY sort key",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header entry from the headers menu as the new TERTIARY sort key."
+    },
+    {
+      "name": "S_ORDER3",
+      "prompt": "TERTIARY sort order",
+      "kind": "circular",
+      "default": null,
+      "help": "This dictates the order of traces within each output ensemble.",
+      "choices": [
+        {
+          "label": "Ascending",
+          "value": "1",
+          "help": "Output traces with the secondary key in ASCENDING order."
+        },
+        {
+          "label": "Descending",
+          "value": "-1",
+          "help": "Output traces with the secondary key in DESCENDING order."
+        }
+      ]
+    },
+    {
+      "name": "SORTKEY4",
+      "prompt": "Select new QUATERNARY sort key",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header entry from the headers menu as the new QUATERNARY sort key."
+    },
+    {
+      "name": "S_ORDER4",
+      "prompt": "QUATERNARY sort order",
+      "kind": "circular",
+      "default": null,
+      "help": "This dictates the order of traces within each output ensemble.",
+      "choices": [
+        {
+          "label": "Ascending",
+          "value": "1",
+          "help": "Output traces with the secondary key in ASCENDING order."
+        },
+        {
+          "label": "Descending",
+          "value": "-1",
+          "help": "Output traces with the secondary key in DESCENDING order."
+        }
+      ]
+    },
+    {
+      "name": "MAX_DTRZ",
+      "prompt": "Maximum traces per output ensemble",
+      "kind": "typein",
+      "default": "-1",
+      "help": "What is the maximum number of traces per ensemble AFTER sorting?  For a CDP sort, this is the maximum fold."
+    },
+    {
+      "name": "N_BUFFER",
+      "prompt": "Number of traces in buffer",
+      "kind": "typein",
+      "default": "-1",
+      "help": "How many traces must be buffered?  For a normal CDP sort, this is max fold multiplied by chans per record."
+    },
+    {
+      "name": "MEDIA",
+      "prompt": "Buffer type",
+      "kind": "circular",
+      "default": "1",
+      "help": "Use MB1 to rotate between choices for buffering traces to disk (large but slow) or memory (small but fast).",
+      "choices": [
+        {
+          "label": "Disk",
+          "value": "1",
+          "help": "Buffer traces on disk"
+        },
+        {
+          "label": "Memory",
+          "value": "2",
+          "help": "Buffer traces in memory"
+        }
+      ]
+    },
+    {
+      "name": "ENDENSKY",
+      "prompt": "Sort key which controls End-Of-Ensemble",
+      "kind": "circular",
+      "default": "1",
+      "help": "Use MB1 to rotate between choices for End-Of-Ensemble key.  Line-Segment-End will be the key above the End-Of-Ensemble key.",
+      "choices": [
+        {
+          "label": "Primary",
+          "value": "1",
+          "help": "End-Ensemble set when PRIMARY key changes"
+        },
+        {
+          "label": "Secondary",
+          "value": "2",
+          "help": "End-Ensemble set when SECONDARY key changes"
+        },
+        {
+          "label": "Tertiary",
+          "value": "3",
+          "help": "End-Ensemble set when TERTIARY key changes"
+        },
+        {
+          "label": "Quaternary",
+          "value": "4",
+          "help": "End-Ensemble set when QUATERNARY key changes"
+        }
+      ]
+    },
+    {
+      "name": "COMPRESS",
+      "prompt": "Compress data before sorting?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to reduce storage requirements by compressing the data before sorting."
+    },
+    {
+      "name": "MULTPASS",
+      "prompt": "Multiple pass?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' if buffer is not big enough for sort. Refer to help file for procedure."
+    },
+    {
+      "name": "AUTOTEST",
+      "prompt": "Run in AUTOTEST mode?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' if sort should stay the same as input primary/secondary keys and add DS_SEQNO as tertiary sort key"
+    },
+    {
+      "name": "AUTOTERT",
+      "prompt": "AUTOTEST tertiary sort key",
+      "kind": "typein",
+      "default": "TLIVE_S",
+      "help": "Enter tertiary sort key name for autotests"
+    }
+  ]
+}

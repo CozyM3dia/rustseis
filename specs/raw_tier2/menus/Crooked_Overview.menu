@@ -1,0 +1,27 @@
+; 1 FIELD
+'(
+name: Crooked_Overview
+label: "Crooked Line Overview Documentation"
+value_tab: 50
+
+parameter: Comment
+text: "------- Use the Help button to access -------"
+parameter: Comment
+text: "---- Crooked Line Overview Documentation ----"
+
+
+
+exec_data:
+  (
+    ("FLOW_COMMENT"
+      ("GENERAL"
+        ("version"   implicit: "ProMAX $Id: Crooked_Overview.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+        ("FCOMMENT"  implicit: "use the help button to get to the Crooked Line Overview documentation")
+      )
+    )
+  )
+
+
+rules: (
+       )
+)

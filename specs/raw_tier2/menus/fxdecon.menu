@@ -1,0 +1,158 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: FXDECON
+label: "F-X Decon"
+value_tab: 54
+
+parameter: FLT_TYPE
+text: "TYPE of filter"
+;type: choose:
+type: circular:
+type_desc: (  
+ ("Wiener Levinson"  1 "Apply complex Wiener Levinson prediction filter." ) 
+ ("L2 NORM ADAPTIVE"  2 "Apply LMS L2 norm adaptive prediction filter." ) )
+mouse_text: "The output data is from a complex step ahead prediction filter, either W-L fixed or L2 norm adaptive."
+plot_label: t
+
+
+parameter: PCTN
+text: "Percentage of white noise"
+type: typein:
+type_desc: ( real: 5 0. nil )
+value: 0.0
+mouse_text: "Percentage of white noise to be added to the zero lag autocorrelation value."
+plot_label: t
+
+
+parameter: RADAPT
+text: "Rate of adaptation"
+type: typein:
+type_desc: ( real: 10 1.0e-10 nil )
+value: .1
+mouse_text: "This is the coefficient controlling the adaptation rate."
+plot_label: t
+
+
+parameter: NTRW
+text: "Horizontal window length"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 10
+mouse_text: "This is the horizontal F-X prediction window length in traces."
+plot_label: t
+
+
+parameter: NPF
+text: "Number of filter samples"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 5
+mouse_text: "This is the number of samples in the complex prediction filter.  (Minimum of 4 samps; longer for conflicting dips)"
+plot_label: t
+
+
+parameter: TIMEW
+text: "Time window length"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value: 1000.0
+mouse_text: "This is the time gate length (in milliseconds) for prediction windows."
+plot_label: t
+
+
+parameter: TOVLP
+text: "Time window overlap"
+;text: "Time window extension"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 100.0
+mouse_text: "This is the window extension in milliseconds (and on both sides) of time gates for prediction windows."
+plot_label: t
+
+
+parameter: FR1
+text: "F-X filter start frequency"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 1.0
+mouse_text: "This is minimum frequency of any SIGNAL OR NOISE in the seismic data."
+showp: t
+plot_label: t
+
+
+parameter: FR2
+text: "F-X filter end frequency"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value: 250.0
+mouse_text: "This is maximum frequency of any SIGNAL OR NOISE in the seismic data."
+plot_label: t
+
+parameter: NPASSES
+text: "Number of times to apply F-X filter to each trace"
+type: typein:
+type_desc: ( int: 5 1 5 )
+value: 1
+mouse_text: "For convenience multiple F-X passes may be used without inserting extra processes in the flow."
+plot_label: t
+
+parameter: HDRLIMIT
+text: "Apply filter only to selected traces?"
+type: :boolean
+value: nil
+mouse_text: "Compute output only where chosen trace header is nonzero."
+showp: t
+plot_label: t
+
+parameter: HDRNAME
+text: "  Select trace header for filter application"
+type: :function
+type_desc: (header_list headers)
+value: "TRC_TYPE"
+selected_item: "Trace type (data, aux, etc.)"
+mouse_text: "Choose which header to use in determining filter application."
+plot_label: t
+
+parameter: REMUTE
+text: "Re-apply trace mute after filter?"
+type: boolean:
+value: t
+showp: t
+mouse_text: "Trace mutes (such as surgical and first break suppression mutes) may be re-applied after F-X filtering."
+
+exec_data: ("FXDECON"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: fxdecon.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+	                ("FLT_TYPE" implicit: (value 'FLT_TYPE))
+	                ("PCTN"     implicit: (value 'PCTN))
+	                ("RADAPT"   implicit: (value 'RADAPT))
+			("NTRW"     implicit: (value 'NTRW))
+			("NPF"      implicit: (value 'NPF))
+			("TIMEW"    implicit: (value 'TIMEW))
+			("TOVLP"    implicit: (value 'TOVLP))
+			("FR1"      implicit: (value 'FR1))
+			("FR2"      implicit: (value 'FR2))
+                        ("NPASSES"  implicit: (value 'NPASSES))
+			("HDRLIMIT" implicit: (if (value 'HDRLIMIT) 1 0))
+			("HDRNAME"  implicit: (if (value 'HDRLIMIT) (value 'HDRNAME) "NONE"))
+			("REMUTE"   implicit: (if (value 'REMUTE) 1 0 ))
+		)
+	   )
+
+
+rules: (
+
+ (rule1 ( = ( value 'FLT_TYPE ) 1 ) (progn (do_not_show 'RADAPT) (do_show 'NPF)
+	(do_show 'PCTN)) )
+ (rule2 ( = ( value 'FLT_TYPE ) 2 ) (progn (do_show 'RADAPT)(do_show 'NPF)
+	(do_not_show 'PCTN))  )
+ (rule3 (value 'HDRLIMIT) (do_show 'HDRNAME) (do_not_show 'HDRNAME))
+
+ (npf  (<= (value 'NTRW) (value 'NPF))
+       (set_value 'NPF (- (value 'NTRW) 1)))
+
+)
+
+)
+
+

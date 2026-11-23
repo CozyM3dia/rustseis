@@ -1,0 +1,433 @@
+;; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+;; -*- mode:lisp; mode:font-lock; -*-
+'(
+  name: SEG_READ
+  label: "SEG-Y Input"
+  value_tab: 60
+  :include MULTIPLE "taperead_inc3.menu" ( "SEG_READ" "GENERAL" ) 
+  :include COORREF "aux_read_inc.menu" ( "SEG_READ" "GENERAL" )
+
+  ;; Create a place holder for external history
+  parameter: extern_history
+  showp: nil
+
+  parameter: FLAVOUR
+  text: "Type of SEG-Y"
+  type: pop_choose:
+  type_desc: (
+			  ("Standard fixed trace length" 1 "Standard SEG-Y (fixed trace length)")
+			  ("Standard variable trace length" 2 "Standard SEG-Y (variable trace length)")
+			  ("Sierra"   3 "Sierra SEG-Y  (fixed trace length)")
+			  ("Landmark TOD" 4 "Landmark TOD SEG-Y (fixed trace length)")
+			  ("Western" 5 "Western SEG-Y (variable trace length)")
+			  ("MS-DOS" 6 "MS-DOS SEG-Y disk file (fixed trace length)") 
+			  ("Prakla" 7 "Read from a Prakla SEG-Y disk file (variable trace length)")
+			  ("Charisma" 8 "Read from a Charisma SEG-Y disk file (fixed trace length)")
+;			  ("Prima" 14 "Read from a Prima SEG-Y disk file (compressed traces)")
+			  ("Input/Output" 9 "I/O System Four SEG-Y")
+			  )
+  mouse_text: "Choose the type of SEG-Y to input."
+  plot_label: t
+
+  parameter: BYTESWAP
+  text: "Invert normal byte order correction?"
+  type: :boolean
+  value: nil
+  mouse_text: "The SEG-Y standard requires big endian numeric formatting, but some systems blithely violate this explicit requirement."
+  plot_label: t
+
+
+  ;; handle multiple files per tape
+
+  parameter: MULTIPLE
+  text: "  Input MULTIPLE files from tape(s)?"
+  type: boolean:
+  value: t
+  mouse_text: "If the user wants to load multiple tapes or files from tape(s). If a tape contains multiple files (EOF between files) or the SEG-Y file spans multiple tapes, specify 'YES'. Otherwise specify 'NO' and ProMAX will end the job after encountering an EOF."
+  plot_label: t
+ 
+  parameter: MULTCONT
+  text: "    Multiple file SELECTION"
+  type: pop_choose:
+  type_desc: (  
+			  ("Input ALL" 0 "Input all files/tapes." ) 
+			  ("Select"    1 "Select input files/tapes based on a sequential count." ) )
+  mouse_text: "You can input ALL files/tapes or select a range of sequential file numbers."
+  plot_label: t
+
+  parameter: FILELIST
+  text: "     Specify input FILES list"
+  type: edit:
+  type_desc: (25 80 5 " FORMAT: Selection key 'value' 'values' 'range' /
+ EXAMPLES: 1-2/  or  1,3,6/  or  1-4,6,8/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "1-100/"
+  mouse_text: "If a tape contains multiple SEG-Y files (EOF between files), enter the list of sequential files that you want to input. MAX=50000."
+  ;; end of multiple files per tape
+  plot_label: t
+
+
+  parameter: ANALYZER
+  text: "Invoke SeisWorks SEG-Y Analyzer?"
+  type: circular:
+  type_desc: (
+			  ("Launch" 1 "Launch SEG-Y Analyzer")
+			  ("Launch" 0 "Launch SEG-Y Analyzer")
+			  )
+  selected_item: ("Launch" 0 "Launch SEG-Y Analyzer")
+  value: 0
+  mouse_text: "Launches an interactive SEG-Y analyzer application to allow you to scan the input disk file while preparing menu parameters."
+  showp: nil
+  plot_label: nil
+
+  parameter: SCSISIZE
+  text: "  MAXIMUM data block size in bytes"
+  type: typein:
+  type_desc: ( int: 8 1 99000000 )
+  value: 65535
+  mouse_text: "Maximum size of a data block in bytes that will be encountered. For values greater than 65536, you must have a long block driver."
+  plot_label: t
+
+
+  parameter: ABORT
+  text: "  Number of read errors in a row before ABORTING job?"
+  type: typein:
+  type_desc: ( int: 5 0 99999 )
+  value: 10 
+  mouse_text: "Specify the number of errors in a row before aborting. '0' means ignore all errors. Greater than '0' will output dead traces until number of errors is reached."
+
+  parameter: NSAMPS1
+  text: "Samples per data trace (override binary header)"
+  type: typein:
+  type_desc: ( int: 6 0 99999 )
+  value: 0
+  mouse_text: "What is number of samples per data trace. Enter 0 to get from SEG-Y binary header bytes 21-22."
+  plot_label: t
+
+  parameter: NSAMPS2
+  text: "Number of samples per data trace"
+  type: typein:
+  type_desc: ( int: 6 0 99999 )
+  value: 1001
+  mouse_text: "What is number of samples per data trace. FOR A SIERRA DISK FILE THIS VALUE MUST BE ENTERED."
+
+  parameter: STORE
+  text: "Store reel header in processing history?"
+  type: boolean:
+  value: t
+  mouse_text: "The 3200-byte SEG-Y reel header (EBCDIC) will be stored in the dataset processing history."
+
+  parameter: AUXOPT
+  text: "Input AUXILIARY traces?"
+  type: boolean:
+  value: t
+  mouse_text: "Auxiliary traces may either be input normally or ignored."
+  plot_label: t
+
+  parameter: TTRACE
+  text: "Get CHANNEL NUMBER from trace headers?"
+  type: boolean:
+  value: t
+  mouse_text: "Do you wish to get the channel number from the trace headers or number the channel sequentially in a ensemble?"
+  plot_label: t
+ 
+  parameter: FORMAT
+  text: "Input trace FORMAT"
+										;type: choose:
+  type: pop_choose:
+  type_desc: (  
+			  ("Get from header"  6 "Get the trace format from binary header." )
+			  ("IBM Real"         1 "4-byte IBM Floating Point SEG-Y." ) 
+			  ("4 byte Integer"   2 "4-byte Integer SEG-Y." ) 
+			  ("IEEE Real"        5 "4-byte IEEE Floating Point SEG-Y (non-standard)." ) 
+			  ("2 byte Integer"   3 "2-byte Integer SEG-Y." ) 
+			  ("4 byte w/ gain"   4 "4-byte SEG-Y Fixed Point with Gain Code." )
+			  ("2 byte Float"     7 "2-byte Floating Point." )
+			  ("1 byte Integer"   8 "1-byte Integer." ) )
+  mouse_text: "What is the format of the trace data samples?"
+  plot_label: t
+
+
+  parameter: MPFACTOR
+  text: "Apply trace weighting factors (2**-N)?"
+  type: boolean:
+  value: t
+  mouse_text: "Specify whether to apply the millivolt conversion factor stored in header bytes 169-170 of the standard SEG-Y header to fixed point sample formats."
+  plot_label: t
+
+
+  parameter: COORREF
+  text: "Input Global XY reference coordinates?"
+  type: boolean:
+  mouse_text: "Specify whether to input the global reference coordinates 'xref' and 'yref'. If 'NO', then these parameters are not used."
+  plot_label: t
+
+
+  parameter: XREF
+  text: "  Global X reference coordinate"
+  type: typein:
+  type_desc: ( real: 15 0.0 nil )
+  value: 0.0
+  mouse_text: "Enter the global X reference coordinate. All X coordinates will have this reference subtracted from their original value."
+  plot_label: t
+
+
+  parameter: YREF
+  text: "  Global Y reference coordinate"
+  type: typein:
+  type_desc: ( real: 15 0.0 nil )
+  value: 0.0
+  mouse_text: "Enter the global Y reference coordinate. All Y coordinates will have this reference subtracted from their original value."
+  plot_label: t
+
+  parameter: COORSCAL
+  text: "Use the coordinate scalar?"
+  type: boolean:
+  value: t
+  mouse_text: "This flag determines whether to apply the coordinate scalar (bytes 71-72) to the coordinates (bytes 73-88) when reading SEG-Y trace headers. Choose 'YES' for a standard SEG-Y header. "
+  plot_label: t
+
+  parameter: TIMESCAL
+  text: "Use the Rev 1 time scalar?"
+  type: boolean:
+  value: t
+  mouse_text: "This flag determines whether to apply the time scalar (bytes 215-216) to the statics, lag times and mutes (bytes 95-114) when reading SEG-Y trace headers.  Ignored if the input is not SEG-Y Rev 1 or higher."
+  plot_label: t
+
+  parameter: SCANALL
+  text: "Scan range of all header words?"
+  type: boolean:
+  value: t
+  mouse_text: "Choose 'YES' to scan range of all 240 bytes header fields."
+
+  parameter: REVONE
+  text: "Use SEG-Y Rev 1 header mapping?"
+  type: pop_choose:
+  type_desc: (  
+			  ("Autodetect"  2 "C39 SEG Y REV1 in card image header or 256 in binary header bytes 301-302." )
+			  ("NO"  0 "Force Rev 1 mapping off." )
+			  ("YES" 1 "Force Rev 1 mapping on." )
+			  )
+  value: 2
+  mouse_text: "Controls whether to decode header bytes 181-240 according to the SEG-Y Rev 1 standard."
+
+  parameter: IOVER
+  text: "Remap SEG-Y header values?"
+  type: boolean:
+  mouse_text: "Choose 'YES' to input/override SEG-Y trace header values."
+  plot_label: t
+
+  parameter: OVERRIDE
+  text: "  Input/override trace header entries"
+  type: edit:
+  type_desc: (32 80 5 " Purpose: read trace header with user format and position 
+ Format:  keyword,description,format,floating_pt_qualifier,byte_start/
+ Example: RCVRTYPE,User Receiver Type,2I,,181/SOURCE,,4R,IEEE,17/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+										;value"NONE    "
+  value: "sou_sloc,,4I,,233/srf_sloc,,4I,,237/"
+  mouse_text: "Enter: 1-8char keyword, max 32char description (for new keyword), 2I or 4I or 4R or 8R, IEEE or IBM, byte start (1-240)/ ... /"
+  plot_label: t
+
+  parameter: OVERRDIO
+  text: "  Input/override trace header entries"
+  type: edit:
+  type_desc: (32 80 5 " Purpose: read trace header with user format and position 
+ Format:  keyword,description,format,floating_pt_qualifier,byte_start/
+ Example: RCVRTYPE,User Receiver Type,2I,,181/SOURCE,,4R,IEEE,17/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+										;value"NONE    "
+  value: "io_31,# vertically summed trcs in trc,2I,,31/
+io_35,1=production 2=test,2I,,35/
+rec_elev,,4I,,41/sou_elev,,4I,,45/
+io_115,numsamp,2I,,115/
+io_117,sample rate in micros,2I,,117/
+io_125,data type-raw-correlated-stacked,2I,,125/
+io_127,sweep start in 0.1 hz,2I,,127/
+io_129,sweep freq end,2i,,129/
+io_131,sweep length in ms,2I,,131/
+io_133,sweep type,2I,,133/
+io_135,sweep taper at start,2I,,135/
+io_137,sweep taper at end,2I,,137/
+io_139,taper type,2I,,139/
+io_159,day of year,2I,,159/
+io_161,hour of day,2I,,161/
+io_163,min of hour,2I,,163/
+io_167,time basis code,2I,,167/
+io_171,windowed data start time in samp,2I,,171/
+io_173,windowed data length in samples,2I,,173/
+io_175,ms byte and mid byte of window,2I,,175/
+io_177,ls byte and ms byte of window,2I,,177/
+io_179,mid byte and ls byte of window,2i,,179/
+io_181,trace header revision #,2I,,181/
+shotid,,4I,,183/
+io_187,aux chan signal description,1I,,187/
+io_188,aux chan id from RSR,1I,,188/
+s_line,,4I,,189/
+sou_sloc,,4I,,193/
+r_line,,2I,,197/
+srf_sloc,,2I,,199/
+io_201,vectorseis module type,1I,,201/
+io_202,VSMT sensor scaling code in hex,1I,,202/
+io_203,VSMT horz orientation angle,2I,,203/
+io_205,VSMT VOA-vert orientation angle,2I,,205/
+io_207,source type,1I,,207/
+io_208,sensor type,1I,,208/
+io_209,aux chan set type,1I,,209/
+io_210,noise edit type,1I,,210/
+io_211,noise edit gate length in ms,2I,,211/
+io_213,device type,1I,,213/
+io_214,device serial#,3I,,214/
+io_217,device channel #,1I,,217/
+io_218,aux chan source set id,1I,,218/
+io_219,device status bits,1I,,219/
+io_220,LAT test type and codes,1I,,220/
+io_221,fixed low cut freq:on=3.0hz,2I,,221/
+io_223,fixed low cut slope on=12 db,1I,,223/
+io_224,box function,1I,,224/
+io_225,RSR or T2 dependent,2I,,225/
+io_227,RSR or T2 dependent,2I,,227/
+io_229,RSR or T2 dependent,2I,,229/
+io_231,RSR or T2 dependent,2I,,231/
+io_233,event type,1I,,233/
+io_234,sensor type id,1I,,234/
+io_235,VSMT serial#,3I,,235/
+io_238,VSMT version3,1I,,238/
+io_239,VSMT revision#,1I,,239/
+io_240,data modified flags-bits0-7,1I,,240/"
+  mouse_text: "Enter: 1-8char keyword, max 32char description (for new keyword), 2I or 4I or 4R or 8R, IEEE or IBM, byte start (1-240)/ ... /"
+
+  showp: nil
+  plot_label: t
+
+  :exec_data
+  ("SEG_READ"
+   ("SPECIAL" ("TOOLTYPE"     implicit: "INPUT") )
+   ("GENERAL"
+	("version" implicit: "ProMAX $Id: segy_read.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+	("SEGFORMT" implicit: 0 )
+	("FLAVOUR"  implicit: (value 'FLAVOUR))
+	("BYTESWAP" implicit: (if (value 'BYTESWAP) 1 0 ))
+	("MULTIPLE" implicit: (if (value 'MULTIPLE) 0 1 ))
+	("MULTCONT" implicit: (value 'MULTCONT))
+	("FILELIST" implicit: (value 'FILELIST))
+	("SCSISIZE" implicit: (value 'SCSISIZE))
+	("ABORT"    implicit: (value 'ABORT))
+	("NSAMPS1"  implicit: (value 'NSAMPS1))
+	("NSAMPS2"  implicit: (value 'NSAMPS2))
+	("STORE"    implicit: (if (value 'STORE) 1 0 ))
+	("AUXOPT"   implicit: (if (value 'AUXOPT) 2 1 ))
+	("TTRACE"   implicit: (if (value 'TTRACE) 0 1 ))
+	("FORMAT"   implicit: (value 'FORMAT))
+	("MPFACTOR" implicit: (if (value 'MPFACTOR) 0 1 ))
+	("COORREF"  implicit: (if (value 'COORREF) 1 0 ))
+	("XREF"     implicit: (value 'XREF))
+	("YREF"     implicit: (value 'YREF))
+	("COORSCAL" implicit: (if (value 'COORSCAL) 0 1 ))
+	("TIMESCAL" implicit: (if (value 'TIMESCAL) 0 1 ))
+	("IOVER"    implicit: (if (or ( = (value 'FLAVOUR ) 9) (value 'IOVER)) 1 0 ))
+	("REVONE"   implicit: (value 'REVONE))
+	("SCANALL"  implicit: (if (value 'SCANALL) 1 0 ))
+	("OVERRIDE" implicit: (string_concatinate (if ( = ( value 'FLAVOUR ) 9 ) (value 'OVERRDIO) "" ) (if (value 'IOVER) (value 'OVERRIDE) "")))
+	)
+   )   
+
+
+  :rules 
+  (
+   (rule0 t (progn  (setq FMTNAME "SEGY")
+					(setq SAMPSW :sw)
+					(setq TLSW :sw)
+					(setq ANYDISK :all)
+					(do_show 'UPDATEDB)
+					))
+
+   (((value STORAGE)(value FLAVOUR)) 
+	diskonly 
+	(and (> ( value 'FLAVOUR ) 2 ) (< (value 'FLAVOUR) 9 ) ) 
+	(progn (set_value 'STORAGE :disk)	
+		   (set_value 'DISKONLY t) )
+	(progn 
+	  (set_value 'TAPEONLY nil)
+	  (set_value 'DISKONLY nil)))
+   
+   (tape (or ( eq ( value 'STORAGE ) :tape) (not (= 1 (value 'TODTYPE))))
+		 ( progn
+		   (do_show 'MULTIPLE)
+		   (do_show 'SCSISIZE)
+		   (do_show 'ABORT)
+		   (do_not_show 'ANALYZER))
+		 ( progn
+		   ;; hide for now ;;              (do_show 'ANALYZER)
+		   (do_not_show 'MULTIPLE)
+		   (do_not_show 'SCSISIZE)
+		   (do_not_show 'ABORT)))
+ 		 
+   (analyzer (= (value 'ANALYZER) 1)
+			 (progn
+			   (system (string_concatinate
+						(promax_path "port/bin/SegyAnalyzer")
+						" -file " (value 'FILENAME) ))
+			   (set_value 'ANALYZER 0)
+			   (set_selected_item 'ANALYZER (second (type_desc 'ANALYZER ) ) )
+			   ))
+   
+   (rule40  ( = ( value 'FLAVOUR ) 3 )
+			( progn ( do_show 'NSAMPS2 )
+					( do_not_show 'NSAMPS1 ) )
+			( progn ( do_not_show 'NSAMPS2 )
+					( do_show 'NSAMPS1 ) ) )
+   
+   (rule1  (and (showing 'FILENAME ) (value 'FILENAME ) )
+		   (do_not_show 'MULTIPLE ) 
+		   (do_show 'MULTIPLE))
+   
+   (rule7  ( value 'IOVER ) 
+		   ( do_show 'OVERRIDE )
+		   ( do_not_show 'OVERRIDE ) )
+
+   (rule9  ( and ( showing 'MULTIPLE ) (value 'MULTIPLE ) )
+		   ( do_show 'MULTCONT )
+		   ( do_not_show 'MULTCONT ) )
+
+   (rule10 ( and ( showing 'MULTCONT ) (= (value 'MULTCONT ) 1 ) )
+		   ( do_show 'FILELIST )
+		   ( do_not_show 'FILELIST ) )
+
+   (rule11 ( value 'COORREF )
+		   ( progn ( do_show 'XREF )
+				   ( do_show 'YREF ) )
+		   ( progn ( do_not_show 'XREF )
+				   ( do_not_show 'YREF ) ) )
+   )
+
+  :after_exec
+  (setq FMTNAME "SEGY")
+  )

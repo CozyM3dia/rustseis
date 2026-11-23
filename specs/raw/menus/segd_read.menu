@@ -1,0 +1,664 @@
+;; IIID IVD 1 BSI FIELD DEV DEPTHC BHSS
+;; -*- mode:lisp; mode:font-lock; -*-
+'(
+  name: SEG_READ
+  label: "SEG-D Input"
+  value_tab: 60
+  :include FILENUM "taperead_inc3.menu" ( "SEG_READ" "GENERAL" ) 
+
+  parameter: FILENUM
+  text: "   Starting sequential FILE number"
+  type: typein:
+  type_desc: ( int: 7 1 999 )
+  value: 1
+  mouse_text: "Which SEQUENTIAL field record number do you wish to start with on this tape? (1st?, 2nd?, 10th?)"
+
+
+  parameter: IMULTIPL
+  text: "   SEG-D tape format"
+  type: pop_choose:
+  type_desc: (
+			  ("Demultiplexed" 1 "SEG-D tape format is trace sequential or demultiplexed.")
+			  ("Multiplexed"   0 "SEG-D tape format is long blocked or multiplexed.") )
+  mouse_text: "Specify the SEG-D tape format."
+
+
+  parameter: SCSI1
+  text: "   MAXIMUM data block size in bytes"
+  type: typein:
+  type_desc: ( int: 8 1 99000000 )
+  value: 65535
+  mouse_text: "Maximum size of a data block in bytes that will be encountered. For values greater than 65536, you must have a long block driver."
+
+
+  parameter: SCSI2
+  text: "   MAXIMUM data block size in bytes"
+  type: typein:
+  type_desc: ( int: 10 1 99000000 )
+  value: 4000000
+  mouse_text: "Maximum size of a data block in bytes that will be encountered. For values greater than 65536, you must have a long block driver."
+
+  parameter: SEGDDBUG
+  text: "Turn on SEGD debug option?"
+  type: boolean:
+  value: nil
+  mouse_text: "SEGD will show general header(s), channel set(s), trace header and extended trace header information."
+  showp: t
+
+  parameter: OMITFATL
+  text: "Bypass Fatal Errors?"
+  type: boolean:
+  value: nil
+  mouse_text: "SEGD will ignore fatal errors, skip the record and keep going."
+  showp: t
+
+  parameter: SEGDOGH
+  text: "Override the Additional General Header Block count (GH)?"
+  type: boolean:
+  value: nil
+  showp: t
+  mouse_text: "In some rare cases, SEGD input data may incorrectly specify the number of additional general header blocks."
+
+  parameter: SEGDNGH
+  text: "   Number of additional general header blocks"
+  type: typein:
+  type_desc: ( int: 4 0 15 )
+  value: 0
+  showp: nil
+  mouse_text: "Enter the number of additional 32 byte general header blocks."
+
+  parameter: EXHGEOM
+  text: "Extract geometry from extended trace headers?"
+  type: boolean:
+  value: t
+  mouse_text: "The extended trace header integer source and receiver station and line values are good, use them."
+  showp: t
+
+  parameter: EXHXGEOM
+  text: "Extract extended geometry from extended trace headers?"
+  type: boolean:
+  value: t
+  mouse_text: "The extended trace header fractional source and receiver station and line values are good, use them."
+  showp: t
+
+  parameter: SEGD_THE
+  text: "Honor the Trace Header Extension value (THE)?"
+  type: boolean:
+  value: t
+  mouse_text: "SEGD (default) will honor THE only when the values in the channel set and trace header match.  This option signals SEGD that the value in the trace header is good and to use it (USE with SERCEL 368)."
+  showp: t
+
+  parameter: SEGDOTHE
+  text: "Override the Trace Header Extension value (THE)?"
+  type: boolean:
+  value: nil
+  showp: t
+  mouse_text: "In some rare cases, SEGD input data may incorrectly specify the number of trace header extensions in both the channel set and the trace header."
+
+  parameter: SEGDNTHE
+  text: "   Number of trace header extensions"
+  type: typein:
+  type_desc: ( int: 4 0 15 )
+  value: 0
+  showp: nil
+  mouse_text: "Enter the number of 32 byte trace header extension blocks on each trace."
+
+  parameter: ADJTRLEN
+  text: "Auto adjust incorrect trace data length?"
+  type: boolean:
+  value: t
+  mouse_text: "If the chan set start/end times are incorrect, traces may not be read. If this condition is detected, this option will attempt to adjust the data and/or header length so the traces can be decoded correctly."
+  showp: t
+
+  parameter: OMITREC
+  text: "Omit records of type."
+  type: edit:
+  type_desc: (30 50 1 " Specify data channel types to omit separating them with ':' (values are integer)
+ EXAMPLE: 1:3:9/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "-1"
+  mouse_text: "This is a record rejection method based upon the general header record type. '-1' disables the option otherwise records of these type will be skipped."
+
+  parameter: SEISCN
+  text: "Specify Seismic Data Channel Type(s)"
+  type: edit:
+  type_desc: (30 50 1 " Specify seismic data channel types separating them with ':' (values are integer)
+ EXAMPLE: 1:3:9/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "1"
+  mouse_text: "Change the default seismic data channel type '1'."
+
+  parameter: AUXCN
+  text: "Specify Auxiliary Channel Type(s)"
+  type: edit:
+  type_desc: (30 50 1 " Specify aux channel types separating them with ':' (values are integer)
+ EXAMPLE: 0:8:2:9/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "8"
+  mouse_text: "Change the default aux channel type '8'."
+
+  parameter: ZEROCN
+  text: "Specify Zero or Pad Channel Type(s)"
+  type: edit:
+  type_desc: (30 50 1 " Specify pad channel types separating them with ':' (values are integer)
+ EXAMPLE: 1:3:9/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "-1"
+  mouse_text: "Enter channel types defined as Pad/Zero Traces. '-1' disables the option."
+
+
+  parameter: ABORT
+  text: "   Number of errors in a row before ABORTING job?"
+  type: typein:
+  type_desc: ( int: 5 0 99999 )
+  value: 10 
+  mouse_text: "Specify the number of errors in a row before aborting. '0' means ignore all errors. Greater than '0' will output dead traces until number of errors is reached."
+
+
+  parameter: HEAD_LEN
+  text: "      SEG-D main header length (bytes)"
+  type: typein:
+  type_desc: ( int: 5 0 99999 )
+  value: 0 
+  mouse_text: "The SEG-D main header length in bytes. Enter 0 to calculate from header values."
+
+
+  parameter: DISPFLAG
+  text: "Display ensemble information?"
+  type: boolean:
+  mouse_text: "Specify whether to display information for each ensemble input into ProMAX."
+
+  parameter: FORMAT
+  text: "SEG-D DATA format code?"
+  type: pop_choose:
+  type_desc: (  
+			  ("Get from header"  7 "Get format code from general header." ) 
+			  ("8015, 0015"  1 "2.5-byte binary exponent  (demultiplexed, multiplexed)." ) 
+			  ("8022, 0022"  2 "1-byte quaternary exponent  (demult., mult.)." ) 
+			  ("8024, 0024"  3 "2-byte quaternary exponent  (demult., mult.)." )  
+			  ("8036, 0036"  9 "3-byte 2's complement integer  (demult., mult.)." )  
+			  ("8038, 0038"  10 "4-byte 2's complement integer  (demult., mult.)." )  
+			  ("8042, 0042"  4 "1-byte hexadecimal exponent  (demult., mult.)." )  
+			  ("8044, 0044"  5 "2-byte hexadecimal exponent  (demult., mult.)." )  
+			  ("8048, 0048"  6 "4-byte hexadecimal exponent  (demult., mult.)." )
+			  ("8058, 0058"  8 "4-byte IEEE floating point  (demult., mult.)." ) )
+  value: "Get from header"
+  selected_item:  ("Get from header"  7 "Get format code from general header." ) 
+  mouse_text: "Specify the format code (data recording method) of the data samples on tape. 80?? is for demultiplexed and 00?? is for multiplexed formats."
+
+
+  parameter: MAXDTR
+  text: "MAXIMUM traces per record"
+  type: typein:
+  type_desc: ( int: 5 0 99999 )
+  value: 0 
+  mouse_text: "Maximum number of traces per record (shot). Enter 0 to calculate from header values."
+
+
+  parameter: AUXOPT
+  text: "Input AUXILIARY traces?"
+  type: boolean:
+  mouse_text: "Auxiliary traces may either be input normally or ignored.  (Include in above parameter.)"
+
+
+  parameter: TMAX
+  text: "RECORD LENGTH to input"
+  type: typein:
+  type_desc: ( real: 8 0.0 nil )
+  value: 0.0
+  mouse_text: "Amount of data to input, in milliseconds. (Enter 0.0 to read all available data!)"
+
+
+  parameter: SERCEL
+  text: "SERCEL instrument type?"
+  type: pop_choose:
+  type_desc: (  
+			  ("Not Sercel"     0 "Not a Sercel instrument or other type of Sercel." ) 
+			  ("358 Demux"      4 "The SEGD data is Sercel 358 demultiplexed." ) 
+			  ("368"            1 "The SEGD data is Sercel 368." ) 
+			  ("388"            2 "The SEGD data is Sercel 388." ) 
+			  ("408UL"          3 "The SEGD data is Sercel 408UL. (Versions 1 through 4.)" )
+			  ("408XL"          5 "The SEGD data is Sercel 408XL. (Versions 5 and up.)" )
+			  ("428XL"          6 "The SEGD data is Sercel 428XL." )
+			  ("SEAL"           7 "The SEGD data is Sercel SEAL." )
+             ) 
+  value: "Not Sercel"
+  selected_item: ("Not Sercel"   0 "Not a Sercel instrument or other type of Sercel." ) 
+  mouse_text: "Sercel uses alternate locations than standard SEG-D for critical parameters."
+
+
+  parameter: MPFACTOR
+  text: "Apply pre-amplifier gain (2 ** MP factor)?"
+  type: boolean:
+  value: t
+  mouse_text: "Specify whether to apply the pre-amplifier gain to the trace data.gain = 2. ** MP. The MP factor occupies byte 8 of the channel set descriptor."
+ 
+
+  parameter: TMULTIPL
+  text: "Scan correction option (sample skew statics)?"
+  type: pop_choose:
+  type_desc: (  
+			  ("Get from header"  1 "Get scan corrections from SEG-D header." ) 
+			  ("User specified"   2 "User specifies scan corrections in next field." ) 
+			  ("Do not apply"     0 "Do not apply scan corrections." )) 
+  value: "Get from header"
+  selected_item:  ("Get from header"  1 "Get scan corrections from header." ) 
+  mouse_text: "Specify method for getting scan corrections (sample skew statics)."
+
+
+  parameter: STATIC
+  text: "   Specify multiplex scan corrections list"
+  type: edit:
+  type_desc: (30 80 5 " FORMAT: 'channel':'static'/'channel':/'static'/ (times are in microseconds)
+ EXAMPLE: 1:62/48:1531/49:62/96:1531/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "1:62/48:1531/49:62/96:1532"
+  mouse_text: "Access the text editor to define the scan corrections for each channel. Static times must be in microseconds."
+
+
+  parameter: TTRACE
+  text: "Get CHANNEL NUMBER from trace headers?"
+  type: boolean:
+  value: t
+  mouse_text: "Do you wish to get the channel number from the trace headers or number the channel sequentially in a ensemble?"
+
+
+  parameter: INKEYNAM
+  text: "Input PRIMARY selection choice?"
+  type: pop_choose:
+  type_desc: (  
+			  ("Input ALL" "GET_ALL" "Input all file numbers on this tape, or on the line (multi-tape input)." ) 
+			  ("File No." "FFID" "Select input records based on SEG-D File Number." )
+			  ("Source Index No." "SOURCE" "Select input records based on ProMAX Sequential Source Number." ) )
+  value: "GET_ALL"
+  selected_item:  ("Input ALL" "GET_ALL" "Input all file numbers on this tape, or on the line (multi-tape input)." ) 
+  mouse_text: "How (based on what SEG-D or ProMAX header word) is the primary input record list specified?"
+
+  parameter: PMODE
+  text: "Primary selection MODE"
+  type: circular:
+  type_desc: ( ("Include" 0 "INCLUDE the records in the list.")
+             ("Exclude" 1 "EXCLUDE the records in the list.") )
+  mouse_text: "The records in the list can be either INCLUDED or EXCLUDED from the following processes."
+
+  parameter: TRC_LIST
+  text: "   Specify PRIMARY input records list"
+  type: edit:
+  type_desc: (25 80 5 " FORMAT: Selection key 'value' 'values' 'range' /
+ EXAMPLES: 1-12000 / 1-100 / 101-750(10) / 1-120 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "1-100/"
+  mouse_text: "Access the text editor to define the records that are to be read in."
+
+
+  parameter: CHAN_KEY
+  text: "Input SECONDARY selection choice?"
+  type: pop_choose:
+  type_desc: (  
+			  ("None" "NONE" "No secondary sort key." ) 
+			  ("Channel" "CHAN" "Select input traces based on their Trace No. or Channel No.." ) )
+  value: "NONE"
+  selected_item:  ("None" "NONE" "No secondary sort key." ) 
+  mouse_text: "The SEG-D record can be secondary sorted by input channel/trace number."
+
+  parameter: SMODE
+  text: "Channel selection MODE"
+  type: circular:
+  type_desc: ( ("Include" 0 "INCLUDE the channels in the list.")
+             ("Exclude" 1 "EXCLUDE the channels in the list.") )
+  mouse_text: "The channels in the list can be either INCLUDED or EXCLUDED from the following processes."
+
+  parameter: CHANLIST
+  text: "   Specify CHANNEL input list"
+  type: edit:
+  type_desc: (25 80 5 " FORMAT: Selection key 'value' 'values' 'range' /
+ EXAMPLES: 1-240(2) / 1-120,122-240 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "1-100/"
+  mouse_text: "Access the text editor to define the channels/traces that are to be read in."
+
+  parameter: STRMLCHN
+  text: "   Streamline CHANNEL selection?"
+  type: :boolean
+  value: nil
+  mouse_text: "If Yes, SEG-D Input quickly forward spaces its input to the next record once it encounters channels beyond the selected range."
+
+  parameter: IOVER
+  text: "Remap SEGD main header values?"
+  type: boolean:
+  mouse_text: "Choose 'YES' to input/override SEGD main header values."
+
+
+  parameter: OVERRIDE
+  text: "   Input/override main header entries"
+  type: edit:
+  type_desc: (32 80 5 " Purpose: read main header with user format and position 
+ Format:  keyword,description,format,channel set delimiter,byte increment,byte start/
+ Example: RCVRTYPE,User Receiver Type,4B,1:2,32,132/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "cab_off,cable shipboard offset,4RIBM,,,793/cab_num,cable number,1I,,32,865/"
+  mouse_text: "Enter: 1-8 char keyword, 1-32 char description, 1I 2I 4I #B #C 4RIBM 4RIEEE 8R, channel set delimiter, byte increment, byte start/ ... /"
+
+
+  parameter: ITOVER
+  text: "Remap SEGD trace header values?"
+  type: boolean:
+  mouse_text: "Choose 'YES' to input/override SEGD trace header values."
+
+
+  parameter: TOVERRID
+  text: "   Input/override trace header entries"
+  type: edit:
+  type_desc: (32 80 5 " Purpose: read trace header with user format and position 
+ Format:  keyword,description,format,channel set delimiter,byte increment,byte start/
+ Example: RCVRTYPE,User Receiver Type,4B,1:2,32,132/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "cab_off,cable shipboard offset,4RIBM,,,793/cab_num,cable number,1I,,32,865/"
+  mouse_text: "Enter: 1-8 char keyword, 1-32 char description, 1I 2I 4I #B #C 4RIBM 4RIEEE 8R, channel set delimiter, byte increment, byte start/ ... /"
+
+
+  parameter: COORREF
+  text: "Input Global XY reference coordinates?"
+  type: boolean:
+  mouse_text: "Specify whether to input the global reference coordinates 'xref' and 'yref'. If 'NO', then these parameters are not used."
+
+
+  parameter: XREF
+  text: "   Global X reference coordinate"
+  type: typein:
+  type_desc: ( real: 15 0.0 nil )
+  value: 0.0
+  mouse_text: "Enter the global X reference coordinate. All X coordinates will have this reference subtracted from their original value."
+
+
+  parameter: YREF
+  text: "   Global Y reference coordinate"
+  type: typein:
+  type_desc: ( real: 15 0.0 nil )
+  value: 0.0
+  mouse_text: "Enter the global Y reference coordinate. All Y coordinates will have this reference subtracted from their original value."
+
+
+  parameter: NGAIN
+  text: "Save trace IFP values for NGAIN Instrument Test?"
+  type: boolean:
+  mouse_text: "Choose 'YES' to save the trace sample IFP values to a file. The file is required to run the Ngain Instrument Test. "
+
+
+  parameter: GAINFILE
+  text: "   Enter NGAIN disk file path name"
+  type: edit:
+  type_desc: (15 80 5 " Examples: ngain_file, /usr/joe/ngainfile
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "ngain_data"
+  mouse_text: "This specifies the disk file path name to save the IFP values for the Ngain Instrument Test  The full path is not necessary if the file is in the database."
+
+
+  exec_data: 
+  ("SEG_READ"
+   ("SPECIAL" ("TOOLTYPE"     implicit: "INPUT") )
+   ("GENERAL"
+	("version" implicit: "ProMAX $Id: segd_read.menu 44596 2009-07-30 15:25:04Z Dan Grygier $ $Revision: 44596 $ $Date: 2009-07-30 09:25:04 -0600 (Thu, 30 Jul 2009) $")
+	("SEGFORMT" implicit: 1 )
+	("IMULTIPL" implicit: (value 'IMULTIPL))
+	("SCSISIZE" implicit:  
+	 (if ( = (value 'IMULTIPL ) 1 ) ( value 'SCSI1 )
+	   (if ( = (value 'IMULTIPL ) 0 ) ( value 'SCSI2 ) ) ) )
+	("FILENUM"  implicit: (value 'FILENUM))
+	("ABORT"    implicit: (value 'ABORT))
+	("HEAD_LEN" implicit: (value 'HEAD_LEN))
+	("TMULTIPL" implicit: (value 'TMULTIPL))
+	("STATIC"   implicit: (value 'STATIC))
+	("SEGDDBUG" implicit: (if (value 'SEGDDBUG) 1 0 ))
+	("OMITFATL" implicit: (if (value 'OMITFATL) 1 0 ))
+	("EXHGEOM"  implicit: (if (value 'EXHGEOM) 1 0 ))
+	("EXHXGEOM" implicit: (if (value 'EXHXGEOM) 1 0 ))
+	("SEGD_THE" implicit: (if (value 'SEGD_THE) 1 0 ))
+	("SEGDNTHE" implicit: (if (and (not (value 'SEGD_THE) ) (value 'SEGDOTHE)) (value 'SEGDNTHE) -1 ))
+	("SEGDNGH" implicit: (if (value 'SEGDOGH) (value 'SEGDNGH) -1 ))
+	("ADJTRLEN" implicit: (if (value 'ADJTRLEN) 1 0 ))
+	("OMITREC"  implicit: (value 'OMITREC))
+	("SEISCN"   implicit: (value 'SEISCN))
+	("AUXCN"    implicit: (value 'AUXCN))
+	("ZEROCN"   implicit: (value 'ZEROCN))
+	("TTRACE"   implicit: (if (value 'TTRACE) 0 1 ))
+	("DISPFLAG" implicit: (if (value 'DISPFLAG) 1 0 ))
+	("AUXOPT"   implicit: (if (value 'AUXOPT) 2 1 ))
+	("MAXDTR"   implicit: (value 'MAXDTR))
+	("TMAX"     implicit: (value 'TMAX))
+	("SERCEL"   implicit: (value 'SERCEL ))
+	("MPFACTOR" implicit: (if (value 'MPFACTOR) 0 1 ))
+	("FORMAT"   implicit: (value 'FORMAT))
+	("PRIM_KEY" implicit: "SOURCE")
+	("INKEYNAM" implicit: (value 'INKEYNAM))
+	("PMODE"    implicit: (value 'PMODE))
+	("TRC_LIST" implicit: (value 'TRC_LIST))
+	("CHAN_KEY" implicit: (value 'CHAN_KEY))
+	("SMODE"    implicit: (value 'SMODE))
+	("CHANLIST" implicit: (value 'CHANLIST))
+	("STRMLCHN" implicit: (if (value 'STRMLCHN) 1 0 ))
+	("IOVER"    implicit: (if (value 'IOVER) 1 0 ))
+	("OVERRIDE" implicit: (value 'OVERRIDE))
+	("ITOVER"    implicit: (if (value 'ITOVER) 1 0 ))
+	("TOVERRID" implicit: (value 'TOVERRID))
+	("COORREF"  implicit: (if (value 'COORREF) 1 0 ))
+	("XREF"     implicit: (value 'XREF))
+	("YREF"     implicit: (value 'YREF))
+	("NGAIN"    implicit: (if (and (showing 'NGAIN) (value 'NGAIN)) 1 0 ))
+	("GAINFILE" implicit: (value 'GAINFILE))
+	)
+   )
+
+  rules: 
+  (
+   (rule-1 t (progn (setq FMTNAME "SEGD"
+						  TLSW :only
+						  SAMPSW :sw 
+						  ANYDISK :all )
+					(do_show '(STORAGE UPDATEDB))
+					(set_mouse_text 'SAMPRATE "Sample rate ('base scan interval'), in milliseconds, of input data.  Do not override if correct in headers.")
+					(set_mouse_text 'TLOVER "Trace length, in milliseconds, of input data.  Do not override if correct in headers.")
+					))
+   
+   (rule1  ( = ( value 'INKEYNAM ) "GET_ALL" )
+		   (progn
+			 ( do_not_show 'PMODE ) 
+			 ( do_not_show 'TRC_LIST ) 
+			 )
+		   (progn
+			 ( do_show 'PMODE )
+			 ( do_show 'TRC_LIST )
+			 ) )
+   
+   (rule2  ( = ( value 'CHAN_KEY ) "NONE" )
+		   (progn
+			 ( do_not_show 'SMODE ) 
+			 ( do_not_show 'CHANLIST ) 
+			 ( do_not_show 'STRMLCHN ) 
+			 )
+		   (progn
+			 ( do_show 'SMODE)
+			 ( do_show 'CHANLIST)
+			 ( do_show 'STRMLCHN)
+			 ) )
+   
+   (file_num (eq (value 'STORAGE) :tape)
+			 (do_show 'FILENUM)
+			 (dont_show 'FILENUM))
+
+   (ionseal (eq (value 'STORAGE) :dynvol)
+ 	(progn
+ 	    (set_value 'SERCEL 7)
+ 	    (set_selected_item 'SERCEL "SEAL")
+ 	    (do_show 'IMULTIPL)
+ 	    (set_value 'IMULTIPL 1)
+ 	    (set_selected_item 'IMULTIPL "Demultiplexed")
+ 	) )
+
+   (rule6  ( = ( value 'TMULTIPL) 2 )
+		   ( do_show 'STATIC) 
+		   ( do_not_show 'STATIC))
+
+   (rule7  ( and ( showing 'IMULTIPL ) ( = ( value 'IMULTIPL ) 1 ) )
+		   ( do_show 'SCSI1 )
+		   ( do_not_show 'SCSI1 ) )
+
+   (rule8  ( and ( showing 'IMULTIPL ) ( = ( value 'IMULTIPL ) 0 ) )
+		   ( progn ( do_show 'SCSI2 )
+				   ( do_not_show 'IOVER )
+				   ( do_not_show 'ITOVER ) )
+		   ( progn ( do_not_show 'SCSI2 )
+				   ( do_show 'IOVER )
+				   ( do_show 'ITOVER ) ) )
+
+   (rule9  ( and ( showing 'IOVER ) ( value 'IOVER ) )
+		   ( do_show 'OVERRIDE )
+		   ( do_not_show 'OVERRIDE ) )
+
+   (rule10 ( and ( showing 'ITOVER ) ( value 'ITOVER ) )
+		   ( do_show 'TOVERRID )
+		   ( do_not_show 'TOVERRID ) )
+
+   (rule11 ( and ( showing 'NGAIN ) ( value 'NGAIN ))
+		   ( do_show 'GAINFILE )
+		   ( do_not_show 'GAINFILE ) )
+
+;  (rule12 ( = ( value 'SERCEL) 1 )
+;	   ( do_not_show 'MPFACTOR )
+;	   ( do_show 'MPFACTOR ) )
+
+   (rule13 (or ( = (value 'FORMAT) 6 ) ( = (value 'FORMAT) 8 )
+			   ( = (value 'FORMAT) 9 ) ( = (value 'FORMAT) 10 ) )
+		   ( do_not_show 'NGAIN )
+		   ( do_show 'NGAIN ) )
+
+   (rule14 ( value 'COORREF )
+		   ( progn ( do_show 'XREF )
+				   ( do_show 'YREF ) )
+		   ( progn ( do_not_show 'XREF )
+				   ( do_not_show 'YREF ) ) )
+
+
+   (rule15 (or (= (value 'SERCEL) 2) (= (value 'SERCEL) 3) (= (value 'SERCEL) 5) (= (value 'SERCEL) 6) (= (value 'SERCEL) 7) )
+		   (do_not_show 'EXHGEOM)
+		   (do_show 'EXHGEOM) )
+
+   (rule16 (or (= (value 'SERCEL) 2) (= (value 'SERCEL) 3) (= (value 'SERCEL) 5) (= (value 'SERCEL) 6) (= (value 'SERCEL) 7) )
+		   (do_not_show 'EXHXGEOM)
+		   (do_show 'EXHXGEOM) )
+
+   (rule17 (or (= (value 'SERCEL) 2) (= (value 'SERCEL) 3) (= (value 'SERCEL) 5) (= (value 'SERCEL) 6) (= (value 'SERCEL) 7) )
+		   (do_not_show 'SEGD_THE)
+		   (do_show 'SEGD_THE) )
+
+   (rule18 (or (value 'SEGD_THE) (not (showing 'SEGD_THE)) )
+		   (do_not_show 'SEGDOTHE)
+		   (do_show 'SEGDOTHE) )
+
+   (rule19 (and (value 'SEGDOTHE) (showing 'SEGDOTHE) )
+		   (do_show 'SEGDNTHE)
+		   (do_not_show 'SEGDNTHE) )
+
+   (rule20 (value 'SEGDOGH)
+		   (do_show 'SEGDNGH)
+		   (do_not_show 'SEGDNGH) )
+
+   (((value SERCEL)) rule21 (or (= (value 'SERCEL) 3) (= (value 'SERCEL) 5) (= (value 'SERCEL) 6) (= (value 'SERCEL) 7) )
+ 	   (progn (set_value 'ADJTRLEN nil) (set_selected_item 'ADJTRLEN (second (type_desc 'ADJTRLEN)))))
+
+  )
+
+  :after_exec
+  (setq FMTNAME "SEGD")
+  )
+

@@ -1,0 +1,147 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: TEQ
+label: "Trace Equalization"
+value_tab: 43
+
+
+parameter: GAINTYPE
+text: "BASIS for scaling"
+;type: choose:
+type: pop_choose:
+type_desc: ( 
+      ("MEAN" "MEAN" "The MEAN (average) value in the defined gate will be used to determine the scalar." )
+      ("RMS"  "RMS"  "The ROOT MEAN SQUARE value in the defined gate will be used to determine the scalar." )
+      ("MAX"  "MAX"  "The MAXIMUM value in the defined gate will be used to determine the scalar." ) )
+mouse_text: "Use MB1 to choose among MEAN, RMS, or MAXIMUM amplitude as a basis for TE scalar computation."
+plot_label: t
+
+
+parameter: GATETIME
+text: "Time gate reference"
+type: pop_choose:
+type_desc: ( ("Time 0"       1 "Gate times are referenced to time 0." )
+	     ("Water Bottom" 2 "Gate times are relative to the water bottom time." ) )
+mouse_text: "Use MB1 to select the time gate reference."
+plot_label: t
+
+
+parameter: db_option
+text: "Get TE gates from the DATABASE?"
+type: boolean:
+value: t
+mouse_text: "Set this to 'NO' if a TE time gate parameter file was not created interactively. (Will enter manually.)"
+
+
+parameter: GATENAME
+text: "  SELECT time gate parameter file"
+type: function:
+type_desc: ((parm_list "GAT") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a trace equalization time gate parameter file from the parameter file menu."
+plot_label: t
+
+
+parameter: GATENAWB
+text: "  SELECT water relative time gate file"
+type: function:
+type_desc: ((parm_list "WBG") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a water relative trace equalization time gate parameter file from the parameter file menu."
+plot_label: t
+
+
+
+parameter: PRIM_KEY
+text: "  SELECT Primary time gate header word"
+type: function:
+type_desc: (header_list headers)
+value: "SOURCE  "
+selected_item: "Live source number"
+mouse_text: "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying TE time gate parameters."
+
+
+parameter: SCND_KEY
+text: "  SELECT Secondary time gate header word"
+type: function:
+type_desc: (header_list headers)
+value: "AOFFSET "
+selected_item: "Absolute value of offset"
+mouse_text: "Use MB1 to select a header word from the HEADERS menu as the SECONDARY key for specifying TE time gate parms."
+
+
+
+parameter: TE_GATE
+text: "  SPECIFY TE gate parameters"
+type: edit:
+type_desc: (25 80 5 " FORMAT: Primary Gate Location Value:Secondary Gate Location Value:Time Gate/
+ EXAMPLE: 1:0.0:700-2000 / 1:2640:1000-2200 / 1:5280:1500-2500 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1:0:1000-2500/"
+mouse_text: "Use MB1 to access the text editor and define the TE time gates. (Example: '1:0:800-2200/1:5280:1300-2500/'.)"
+plot_label: t
+
+
+parameter: OUT_TYPE
+text: "Type of output"
+;type: choose:
+type: circular:
+type_desc: ( 
+      ("TRACES " 1 "Output the scaled input traces." )
+      ("SCALARS"  2 "Output the scalar value as a trace." ) )
+mouse_text: "This option determines what values are in the output traces."
+plot_label: t
+
+
+exec_data: ("TEQ"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: teq.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("GAINTYPE" implicit: (value 'GAINTYPE))
+			("GATETIME" implicit: (value 'GATETIME))
+			("PRIM_KEY" implicit: (value 'PRIM_KEY))
+			("SCND_KEY" implicit: (value 'SCND_KEY))
+			("TE_GATE"  implicit: (value 'TE_GATE))
+			("GATENAME" implicit: (if (value 'db_option)
+						  (value 'GATENAME) "NONE"))
+			("GATENAWB" implicit: (if (value 'db_option)
+						  (value 'GATENAWB) "NONE"))
+			("OUT_TYPE" implicit: (value 'OUT_TYPE))
+		)
+	   )
+
+rules: (
+
+   (rule1 ( not (value 'db_option) )
+			     (progn (do_not_show '(GATENAME GATENAWB))
+				    (do_show 'PRIM_KEY)
+				    (do_show 'SCND_KEY)
+				    (do_show 'TE_GATE)))
+
+   (rule2 ( and (value 'db_option)( =  (value 'GATETIME) 1 ) )
+                             (progn (do_show 'GATENAME)
+                                    (do_not_show 'GATENAWB)
+				    (do_not_show 'PRIM_KEY)
+				    (do_not_show 'SCND_KEY)
+				    (do_not_show 'TE_GATE)))
+
+   (rule3 ( and (value 'db_option)( =  (value 'GATETIME) 2 ) )
+                             (progn (do_show 'GATENAWB)
+                                    (do_not_show 'GATENAME)
+				    (do_not_show 'PRIM_KEY)
+				    (do_not_show 'SCND_KEY)
+				    (do_not_show 'TE_GATE)))
+
+
+	)
+)

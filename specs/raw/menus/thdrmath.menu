@@ -1,0 +1,299 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: THDRMATH
+label: "Trace Header Math"
+value_tab: 60
+
+parameter: mode
+text: "Select mode"
+type: pop_choose:
+type_desc: (
+("Fixed equation mode"    1 "Define a fixed equation. (DO NOT ATTEMPT TO CHANGE THE FORMAT OF EXISTING PROMAX HEADER WORDS; e.g. CHAN=1.0)")
+("Sequence renumber mode" 2 "Renumber sequences.") 
+("Rotation & Translation" 3 "Coordinate translation and rotation.") 
+("Change data attributes" 4 "Change global data parameters.") )
+mouse_text: "Select the math mode."
+plot_label: t
+
+parameter: OPERATE
+text: "  DEFINE trace header equation(s)"
+type: edit:
+type_desc: (25 80 5 " FORMAT: C=A+B-C; C=NINT(A/B)+MOD(A,B); C=A*((B**2.0)/C+1.0)
+ (Use semicolons to separate equations; See Help '?')
+
+ EXAMPLES: NEW_ELEV = REC_ELEV + 100.0; SOU_SLOC = NINT(SOU_X) / 55
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 5 )
+value: "new_elev = rec_elev + 100"
+mouse_text: "Use MB1 to access the text editor and define equations to overwrite old header words or create new ones."
+plot_label: t
+
+
+parameter: IENSTRC
+text: "  Renumber ensembles or traces?"
+type: circular:
+type_desc: (
+ ("ENSEMBLES" 1 "Renumber ensembles in the order in which they are input.")  
+("TRACES " 2 "Renumber headers of traces within ensembles, renumbering starts at the begining of each ensemble.") )
+mouse_text: "You can renumber either the ensemble number or the traces within ensembles."
+plot_label: t
+
+
+parameter: CHEADNAM
+text: "  SELECT trace header word"
+type: function:
+type_desc: (header_list headers)
+value: "NONE    "
+selected_item: "REPEATED data copy number"
+mouse_text: "Use MB1 to select a header word from the headers menu as the HEADER NAME key for renumbering."
+plot_label: t
+
+parameter: STARTVAL
+text: "  Starting value"
+type: typein:
+type_desc: (string: 12)
+value: "no default"
+mouse_text: "Value to assign to first trace header encountered, entry for floating point trace headers MUST include a decimal."
+plot_label: t
+
+parameter: INC_VAL
+text: "  Increment value"
+type: typein:
+type_desc: (string: 12)
+value: "no default"
+mouse_text: "Value by which to increment successive headers, entry for floating point header values MUST include a decimal."
+plot_label: t
+
+parameter: IRESET
+text: "  Reset the Starting value at header change?"
+type: boolean:
+value: nil
+mouse_text: " Do you want to reset the renumber counter to the Starting value when a different trace header changes value?"
+plot_label: t
+
+parameter: CHDRESET
+text: "  SELECT reset renumber trace header word"
+type: function:
+type_desc: (header_list headers)
+value: "S_LINE  "
+selected_item: "Swath or sail line number"
+mouse_text: "Use MB1 to select a header word from the headers menu as the HEADER NAME key for resetting."
+plot_label: t
+
+parameter: ANGLE
+text: "  Rotation angle"
+type: typein:
+type_desc: ( real:  8 0.0 360.0 )
+value: 0.0
+mouse_text: "Clockwise rotation angle of new coordinate relative to the original axes. (0.0 - 360.0 degrees)"
+plot_label: t
+
+parameter: XSHIFT
+text: "  X coordinate shift"
+type: typein:
+type_desc: ( real:  8 nil nil )
+value: 0.0
+mouse_text: "Value of X coordinate in old system of the new, translated origin.  (0.0 = no shift in X position)"
+plot_label: t
+
+parameter: YSHIFT
+text: "  Y coordinate shift"
+type: typein:
+type_desc: ( real:  8 nil nil )
+value: 0.0
+mouse_text: "Value of Y coordinate in the old system of the new, translated origin.  (0.0 = no shift in Y position)"
+plot_label: t
+
+parameter: warning
+text: "** CHANGE THESE ONLY IF YOU UNDERSTAND THE CONSEQUENCES **"
+
+parameter: IVALID
+text: "  Trace number valid?"
+type: pop_choose:
+type_desc: 
+	(
+("No change" -1 "Leave flag as is.")
+("Valid    " 1  "Trace numbers are valid and can be used to reference the database.")    
+("Invalid  " 0  "Trace numbers are NOT valid and can not be used to reference the database.")    
+	)
+mouse_text: "Set the global runtime flag for valid database. (i.e. trace numbers are unique and match the database)"
+plot_label: t
+
+parameter: IGEOM
+text: "  Geometry valid?"
+type: pop_choose:
+type_desc: 
+	(
+("No change" -1 "Leave flag as is.")
+("Valid    " 1  "Geometry loaded in the trace header match the database.")
+("Invalid  " 0  "Geometry loaded in the trace header do NOT match the database.")
+	)
+mouse_text: "Set the global runtime flag for valid geometry. (i.e. geometry in the trace headers matches the database)"
+plot_label: t
+
+parameter: IDOMAIN
+text: "  Domain of data"
+type: pop_choose:
+type_desc: 
+	(
+("No change " -1 "Leave flag as is.")
+("T-X       " 0  "Normal time-space domain." )
+("F-X       " 1  "Frequency-space domain." ) 
+("F-T       " 2  "Frequency-time domain." )
+("F-K       " 3  "Frequency-wavenumber domain." )
+("Tau-P     " 4  "Tau-P (time-ray-parameter) domain." )
+("Depth     " 7  "Depth-space domain." )
+	)
+mouse_text: "Select new data type."
+plot_label: t
+
+
+parameter: IDTYP
+text: "  Data type"
+type: pop_choose:
+type_desc: 
+	(
+("No change           " -1 "Leave flag as is.")
+("Normal unstacked    " 0  "Normal unstacked data.")
+("Normal stacked      " 7  "Normal stacked data.")
+("Unstacked trasformed" 2  "Transformed unstacked - e.g., frequency dom. - data" )
+("Stacked transformed " 3  "Transformed stacked - e.g., frequency domain - data" )
+	)
+mouse_text: "Select data type."
+plot_label: t
+
+parameter: ISORT
+text: "  Primary sort of data"
+type: pop_choose:
+type_desc: 
+	(
+("No change   " -1 "Leave flag as is.")
+("CDP Sort    " 1  "CDP bin number sorted data." )
+("SIN Sort    " 2  "Shot index number sorted data." ) 
+("RECSLOC Sort" 3  "Receiver surface station sorted data." )
+("Offset Sort " 4  "Shot to receiver signed offset sorted data." )
+("CHAN Sort   " 5  "Channel number sorted data." )
+("ILINE Sort  " 7  "Inline number sorted data." )
+("XLINE Sort  " 8  "Crossline number sorted data." )
+
+	)
+mouse_text: "Select new primary sort order."
+plot_label: t
+
+
+
+exec_data:  
+(eval
+    (let ((result nil))
+
+        (if (= (value 'mode) 1 ) 
+            (setq result 
+	        (pushend 
+                  '("THDRMATH"
+		    ("GENERAL"
+			("version" implicit: "ProMAX $Id: thdrmath.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("OPERATE" implicit: (value 'OPERATE))
+		    )
+	          ) 
+        result)
+            )
+       )
+
+        (if (= (value 'mode) 2 ) 
+            (setq result 
+	        (pushend 
+                  '("HEADER_RENUM"
+		    ("GENERAL"
+
+			("IENSTRC" implicit: (value 'IENSTRC))
+
+
+
+			("CHEADNAM"   implicit: (value 'CHEADNAM))
+			("STARTVAL" implicit: (value 'STARTVAL))
+			("INC_VAL" implicit:  (value 'INC_VAL))
+			("IRESET"     implicit: (if (value 'IRESET) 1 0))
+			("CHDRESET"   implicit: (value 'CHDRESET))
+		    )
+	          ) 
+        result)
+            )
+       )
+
+        (if (= (value 'mode) 3 ) 
+            (setq result 
+	        (pushend 
+                  '("ROTATE"
+		    ("GENERAL"
+			("ANGLE  " implicit:  (value 'ANGLE  ))
+			("XSHIFT " implicit:  (value 'XSHIFT ))
+			("YSHIFT " implicit:  (value 'YSHIFT ))
+		    )
+	          ) 
+        result)
+            )
+       )
+
+
+        (if (= (value 'mode) 4) 
+            (setq result 
+	        (pushend 
+                  '("DEITY"
+		    ("GENERAL"
+			("IVALID " implicit:  (value 'IVALID))
+			("IGEOM  " implicit:  (value 'IGEOM ))
+			("IDOMAIN" implicit:  (value 'IDOMAIN ))
+
+			("IDTYP  " implicit:  (value 'IDTYP ))
+			("ISORT  " implicit:  (value 'ISORT ))
+
+
+
+
+		    )
+	          ) 
+        result)
+            )
+       )
+
+result)
+)
+
+
+rules: (
+ (mode1 ( = (value 'mode) 1 ) (do_show 'OPERATE)
+		(dont_show 'OPERATE ) )
+
+
+ (mode2 ( = (value 'mode) 2 ) (do_show '(IENSTRC CHEADNAM STARTVAL INC_VAL IRESET CHDRESET) )
+		(dont_show '(IENSTRC CHEADNAM STARTVAL INC_VAL IRESET CHDRESET) ) )
+
+ (mode2a ( if (value 'IRESET)  (do_show 'CHDRESET)
+				(dont_show 'CHDRESET) ) )
+
+
+
+
+
+
+ (mode3 ( = (value 'mode) 3 ) (do_show '(ANGLE XSHIFT YSHIFT)  )
+		(dont_show '(ANGLE XSHIFT YSHIFT)  ) )
+
+
+ (mode4 ( = (value 'mode) 4 ) (do_show '(warning IVALID IGEOM IDTYP IDOMAIN ISORT)  )
+		(dont_show '(warning IVALID IGEOM IDTYP IDOMAIN ISORT)  ) )
+
+
+
+
+
+       )
+)

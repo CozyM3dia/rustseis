@@ -1,0 +1,44 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/rustseis-core",
+    "crates/rustseis-io",
+    "crates/rustseis-dsp",
+    "crates/rustseis-imaging",
+    "crates/rustseis-flow",
+    "crates/rustseis-render",
+    "crates/rustseis-engine",
+    "crates/rustseis-mcp",
+    "apps/rustseis-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["RustSeis Contributors"]
+
+[workspace.dependencies]
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive"] }
+memmap2 = "0.9"
+png = "0.17"
+rayon = "1.10"
+rusqlite = { version = "0.32", features = ["bundled"] }
+rustfft = "6.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tiny-skia = "0.11"
+toml = "0.8"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+rustseis-core = { path = "crates/rustseis-core" }
+rustseis-io = { path = "crates/rustseis-io" }
+rustseis-dsp = { path = "crates/rustseis-dsp" }
+rustseis-imaging = { path = "crates/rustseis-imaging" }
+rustseis-flow = { path = "crates/rustseis-flow" }
+rustseis-render = { path = "crates/rustseis-render" }
+rustseis-engine = { path = "crates/rustseis-engine" }
+rustseis-mcp = { path = "crates/rustseis-mcp" }

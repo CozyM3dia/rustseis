@@ -1,0 +1,156 @@
+{
+  "name": "NIAS_L22_Tier1_2D_Marine_EndToEnd",
+  "description": "End-to-end 2D marine seismic processing flow on Data Seismik (SGM3-BIO-NIAS-L22): SEG-D Input -> Debias -> Marine Geometry -> Bandpass -> TAR -> Top Mute -> Spiking Decon -> F-K Filter -> CDP Sort -> IVA Semblance Auto-Pick -> NMO -> CDP Stack -> Kirchhoff 2D Time Migration -> SEG-Y Export",
+  "steps": [
+    {
+      "tool": "segd_read",
+      "enabled": true,
+      "params": {
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik",
+        "max_shots": 40,
+        "live_only": true
+      }
+    },
+    {
+      "tool": "trace_len",
+      "enabled": true,
+      "params": { "length_ms": 4000.0 }
+    },
+    {
+      "tool": "debias",
+      "enabled": true,
+      "params": {}
+    },
+    {
+      "tool": "geomspread_marine",
+      "enabled": true,
+      "params": {
+        "near_offset_m": 100.0,
+        "receiver_interval_m": 12.5,
+        "nominal_shot_interval_m": 25.0,
+        "cdp_bin_size_m": 6.25,
+        "chan1_is_near": true,
+        "source_depth_m": 5.0,
+        "streamer_depth_m": 6.0
+      }
+    },
+    {
+      "tool": "filter",
+      "enabled": true,
+      "params": {
+        "spec_type": "Ormsby",
+        "phase": "Zero",
+        "freqs": [6.0, 12.0, 70.0, 90.0],
+        "pad_pct": 25.0
+      }
+    },
+    {
+      "tool": "tar",
+      "enabled": true,
+      "params": {
+        "time_power": 1.5,
+        "max_time_ms": 3500.0
+      }
+    },
+    {
+      "tool": "decon",
+      "enabled": true,
+      "params": {
+        "operator_ms": 140.0,
+        "prediction_lag_ms": 16.0,
+        "white_noise_pct": 1.0,
+        "design_windows_ms": [[300.0, 3200.0]]
+      }
+    },
+    {
+      "tool": "fk_filt",
+      "enabled": true,
+      "params": {
+        "mode": "RejectLowVelocity",
+        "dx_m": 12.5,
+        "vel_cut_mps": 1350.0,
+        "taper_frac": 0.2,
+        "pedestal": 0.02
+      }
+    },
+    {
+      "tool": "inline_sort",
+      "enabled": true,
+      "params": {
+        "primary": "CDP",
+        "secondary": "AOFFSET"
+      }
+    },
+    {
+      "tool": "vaprecom71",
+      "enabled": true,
+      "params": {
+        "cdps": [],
+        "save_table": "nias_auto_vel",
+        "auto_pick": true,
+        "scan": {
+          "v_min_mps": 1450.0,
+          "v_max_mps": 3200.0,
+          "dv_mps": 50.0,
+          "window_ms": 30.0,
+          "t_step_ms": 20.0,
+          "stretch_mute_pct": 50.0
+        }
+      }
+    },
+    {
+      "tool": "nmo",
+      "enabled": true,
+      "params": {
+        "velocity_table": "nias_auto_vel",
+        "params": {
+          "direction": "Forward",
+          "stretch_mute_pct": 35.0,
+          "stretch_taper_samples": 8,
+          "do_stat": true
+        }
+      }
+    },
+    {
+      "tool": "stack",
+      "enabled": true,
+      "params": {
+        "method": "Mean",
+        "fold_norm_power": 1.0,
+        "exclude_muted_zeros": true
+      }
+    },
+    {
+      "tool": "agc",
+      "enabled": true,
+      "params": {
+        "operator_ms": 600.0,
+        "basis": "Rms",
+        "anchor": "Center",
+        "target_amp": 1.0
+      }
+    },
+    {
+      "tool": "kirtime2dstk",
+      "enabled": true,
+      "params": {
+        "velocity_table": "nias_auto_vel",
+        "params": {
+          "dx_m": 6.25,
+          "max_aperture_m": 1500.0,
+          "max_dip_deg": 55.0,
+          "apply_half_derivative": true,
+          "anti_alias": true
+        }
+      }
+    },
+    {
+      "tool": "segy_write",
+      "enabled": true,
+      "params": {
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\nias_40shots_migrated.sgy",
+        "comment": "NIAS L22 40-shot Tier 1 End-to-End Migrated 2D Section"
+      }
+    }
+  ]
+}

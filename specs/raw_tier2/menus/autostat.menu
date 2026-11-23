@@ -1,0 +1,148 @@
+; 1
+'(
+ name: AUTOSTAT
+label: "Correlation Autostatics*"
+value_tab: 47
+
+
+parameter: LABEL
+text: "Select Trace data file"
+type: function:
+type_desc: (dataset_list datasets)
+value: "no entry"
+selected_item: "* No Datasets Found *"
+mouse_text: "Use Mouse Button 1 to select a trace data file description from the datasets menu."
+
+
+parameter: HRZ_NAME
+text: "Select Autostatics HORIZON file"
+type: function:
+type_desc: ((parm_list "AHZ") parms)
+mouse_text: "Use Mouse Button 1 to select an Autostatics HORIZON file from the horizon file menu."
+
+
+parameter: VEL_NAME
+text: "Select Autostatics VELOCITY file"
+type: function:
+type_desc: ( (parm_list "VEL") parms )
+mouse_text: "Use Mouse Button 1 to select an Autostatics VELOCITY file from the velocity file menu."
+
+
+parameter: VEL_ERR
+text: "Maximum velocity error (percent)"
+type: typein:
+type_desc: ( real: 5 0.0 100.0 )
+value: 5.0
+mouse_text: "Estimated maximum error (percent) within any gate of previously-applied velocities."
+
+
+parameter: V_SMOOTH
+text: "Number of CDP's for velocity smoothing"
+type: typein:
+type_desc: ( int: 3 1 999 )
+value: 51
+mouse_text: "Number of CDP's over which to smooth correlation shift estimates of reflection gate velocities."
+
+
+parameter: MIN_VEL_TRC
+text: "Minimum # of traces for vel. estimate"
+type: typein:
+type_desc: ( int: 3 1 999 )
+value: 36
+mouse_text: "Minimum number of traces to be included in a velocity estimate (program will expand the CDP range to satisfy this)."
+
+
+parameter: OS_RNG_P
+text: "Minimum % of offset range for vel. estimate"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 25.0
+mouse_text: "Minimum percentage of the normal offset range for a velocity estimate (program will expand the CDP range to satisfy this)."
+
+
+parameter: STAT_MAX
+text: "Maximum static allowed (milliseconds)"
+type: typein:
+type_desc: ( real: 5 1.0e-3 nil )
+value: 30.0
+mouse_text: "Do not allow computed statics to exceed this magnitude."
+
+
+parameter: LOOP_INT
+text: "Statics partitioning iterations"
+type: typein:
+type_desc: ( int: 2 1 99 )
+value: 4
+mouse_text: "Number of iterations of partitioning statics into velocities and source/receiver/channel/structure statics."
+
+
+parameter: TLIVEMIN
+text: "Minimum live samples in a gate (percent)"
+type: typein:
+type_desc: ( real: 5 1.0e-3 100.0 )
+value: 60.0
+mouse_text: "If fewer than this percentage of samples in any gate are non-zero, the trace is excluded from statics estimates."
+
+
+parameter: rev_option
+text: "Seek/report reversed sources/receivers/channels"
+type: boolean:
+value: t
+mouse_text: "Automatically detects reversed trace ensembles and temporarily reverses traces (for statics calculations ONLY)."
+
+
+parameter: db_option
+text: "Create a NEW database entry for each run?"
+type: boolean:
+value: nil
+mouse_text: "If this is set to NO, if a previous database entry is present it will be overwritten (thereby saving space)."
+
+
+parameter: DB_NUM
+text: "  Enter 4 digit ID number"
+type: typein:
+type_desc: ( string: 4 )
+value: "0001"
+mouse_text: "Enter a 4 digit number identifying the database output parameters as SST1XXXX and RST1XXXX."
+
+
+exec_data: ("AUTOSTAT"
+		("SPECIAL"
+			("TOOLTYPE"     implicit: "STAND_ALONE")
+			("PATHNAME"     implicit: "autostat.exe")
+
+		)
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: autostat.menu 28744 2001-06-25 07:56:19Z build $ $Revision: 28744 $ $Date: 2001-06-25 01:56:19 -0600 (Mon, 25 Jun 2001) $")
+			("TRIMSTAT" implicit: 0 )
+			("LABEL"    implicit: (value 'LABEL))
+			("HRZ_NAME" implicit: (value 'HRZ_NAME))
+			("VEL_NAME" implicit: (value 'VEL_NAME))
+			("LOOP_INT" implicit: (value 'LOOP_INT))
+			("REV_TEST" implicit: (if (value 'rev_option) 1 0 ))
+			("V_SMOOTH" implicit: (value 'V_SMOOTH))
+			("VEL_ERR"  implicit: (value 'VEL_ERR))
+			("MIN_V_TR" implicit: (value 'MIN_VEL_TRC))
+			("OS_RNG_P" implicit: (value 'OS_RNG_P))
+			("TLIVEMIN" implicit: (value 'TLIVEMIN))
+			("STAT_MAX" implicit: (value 'STAT_MAX))
+			("NEW_DB"    implicit: (if (value 'db_option) 1 0 ))
+			("DB_NUM  " implicit: (value 'DB_NUM))
+		)
+	   )
+
+rules: (
+        (rule1 ( = ( value 'VEL_ERR) 0.0 )  (progn (do_not_show 'V_SMOOTH)
+				       		   (do_not_show 'MIN_VEL_TRC)
+				       		   (do_not_show 'OS_RNG_P))
+	                	            (progn (do_show 'V_SMOOTH)
+					           (do_show 'MIN_VEL_TRC)
+				 	           (do_show 'OS_RNG_P)))
+
+	(rule8 (value 'db_option)
+             (do_show 'DB_NUM)
+             (do_not_show 'DB_NUM))
+
+	)
+)
+

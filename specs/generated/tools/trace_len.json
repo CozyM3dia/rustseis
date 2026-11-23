@@ -1,0 +1,15 @@
+{
+  "menu_id": "trace_len",
+  "tool_name": "TRACE_LEN",
+  "label": "Trace Length",
+  "parameter_count": 1,
+  "parameters": [
+    {
+      "name": "TRACELEN",
+      "prompt": "New trace length",
+      "kind": "typein",
+      "default": "2000.0",
+      "help": "Revised trace length to output: trace is clipped if shortened, padded with zeros if lengthened."
+    }
+  ]
+}

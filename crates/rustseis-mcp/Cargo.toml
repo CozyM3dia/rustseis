@@ -1,0 +1,14 @@
+[package]
+name = "rustseis-mcp"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rustseis-core.workspace = true
+rustseis-engine.workspace = true
+rustseis-flow.workspace = true
+rustseis-io.workspace = true
+rustseis-render.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

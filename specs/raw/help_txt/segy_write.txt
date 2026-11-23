@@ -1,0 +1,1180 @@
+SEG-Y Output542
+
+ProMAX® Reference
+
+SEG-Y Output
+SEG-Y Output writes out industry standard SEG-Y tapes, it
+can also write out frequently requested non-standard
+variations of SEG-Y.
+
+Theory
+This process offers the option of writing a SEG-Y disk image
+ﬁle in IEEE format. The disk format allows you to retain some
+of the header information for later use, while writing out a
+SEG-Y format disk ﬁle.
+Read the Conﬁguring ProMAX® Tape Device Information
+section in the System Administration guide for system speciﬁc
+information about tape device conﬁguration, settings, long
+blocks, installation, and a detailed description of the tape
+subsystems.
+Read the Seismograph Instrument Parameters section for
+information on transduction, coding, and skew corrections.
+
+Parameters
+Type of SEG-Y
+Select the type of data storage to be used for the output data.
+The choices are:
+• Standard writes a standard SEGY tape.
+• Sierra writes a Sierra SEGY disk ﬁle (ﬁxed record
+length).
+• Landmark TOD writes a Landmark TOD SEGY disk ﬁle
+(ﬁxed trace length)
+• Western writes a Western SEGY disk ﬁle (variable record
+length).
+• Charisma writes a Charisma SEGY disk ﬁle (ﬁxed record
+length).
+• MS-DOS writes a MS-DOS SEGY disk ﬁle (variable
+record length).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output543
+
+ProMAX® Reference
+
+Type of storage to use
+• Tape uses a real tape dataset.
+• Disk Image uses a disk representation of the tape.
+Enter Disk ﬁle path name
+This appears if Disk Image to Type of storage to use. Enter
+the disk ﬁlename, including the path. You do not need to
+enter the full path if the ﬁle is in the Line subdirectory.
+Is the dataset to be in the catalog
+This appears if Tape to Type of storage to use. Select Yes to
+put the output dataset in an active catalog.
+Write over the dataset if it already exists?
+This appears if Yes to Is the dataset to be in the catalog.
+Select Yes to overwrite an existing ﬁle.
+The Available Tape Catalog(s)
+This appears if Yes to Is the dataset to be in the catalog.
+Select the catalog for retrieving the VSNs.
+Select tape device
+This appears if Tape to Type of storage to use. Select tapeN
+(N=ProMAX Device Name) to choose a tape device from a
+popup menu containing the existing list.
+Tape volume selection method
+Select the tape volume selection method. This is the method
+that the system groups volumes.
+• External VSN list appear if No to Is the dataset to be
+in the catalog.
+• User or Catalog supplied name if Yes to Is the dataset
+to be in the Catalog.
+Enter/Select the tape ﬁle name (catalog DSN)
+This appears if Yes to Is the dataset in the catalog. Select or
+enter a new catalog name from the multiple choose menu.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output544
+
+ProMAX® Reference
+
+Tape LABEL type
+Select the type of tape label from the following options:
+• None
+• ANSI
+• IBM
+Enter the tape ﬁle name for internal label
+This appears if ANSI or IBM to Tape LABEL type. Enter the
+tape ﬁle name.
+Specify Mask for external labels
+Enter the label volume ids for external tapes. For robotic
+devices, this ﬁeld is required. For other tape devices this ﬁeld
+is optional. If you choose to use it, the tape mount message
+will contain the label of the next tape to mount.
+The mask is used in conjunction with the parameter below to
+build tape label names.
+For example, if the tape labels for a job are
+PB001, PB002, PB003
+
+the mask will be
+PB000
+
+Specify Mask list for external labels
+Enter the label volume lists for external tapes. For example, if
+the tape labels fora job are
+PB001, PB002, PB003
+
+he mask list will be
+1-3
+
+The ProMAX® tape catalog, tcat, is automatically bypassed if
+the catalog is already active. This allows you to input multiple
+datasets.
+Expiration method for labeled tapes
+Select the expiration method for labeled tapes from the
+following choice:
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output545
+
+ProMAX® Reference
+
+• Retention Days keeps tapes for a speciﬁed number of
+days.
+• Expiration Date keeps tapes until a speciﬁed date.
+Retention period (days)
+This appears if Retention Days to Expiration method for
+labeled tapes. Enter the number of days that labeled tapes
+are kept. After that retention period, tapes are converted to
+scratch.
+Expiration date
+This appears if Expiration Date to Expiration method for
+labeled tapes. Enter an expiration date in a variety of
+formats. For example, 1 September, 2001, Sep 1, 2001,
+9/1/01, 09/01/2001 are all valid. The menu checks the
+validity of the entered date and display and error message if it
+cannot interpret it.
+File Number on tape
+Enter the ﬁle number to write to tape when there are multiple
+SEG-Y ﬁles on one reel. SEG-Y standard is one ﬁle per tape
+and putting more than one ﬁle per tape violates the SEG-Y
+standard. However, it is commonly done, especially when
+stacked data is written to tape. This option allows you to
+output a selected ﬁle to tape by counting the ﬁles on the tape.
+For example, if you want to skip the ﬁrst two datasets on a
+tape and write a third dataset, give a value of 3 for this
+parameter. You do not need to position the tape at the EOF
+marker before writing, our software will automatically skip
+over the correct number of ﬁles to write the ﬁle number you
+speciﬁed.
+New ﬁle on line segment end?
+Select Yes to write multiple SEG-Y ﬁles to tape based upon
+the LSEG_END ﬂag. When a trace is written, where the trace
+header value for LSEG_END =1, another SEG-Y ﬁle is started
+beginning with the next trace. This option allows you to write
+seismic lines to separate ﬁles. SEG-Y Output will set the
+LSEG_END ﬂag at line number changes (LINE_NO) and/or
+ﬁle boundaries.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output546
+
+ProMAX® Reference
+
+Note: At this time, the dataset must be sorted by ILINE_NO
+and a LSEG_END = END_ENS must be inserted using Trace
+Header Math to explicitly set lseg_end.
+Polarity of output data
+Select the polarity of the input label from the following
+options:
+• Unknown origin and polarity are unknown.
+• Normal is positive pressure and negative sample value.
+• Reverse is positive pressure and positive sample value.
+EBCDIC Reel Header Generation Method?
+Select the method for populating the 3200 byte EDCDIC reel
+header from the following choices:
+• User type in
+• Derived from processing history
+• Automatic System Generated.
+Edit (copy) SEG-Y reel header
+This appears if User type in to EBCDIC Reel Header
+Generation Method. Edit the SEG-Y reel header (40 80column card images).
+Client name to use in system generated reel header
+This appears if Automatic System Generated to EBCDIC
+Reel Header Generation Method. The default is the value
+found in the client position of the reel header.
+Company name to use in system generated reel header
+This appears if Automatic System Generated to EBCDIC
+Reel Header Generation Method. The default is the value
+found in the company position of the reel header.
+Display dataset information option
+Select the amount of information to write to the log ﬁle from
+the following choices:
+• None writes dataset information to the log ﬁle.
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output547
+
+ProMAX® Reference
+
+• Show reel header writes SEG-Y reel header into the log
+ﬁle.
+• Show processing history writes the dataset’s processing history into the log ﬁle.
+• Show Reel Header and history writes both the reel
+header and processing history into the log ﬁle.
+Job ID # for binary header
+Enter the job identiﬁcation number needed for the binary
+header. This value has no meaning for the ProMAX®
+database.
+Line # for binary header
+Enter the line number for the binary header; this is not
+necessarily an integer in the database. You must supply a
+value here.
+Note: If you have previouly run SEG-Y Input in the same
+ﬂow directory, the binary headers from that run initialize all
+binary header values for this process. SEG-Y Input savetThe
+binary headersin the bhed ﬁle. These values (zeros if not
+available) are overridden as needed to adhere to the SEG-Y
+standard.
+Desired trace format
+Select the type of data sample words to be written out. When
+using the MS-DOS option only the 2 byte integer format is
+used so this parameter is not shown. The choices are:
+• IBM Real is 4-byte IBM Floating Point SEG-Y.
+• 4 byte Integer is 4-byte Integer SEG-Y.
+• IEEE Real is 4-byte IEEE Floating Point SEG-Y (nonstandard).
+• 2 byte Integer is 2-byte Integer SEG-Y.
+• 1 byte Integer is 1-byte Integer SEG-Y (non-standard).
+Use the coordinate scalars
+Select No to ignore the coordinate scalars in bytes 71-72 of
+the SEG-Y trace headers. Normally, a scalar is computed and
+saved in the trace header so the maximum ﬂoating point
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output548
+
+ProMAX® Reference
+
+precision is saved for each value. No forces the system to use
+the unscaled trace values.
+Note: The location coordinates: SOU_X, SOU_Y, REC_X,
+REC_Y, CDP_X and CDP_Y are stored as 4 byte integers in
+SEG-Y trace headers. Due to the storage type, we recommend
+that this option be left at its default value of Yes.
+Use the Rev 1 time scalar?
+Select Yes to apply the time scalar ( bytes 215-216 in the Rev
+1 header) to the statics, lag times and mutes (bytes 95-114)
+when reading the SEG-Y trace headers. The time scalars are
+ignored if the input is not SEG-Y Rev1 or higher. (See SEG-Y
+Rev 1 header table.)
+Maximum time to output
+Enter the maximum time in ms to output. The default, 0,
+outputs all the available data.
+Remap SEGY headers?
+Select Yes to output/override/remap SEG-Y trace header
+values.
+Output/override trace header entries
+This appears if Yes to Remap SEGY headers. Select the
+header entries to output or override in the SEG_Y trace
+header, using user-supplied format and position. Header
+entries must exist prior to output. Format can be 2I, 4I, 4R
+IBM, 4R IEEE, 8R IEEE. Position is anywhere inside the 240
+byte SEG_Y trace header. For example, bytes 233-240 could
+be used since they are currently unassigned in both the
+standard SEG-Y and Rev 1headers.
+An override entry consists of four ﬁelds plus a / at the end of
+each entry. Each ﬁeld is separated by a comma.
+Example:
+rms_amp, 4R,IEEE, 233/
+
+Field 1: rms_amp is the name of the header word. This word
+must already exist in the header prior to output. This ﬁeld
+can be 1 to 8 characters.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output549
+
+ProMAX® Reference
+
+Field 2: 4R is the format of the value in the SEG-Y header.
+This ﬁeld can be an 2I (2 byte integer), 4I (4 byte integer), 4R
+(4 byte real), or 8R (8 byte real). This ﬁeld must be 2
+characters.
+Field 3: IEEE is the data representation of a real value in the
+SEG-Y header. This ﬁeld is valid for 4R and 8R values only.
+This ﬁeld can be IBM for IBM real values or IEEE for IEEE
+real values. At this time, 8R can be IEEE only.
+Field 4: 233 is the starting byte position within the SEG-Y
+header to write the override value. This ﬁeld can be 1 to 3
+characters.
+Examples:
+sou_sloc, 4I, 181/nav_sloc, 4R,IBM, 185/
+
+Standard SEG-Y Headers
+Bytes
+
+Use
+
+Input
+
+Output
+
+1-4
+
+trace sequence number
+within line
+
+Ignored (reassigned
+internally in the
+ProMAX® system)
+
+Output from
+TRACENO
+
+5-8
+
+trace sequence number
+within reel
+
+Ignored
+
+Used on output
+
+9-12
+
+original ﬁeld record
+number
+
+Input to FFID
+
+Output from FFID
+
+13-16
+
+trace number within the
+original ﬁeld record
+(channel)
+
+Input to CHAN
+
+Output from CHAN
+
+17-20
+
+energy source point
+number
+
+Input to SOURCE
+
+Output from
+SOURCE
+
+21-24
+
+CDP ensemble number
+
+Input to CDP
+
+Output from CDP
+
+25-28
+
+trace number within CDP
+ensemble
+
+Ignored
+
+Output from
+SEQNO
+
+29-30
+
+trace identiﬁcation code
+
+Input to TRC_TYPE
+
+Output from
+TRC_TYPE
+
+31-32
+
+number of vertically
+summed traces
+
+Ignored
+
+Ignored
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output550
+
+ProMAX® Reference
+
+Bytes
+
+Use
+
+Input
+
+Output
+
+33-34
+
+number of horizontally
+stacked traces (fold)
+
+Input to TR_FOLD
+(but reassigned by
+geometry)
+
+Output from
+TR_FOLD
+
+35-36
+
+data use: production or test
+
+Ignored
+
+Ignored
+
+37-40
+
+distance from source to
+receiver
+
+Input to OFFSET and
+AOFFSET (but
+reassigned by
+geometry)
+
+Output from
+OFFSET
+
+41-44
+
+receiver group elevation
+
+Input to REC_ELEV
+
+Output from
+REC_ELEV
+
+45-48
+
+surface elevation at source
+
+Input to SOU_ELEV
+
+Output from
+SOU_ELEV
+
+49-52
+
+source depth below surface
+
+Input to DEPTH
+
+Output from
+DEPTH
+
+53-56
+
+datum elevation at receiver
+
+Ignored
+
+Ignored
+
+57-60
+
+datum elevation at source
+
+Ignored
+
+Ignored
+
+61-64
+
+water depth at source
+
+Input to SOU_H2OD
+
+Output from
+SOU_H2OD
+
+65-68
+
+water depth at receiver
+
+Input to REC_H2OD
+
+Output from
+REC_H2OD
+
+69-70
+
+scalar for bytes 41-68
+
+Used on input
+
+Computed on output
+
+71-72
+
+scalar for bytes 73-88
+
+Used on input
+
+Computed on output
+
+73-76
+
+source X coordinate
+
+Input to SOU_X, 4
+byte real, input to
+SOU_XD, 8 byte real
+
+Output from
+SOU_X (precise to
+7 digits)
+
+77-80
+
+source Y coordinate
+
+Input to SOU_Y, 4
+byte real, input to
+SOU_YD, 8 byte real
+
+Output from
+SOU_Y (precise to
+7 digits)
+
+81-84
+
+receiver X coordinate
+
+Input to REC_X, 4
+byte real, input to
+REC_XD, 8 byte real
+
+Output from
+REC_X (precise to
+7 digits)
+
+85-88
+
+receiver Y coordinate
+
+Input to REC_Y, 4
+byte real, input to
+REC_YD, 8 byte real
+
+Output from
+REC_Y (precise to
+7 digits)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output551
+
+ProMAX® Reference
+
+Bytes
+
+Use
+
+Input
+
+Output
+
+89-90
+
+coordinates units - to
+database
+
+Input to database
+(IUNITSz)
+
+Output from
+database (IUNITSz)
+
+91-92
+
+weathering velocity
+
+Ignored
+
+Ignored
+
+93-94
+
+sub-weathering velocity
+
+Ignored
+
+Ignored
+
+95-96
+
+uphole time at source
+
+Input to UPHOLE
+
+Output from
+UPHOLE
+
+97-98
+
+uphole time at receiver
+
+Ignored
+
+Ignored
+
+99-100
+
+source static correction
+
+Input to SOU_STAT
+
+Output from
+SOU_STAT
+
+101-102
+
+receiver static correction
+
+Input to REC_STAT
+
+Output from
+REC_STAT
+
+103-104
+
+total static applied
+
+Input to TOT_STAT
+
+Output from
+TOT_STAT
+
+105-106
+
+lag time A
+
+Ignored
+
+Ignored
+
+107-108
+
+lag time B
+
+Ignored
+
+Ignored
+
+109-110
+
+delay recording time
+
+Input to NA_STAT,
+TAPE_TO
+
+Ignored
+
+111-112
+
+mute time start
+
+Input to TLIVE_S
+
+Output from
+TLIVE_S
+
+113-114
+
+mute time end
+
+Input to TFULL_S
+
+Output from
+TFULL_S
+
+115-116
+
+number of samples in this
+trace
+
+Ignored (cannot vary
+in the ProMAX®
+system)
+
+Output from global
+variable NUMSMPz
+
+117-118
+
+sample interval in this
+trace
+
+Ignored (cannot vary
+in the ProMAX®
+system)
+
+Output from global
+variable
+SAMPRATz
+
+119-120
+
+gain type of instruments
+
+Input to database
+(IGAINXz)
+
+Output from
+database
+(IGAINXz)
+
+121-122
+
+instrument gain constant
+
+Input to database
+(PREAMPz)
+
+Output from
+database
+(PREAMPz)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output552
+
+ProMAX® Reference
+
+Bytes
+
+Use
+
+Input
+
+Output
+
+123-124
+
+instrument early gain
+
+Input to database
+(EARLYGz)
+
+Output from
+database
+(EARLYGz)
+
+125-126
+
+correlated ﬂag
+
+Ignored
+
+Ignored
+
+127-128
+
+sweep start frequency
+
+Ignored
+
+Ignored
+
+129-130
+
+sweep end frequency
+
+Ignored
+
+Ignored
+
+131-132
+
+sweep length
+
+Ignored
+
+Ignored
+
+133-134
+
+sweep type
+
+Ignored
+
+Ignored
+
+135-136
+
+sweep start taper length
+
+Ignored
+
+Ignored
+
+137-138
+
+sweep end taper length
+
+Ignored
+
+Ignored
+
+139-140
+
+sweep taper type
+
+Ignored
+
+Ignored
+
+141-142
+
+alias ﬁlter freq - to
+database
+
+Input to database
+(AAXFILTz)
+
+Output from
+database
+(AAXFILTz)
+
+143-144
+
+alias ﬁlter slope - to
+database
+
+Input to database
+(AAXSLOPz)
+
+Output from
+database
+(AAXSLOPz)
+
+145-146
+
+notch ﬁlter freq - to
+database
+
+Input to database
+(FREQXNz)
+
+Output from
+database
+(FREQXNz)
+
+147-148
+
+notch ﬁlter slope - to
+database
+
+Input to database
+(FXNSLOPz)
+
+Output from
+database
+(FXNSLOPz)
+
+149-150
+
+low cut freq - to database
+
+Input to database
+(FREQXLz)
+
+Output from
+database
+(FREQXLz)
+
+151-152
+
+high cut freq - to database
+
+Input to database
+(FREQXHz)
+
+Output from
+database
+(FREQXHz)
+
+153-154
+
+low cut slope - to database
+
+Input to database
+(FXLSLOPz)
+
+Output from
+database
+(FXLSLOPz)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output553
+
+ProMAX® Reference
+
+Bytes
+
+Use
+
+Input
+
+Output
+
+155-156
+
+high cut slope - to database
+
+Input to database
+(FXHSLOPz)
+
+Output from
+database
+(FXHSLOPz)
+
+157-158
+
+year recorded - to database
+
+Input to database
+(IDATRECz)
+
+Output from
+database
+(IDATRECz)
+
+159-160
+
+day of year recorded
+
+Ignored
+
+Ignored
+
+161-162
+
+hour of day recorded
+
+Ignored
+
+Ignored
+
+163-164
+
+minute of hour recorded
+
+Ignored
+
+Ignored
+
+165-166
+
+second of minute recorded
+
+Ignored
+
+Ignored
+
+167-168
+
+time basis code
+
+Ignored
+
+Ignored
+
+169-170
+
+trace weighting factor
+
+used in 32, 16, and 8
+bit integer formats
+
+computed for 32,
+16, and 8 bit integer
+formats
+
+171-172
+
+geophone group number of
+roll switch pos. 1
+
+Ignored
+
+Ignored
+
+173-174
+
+geophone group number of
+trace 1 in record
+
+Ignored
+
+Ignored
+
+175-176
+
+geophone group number of
+last trace in record
+
+Ignored
+
+Ignored
+
+177-178
+
+gap size
+
+Ignored
+
+Ignored
+
+179-180
+
+overtravel associated with
+taper
+
+Ignored
+
+Ignored
+
+181-240
+
+optional use
+
+Used on input
+(if Rev 1)
+
+Used on output
+(if Rev 1)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-Y Output554
+
+ProMAX® Reference
+
+SEG-Y Rev 1 Headers
+Bytes
+
+Use
+
+Input
+
+181-184
+
+CDP X Coordinate
+
+CDP_X & CDP_XD
+(4 & 8 byte real)
+
+185-188
+
+CDP Y Coordinate
+
+CDP_Y & CDPYD (
+4 & 8 byte real)
+
+189-192
+
+Inline number
+
+ILINE_NO
+
+ILINE_NO
+
+193-196
+
+Crossline number
+
+XLINE_NO
+
+XLINE_NO
+
+197-200
+
+Shotpoint number (for 2D
+poststack data, source
+nearest CDP
+
+CDP_SLOC
+
+CDP_SLOC
+
+201-202
+
+Scalar for bytes 197-200
+
+Set to zero
+
+215-216
+
+Scalar for bytes 95-114
+
+Set to zero
+
+Other Docs
+
+Search Page
+
+Output
+
+Known Problems
+
+SEG-Y Output555
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

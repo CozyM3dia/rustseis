@@ -1,0 +1,155 @@
+{
+  "menu_id": "decon",
+  "tool_name": "DECON",
+  "label": "Spiking/Predictive Decon",
+  "parameter_count": 21,
+  "parameters": [
+    {
+      "name": "DCN_TYPE",
+      "prompt": "TYPE of deconvolution",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Use MB1 to pop up a menu of option choices dictating how the decon operators will be designed and applied."
+    },
+    {
+      "name": "DCN_OPER",
+      "prompt": "Decon operator length(s)",
+      "kind": "typein",
+      "default": "80.0",
+      "help": "Enter operator length(s), in ms, for each design gate (normally just one gate).  Example: 80.0, 120.0, 160.0."
+    },
+    {
+      "name": "DCN_PRED",
+      "prompt": "Operator prediction distance(s)",
+      "kind": "typein",
+      "default": "35.0",
+      "help": "Enter operator prediction distances [in mils] for each design gate (normally just one gate).  Example: 35.0,45.0."
+    },
+    {
+      "name": "wb_option",
+      "prompt": "Is prediction distance water relative?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to add WB_TIME to the prediction distance."
+    },
+    {
+      "name": "pred_correction",
+      "prompt": "Apply prediction filter correction?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Enter 'YES', if making a correction for a prediction window that contains only the 'first bounce' peg-leg multiple."
+    },
+    {
+      "name": "RATIO",
+      "prompt": "Auto-correlation ratio",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Set the ratio of the zero and first peg-leg lags of autocorrelation to this value (0.0 - calc. automatically)."
+    },
+    {
+      "name": "TAPEROPT",
+      "prompt": "Apply user specified taper?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES for user specified taper length. Select NO for old default of 1/2 minimum operator length."
+    },
+    {
+      "name": "TAPERLEN",
+      "prompt": "Taper length in msec",
+      "kind": "typein",
+      "default": "50.",
+      "help": "A taper of this length will be applied to EACH end of the design window prior to autocorrelation (0. for no taper)."
+    },
+    {
+      "name": "DCN_WHTN",
+      "prompt": "Operator 'white noise' level(s)",
+      "kind": "typein",
+      "default": "0.1",
+      "help": "Enter 'white noise' levels, in PERCENT, for each design gate (normally just one gate).  Example: 0.1, 0.5."
+    },
+    {
+      "name": "TWIN_MIN",
+      "prompt": "Window rejection factor",
+      "kind": "typein",
+      "default": "2.0",
+      "help": "Kill traces with fewer LIVE samples (or design gate lengths less) than this factor times the operator length."
+    },
+    {
+      "name": "GATETIME",
+      "prompt": "Time gate reference",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Use MB1 to select the time gate reference."
+    },
+    {
+      "name": "db_option",
+      "prompt": "Get decon gates from the DATABASE?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Set this to 'NO' if a decon design time gate parameter file was not created interactively. (Enter manually.)"
+    },
+    {
+      "name": "GATENAME",
+      "prompt": "SELECT decon gate parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a decon design gate parameter file from the parameter file menu."
+    },
+    {
+      "name": "GATENAWB",
+      "prompt": "SELECT water relative decon gate file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a decon design gate parameter file from the parameter file menu."
+    },
+    {
+      "name": "PRIM_KEY",
+      "prompt": "SELECT Primary decon gate header word",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying decon design gate parms."
+    },
+    {
+      "name": "SCND_KEY",
+      "prompt": "SELECT Secondary decon gate header word",
+      "kind": "function",
+      "default": "AOFFSET ",
+      "help": "Use MB1 to select another header word as the optional SECONDARY key for specifying decon design gate parameters."
+    },
+    {
+      "name": "DCN_GATE",
+      "prompt": "SPECIFY decon gate parameters",
+      "kind": "edit",
+      "default": "1:0:700-2500/1:2640:1000-2800/1:5280:1500-3000/",
+      "help": "Use MB1 to define the time gates in which to design decon operators (example: '1:0:350-2500/1:5280:1200-2800/')."
+    },
+    {
+      "name": "IOUT_OPT",
+      "prompt": "Output traces or filters",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Option to output the filter operator for application to an alternate dataset or for diagnostics."
+    },
+    {
+      "name": "filter_option",
+      "prompt": "Apply a bandpass filter after decon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "A bandpass filter may be applied following the decon application."
+    },
+    {
+      "name": "FLT_FREQ",
+      "prompt": "Bandpass filter frequency values",
+      "kind": "typein",
+      "default": "4-8-90-120",
+      "help": "Enter four 'corner' frequencies: F1(0%) - F2(100%) - F3(100%) - F4(0%).  Hanning tapers are used for ramps."
+    },
+    {
+      "name": "remute_option",
+      "prompt": "Re-apply trace mute after decon?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Trace mutes (such as first break suppression mutes) may be re-applied after decon."
+    }
+  ]
+}

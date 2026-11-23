@@ -1,0 +1,177 @@
+{
+  "menu_id": "tar",
+  "tool_name": "TAR",
+  "label": "True Amplitude Recovery",
+  "parameter_count": 19,
+  "parameters": [
+    {
+      "name": "APPLY_SD",
+      "prompt": "Apply spherical divergence corrections?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to compute corrections to compensate for loss of amplitudes due to spherical wavefront spreading."
+    },
+    {
+      "name": "SDV_TYPE",
+      "prompt": "Basis for spherical spreading",
+      "kind": "circular",
+      "default": null,
+      "help": "Select between the 2 choices for spherical spreading corrections. (See P. Newman, Geophysics v. 38-03, p. 481.)",
+      "choices": [
+        {
+          "label": "1/dist",
+          "value": "1",
+          "help": "Corrections based on the reciprocal of the distance that the wavefront has travelled."
+        },
+        {
+          "label": "1/(time*vel**2)",
+          "value": "2",
+          "help": "Corrections based on a function of travel time and velocity (assuming a layered earth)."
+        }
+      ]
+    },
+    {
+      "name": "APPLY_IE",
+      "prompt": "Apply inelastic attenuation corrections?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to compute corrections to compensate for loss of amplitudes due to inelastic attenuation."
+    },
+    {
+      "name": "INLS_ATN",
+      "prompt": "Inelastic attenuation correction constant",
+      "kind": "typein",
+      "default": ".0002",
+      "help": "Constant inelastic attenuation value (alpha) used in: e**(alpha*x), where x = velocity * time."
+    },
+    {
+      "name": "db_bool",
+      "prompt": "Get TAR velocity function from database?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "A velocity function can either be retrieved from the database or specified by hand."
+    },
+    {
+      "name": "VELVARYS",
+      "prompt": "Are velocities spatially variant?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Velocities may be spatially variant by CDP, but this will cause a longer run time."
+    },
+    {
+      "name": "DB_VEL",
+      "prompt": "Select velocity parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select an RMS velocity function parameter file from the parameter file menu."
+    },
+    {
+      "name": "TAR_VEL",
+      "prompt": "Specify TAR velocity function",
+      "kind": "edit",
+      "default": "XXX",
+      "help": "Use MB1 to define the AVERAGE velocity function for true amplitude corrections (2-way time[in ms]-vel, time-vel, etc)."
+    },
+    {
+      "name": "TAR_VEL2",
+      "prompt": "Specify TAR velocity functions",
+      "kind": "edit",
+      "default": "XXX",
+      "help": "Use MB1 to define the velocity functions for true amplitude corrections (2-way time[in ms]-vel, time-vel, etc)."
+    },
+    {
+      "name": "APPLY_DB",
+      "prompt": "Apply dB/sec corrections?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Compute corrections by a simple deciBels per second amplitude adjustment function."
+    },
+    {
+      "name": "TAR_REF",
+      "prompt": "dB/sec correction start time",
+      "kind": "circular",
+      "default": null,
+      "help": "Select dB/sec correction start time.",
+      "choices": [
+        {
+          "label": "Time zero",
+          "value": "0",
+          "help": "dB/sec correction starts at time zero."
+        },
+        {
+          "label": "Water bottom",
+          "value": "1",
+          "help": "dB/sec correction starts at the water-bottom time."
+        }
+      ]
+    },
+    {
+      "name": "DB_PER_S",
+      "prompt": "dB/sec correction constant",
+      "kind": "typein",
+      "default": "6.0",
+      "help": "This is the constant dB/sec value used to compute amplitude corrections."
+    },
+    {
+      "name": "APPLY_PW",
+      "prompt": "Apply time raised to a power corrections?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Compute corrections by raising the time to a power and multiplying it by the sample value."
+    },
+    {
+      "name": "T_POWER",
+      "prompt": "Time-Power constant",
+      "kind": "typein",
+      "default": "2.0",
+      "help": "This is the constant to raise time to before multiplying by the trace samples."
+    },
+    {
+      "name": "TAR_MODE",
+      "prompt": "APPLY or REMOVE amplitude corrections?",
+      "kind": "circular",
+      "default": null,
+      "help": "Normally, gain is APPLIED, but for synthetic data you may wish to REMOVE amplitude effects.",
+      "choices": [
+        {
+          "label": "Apply",
+          "value": "1",
+          "help": "This is the normal mode wherein seismic data are corrected for loss of signal strength."
+        },
+        {
+          "label": "Remove",
+          "value": "2",
+          "help": "This mode can be used to introduce Earth amplitude effects to synthetic data."
+        }
+      ]
+    },
+    {
+      "name": "TIME_MAX",
+      "prompt": "Maximum application TIME",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Maximum time in ms for computing TAR corrections. Beyond this time a constant scalar is applied. Use 0.0 for whole trace."
+    },
+    {
+      "name": "NORM_SRC",
+      "prompt": "Normalization source",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Computed gain curves are divided by normalization constant so that trace amplitudes are relatively unchanged."
+    },
+    {
+      "name": "REF_TIME",
+      "prompt": "Normalization reference TIME",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Reference time in ms for normalizing TAR corrections. Must not exceed length of trace. 0.0 defaults to middle of trace."
+    },
+    {
+      "name": "TAR_NORM",
+      "prompt": "Normalization constant",
+      "kind": "typein",
+      "default": "1.0",
+      "help": "Enter normalization constant. Must be > 0."
+    }
+  ]
+}

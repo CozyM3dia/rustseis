@@ -1,0 +1,176 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC BHSS
+'(
+ name: taup
+label: "Tau-P Transform"
+value_tab: 45
+
+parameter: PMIN
+text: "Minimum slowness (ms/km or ms/kf)"
+type: typein:
+type_desc: (real: 8)
+value: -250.0
+mouse_text: "This is the minimum P value in milliseconds/kilometer or kilofoot."
+
+parameter: PMAX
+text: "Maximum slowness (ms/km or ms/kf)"
+type: typein:
+type_desc: (real: 8)
+value: 250.0
+mouse_text: "This is the maximum P value in milliseconds/kilometer or kilofoot."
+
+parameter: PINC
+text: "Slowness increment (ms/km or ms/kf)"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "This is the increment in slowness between traces in Tau-P space."
+
+parameter: TMIN
+text: "Minimum time of interest (ms)"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "This is the minimum input time in milliseconds"
+
+parameter: TMAX
+text: "Maximum time of interest (ms)"
+type: typein:
+type_desc:  (real: 8)
+value: 2000.0
+mouse_text: "This is the maximum input time in milliseconds"
+
+parameter: WINTAU
+text: "Place a window on Tau?"
+type: boolean:
+value: nil
+mouse_text: "Do you wish to place a window on the Tau range to be computed?"
+
+parameter: TAUMIN
+text: "Minimum Tau of interest"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "This is the minimum Tau (intercept time) to consider."
+
+parameter: TAUMAX
+text: "Maximum Tau of interest"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "This is the maximum Tau (intercept time) to consider."
+
+parameter: XMIN
+text: "Minimum signed offset of interest"
+type: typein:
+type_desc:  (real: 8)
+value: -20000.0
+mouse_text: "Offsets less than this minimum are not transformed."
+
+parameter: XMAX
+text: "Maximum signed offset of interest"
+type: typein:
+type_desc:  (real: 8)
+value: 20000.0
+mouse_text: "Offsets greater than this maximum are not transformed."
+
+parameter: XNORM
+text: "Normalize Tau-P amplitudes by square root of X?"
+type: boolean:
+value: nil
+mouse_text: "Do you wish to normalize the Tau-P amplitudes by the square root of the offset X?"
+
+parameter: STKZERX
+text: "Zero offset for stacked data (X)"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "For stacked data, define the X location to use for zero offset."
+
+parameter: STKZERY
+text: "Zero offset for stacked data (Y)"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "For stacked data, define the Y location to use for zero offset."
+
+parameter: MODE
+text: "Output data type"
+type: pop_choose:
+type_desc: (
+("Tau-P" 1 "Output is the Tau-P transform of the X - t input.")
+("Semblance" 2 "Output is the semblance of the Tau-P transformed data.")
+("Product" 3 "Output is the product of Tau-P transformed data and the Tau-P semblance.") )
+value: 1
+mouse_text: "Output either Tau-P data, semblance of the Tau-P data, or the product of the two."
+
+parameter: GAIN
+text: "Semblance gain factor"
+type: typein:
+type_desc: (real: 8)
+value: 1.0
+mouse_text: "Apply this gain value to the semblance."
+
+parameter: SMOOTH
+text: "Semblance averaging window width"
+type: int:
+;type_desc: real:
+value: 1
+mouse_text: "Specify a window width (in samples) for semblance smoothing."
+
+parameter: THRESH
+text: "Semblance threshold"
+type: typein:
+type_desc: (real: 8)
+value: 0.0
+mouse_text: "Semblance values less than this number will be set to 0." 
+
+;parameter: DOSINC
+;text: "Use a Sinc interpolation?"
+;type: boolean:
+;value: nil
+;mouse_text: "If NO, then a linear interpolation is used.  Linear is faster."
+
+exec_data:("TAUP"
+	      ("GENERAL"
+	        ("version" implicit: "ProMAX $Id: taup.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+		("PMIN"     implicit: (value 'PMIN))
+		("PMAX"     implicit: (value 'PMAX))
+		("PINC"     implicit: (value 'PINC))
+		("TMIN"     implicit: (value 'TMIN))
+		("TMAX"     implicit: (value 'TMAX))
+		("XMIN"     implicit: (value 'XMIN))
+		("XMAX"     implicit: (value 'XMAX))
+		("XNORM"    implicit: ( if (value 'XNORM) 1 0 ))
+		("WINTAU"   implicit: ( if (value 'WINTAU) 1 0 ))
+		("TAUMIN"   implicit: (value 'TAUMIN))
+		("TAUMAX"   implicit: (value 'TAUMAX))
+		("STKZERX"  implicit: (value 'STKZERX))
+		("STKZERY"  implicit: (value 'STKZERY))
+		("MODE"     implicit: (value 'MODE))
+		("GAIN"	    implicit: (value 'GAIN))
+		("SMOOTH"   implicit: (value 'SMOOTH))
+		("THRESH"   implicit: (value 'THRESH))
+;		("DOSINC"   implicit: ( if (value 'DOSINC) 1 0 ))
+ 	     )
+           )
+rules: (
+  (rule1 ( = (value 'MODE ) 1 ) (progn (do_not_show 'GAIN)
+                                       (do_not_show 'SMOOTH)
+         			       (do_not_show 'THRESH) ))
+  (rule2 ( = (value 'MODE ) 2 ) (progn (do_show 'GAIN)
+				       (do_show 'SMOOTH)
+				       (do_show 'THRESH) ))
+  (rule3 ( = (value 'MODE ) 3 ) (progn (do_show 'GAIN)
+				       (do_show 'SMOOTH)
+				       (do_show 'THRESH) ))
+  (rule4 (value 'WINTAU)        (progn (do_show 'TAUMIN)
+				       (do_show 'TAUMAX))
+                                (progn (do_not_show 'TAUMIN)
+				       (do_not_show 'TAUMAX) ))
+  )
+)
+
+
+
+
+

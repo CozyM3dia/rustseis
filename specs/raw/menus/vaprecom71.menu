@@ -1,0 +1,439 @@
+;; IIID IVD 1 FIELD DEV DEPTHC
+;; -*- Mode:lisp; Mode:font-lock; -*-
+;; Menu for Velocity Analysis Precompute 12/04/97
+'(
+  :name vaprecom71
+  :label "Velocity Analysis Precompute"
+  :value_tab 55
+
+  :parameter LANDDATA
+  :type integer:
+  :value 1
+  :showp nil
+
+  :parameter RMO
+  :text "Perform residual velocity analysis?"
+  :type choose:
+  :type_desc (
+              ("NONE" 0 "Default pre-stack velocity analysis.")
+              ("TIME" 1 "Residual moveout analysis in time (Harlan).")
+              ("DEPTH" 2 "Residual moveout analysis in depth (Al-Yahya).")
+              )
+  :value 0
+  :selected_item "NONE"
+  :mouse_text "Configure parameters for residual velocity analysis"
+
+  :parameter OLDRMO
+  :text "Previous value of RMO"
+  :type int:
+  :value 0
+  :showp nil
+
+  :parameter NSMASH
+  :text "Number of CDPs to sum into gather"
+  :type typein:
+  :type_desc ( :int 3 1 100)
+  :value 99999999
+  :mouse_text "Enter the number of CDPs to use to build the commom offset stacked supergather."
+
+  :parameter SMASHNMO
+  :text "Apply partial NMO-to-binning"
+  :type boolean:
+  :value t
+  :mouse_text "Apply partial NMO before summing trace to offset bin center for supergather."
+
+  :parameter SMASHSTA
+  :text "Apply differential CDP mean statics?"
+  :type boolean:
+  :value t
+  :mouse_text "Apply differential CDP mean statics prior to offset  super gather stack generation."
+
+  :parameter INITDIST
+  :text "Absolute offset of first bin center"
+  :type typein:
+  :type_desc ( real: 7 0.0 nil)
+  :value 50.0
+  :mouse_text "Enter the center of the first offset bin."
+
+  :parameter BINSIZE
+  :text "Bin size for vertically summing offsets"
+  :type typein:
+  :type_desc ( real: 7 1.0e-5 nil)
+  :value 100.0
+  :mouse_text "Enter the offset bin size for summing offsets for supergather generation."
+
+  :parameter MAXOFFS
+  :text "Maximum offset"
+  :type typein:
+  :type_desc ( real: 8 -1.0 1.0e9)
+  :value -1.0
+  :mouse_text "Enter the maximum offset for creating common offset stacked supergather."
+
+  :parameter USEAOFF
+  :text "Use absolute value of offset for stacking?"
+  :type boolean:
+  :value t
+  :mouse_text "If YES absolute value of offset is used to stack gathers for 2D data.  Otherwise, signed offset is used.  3D always uses absolute offset."
+
+  :parameter MULTINMO
+  :text "Compute NMO for every velocity function?"
+  :type boolean:
+  :value nil
+  :mouse_text "If YES a NMO gather is computed for each velocity function."
+
+  :parameter MINVEL
+  :text "Minimum semblance analysis value"
+  :type typein:
+  :type_desc ( real: 12 nil nil )
+  :value 999999999.
+  :mouse_text "Minimum expected stacking value - value of first semblance scan."
+
+  :parameter MAXVEL
+  :text "Maximum semblance analysis value"
+  :type typein:
+  :type_desc ( real: 12 nil nil )
+  :value 999999999.
+  :mouse_text "Maximum expected stacking value - value of last semblance scan."
+
+  :parameter NVELS
+  :text "Number of semblance calculations"
+  :type typein:
+  :type_desc ( int: 3 1 999 )
+  :value 50
+  :mouse_text "Number of semblance scans to perform between the minimum and maximum velocity range."
+
+  :parameter VELSPACE
+  :text "Semblance velocity axis"
+  :type pop_choose:
+  :type_desc (
+              ("Equal Velocity" 2 "Equal spacing of velocities.")
+              ("Slowness Squared" 4 "Spacing proportional to slowness squared. Use this option ONLY to create semblances for Velocity Auto Picker.")
+                                        ;("Logarithmic" 1 "Logarithmic spacing of velocities.")
+              )
+  :value 2
+  :mouse_text "Method of spacing velocities along semblance axis."
+
+  :parameter WINSIZE
+  :text "Semblance sample rate"
+  :type typein:
+  :type_desc ( real: 7 0.0 2000.0)
+  :value 20.0
+  :mouse_text "Enter the semblance sample rate in milliseconds - distance between analysis window centers."
+
+  :parameter RSMOOTH
+  :text "Semblance calculation window"
+  :type typein:
+  :type_desc ( real: 7 0.0 4000.0)
+  :value 40.0
+  :mouse_text "Enter size of window over which semblance will be calculated."
+
+  :parameter NVFS
+  :text "Number of stack velocity functions"
+  :type typein:
+  :type_desc ( int: 3 1 999 )
+  :value 11
+  :mouse_text "Number of velocity functions and the number of stack strips."
+
+  :parameter NSTACK
+  :text "Number of CDPS per stack strip"
+  :type typein:
+  :type_desc ( int: 3 1 999 )
+  :value 99999999
+  :mouse_text "Number of CDPS to stack for each of the velocity function stacks."
+
+  :parameter NORMSTK
+  :text "Scale stacks by number of live samples summed"
+  :type boolean:
+  :value t
+  :mouse_text "Divide function velocity stacks, dynamic stacks, and flip stacks by number of live samples summed into stacks."
+
+  :parameter VFSTYPE
+  :text "Method of computing velocity functions"
+  :type pop_choose:
+  :type_desc (
+              ("Top/base range" 1 "Velocity function range specified min and max time.")
+              ("Delta delta-t" 2 "Velocity function is the moveout at maximum offset.")
+              ("Percentage" 3 "Velocity function is percentage of guide function.")
+              ("Constant Velocity" 4 "Constant velocity function- evenly spaced through semblance span.")
+              )
+  :value 1
+  :mouse_text "Method of computing velocity function from guide velocity function."
+
+  :parameter VFDELTA
+  :text "  Velocity function time increment"
+  :type typein:
+  :type_desc ( real: 5 0.0 nil )
+  :value 10.0
+  :mouse_text "Change in moveout (delta t) between the velocity functions at the farthest offset."
+
+  :parameter VFCENT
+  :text "  Velocity function percent maximum"
+  :type typein:
+  :type_desc ( real: 5 0.0 nil )
+  :value 30.0
+  :mouse_text "Maximum percent change of the fan relative to the guide function (minimum and maximum)."
+
+  :parameter VFMINVEL
+  :text "  Velocity variation at time 0"
+  :type typein:
+  :type_desc ( real: 6 0 MAXVEL )
+  :value 99999999.
+  :mouse_text "The fan at time 0 will be the this value (in units/sec) wide centered at the guide function velocity"
+
+  :parameter VFMAXVEL
+  :text "  Velocity variation at maximum time"
+  :type typein:
+  :type_desc ( real: 6 0 MAXVEL )
+  :value 99999999.
+  :mouse_text "The fan at maximum time will be the this value (in units/sec) wide centered at the guide function velocity"
+
+  :parameter NORM
+  :text "Semblance normalization mode"
+  :type pop_choose:
+  :type_desc (
+              ("No Scaling"  3 "Do no scaling of semblance values.")
+              ("Scale Time Slice"  1 "Divide time slice of semblance values by the maximum in time slice.")
+              ("Scale Panel"  2 "Divide all semblance values by the maximum semblance in panel.")
+              )
+  :mouse_text "Choose method of normalizing semblances."
+  :value 3
+
+  :parameter RPOWER
+  :text "Contrast power factor"
+  :type typein:
+  :type_desc ( real: 3 0.0 nil )
+  :value 1.0
+  :mouse_text "Raise each semblance sample power to this power before plotting.  A value greater/less than 1.0 increases/decreases the contrast."
+
+  :parameter RNOISE
+  :text "Contrast noise factor"
+  :type typein:
+  :type_desc ( real: 3 0.0 nil )
+  :value 0.1
+  :mouse_text "Add this value to maximum semblance before scaling (not used if no scaling applied).  Recommend 0.0 to 0.4"
+
+  :parameter GUIDTYPE
+  :text "Guide file type"
+  :type typein:
+  :value "VEL"
+  :mouse_text "Guide file type."
+
+  :parameter GUIDEOPT
+  :text "Get guide function from an existing parameter table?"
+  :type boolean:
+  :value nil
+  :mouse_text "Get the guide function from the list of RMS velocity parameter tables"
+
+  :parameter GUIDETBL
+  :text "  Velocity guide function table name"
+  :type function:
+  :type_desc ((parm_list "VEL") parms)
+  :value "no entry"
+  :mouse_text "Guide function for fan function stacks, and picking. Use Mouse Button 1 to select a velocity file from the menu."
+
+  :parameter MINGDVEL
+  :text "  Guide minimum value"
+  :type typein:
+  :type_desc ( real: 12 MINVEL MAXVEL )
+  :value 99999999.
+  :mouse_text "Semblance analysis value at minimum time/depth to use as guide."
+
+  :parameter MAXGDVEL
+  :text "  Guide maximum time value"
+  :type typein:
+  :type_desc ( :real 12 MINVEL MAXVEL )
+  :value 99999999.
+  :mouse_text "Semblance analysis value at maximum time/depth to use as guide."
+  
+  :parameter STRETCH
+  :text "Maximum stretch percentage for NMO"
+  :type typein:
+  :type_desc ( real: 7 0.0 10000.0)
+  :value 30.0
+  :mouse_text "Any trace stretched more than this factor will be excluded from the semblance analysis. Enter 0.0 to turn off this option"
+
+  :parameter LONGOFFS
+  :text "Long offset moveout correction?"
+  :type choose:
+  :type_desc ( ( "NONE" 0 "Apply only two term NMO (normal application).")
+               ( "ALCHALABI" 1 "Apply Al-Chalabi's third term (fastest).")
+               ( "CASTLE" 2 "Apply Castle's shifted hyperbola (slow, least accurate).")
+               ( "HARLAN" 4 "Apply Harlan's anisotropic third term (slower, good accuracy).")
+               ( "TSVANKIN" 3 "Apply Tsvankin and Thomsen's third term (slowest, most accurate).")
+               )
+  :value 0
+  :mouse_text "Choose desired method for long-offset moveout correction."
+  :plot_label t
+
+  :parameter ETA
+  :text "  Anisotropy correction parameter ETA"
+  :type typein:
+  :type_desc ( real: 6 -0.25 1.0 )
+  :value 0.0
+  :mouse_text "Value of zero means no anisotropy correction. Normally nonnegative and less than 0.1"
+
+  :parameter MUTEMODE
+  :text "Use a picked mute?"
+  :type choose:
+  :type_desc (	( "NONE" 0 "Do not apply picked mute.")
+                ("TOP" 1 "Mute from top mute upward and make top mute editable.")
+                ("BASE" 2 "Mute from base mute downward and make base mute editable.")
+                ("BOTH" 3 "Mute from top mute upward and base mute downward.")
+                )
+  :value 0
+  :mouse_text "Use top and/or base mutes picked on the Gather panel and/or a mute file."
+
+  :parameter TOPMUTE
+  :text "  Gather offset Top mute table"
+  :type function:
+  :type_desc ((parm_list "MUT") parms)
+  :value "INVALID"
+  :mouse_text "Use Mouse Button 1 to select a mute table from the menu."
+
+  :parameter BASEMUTE
+  :text "  Gather offset Base mute table"
+  :type function:
+  :type_desc ((parm_list "MUT") parms)
+  :value "INVALID"
+  :mouse_text "Use Mouse Button 1 to select a mute table from the menu."
+
+  :parameter MUTETAPE
+  :text "  Mute taper length"
+  :type typein:
+  :type_desc ( real: 7 0.0 nil)
+  :value 20.0
+  :mouse_text "Taper length of end of mute in vertical units."
+
+  :exec_data 
+  ("ST_VAPRECOM71"
+   ("GENERAL"
+    ("version" :implicit "ProMAX $Id: vaprecom71.menu 45297 2010-03-27 00:04:43Z Chris Jones $ $Revision: 45297 $ $Date: 2010-03-26 18:04:43 -0600 (Fri, 26 Mar 2010) $")
+    ("program"	:implicit "vaprecom_sa.exe")
+    ("RMO"		:implicit (value 'RMO))
+    ("LANDDATA"	:implicit (value 'LANDDATA))
+    ("NSMASH"	:implicit (value 'NSMASH))
+    ("SMASHNMO"	:implicit (if (value 'SMASHNMO) 1 0))
+    ("SMASHSTA"	:implicit (if (value 'SMASHSTA) 1 0))
+    ("INITDIST"	:implicit (value 'INITDIST))
+    ("LONGOFFS"	:implicit (value 'LONGOFFS))
+    ("ETA"		:implicit (value 'ETA))
+    ("BINSIZE"	:implicit (value 'BINSIZE))
+    ("MAXOFFS"	:implicit (value 'MAXOFFS))
+    ("USEABS"	:implicit (if (value 'USEAOFF) 1 0))
+    ("MULTINMO"	:implicit (if (value 'MULTINMO) 1 0))
+    ("VELSPACE"	:implicit (value 'VELSPACE))
+    ("MINVEL"	:implicit (value 'MINVEL))
+    ("MAXVEL"	:implicit (value 'MAXVEL))
+    ("NVELS"	:implicit (value 'NVELS))
+    ("WINSIZE"	:implicit (value 'WINSIZE))
+    ("RSMOOTH"	:implicit (value 'RSMOOTH))
+    ("NORMSTK"	:implicit (if (value 'NORMSTK) 1 0))
+    ("NVFS"		:implicit (value 'NVFS))
+    ("NSTACK"	:implicit (value 'NSTACK))
+    ("VFSTYPE"	:implicit (value 'VFSTYPE))
+    ("VFDELTA"	:implicit (value 'VFDELTA))
+    ("VFCENT"	:implicit (value 'VFCENT))
+    ("VFMINVEL"	:implicit (value 'VFMINVEL))
+    ("VFMAXVEL"	:implicit (value 'VFMAXVEL))
+    ("NORM"		:implicit (value 'NORM))
+    ("RPOWER"	:implicit (value 'RPOWER))
+    ("RNOISE"	:implicit (value 'RNOISE))
+    ("GUIDTYPE"	:implicit (value 'GUIDTYPE))
+    ("GUIDEOPT"	:implicit (if (value 'GUIDEOPT) 1 0))
+    ("GUIDETBL"	:implicit (value 'GUIDETBL))
+    ("MINGDVEL"	:implicit (value 'MINGDVEL))
+    ("MAXGDVEL"	:implicit (value 'MAXGDVEL))
+    ("STRETCH"	:implicit (value 'STRETCH))
+    ("MUTEMODE"	:implicit (value 'MUTEMODE))
+    ("TOPMUTE"	:implicit (value 'TOPMUTE))
+    ("BASEMUTE"	:implicit (value 'BASEMUTE))
+    ("MUTETAPE"	:implicit (value 'MUTETAPE))
+    ("DEBUG"	:implicit 0)
+    )
+   )
+
+  rules: 
+  (
+                                        ; land data rules
+   (LANDDATA_rule (= (db_parmget_line "IUNITSz") 3) (set_value 'LANDDATA 0))
+   ;;(LANDDATA_rule t (do_not_show 'LANDDATA))
+                                        ; residual moveout rules
+                                        ;	(RMO_rule (do_not_show 'RMO))
+   (RMO_rule (= (value 'RMO) -1)
+             (add_error 'RMO "No option selected")
+             (delete_error 'RMO "No option selected"))
+   (OLDRMO_rule (not (= (value 'OLDRMO) (value 'RMO)))
+                (progn  (set_value 'MINVEL 99999999.)
+                        (set_value 'MAXVEL 99999999.)
+                        (set_value 'VFMINVEL 99999999.)
+                        (set_value 'VFMAXVEL 99999999.)
+                        (set_value 'MINGDVEL 99999999.)
+                        (set_value 'MAXGDVEL 99999999.)
+                        (set_value 'OLDRMO (value 'RMO))))
+   (RMO_rule2 (= (value 'RMO) 0) (do_show 'VELSPACE) (do_not_show 'VELSPACE))
+   (RMO_rule3 (not (= (value 'RMO) 0)) 
+              (progn (set_value 'VELSPACE 2)
+                     (set_selected_item 'VELSPACE 
+                                        '("Equal Velocity" 2 "Equal spacing of velocities."))))
+                                        ; offset rules
+   (SMASHNMO_rule (= (value 'RMO) 0) (do_show 'SMASHNMO) (do_not_show 'SMASHNMO))
+   (MAXOFFS_rule ( = ( value 'MAXOFFS) -1.0) (set_value 'MAXOFFS ( db_parmget_line "OFFMAXz")))
+   (USEAOFF_rule (= (db_parmget_line "I3Dz") 1 ) (do_not_show 'USEAOFF) (do_show 'USEAOFF))
+   (NSMASH_rule (and (= (value 'RMO) 0) (= (value 'NSMASH) 99999999)) (set_value 'NSMASH 5))
+   (NSMASH_rule (and (= (value 'RMO) 1) (= (value 'NSMASH) 99999999)) (set_value 'NSMASH 1))
+   (NSMASH_rule (and (= (value 'RMO) 2) (= (value 'NSMASH) 99999999)) (set_value 'NSMASH 1))
+                                        ; semblance rules
+   (MINVEL_rule (and (= (value 'RMO) 0) (= (value 'MINVEL) 99999999.)) (set_value 'MINVEL 4000.0))
+   (MINVEL_rule (and (= (value 'RMO) 1) (= (value 'MINVEL) 99999999.)) (set_value 'MINVEL -50.))
+   (MINVEL_rule (and (= (value 'RMO) 2) (= (value 'MINVEL) 99999999.)) (set_value 'MINVEL -50.))
+   (MAXVEL_rule (and (= (value 'RMO) 0) (= (value 'MAXVEL) 99999999.)) (set_value 'MAXVEL 25000.0))
+   (MAXVEL_rule (and (= (value 'RMO) 1) (= (value 'MAXVEL) 99999999.)) (set_value 'MAXVEL 50.))
+   (MAXVEL_rule (and (= (value 'RMO) 2) (= (value 'MAXVEL) 99999999.)) (set_value 'MAXVEL 50.))
+   (RPOWER_rule (not (= (value 'NORM) 3)) (do_show 'RPOWER) (do_not_show 'RPOWER))
+   (RNOISE_rule (not (= (value 'NORM) 3)) (do_show 'RNOISE) (do_not_show 'RNOISE))
+                                        ;	(VELSPACE_rule (do_not_show 'VELSPACE))
+   (VFSTYPE_rule (= (value 'RMO) 0) (do_show 'VFSTYPE) (do_not_show 'VFSTYPE))
+   (VFDELTA_rule (and (= (value 'RMO) 0) (= (value 'VFSTYPE) 2)) (do_show 'VFDELTA) (do_not_show 'VFDELTA))
+   (VFCENT_rule (and (= (value 'RMO) 0) (= (value 'VFSTYPE) 3)) (do_show 'VFCENT) (do_not_show 'VFCENT))
+                                        ; function velocity stack rules
+   (NSTACK_rule (and (= (value 'RMO) 0) (= (value 'NSTACK) 99999999)) (set_value 'NSTACK 5))
+   (NSTACK_rule (and (= (value 'RMO) 1) (= (value 'NSTACK) 99999999)) (set_value 'NSTACK 1))
+   (NSTACK_rule (and (= (value 'RMO) 2) (= (value 'NSTACK) 99999999)) (set_value 'NSTACK 1))
+   (VFMINVEL_rule (and (= (value 'VFMINVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'VFMINVEL 500.0))
+   (VFMINVEL_rule (= (value 'VFMINVEL) 99999999. ) (set_value 'VFMINVEL 2000.0))
+   (VFMINVEL_rule (and (= (value 'VFSTYPE) 1) (= (value 'RMO) 0)) (do_show 'VFMINVEL) (do_not_show 'VFMINVEL))
+   (VFMAXVEL_rule (and (= (value 'VFMAXVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'VFMAXVEL 1500.0))
+   (VFMAXVEL_rule (= (value 'VFMAXVEL) 99999999. ) (set_value 'VFMAXVEL 5000.0))
+   (VFMAXVEL_rule (and (= (value 'RMO) 0) (= (value 'VFSTYPE) 1)) (do_show 'VFMAXVEL) (do_not_show 'VFMAXVEL))
+                                        ; long offset rules
+   (LONGOFFS_rule (= (value 'RMO) 0) (do_show 'LONGOFFS) (do_not_show 'LONGOFFS))
+   (ETA_rule (and (> (value 'LONGOFFS) 2) (= (value 'RMO) 0))  (do_show 'ETA) (do_not_show 'ETA))
+                                        ; guide function rules
+   (GUIDTYPE_rule (do_not_show 'GUIDTYPE))
+   (GUIDTYPE_rule (= (value 'RMO) 0) (set_value 'GUIDTYPE "VEL"))
+   (GUIDTYPE_rule (= (value 'RMO) 1) (set_value 'GUIDTYPE "RSL"))
+   (GUIDTYPE_rule (= (value 'RMO) 2) (set_value 'GUIDTYPE "RSD"))
+   (GUIDEOPT_rule (= (value 'RMO) 0) (do_show 'GUIDEOPT) (do_not_show 'GUIDEOPT))
+   (GUIDEOPT_rule (not (= (value 'RMO) 0)) (set_value 'GUIDEOPT nil))
+   (GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 0)) (set_type_desc 'GUIDETBL (list (list 'parm_list "VEL") 'parms)))
+   (GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 1)) (set_type_desc 'GUIDETBL (list (list 'parm_list "RSL") 'parms)))
+   (GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 2)) (set_type_desc 'GUIDETBL (list (list 'parm_list "RSD") 'parms)))
+   (GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 0)) (do_show 'GUIDETBL) (do_not_show 'GUIDETBL))
+   (MINGDVEL_rule (and (not (value 'GUIDEOPT)) (= (value 'RMO) 0)) (do_show 'MINGDVEL) (do_not_show 'MINGDVEL))
+   (MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'MINGDVEL 1500.0))
+   (MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 0)) (set_value 'MINGDVEL 5000.0))
+   (MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 1)) (set_value 'MINGDVEL 0.0))
+   (MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 2)) (set_value 'MINGDVEL 0.0))
+   (MAXGDVEL_rule (and (not (value 'GUIDEOPT)) (= (value 'RMO) 0)) (do_show 'MAXGDVEL) (do_not_show 'MAXGDVEL))
+   (MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'MAXGDVEL 4000.0))
+   (MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 0)) (set_value 'MAXGDVEL 12500.0))
+   (MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 1)) (set_value 'MAXGDVEL 0.0))
+   (MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 2)) (set_value 'MAXGDVEL 0.0))
+                                        ; mute rules
+   (TOPMUTE_rule (or (= (value 'MUTEMODE) 1) (= (value 'MUTEMODE) 3))
+                 (do_show 'TOPMUTE) (do_not_show 'TOPMUTE))
+   (BASEMUTE_rule (or (= (value 'MUTEMODE) 2) (= (value 'MUTEMODE) 3))
+                  (do_show 'BASEMUTE) (do_not_show 'BASEMUTE))
+   (MUTETAPE_rule (not (= (value 'MUTEMODE) 0)) (do_show 'MUTETAPE) (do_not_show 'MUTETAPE))
+   )
+  )

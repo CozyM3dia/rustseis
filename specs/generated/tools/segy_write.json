@@ -1,0 +1,7 @@
+{
+  "menu_id": "segy_write",
+  "tool_name": "SEGY_WRITE",
+  "label": "segy_write",
+  "parameter_count": 0,
+  "parameters": []
+}

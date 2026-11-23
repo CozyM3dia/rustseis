@@ -1,0 +1,223 @@
+; IIID IVD 1 FIELD BSI DEV DEPTHC BHSS
+'(
+ name: SYNTH
+label: "Synthetic Trc Generation"
+value_tab: 45
+
+
+parameter: PKEYNAM
+text: "Synthetic trace ensemble option"
+type: circular:
+type_desc: (
+   ("Source" "SOURCE  " "Generate synthetic SHOT gathers." )
+   ("CDP   "     "CDP     " "Generate synthetic COMMON DEPTH POINT gathers."))
+value: "SOURCE  "
+mouse_text: "The synthetic program can generate either SHOT or CDP gathers."
+plot_label: t
+
+
+parameter: NENS
+text: "  Number of trace ensembles to generate"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 3
+mouse_text: "How many SHOT or CDP gathers do you wish to generate?"
+plot_label: t
+
+parameter: DXENS
+text: "  Spacing between ensembles (m/ft)"
+type: typein:
+type_desc: ( real: 7 nil nil )
+value: 0.0
+mouse_text: "Use 0.0 to REPEAT the same ensemble."
+plot_label: t
+
+
+parameter: NTRACES
+text: "  Number of traces per ensemble"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 60
+mouse_text: "How many TRACES per Shot or CDP gather do you wish to generate?"
+plot_label: t
+
+
+parameter: OFFSTART
+text: "Signed offset for the first trace"
+type: typein:
+type_desc: ( real: 7 nil nil )
+value: 0.0
+mouse_text: "What is the desired offset for the first trace in each ensemble?"
+plot_label: t
+
+
+parameter: OFFINC
+text: "Offset increment between traces"
+type: typein:
+type_desc: ( real: 7 nil nil )
+value: 50.0
+mouse_text: "What is the desired offset increment (group interval: + or -) between traces?"
+plot_label: t
+
+
+parameter: SAMPRATE
+text: "Sample Rate for the synthetic traces"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 2.0
+mouse_text: "What is the desired sample rate in milliseconds for the synthetic traces?"
+plot_label: t
+
+
+parameter: TRACELEN
+text: "Trace Length for the synthetic traces"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 2000.0
+mouse_text: "What is the desired trace length in milliseconds for the synthetic traces?"
+
+
+parameter: WAVETYPE
+text: "TYPE of synthetic wavelet"
+type: choose:
+type_desc: (
+   ("Ormsby "  1 "Generate ORMSBY wavelets (four frequency values needed).")
+   ("Klauder " 2 "Generate KLAUDER wavelets (two frequency values needed).")
+   ("Ricker "  3 "Generate RICKER wavelets (one frequency value needed).")
+   ("Spike "   4 "Generate SPIKES at the requested times (no frequency values needed)."))
+mouse_text: "The synthetic program can generate any of these requested wavelets."
+plot_label: t
+
+
+parameter: WAVPHASE
+text: "  PHASE of synthetic wavelet"
+type: circular:
+type_desc: (
+   ("Zero    "    0 "Generate ZERO phase wavelets." )
+   ("Minimum " 1 "Generate MINIMUM phase wavelets." ) )
+value: 0
+mouse_text: "The synthetic program can generate zero or minimum phase wavelets."
+plot_label: t
+
+
+parameter: SWEEPLEN
+text: "  Vibroseis sweep length"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 12000.0
+mouse_text: "What is the sweep length in milliseconds to use to generate Klauder wavelets?"
+plot_label: t
+
+
+parameter: EVENTS1
+text: "  Define ORMSBY synthetic seismic events"
+type: edit:
+type_desc: (31 80 5 " FORMAT: Type,Time,Velocity,Amplitude,Length(ms),Dip,Frequencies(4 values)/
+ EXAMPLE: 1,75,7500,-.75,300,5,4,8,24,30/2,350.5,10000,0.9,250,10,8,12,80,90/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1,100,9000,1,300,0,4,8,30,40/2,412.5,7000,1,300,0,8,12,70,90/"
+mouse_text: "For each event, enter 'type,time,vel,ampl,length,dip,freqs/'.  (Type: 1 for refractor, 2 for reflector.)"
+
+
+parameter: EVENTS2
+text: "  Define KLAUDER synthetic seismic events"
+type: edit:
+type_desc: (31 80 5 " FORMAT: Type,Time,Velocity,Amplitude,Length(ms),Dip,Frequencies(2 values)/
+ EXAMPLE: 1,75,7500,-.75,300,5,10,50/2,350.5,10000,0.9,250,10,12,70/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1,100,9000,1,300,0,4,40/2,412.5,7000,1,300,0,8,90/"
+mouse_text: "For each event, enter 'type,time,vel,ampl,length,dip,freqs/'.  (Type: 1 for refractor, 2 for reflector.)"
+
+
+parameter: EVENTS3
+text: "  Define RICKER synthetic seismic events"
+type: edit:
+type_desc: (31 80 5 " FORMAT: Type,Time,Velocity,Amplitude,Length(ms),Dip,Frequency(1 value)/
+ EXAMPLE: 1,75,7500,-.75,300,5,50/2,350.5,10000,0.9,250,10,30/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1,100,9000,1,300,0,50/2,412.5,7000,1,300,0,30/"
+mouse_text: "For each event, enter 'type,time,vel,ampl,length,dip,freq/'.  (Type: 1 for refractor, 2 for reflector.)"
+
+
+parameter: EVENTS4
+text: "  Define SPIKE synthetic seismic events"
+type: edit:
+type_desc: (31 80 5 " FORMAT: Type,Time,Velocity,Amplitude,Length(ms),Dip/
+ EXAMPLE: 1,75,7500,-.75,300,5/2,350.5,10000,0.9,250,10/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1,100,9000,1,300,0/2,412.5,7000,1,300,0/"
+mouse_text: "For each event, enter 'type,time,vel,ampl,length,dip/'.  (Type: 1 for refractor, 2 for reflector.)"
+
+
+exec_data: ("SYNTH"
+		("SPECIAL"
+			("TOOLTYPE"     implicit: "INPUT")
+		)
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: synth.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+		   	("PKEYNAM"   implicit: (value 'PKEYNAM))
+		   	("NENS"      implicit: (value 'NENS))
+		   	("NTRACES"   implicit: (value 'NTRACES))
+		   	("OFFSTART"  implicit: (value 'OFFSTART))
+		   	("OFFINC"    implicit: (value 'OFFINC))
+		   	("DXENS"     implicit: (value 'DXENS))
+		   	("SAMPRATE"  implicit: (value 'SAMPRATE))
+		   	("TRACELEN"  implicit: (value 'TRACELEN))
+		   	("WAVETYPE"  implicit: (value 'WAVETYPE))
+		   	("WAVPHASE"  implicit: (value 'WAVPHASE))
+		   	("SWEEPLEN"  implicit: (value 'SWEEPLEN))
+		   	("EVENTS"    implicit: (if (= (value 'WAVETYPE) 1) (value 'EVENTS1) (if (= (value 'WAVETYPE) 2) (value 'EVENTS2) 
+                                               (if (= (value 'WAVETYPE) 3) (value 'EVENTS3) (value 'EVENTS4) ))))
+		)
+	   )
+
+
+rules: (
+ (rule1 ( = ( value 'WAVETYPE ) 2 ) (do_show 'SWEEPLEN)  (do_not_show 'SWEEPLEN))
+ (rule2 ( = ( value 'WAVETYPE ) 4 ) (do_not_show 'WAVPHASE)  (do_show 'WAVPHASE))
+ (rule3 ( > ( value 'WAVETYPE ) 0 ) (progn (do_not_show 'EVENTS1) (do_not_show 'EVENTS2) (do_not_show 'EVENTS3) (do_not_show 'EVENTS4)))
+ (rule4 ( = ( value 'WAVETYPE ) 1 ) (do_show 'EVENTS1))
+ (rule5 ( = ( value 'WAVETYPE ) 2 ) (do_show 'EVENTS2))
+ (rule6 ( = ( value 'WAVETYPE ) 3 ) (do_show 'EVENTS3))
+ (rule7 ( = ( value 'WAVETYPE ) 4 ) (do_show 'EVENTS4))
+        )
+
+
+)
+

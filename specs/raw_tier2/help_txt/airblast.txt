@@ -1,0 +1,177 @@
+Air Blast Attenuation1976
+
+ProMAX® Reference
+
+Air Blast Attenuation
+Air Blast Attenuation automatically searches for anomalous
+energy on a trace-by-trace basis using a pilot velocity, a
+relative noise amplitude threshold, and an approximate
+energy envelope width.
+
+Theory
+Strong energy from sources, such as shot-generated air
+blasts, can contaminate seismic data with very high
+amplitude, broad band noise. This noise must typically be
+muted prior to subsequent processing, such as ﬁltering and
+deconvolution, since these processes can propagate the
+strong noise bursts in proportion to the length of the ﬁlter
+operators. Unfortunately, such surgical mutes can produce
+undesired and sometimes unexpected results in decon
+design, amplitude scaling, residual statics and other
+processes. In addition, these noise trains can be very strong
+on some records but virtually non-existent just a few records
+away. In the case of air blasts resulting from hole blow on
+poorly tamped dynamite shotholes, the air blast can appear
+and disappear on a shot-by-shot basis.
+Air Blast Attenuation attempts to address these problems
+by providing you with a relatively automated air blast
+attenuation tool. It will automatically seek out anomalous
+energy on a trace-by-trace basis, given a pilot velocity, a
+relative noise amplitude threshold, and an approximate
+energy envelope width. This strong energy, if found, can be
+either surgically muted with appropriate edge tapering, or
+attenuated down to an amplitude level similar to the
+surrounding data. If the trace does not appear to be
+contaminated by noise, the process will leave the trace
+untouched. Since Air Blast Attenuation is a single trace
+process, the trace-to-trace amplitude variations are
+approximately preserved. This is important if subsequent
+processing attempts to measure and preserve true amplitude
+relationships.
+
+Usage
+Air Blast Attenuation can be used to attenuate other linear
+noise trains that are strong relative to the surrounding data.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Air Blast Attenuation1977
+
+ProMAX® Reference
+
+Geometry must have been assigned prior to the application of
+this process. In general, input traces should have True
+Amplitude Recovery processing; however, reasonable
+results may be obtained if an AGC scalar length is long
+relative to the width of the energy envelope of the noise train.
+The run times for this tool are normally less that of an AGC,
+unless the automatic picking option is used in combination
+with the Filter to apply to enhance air blast energy
+parameter. If this ﬁlter is speciﬁed, run times will normally be
+about half that of a simple bandpass ﬁlter.
+
+Parameters
+Approximate velocity of energy to be attenuated
+Enter the approximate velocity of the noise that you want to
+attenuate. This process assumes the noise is approximately
+constant in velocity. If this is not the case, consider using
+several repeated copies of Air Blast Attenuation in your ﬂow
+using the automatic noise search and detection option.
+Specify the velocity of each noise train you wish to attenuate
+for each copy of Air Blast Attenuation in the ﬂow. This will
+work for air blasts, but not for ground roll. Therefore, it
+doesn’t work well on noise trains that are extremely
+dispersive.
+Start time (ms) at zero offset
+Enter the start time of the noise train at 0 offset. The default
+is 0 ms for air blasts.
+Type of energy attenuation
+Select the type of energy attenuation from:
+• Muting applies a sample-zeroing surgical mute with
+edge tapers to the air blast energy.
+• Attenuation applies an inverse amplitude scalar to
+attenuate the air blast energy. The inverse scalar is computed dynamically based on an estimate of the average
+amplitude of the samples in a window just above and
+below the time window that is to be attenuated.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Air Blast Attenuation1978
+
+ProMAX® Reference
+
+Taper ramp length for surgical mute
+This appears if Muting to Type of energy attenuation.
+Enter the time in ms over which to ramp on and off
+amplitudes for surgical mutes.
+Automatically search for and detect noise?
+Select Yes to automatically determine whether or not a noise
+train exists on a particular trace based on the threshold
+value. If detected, it then picks the time boundaries for noise
+editing.
+Time gate width of air blast energy to attenuate
+This appears if No to Automatically search for and detect
+noise. Enter the energy envelope width, in ms, for the strong
+noise amplitudes.
+Note: This process cannot accept a value that is longer than
+one-ﬁfth the trace length.
+Maximum air blast energy envelope width
+This appears if Yes to Automatically search for and detect
+noise. Enter the maximum energy envelope width, in ms, for
+the strong air blast amplitudes. This process won’t be able to
+pick any noise train longer than this value, therefore it is
+better to specify a value that’s larger than one that is too
+small.
+Note: This process cannot accept a value that is longer than
+one-ﬁfth the trace length.
+Filter to apply to enhance air blast energy
+This appears if Yes to Automatically seach for and detect
+noise. Enter the ﬁlter as four frequencies (0%, 100%, 100%,
+0%) or a blank string for no ﬁlter to help detect air blast
+energy start and end times.
+Note: This ﬁlter is used to help pick the start and end times
+of the noise to be attenuated and has no effect on the
+frequency content of the seismic trace output from this
+process. Applying this ﬁlter has a signiﬁcant affect on run
+times, so don’t use the ﬁlter if you don’t need it. However, if
+the air blast noise has signiﬁcant energy outside the normal
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Air Blast Attenuation1979
+
+ProMAX® Reference
+
+reﬂection data’s spectrum, this option can be a very effective
+aid in automatically detecting the noise train.
+Air blast picking amplitude ratio threshold
+This appears if Yes to Automatically seach for and detect
+noise. The automatic picking of noise trains is based on the
+ratio of the average amplitudes to the amplitudes of the
+surrounding data. The ratio speciﬁes the value of this
+parameter.
+Percentage to expand picked air blast energy envelopes
+This appears if Yes to Automatically seach for and detect
+noise. Detected noise blocks are expanded by this percentage
+of their length before editing. If you specify 20%, the top
+arrival time of the noise burst will be shifted up by 10% of the
+detected noise block’s length, and the bottom arrival time of
+the noise burst will be shifted down by 10% of the detected
+noise block’s length. Since the edges of the noise bursts can’t
+be exactly detected, it is usually better to use a higher
+threshold parameter, such as 2.5, combined with an
+expansion percentage, such as 30%.
+Minimum detected air blast energy envelope length
+This appears if Yes to Automatically seach for and detect
+noise. Enter the minimum length in ms of automatically
+detected air blast energy. Suspected noise windows shorter
+than this length are ignored.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

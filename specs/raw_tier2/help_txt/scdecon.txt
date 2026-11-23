@@ -1,0 +1,284 @@
+Surface Consistent Deconvolution39
+
+ProMAX® Reference
+
+Surface Consistent Deconvolution
+Surface Consistent Deconvolution uses any combination of
+source, receiver, offset, and CDP components for power
+spectrum calculation and deconvolution.
+
+Theory
+The recorded seismic signal may be considered as the
+convolution of the source signal with the instruments, the
+geophones, and the response of the earth. The earth response
+includes some undesirable effects, such as reverberation,
+attenuation, and ghosting. The objective of deconvolution is
+to estimate these effects as linear ﬁlters, and then design and
+apply inverse ﬁlters.
+Surface consistent deconvolution is based on the concept
+that a seismic wavelet can be broken down into its source,
+receiver, offset, and CDP components. For land data, all four
+components are normally used in the decomposition, but
+only the shot and receiver portions are applied. Since the
+receivers are in motion in marine acquisition, the common
+receiver grouping is less suited to this type of data. However,
+the common receiver domain is still important in areas with
+highly variable bottom conditions. When using this process
+on marine data, it is common either to perform a simple shot
+decon, or to use the shot and offset terms.
+Note: The SRF database must be present and complete to
+decompose or deconvolve with the SRF term.
+
+Usage
+Surface Consistent Deconvolution is an iterative tool,
+meaning traces from the ﬂow input tool are passed into the
+process for analysis, and then automatically passed again for
+decon application.
+Note: JavaSeis datasets cannot be input to this module.
+Only ProMAX datasets are supported. Use the Gated SC
+Decon modules sequence for JavaSeis datasets.
+After deconvolution has been applied to the traces, they are
+reinserted in the ﬂow, one at a time. There can be any
+number of processes in the ﬂow between the input step and
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution40
+
+ProMAX® Reference
+
+the iterative tool. For example, scaling, trace editing, and
+muting could be applied to the data before Surface
+Consistent Decon, without writing to an intermediate dataset
+to disk.
+After the four components are separated, the deconvolution
+operator is designed using the power spectra from the desired
+components in the Wiener-Levinson algorithm. This
+algorithm uses a least-squares approach to design the
+optimal operator. You can select either a minimum phase
+spiking or predictive operator.
+Prior to operator design, a Hanning taper is applied to both
+taper on and taper off the input data derived from the time
+gate. Beginning and ending tapers are equal to one-half the
+operator length. In the case of multiple decon operators, onehalf the minimum operator length is used.
+
+References
+Cary, P. W., 1991, and Lorentz, G. A., Four-component surface-consistent deconvolution: annual SEG expanded abstracts SP4.2.
+Cambois, G., 1989, Surface-consistent deconvolution: annual SEG expanded
+abstracts SP4.4.
+Claerbout, J. F., 1976, Fundamentals of geophysical data processing: McGrawHill Book Co.
+Levin, S. A., 1989, Surface-consistent deconvolution: Geophysics 54, no. 9, 11231133.
+Robinson, E. A, 1967, Multichannel time series analysis with digital computer programs: Holden-Day.
+Robinson, E. A., and Treitel, S., 1980, Geophysical signal analysis: Prentice- Hall,
+Inc.
+Sheriff, R. E., and Geldart, L. P., 1983, Exploration Seismology Vol 2: Data Processing,40-47: Cambridge University Press.
+Telford, W. M., Geldart, L. P., Sheriff, R. E., and Keys, D.A., 1976: Applied geophysics, 379-380, 389-390.
+Yilmaz, O., 1987, Seismic data processing, 83-153: Society of Exploration Geophysicists.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution41
+
+ProMAX® Reference
+
+Parameters
+Choose version
+Select a faster memory version or slower disk version. The
+choices are:
+• Memory version uses the fast memory version for small
+datasets (.5M traces or less).
+• Disk version uses the slower disk version for large
+datasets (.5M traces or more).
+Display spectra and autocorrelations?
+Select Yes to display spectra and autocorrelations. During
+execution, screen prompts appear for:
+• number of stations per screen
+• scale factor
+The spectra and autocorrelations are displayed by station,
+except for offset, which is displayed in number of stations. All
+power spectra are displayed with respect to the minimum
+and maximum values of the entire input dataset.
+Select display DEVICE
+This appears if Yes to Display spectra and
+autocorrelations. Select This screen to display spectra and
+autocorrelations from the device you are working. You can
+also enter the name of another recognized device. Spectra
+may only be displayed for 2D land surveys.
+Start CDP
+Enter the starting CDP, but not less than the minimum CDP
+of the input data. Use this value to make a subset of the
+input data for analysis and application.
+End CDP
+Enter the ending CDP, but not greater than the maximum
+CDP of the input data. Use this value to make a subset of the
+input data for analysis and application.
+Note: Traces outside the CDP range are passed without
+decon application.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution42
+
+ProMAX® Reference
+
+Get decon gate from the DATABASE?
+Select Yes to specify a previously picked decon gate. Select
+No to enter the decon gate speciﬁcations.
+Select Time Gate Parameter File
+This appears if Yes to Get decon gate from the Database.
+Select the time gate ﬁle.
+SELECT Primary decon gate header word
+This appears if No to Get decon gate from the Database.
+Select the primary header word for the decon gate.
+SELECT Secondary decon gate header word
+This appears if No to Get decon gate from the Database.
+Select the secondary header word for the decon gate.
+SPECIFY decon gate parameters
+This appears if No to Get decon gate from the Database.
+Enter the gate Primary:Secondary:TI-T2/ pattern for each
+change in gate parameters.
+TYPE of deconvolution
+Enter the type of deconvolution operators to design and
+apply. The choices are:
+• Spiking applies Wiener-Levinson spiking decon for each
+selected component.
+• Predictive applies Wiener-Levinson predictive decon for
+each selected component.
+Prediction distance (ms)
+This appears if Predictive to Type of deconvolution. Enter
+the length, in ms, of the prediction distance for the predictive
+deconvolution operator.
+Components of spectral decomposition
+Select any combination of components specifying how the
+decon operators will be designed. A multi-value menu
+appears with four components of spectral decomposition:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution43
+
+ProMAX® Reference
+
+Shot, Rcvr, Offset, CDP. Select your choice(s) and click on
+Accept.
+Click on Help to display a description of the functionality of
+this menu. Exit without performing any update by clicking on
+Abort.
+Spectral decompositions used in application
+Select any combination of components to include in spectral
+decomposition. A multi-value menu appears with four
+components: Shot, Rcvr, Offset, CDP. Select your choice(s)
+and click on Accept.
+Click on Help to display a description of the functionality of
+this menu. Exit without performing any update by clicking on
+Abort.
+Limit offsets in decomposition?
+Select Yes to restrict a range of offsets in decomposition. It
+may be possible to better approximate the seismic wavelet by
+restricting the offsets because of the effects of ground roll or
+high amplitude ambient noise.
+Minimum absolute offset
+This appears if Yes to Limit offsets in decomposition. Enter
+a minimum absolute offset. Traces with offsets less than this
+value are not included in calculation.
+Maximum absolute offset
+This appears if Yes to Limit offsets in decomposition. Enter
+a maximum absolute offset. Traces with offsets greater than
+this value are not included in calculation.
+Decon operator length (ms)
+Enter the deconvolution operator length, in ms.
+Operator white noise level
+Enter the white noise value, in percent, to use for the
+operator calculation. This prewhitening percentage
+represents the percentage of white noise that is added to the
+original spike response, in order to stabilize the inverse ﬁlter
+calculation.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution44
+
+ProMAX® Reference
+
+Apply user speciﬁed taper?
+Select Yes to apply a user speciﬁed taper length to the design
+gate prior to autocorrelation. Select No to use a taper of 1/2
+the minimum operator length.
+Taper length in ms
+This appears if Yes to Apply user speciﬁed taper. Enter the
+taper length to be applied to each end of the design window
+prior to autocorrelation. The value is speciﬁed in ms.
+Window rejection factor
+Enter the factor by which to multiply the operator length. Any
+gate which contains less live samples than the result is
+eliminated for calculation.
+Apply a bandpass ﬁlter after decon?
+Select Yes to apply a bandpass ﬁlter to the data after the
+application of the deconvolution.
+Bandpass ﬁlter frequency values
+This appears if Yes to Apply a bandpass ﬁlter after decon.
+Enter the frequency bandpass ﬁlter to apply to the data after
+deconvolution. The ﬁlter is speciﬁed by a set of four corner
+frequencies, separated by dashes. The values may be integers
+or real numbers. They represent, sequentially, the 0% and
+100% points of the low-cut ramp, and the 100% and 0%
+points of the high-cut ramp, in Hz. These ramps are formed
+by cosine tapers (Hanning windows) in the frequency domain.
+The Hanning window is deﬁned by:
+cos φ 1
+----------- + -- if – π < ϕ < π , or 0 if ϕ < – π or ϕ > π .
+-2
+2
+Number of Gauss-Siedel iterations
+Enter the number of iterations in the spectral decomposition
+stage. The default is 3, while Cary and Lorentz recommend 5.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution45
+
+ProMAX® Reference
+
+Reapply trace mute after decon?
+Select Yes to automatically reapply previously applied trace
+mutes after deconvolution. Select No to leave the data as it is
+output from the deconvolution.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Deconvolution46
+
+Other Docs
+
+Search Page
+
+ProMAX® Reference
+
+Known Problems
+
+

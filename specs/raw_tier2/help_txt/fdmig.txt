@@ -1,0 +1,360 @@
+Implicit FD Time Migration389
+
+ProMAX® Reference
+
+Implicit FD Time Migration
+Implicit FD Time Migration performs a poststack time
+migration using a Finite Difference algorithm capable of
+improved accuracy at steep dips.
+
+Theory
+This migration algorithm is implemented in the time,
+frequency, space and depth domains, such as f,x,z, requiring
+that the input stacked section be transformed from time to
+frequency.
+The improved response at steep dips results from the use of a
+special form of the higher order approximations to the
+dispersion relation. The six levels of approximation included
+in the program are referred to as 15, 45, 65, 80, 87, and 90
+degrees. You can select the level of approximation, such as
+maximum dip. Compared to the 65 degree approximation,
+the 80 degree algorithm requires an additional iteration at
+every depth step, the 87 degree requires 2 additional
+iterations and the 90 degree 3 additional iterations. The
+computer run time will increase approximately linearly with
+each additional iteration that is required; therefore, you
+should choose the smallest maximum dip consistent with the
+data.
+As indicated above, this process provides a time migration,
+not a depth migration. However, the velocity ﬁeld is allowed to
+vary as a function of both coordinates, (x,z) or (x,t) and,
+within the limitations of a time migration, the process will
+accurately migrate and focus events in a spatially varying
+velocity ﬁeld.
+Internally, the migration algorithm uses interval velocity as a
+function of time. You can input an interval velocity ﬁeld as a
+function of time.
+Note: The reliability and accuracy of the results of any depth
+migration are highly dependent upon the quality of the
+velocity model used to migrate the data. It is strongly
+recommended that you use Velocity Field Manipulation to
+convert and quality control the input stacking velocity ﬁeld to
+derive an appropriate set of velocities for migration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration390
+
+ProMAX® Reference
+
+The input traces may arrive in any order, but will always be
+output in monotonically ascending order. If a CDP is missing
+on input, a zero trace will be inserted in the appropriate
+place. After migration, that trace will no longer be dead and
+could, potentially, be used in subsequent processing.
+However, at present it is not included in the output.
+Note: This migration routine cannot be placed within an IFENDIF block. You will get the error, “Number of samples per
+trace was changed in ﬂow bypass__cannot merge”. This is a
+depth migration routine, and the number of time or depth
+samples output will vary as a function of the Maximum
+Depth to Migrate parameter. This unpredictable trace length
+makes it impossible to merge with other datasets that might
+be generated within the same IF-ENDIF block. A workaround for this problem is to write out a separate dataset for
+each migration using Disk Data Output. You can then merge
+the various datasets by using the multiple input option in
+Disk Data Input. Up to ten migrations can be merged in this
+manner.
+
+Usage
+As with any complex process, the results obtained are very
+dependent on the input data and the parameters selected.
+There are certain things which you must be aware of before
+starting a migration.
+The data to be migrated must be adequately sampled. This
+means not only in the time domain, but also spatially. If the
+stacked traces are not at a sufﬁciently close interval to
+correctly sample a dipping reﬂector, then no migration can
+overcome the aliasing problem. Consider using Trace
+Interpolation to insert sufﬁcient traces to overcome any
+spatial aliasing within the data.
+The program uses a sophisticated, absorbing boundary
+condition at the side boundaries. In general, additional
+procedures are not required to control wave front noise from
+the sides.
+The velocity ﬁeld input will usually be derived from the
+stacking velocities used to generate the input dataset.
+Typically, you should use Velocity Field Manipulation to
+analyze the stacking velocities and convert them to an
+appropriate set of interval velocity functions.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration391
+
+ProMAX® Reference
+
+In performing migrations, it is often necessary to reduce the
+velocities by some percentage. This can be done easily with
+one of the menu options or can be done in a time and space
+variant manner using Velocity Field Manipulation. The actual
+percentages will depend on the data. It is also somewhat
+subjective. Some interpreters prefer under-migrated data.
+This is less likely to introduce distortion, although it may fail
+to completely collapse a diffractor. This could lead to an over
+estimate of the size of a structure. Others prefer to slightly
+over-migrate the data. This may introduce some distortion of
+the structure, but it can also make it easier to judge the
+effects of the migration.
+In most cases it will be necessary to run one or two tests with
+different percentages to determine the best value for a given
+area. As the FK migrations, Memory Stolt or Iterative Stolt,
+run signiﬁcantly faster than the Finite Difference migration,
+you can use one of the FK migration algorithms for this
+velocity testing. After the velocity ﬁeld has been determined,
+use the Finite Difference migration.
+Keep in mind that the velocity values for CDP stacking were
+picked relative to the ﬂoating NMO datum. The input to the
+migration is the stacked section at the ﬁnal datum. Where
+there is a large difference between the NMO datum and the
+ﬁnal datum, you may need to modify the velocity
+speciﬁcations to account for this difference, rather than
+using the actual stacking time-velocity pairs. Velocity Field
+Manipulation will provide this service.
+
+References
+Claerbout, J. F., 1985; Imaging the earth’s interior; Blackwell Scientiﬁc Publications.
+Yilmaz, O., 1987; Seismic Data Processing, SEG, pp. 241-353.
+
+Parameters
+Minimum CDP to migrate
+Enter the minimum CDP bin in window to migrate. If a line
+database exists, the program will default to the minimum
+CDP bin in the line. You may specify a larger bin number if
+you do not want to migrate the entire line.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration392
+
+ProMAX® Reference
+
+Note: If no line database exists for this line, you must enter a
+value in this ﬁeld.
+Maximum CDP to migrate
+Enter the maximum CDP bin in window to migrate. If a line
+database exists, the program will default to the maximum
+CDP bin in the line. You may specify a smaller bin number if
+you do not want to migrate the entire line.
+Note: If no line database exists for this line, you must enter a
+value in this ﬁeld.
+CDP interval (ft. or m)
+Enter the distance between adjacent CDP bins. This
+parameter critically affects the migration, so you must specify
+it accurately. In particular, use the same units as are used in
+the trace headers.
+Minimum frequency to migrate (in Hz)
+Enter the minimum coherent frequency in Hz that is of
+interest in the data to be migrated.
+Maximum frequency vs. depth to migrate
+Enter the maximum coherent frequency in Hz that is of
+interest in the data. You need to input this information as a
+function of depth. Since the maximum usable frequency
+generally decreases with depth or time, proper speciﬁcation
+of the parameter can signiﬁcantly reduce computer run
+times. The format is:
+D1-FMAX1,D2-FMAX2,...,Dn-FMAXn /
+EXAMPLE: 0-80, 4500-67.5,7000-50,20000-35/
+
+Get interval velocities versus time from DATABASE?
+Select Yes to select either an interval velocity versus time or
+interval velocity versus depth ﬁle from the database to use for
+the migration velocities. Select No to input the migration
+velocities using the editor.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration393
+
+ProMAX® Reference
+
+SELECT Interval Velocity File
+This appears if Yes to Get interval velocities versus depth
+from Database. Select a velocity function parameter ﬁle.
+SPECIFY migration velocity ﬁeld
+This appears if No to Get interval velocities versus depth
+from Database. Enter the migration time (or depth) and
+velocity pairs. The migration velocity functions may be
+spatially varied by CDP number. The format is:
+CDP1: T1-V1,T2-V2,...,Tn-Vn / CDP2:T1-V1,T2-V2,...,Tn-Vn /
+EXAMPLE: 1:0-5000,900-6725,1500-8571,2000-9670/ 101:0-5100,8606690,2000-9852/
+
+Percent velocity scale factor
+Enter a percentage by which to scale velocities before
+migration. Normally, a value of 100 percent should be used.
+However, you may enter a scale factor less than or greater
+than 100 percent to under or over migrate. Enter a scale
+factor of 0 percent for no migration. Velocity Field
+Manipulation will also time and space vary these velocity
+reduction factors.
+Time attenuation factor (dB/sec)
+Enter the dB/sec of attenuation to be applied to seismic data
+prior to migration. The data at the bottom of the section may
+include some high energy artifacts. If allowed into the
+migration, these will spread up into the data. To avoid this
+problem, use this dB/second factor to scale the data down
+before migration. The inverse scaling can then be applied
+after migration to restore the original amplitude
+relationships.
+Migration step size (ft. or m)
+Enter the depth step used in the migration process. Enter 0,
+the default, to compute a value equal to Vmin / (4 max
+frequency), where Vmin is the minimum velocity in the
+velocity ﬁle. You should generally use the computed default.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration394
+
+ProMAX® Reference
+
+Maximum depth to migrate (feet or meters)
+Enter the maximum depth to migrate. Since the migration
+process occurs in the depth domain, the program must have
+a maximum depth at which to stop the migration. If the input
+velocity ﬁeld is a function of time, enter 0 to compute a depth
+consistent with the maximum time on the input data. If the
+input velocity ﬁeld is a function of depth, then you must
+input a maximum depth value.
+Deﬁne the largest angle to properly migrate
+Select the largest angle to properly migrate. Finite Difference
+migrations are generally limited in their ability to accurately
+migrate steep dips. At the cost of additional computations,
+this algorithm can provide improved accuracy for dips up to
+90 degrees. However, the computer run time will increase
+approximately linearly with the maximum dip. Therefore, you
+should choose the smallest maximum dip consistent with the
+data. The choices are:
+• 15: Migrate to 15 degrees.
+• 45: Migrate to 45 degrees.
+• 65: Migrate to 65 degrees
+• 80: Migrate to 80 degrees.
+• 87: Migrate to 87 degrees.
+• 90: Migrate to 90 degrees.
+Output the migration in Depth or Time?
+Select to output either a Depth section or a Time section
+from the migration.
+Change the default tapering?
+Select Yes to change the default tapering. Select No to apply a
+bottom taper of 200 ms. The edge taper will vary from 2
+traces at the top of the section to 20 traces at the bottom of
+the section. Because migration artifacts originating deeper in
+the section tend to move a longer distance, the magnitude of
+the edge taper should normally increase with depth.
+Tapering is automatically applied to samples at the bottom
+and edges of the seismic section prior to migration. This
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration395
+
+ProMAX® Reference
+
+prevents migration artifacts due to the abrupt truncation at
+the bottom of the input section.
+A Hamming taper is used, which consists of a cosine
+weighting that varies from 100% to 8% over the length of the
+taper.
+Upper edge
+taper
+
+Bottom
+taper
+Lower edge
+taper
+
+Bottom taper (in milliseconds)
+This appears if Yes to Change the default tapering. Enter a
+value in ms to taper to zero the bottom of each trace within
+the seismic section. This tapering will prevent the creation of
+migration artifacts caused by the abrupt truncation at the
+last live sample of each input trace.
+Upper edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the width of edge taper in traces at top of seismic section.
+Both edges of the seismic section will have their outermost
+traces tapered to zero over this number of traces. The width
+of the taper zone can be made to vary linearly between the top
+and bottom of the seismic section. Because migration
+artifacts generally move a greater lateral distance when they
+originate deeper in the section, it is usually desirable to
+increase edge taper width toward the bottom of the section.
+Note: If the speciﬁed taper width is more than half the total
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Implicit FD Time Migration396
+
+ProMAX® Reference
+
+number of traces in the seismic section, taper width will be
+set to half the total number of traces in the seismic section.
+Lower edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the width of edge taper in traces at bottom of seismic section.
+The width of the taper zone can be made to vary linearly
+between the top and bottom of the seismic section. Because
+migration artifacts generally move a greater lateral distance
+when they originate deeper in the section, it is usually
+desirable to increase edge taper width toward the bottom of
+the section. Note: If the speciﬁed taper width is more than
+half the total number of traces in the seismic section, taper
+width will be set to half the total number of traces in the
+seismic section.
+Re-apply trace mutes?
+Select Yes to re-apply the pre-migration trace mutes after
+migration. Select No to adjust the mutes based on the ﬁrst
+and last non-zero samples after migration. In either case, if
+tapered mutes were used before migration, the same taper
+length is used after migration.
+Re-kill dead traces?
+Select Yes if you want traces that were dead (all zeros) before
+migration to be dead after migration. Select No to keep
+whatever migration has put into a previously dead trace; the
+trace will be made live and mutes will be determined from the
+ﬁrst and last non-zero samples.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

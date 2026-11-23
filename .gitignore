@@ -1,0 +1,4 @@
+/target
+/out
+*.opf.sqlite
+.claude/settings.local.json

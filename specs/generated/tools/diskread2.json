@@ -1,0 +1,147 @@
+{
+  "menu_id": "diskread2",
+  "tool_name": "DISKREAD2",
+  "label": "Disk Data Input",
+  "parameter_count": 15,
+  "parameters": [
+    {
+      "name": "FOREIGN",
+      "prompt": "Read data from other lines/surveys?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Selecting 'Yes' will change the behavior of the menus that are used to select datasets."
+    },
+    {
+      "name": "LABEL",
+      "prompt": "Select dataset",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a dataset from the datasets menu."
+    },
+    {
+      "name": "LABEL_AL",
+      "prompt": "Select dataset",
+      "kind": "action",
+      "default": null,
+      "help": "Use Mouse Button 1 to select a dataset from another line/survey."
+    },
+    {
+      "name": "SORTOPT",
+      "prompt": "Trace read option",
+      "kind": "circular",
+      "default": "-1",
+      "help": "Input traces can be sorted using header entries, or ALL traces in the dataset can be sequentially read in.",
+      "choices": [
+        {
+          "label": "Get All",
+          "value": "-1",
+          "help": "Read in all traces in the dataset sequentially. (In their current sort order.)"
+        },
+        {
+          "label": "Sort",
+          "value": "1",
+          "help": "Input traces will be sorted to the requested order, based on one or more header entries."
+        },
+        {
+          "label": "Get all",
+          "value": "-1",
+          "help": ""
+        }
+      ]
+    },
+    {
+      "name": "IDA_OPT",
+      "prompt": "Interactive Data Access?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Interactive Data Access may be used for certain processing modules to select new input traces on the fly."
+    },
+    {
+      "name": "PKEYNAM",
+      "prompt": "Select primary trace header entry",
+      "kind": "function",
+      "default": "SIN     ",
+      "help": "Use MB1 to select a header entry from the HEADERS menu to use as the primary key for specifying 'Sort' traces."
+    },
+    {
+      "name": "SKEYNAM",
+      "prompt": "Select secondary trace header entry",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header entry from the headers menu to use as the secondary key for specifying 'Sort' traces."
+    },
+    {
+      "name": "TKEYNAM",
+      "prompt": "Select tertiary trace header entry",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header entry from the headers menu to use as the tertiary key for specifying 'Sort' traces."
+    },
+    {
+      "name": "KEYLIST",
+      "prompt": "Sort order list for dataset",
+      "kind": "edit",
+      "default": "*/",
+      "help": "Use MB1 to access the editor and define the input trace list. Use an asterisk (*) to default any header's values ( Ex: FFID,CHAN; *:*/ )"
+    },
+    {
+      "name": "MEM_SORT",
+      "prompt": "Presort in memory or on disk?",
+      "kind": "circular",
+      "default": "1",
+      "help": "The input presort list can be created in memory or on disk, depending on resource requirements.",
+      "choices": [
+        {
+          "label": "Memory",
+          "value": "1",
+          "help": "Presort traces in memory (faster, but may exhaust memory resources)."
+        },
+        {
+          "label": "Disk",
+          "value": "0",
+          "help": "Presort traces on disk (slower, but capable of very large sorts)"
+        },
+        {
+          "label": "Memory",
+          "value": "1",
+          "help": ""
+        }
+      ]
+    },
+    {
+      "name": "iterate",
+      "prompt": "Read the data multiple times?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you wish to read the data multiple times, from beginning to end?"
+    },
+    {
+      "name": "DISKITER",
+      "prompt": "Number of iterations",
+      "kind": "typein",
+      "default": "2",
+      "help": "Enter the number of times that you wish to read the data."
+    },
+    {
+      "name": "THDRONLY",
+      "prompt": "Process trace headers only?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you wish to process trace headers only (for header math, loading geometry info, etc.)?"
+    },
+    {
+      "name": "sr_option",
+      "prompt": "Override input data's sample interval?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Set to 'Yes' if your input data's sample interval is NOT correct on disk and you need to OVERRIDE it to continue!"
+    },
+    {
+      "name": "SAMPRATE",
+      "prompt": "Correct sample interval",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the correct sample interval (in milliseconds) of your input data."
+    }
+  ]
+}

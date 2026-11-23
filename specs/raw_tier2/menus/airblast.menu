@@ -1,0 +1,143 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+'(
+ name: AIRBLAST
+label: "Air Blast Attenuation"
+value_tab: 59
+
+
+parameter: VEL_MUTE
+text: "Approximate velocity of energy to be attenuated"
+type: typein:
+type_desc: ( real: 7 0.01 nil )
+value: -1.0
+mouse_text: "Enter the approximate velocity of the noise that you want ProMAX to attenuate."
+plot_label: t
+
+
+parameter: ST_TM_ZO
+text: "Start time (ms) at zero offset"
+type: typein:
+type_desc: ( real: 7 0. nil )
+value: 0.0
+mouse_text: "Enter the start time in milliseconds of the air blast at zero offset."
+plot_label: t
+ 
+
+parameter: MUTEMODE
+text: "Type of energy atttenuation"
+type: circular:
+type_desc: ( 
+      ("MUTING "          1 "Apply a sample zeroing surgical mute (with edge tapers) to the air blast energy." )
+      ("ATTENUATION "     2 "Apply an inverse amplitude scalar to attenuate the air blast energy." ) )
+mouse_text: "How do you wish to attenuate the air blast energy?  Mute or inverse amplitude?"
+plot_label: t
+
+
+parameter: SURG_LEN
+text: "  Taper ramp length for surgical mute"
+type: typein:
+type_desc: ( real: 10 0.0 nil )
+value:  30.0
+mouse_text: "The time in milliseconds to 'ramp on' and 'ramp off' amplitudes for surgical mute application."
+plot_label: t
+
+
+parameter: search_mode
+text: "Automatically search for and detect noise?"
+type: boolean:
+value: t
+mouse_text: "If set to YES, the program will attempt to automatically determine noise existance and time boundaries."
+
+
+parameter: AB_ENVL1
+text: "  Time gate width of air blast energy to attenuate"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 300.0
+mouse_text: "What is the 'energy envelope' width (in millisecs) for the strong air blast amplitudes you wish to attenuate?"
+plot_label: t
+ 
+
+parameter: AB_ENVL2
+text: "  Maximum air blast energy envelope width"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 400.0
+mouse_text: "What is the maximum 'energy envelope' width (in milliseconds) for the strong air blast amplitudes?"
+plot_label: t
+ 
+
+parameter: ABL_FILT
+text: "  Filter to apply to enhance air blast energy"
+type: typein:
+type_desc: ( string: 15 )
+value: "35,50,90,120"
+mouse_text: "This filter is applied to help pick air blast energy times. Specify F1,F2,F3,F4 or a blank string for no filter."
+plot_label: t
+
+
+parameter: THRESHLD
+text: "  Air blast picking amplitude ratio threshold"
+type: typein:
+type_desc: ( real: 6 1.0e-4 nil )
+value: 2.0
+mouse_text: "To be picked by ProMAX, the air blast should be at least this number times as strong as surrounding energy."
+plot_label: t
+
+ 
+parameter: PCT_EXPN
+text: "  Percentage to expand picked air blast energy envelopes"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 25.0
+mouse_text: "Detected energy windows are expanded by this percentage of their length before applying mute or attenuation."
+plot_label: t
+
+
+parameter: TMIN_LEN
+text: "  Minimum detected air blast energy envelope length"
+type: typein:
+type_desc: ( real: 6 1.0e-4 nil )
+value: 10.0
+mouse_text: "Minimum length (in ms) of detected air blast energy.  Suspected noise windows shorter than this are ignored."
+plot_label: t
+
+
+exec_data: ("AIRBLAST"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: airblast.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("VEL_MUTE" implicit: (value 'VEL_MUTE))
+			("ST_TM_ZO" implicit: (value 'ST_TM_ZO))
+			("SRCHMODE" implicit: (if (value 'search_mode) 1 0 ))
+			("MUTEMODE" implicit: (value 'MUTEMODE))
+			("SURG_LEN" implicit: (value 'SURG_LEN))
+			("AB_ENVLP"  implicit: (if ( value 'search_mode ) (value 'AB_ENVL2) (value 'AB_ENVL1) ) )
+			("ABL_FILT"  implicit: (value 'ABL_FILT))
+			("THRESHLD"  implicit: (value 'THRESHLD))
+			("PCT_EXPN"  implicit: (value 'PCT_EXPN))
+			("TMIN_LEN"  implicit: (value 'TMIN_LEN))
+		)
+	    )	
+
+rules: (
+ 	(rule1 ( = ( value 'MUTEMODE ) 1 ) (do_show 'SURG_LEN)  (do_not_show 'SURG_LEN) )
+        (rule2 (value 'search_mode) (progn  (do_show 'ABL_FILT)
+ 	  				      (do_not_show 'AB_ENVL1) 	
+ 	  				      (do_show 'AB_ENVL2) 	
+				              (do_show 'THRESHLD)
+				              (do_show 'PCT_EXPN)
+				              (do_show 'TMIN_LEN))
+			               (progn (do_not_show 'ABL_FILT)
+ 					      (do_not_show 'THRESHLD)
+ 					      (do_not_show 'PCT_EXPN)
+ 	  				      (do_show 'AB_ENVL1) 	
+ 	  				      (do_not_show 'AB_ENVL2) 	
+ 					      (do_not_show 'TMIN_LEN)))
+	(VEL_default_rule1 (and ( = ( value 'VEL_MUTE) -1.0 )
+    		  	  ( = ( db_parmget_line "IUNITSz") 1 ) ) (set_value 'VEL_MUTE 1086.0 ) )
+	(VEL_default_rule2 ( = ( value 'VEL_MUTE) -1.0 ) (set_value 'VEL_MUTE 331.0 ) )
+      )
+
+)
+
+

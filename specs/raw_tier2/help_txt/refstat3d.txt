@@ -1,0 +1,745 @@
+Refraction Statics Calculation*2472
+
+ProMAX® Reference
+
+Refraction Statics Calculation*
+Refraction Statics Calculation* computes refractor velocity,
+refractor delay time, depth model, and shot and receiver
+statics.
+
+Theory
+The basic assumption is that weathered material exists below
+the source and receiver satisfying the delay time model. There
+are no shooting geometry restrictions, the method is
+applicable to 2D, 3D, or crooked lines. You do not need to
+pick ﬁrst breaks for all the sources, however, enough correct
+ﬁrst break picks must be available for a minimum fold for
+receivers. The ﬁrst break picks in the TRC database for the
+unused sources must be RNULL or less than or equal to zero.
+All database attributes are expected to be complete and
+accurate. Errors in ﬁrst break time picks and shooting
+geometry will degrade refraction statics results. Source
+depth, uphole time, elevation, X and Y values are needed
+from the SIN database. Receiver elevation, X and Y are
+needed from the SRF database. Trace SIN, SRF, sourcereceiver offset, ﬁrst break time picks, and CDP values are
+needed from the TRC database. The maximum number of
+layers allowed is 5, however, experience shows that one easily
+picked layer usually provides a better solution than two
+uneasily picked layers.
+The seven main stages in obtaining a statics solution are:
+• Stage 1: Input or compute V0, interpolate, and place in
+SIN database, and make each ﬁrst break time surfaceto-surface.
+• Stage 2: Input or compute refractor offset data, spatially
+interpolate if necessary, place in SIN database.
+• Stage 3: Compute refractor velocities and output the
+values to the SIN and CDP databases,
+• Stage 4: Compute source and receiver delay times by
+iterative delay times or DRM, optionally update refractor
+velocities (iterative delay times), and output to the SIN,
+SRF and CDP databases.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2473
+
+ProMAX® Reference
+
+• Stage 5: Compute refractor depth model, output depths
+to the SIN and SRF databases and optionally output
+updated V0, if ﬁrst refractor depth or elevation was
+smoothed.
+• Stage 6: Compute source and receiver statics to ﬁnal
+datum and output to the SIN and SRF databases.
+• Stage 7: Compute source and receiver residual refraction statics at the smoothed surface datum and output
+to the SIN and SRF databases. These static values may
+be applied using Apply Residual Statics.
+Note: V0 is the weathering velocity. It will be used as the
+velocity from surface to top of ﬁrst refractor
+Each stage may be done separately to allow you to edit V0,
+refractor offsets, refractor velocities, delay times depths or
+statics using database display, or all ﬁve stages may be
+performed at once. The delay time method requires surfaceto-surface travel times, so source uphole time is added to all
+traces belonging to that source. Offset values used in the
+velocity and delay time estimates are three dimensional
+offsets computed from source and receiver X, Y, and elevation
+coordinates.
+Note: For 64 bit platforms, different results will appear for
+database values computed from the stage by stage usage as
+compared to the all stages ON usage. This is due to each
+value written to the database being converted to IEEE format
+prior to disk output (truncation to 32 bits), then re-read and
+converted from IEEE format to 64 bit representation. This
+effect is most severe when velocity is iterated in the delay
+time stage.
+
+Usage
+Refraction Statics Calculation* expects ﬁrst break time
+picks to exist in the TRC database. This may be done using
+any one of the many ﬁrst break picking tools available with
+the ProMAX® processing system. If your data has high fold
+you may only need every second or third source with usable
+picks. There is no substitute for correct ﬁrst break time
+picks.
+Note: An identiﬁcation number (0-9) is attached as the last
+character of the names of all parameter ﬁles output to the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2474
+
+ProMAX® Reference
+
+databases. This allows you to distinguish between various
+runs.
+Stage 1: Input or Compute V0
+Refraction Statics Calculation offers three options for
+weathering velocity (V0) deﬁnition.
+• Option 1: Compute V0 from source depths and uphole
+times for shot source acquisition.
+• Option 2: Input V0 from menu (user typein). If source
+depths are available, uphole times will be computed
+using the user speciﬁed V0 and the source depths.
+• Option 3: Input V0 from menu (user typein). Use uphole
+times from the SIN database to correct ﬁrst break times
+to surface.
+Accurate uphole times are needed to convert ﬁrst break times
+into surface-to-surface travel times for correct delay time
+estimates. If the source was at the surface, no uphole
+information is available, and you must type in a best estimate
+of SIN vs. V0.
+Stage 2: Refractor Offset Deﬁnition
+Refraction Statics Calculation offers four options for refractor
+offset deﬁnition.
+• Option 1: Create a Mute ﬁle using a ﬂow applying LMO
+to selected sources (SIN is the primary key, OFFSET is
+the secondary key or AOFFSET for 3D) followed by Trace
+Display. Use one mouse click for the start and one for
+the end of each refractor and pick the same number of
+refractors on each selected source. This Mute ﬁle name
+may be speciﬁed in the Refstat3d menu.
+• Option 2: Visually determine the refractor offset ranges
+on selected, LMO sources and write down the SIN and
+offset ranges for each refractor. Whether you use a Mute
+ﬁle or type in refractor offset deﬁnition, the missing SINs
+are provided with values by interpolation using x,y coordinates. The number of layers (refractors) is a parameter
+needed in the menu.
+• Option 3: For 3D only, use the ﬁle generated by 3D Ref.
+Statics Model*.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2475
+
+ProMAX® Reference
+
+• Option 4: Automatic refractor offset computation for the
+one or two refractor case. This option ﬁts line segments
+in a minimum magnitude sense to the ﬁrst break times
+of eligible shots. You enter the minimum and maximum
+offsets that a shot must have to be eligible for analysis.
+The offset values for ineligible shots are computed by
+spatial (X,Y) interpolation. You can optionally apply previously computed elevation or refraction statics to the
+times prior to refractor offset computation. You can also
+spatially smooth the computed offsets prior to output to
+the SIN database.
+Stage 3: Compute Refractor Velocity
+The next stage is to input all source, receiver and CDP
+geometry, optional source uphole information, ﬁrst break
+time picks, refractor offset deﬁnition, and compute refractor
+velocity for each SIN that meets the minimum fold criterion.
+The program ﬁts either least squares or median lines to the
+picks in the refractor zone for velocity estimates. Optionally,
+the standard deviation of pick time variation from the median
+line may be used to detect and kill (RNULL) bad picks and
+recompute velocity. The updated ﬁrst break picks are written
+to the TRC F_B_PICK database if the process has killed any
+ﬁrst break picks. Velocity values for SINs are projected into
+CDP, optionally smoothed and written to the CDP database
+(VCINITNM) and projected back into SIN and written to the
+database (VSINITNM). The N refers to the layer number and
+the M refers to the identiﬁcation number. These CDP velocity
+values will be used in delay time decomposition in stage 4.
+Long operator smoothing of the initial refractor velocity
+estimates is strongly recommended to stabilize the low
+frequency static component. The auto-edit option restricts
+refractor velocity to a speciﬁed percent of the median value
+for the whole refractor and kills (RNULL) ﬁrst break picks
+responsible for the bad velocity values and writes the
+updated pick ﬁle to the TRC database. Examination of SIN
+refractor velocities without the auto-edit option is a quality
+control step showing which SINs have bad picks, wrong
+geometry. or what produced anomalous values. The problems
+with the sources may be corrected and this stage rerun.
+Stage 4: Compute Delay Times
+Once CDP velocity is available, delay times may be computed
+by one of two methods: Iterative Delay Time or DRM
+(Diminishing Residual Matrices / Domain Averaging).
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2476
+
+ProMAX® Reference
+
+• The Iterative Delay Time solution begins with source
+delay time estimates, followed by receiver delay time estimates, and optionally ﬁnalized by refractor velocity
+reﬁnement. Refractor velocity is reﬁned by subtracting
+the current receiver delay times from the ﬁrst break
+times and ﬁtting a least squares or L1 norm line to the
+corrected ﬁrst break times. Values are not computed for
+any source or receiver that does not meet the minimum
+fold criterion. Once the decomposition is complete for
+each refractor, these missing values are interpolated
+based on X and Y. If velocity iteration is selected,
+medium to heavy smoothing between iterations is recommended, especially for low fold data. Source delay time
+values are written to the SIN database as SDELAYNM
+where N is the layer number and M is the identiﬁcation
+number. Receiver delay times are written to SRF as RDELAYNM, and ﬁnal refractor velocities are written to CDP
+as VCFIN0NM. Source and receiver delay time descriptions include the GS term indicating a Gauss-Seidel
+solution. All delay time and velocity values may be
+viewed and edited in database display.
+• The DRM method starts by applying LMO to each eligible
+time to remove the offset term of the delay time equation.
+The velocity at the trace CDP location is used for LMO.
+The velocity corrected times are loaded into a matrix
+with common source across (row) and common surface
+location down (column). The sum of the magnitude of all
+the matrix elements is computed and printed before
+each iteration. A source iteration consists of summing all
+times that belong to a source (across a row) and assigning half the sum to the delay time accumulated for that
+source. This is done for all sources. Similarly, a receiver
+iteration consists of summing all times for a surface
+location (down a column) and assigning half the sum to
+the delay time accumulated for that receiver. The iteration is ﬁnished by subtracting the source and receiver
+time contribution (from that iteration) from each element
+in the matrix (diminish the matrix), and the new sum of
+magnitudes computed and printed. With this method,
+most of the delay time for a source or receiver is computed in the ﬁrst iteration. Subsequent iterations adjust
+the distribution of time between source and receiver. No
+velocity iteration is done. After the ﬁnal iteration is complete, source and receiver delay times are written to the
+database with DRM included in their descriptions. The
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2477
+
+ProMAX® Reference
+
+CDP refractor velocities for each refractor are also written to the CDP database.
+Stage 5: Compute Depth Model
+This stage inputs delay times and refractor velocities in CDP,
+interpolates refractor velocity into SIN and SRF, computes a
+depth model for sources and another for receivers, and writes
+the depth values into the SIN REFDEPTH SDEP_0NX and
+SRF REFDEPTH RDEP_0NX attributes. Optionally, the ﬁrst
+refractor depth or elevation in SRF may be projected into
+CDP, smoothed, projected back into SRF, V0 recomputed in
+SRF based on the smoothed depths or elevations, new V0
+projected from SRF to SIN, and ﬁnally SIN and SRF depth
+models computed. REFDEPTH is the depth below surface
+elevation.
+Stage 6: Compute Source and Receiver statics to ﬁnal datum
+This stage inputs refractor velocities and refractor depths,
+computes source and receiver depths to ﬁnal datum and
+outputs static values into the SIN Geometry SSTAT and SRF
+Geometry RSTAT databases. Time from bottom of the depth
+model to ﬁnal datum may be computed with a constant
+velocity from the menu or bottom refractor velocity.
+Stage 7: Compute Residual Source and Receiver statics at
+smoothed surface
+This stage inputs refractor one (1) velocity and source and
+receiver statics to ﬁnal datum and computes residual source
+and receiver static values at processing datum and outputs
+to the SIN Geometry S_RESIDN and SRF Geometry
+R_RESIDN databases. The computational process involves:
+• Applying source and receiver statics to the ﬁrst break
+picks from the ﬁrst refractor, then adding another CDP
+consistent time shift to place the datum at the processing datum.
+• Applying linear moveout to each ﬁrst break time based
+on CDP velocity of the ﬁrst refractor.
+• Using DRM to compute source and receiver components
+of the static-corrected, moved-out ﬁrst break times
+• Removing the low frequency trends of the source and
+receiver components by subtracting a smoothed version
+of the components from the original.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2478
+
+ProMAX® Reference
+
+References
+Daly, C., and Diggins, C., 1988, Use of refractor elevation models in the computation of refraction statics, Abstracts of the 58th meeting of the International Society of Exploration Geophysicists, Anaheim, Calif.
+Gulunay, N., 1985, A new method for the surface consistent decomposition of statics using diminishing residual matrices (DRM), 55th meeting of the International
+Society of Exploration Geophysicists, Washington, D.C.
+Hollingshead, G. W., and Slater, R. R., A novel method of deriving weathering
+statics from ﬁrst arrival refractions, SEG New Orleans.
+Lawton, D. C., 1989, Computation of refraction static corrections using ﬁrst-break
+traveltime differences: Geophysics. 54. 1289-1296.
+Palmer, Derecke, 1986, Refraction Seismics; Geophysical Press, vol. 13. Palmer,
+Derecke, 1980, The Generalized Reciprocal Method of Seismic Refraction Interpretation, Society of Exp. Geophysicist, Tulsa, Ok.
+
+Parameters
+Select First Break Times ﬁle
+Select ﬁrst break times from TRC order, F_B_PICK or
+NN_PICK information type, and the PICK parameter ﬁle.
+Number of Layers
+Enter the number of layers. The maximum number of layers
+is ﬁve.
+Identiﬁcation Number
+Enter a number (0-9) that will be the last character of the
+names of all parameter ﬁles output to the databases. This
+allows you to distinguish between various runs.
+Minimum fold
+Enter the minimum ensemble fold needed for CDP velocity or
+delay time computation. If the ensemble fold for this domain
+does not equal or exceed this value, a velocity or delay time
+value will be interpolated for this ensemble.
+Shooting Geometry
+Select how to interpret the refractor offset input ﬁle:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2479
+
+ProMAX® Reference
+
+• 3D: Survey is full 3D.
+• 2D end on: Survey is 2D end on. This is also known as
+half spread.
+• 2D split spread: Survey is 2D split spread.
+V0 options
+Select a method to compute or input V0 from the following
+options:
+• Compute V0 from uphole data: V0 is equal to source
+depth/ uphole time.
+• Input V0 but use the uphole time: input V0 and tie
+source to surface with uphole time.
+• Input V0 but compute uphole times: input V0 but
+compute an uphole time equal to source depth/ V0.
+Specify SIN versus V0
+This appears if either Input option to V0 options. Enter
+SIN:V0 value pairs separated by /:
+10:1535/33:1610/100:1450
+
+Input Refractor Offset
+Select Yes to input refractor offset and write to the SIN
+database.
+Refractor offset speciﬁcation
+This appears if Yes to Input Refractor Offset. Select how to
+specify refractor offset:
+• User typein: You enter SIN and refractor offset values.
+• Mute ﬁle: Refractor offsets are picked and stored in a
+mute ﬁle.
+• Offset ﬁle: Offset ﬁle is created by 3D Ref. Statics
+Model*. Number of layers must be 1, 2 or 3. Shooting
+Geometry must be 3D or 2D end on.
+• Compute Offsets: Compute refractor offsets with a line
+segment ﬁt algorithm. Number of layers must be 1 or 2.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2480
+
+ProMAX® Reference
+
+Enter SIN and refractor offsets
+This appears if User typein to Refractor offset
+speciﬁcation. Enter SIN versus horizontal refractor offset for
+selected SINs.
+When Shooting Geometry is 3D or 2D end on, specify one
+pair of offsets for each layer as follows:
+SIN1:offmin1-offmax1,offmin2-offmax2,.../SIN2:offmin1-offmax1,offmin2offmax2,.../
+
+offmin1-offmax1 are minimum and maximum offsets for layer
+1, offmin2-offmax2 are minimum and maximum offsets for
+layer 2, and so on. A two-layer example is
+10:140-450,550-1600/20:210-540,660-1700/
+
+For 2D end on shooting geometries that produce all negative
+offsets, the near offset still should be speciﬁed ﬁrst, for
+example
+10:-250--650,-700--2000/20:-150--500,-600--1800/
+
+When Shooting Geometry is 2D split spread, specify two
+pairs of offsets for each layer as follows:
+SIN1:...,neg_offmax2-neg_offmin2,neg_offmax1-neg_offmin,pos_offmin1pos_offmax1,pos_offmin2-pos_offmax2,.../
+
+Offsets go from largest negative to smallest negative followed
+by smallest positive to largest positive. neg_offmax1neg_offmin1 are maximum and minimum negative offsets for
+layer 1, pos_offmin1-pos_offmax1 are minimum and
+maximum positive offsets for layer 2, and so on. A two-layer
+example is
+10:-1500--500,-400--150,140-450,550-1450/20:-1400--450,-400--125,140450,550-1600/
+
+Select Refractor deﬁnition parameter ﬁle
+This appears if Mute ﬁle to Refractor offset speciﬁcation.
+Select the mute ﬁle for refractor deﬁnition. When Shooting
+Geometry is 3D or 2D end on, the mute ﬁle must contain
+one pair of offsets for each layer. When Shooting Geometry
+is 2D split spread, the mute ﬁle must contain two pairs of
+offsets for each layer.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2481
+
+ProMAX® Reference
+
+Select offset parameter ﬁle
+This appears if Offset ﬁle to Refractor offset speciﬁcation.
+Select the Offset ﬁle from 3D Ref. Statics Model*.
+Number of segments
+This appears if Compute offsets to Refractor offset
+speciﬁcation. Enter the number of line segments to ﬁt to the
+ﬁrst break time picks out to the maximum offset for analysis.
+The number of segments must be 2 or 3. If No to Near source
+traces from direct wave, the number of segments must be
+greater than or equal to Number of layers. If Yes to Near
+source traces from direct wave, the number of segments
+must be greater than or equal to Number of layers + 1.
+To select the number of segments, display a typical source
+record with ﬁrst break picks away from the edges of the
+survey. By specifying the minimum number of ﬁrst break
+times needed to attempt offset analysis, edge sources will not
+be analyzed, but their offsets will be interpolated/
+extrapolated from analyzed sources.
+Near source traces from direct wave
+This appears if Compute offsets to Refractor offset
+speciﬁcation. Select Yes if the near source traces are from
+the direct wave. Selecting Yes will assign refractor offset to
+picks following this segment. Select No to assign the picks
+from the ﬁrst segment to the ﬁrst refractor.
+Minimum offset
+Maximum offset
+These appear if Compute offsets to Refractor offset
+speciﬁcation. Enter positive minimum and maximum
+offsets, even for 2D split-spread shooting. A shot must have
+ﬁrst break picks for traces with absolute offset less than or
+equal to the minimum and greater than or equal the
+maximum to be eligible for refractor offset analysis. Shots
+that do not pass these requirements are assigned refractor
+offsets by spatial (X,Y) interpolation / extrapolation.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2482
+
+ProMAX® Reference
+
+Maximum offset for layer analysis
+This appears if Compute offsets to Refractor offset
+speciﬁcation. Enter the positive maximum offset to use in
+refractor offset analysis. Any ﬁrst break pick for an offset
+greater than this value will not be used. Maximum offset for
+layer analysis must be greater than Maximum offset.
+Apply smoothing to computed offsets
+This appears if Compute offsets to Refractor offset
+speciﬁcation. Select Yes to apply a spatial (X,Y) smoother in
+the CDP domain to the computed offset values prior to output
+to the SIN database.
+Length of smoother
+This appears if Compute offsets to Refractor offset
+speciﬁcation and Yes to Apply smoothing to computed
+offsets. Enter the length of the refractor offset smoother in
+odd CDPs.
+Apply statics to ﬁrst break times
+This appears if Compute offsets to Refractor offset
+speciﬁcation. Select Yes to apply previously computed
+statics (elevation or refraction) to the ﬁrst break times prior to
+segment assignment. This may remove enough static to allow
+a better estimate of refractor offset.
+Select Source statics
+This appears if Compute offsets to Refractor offset
+speciﬁcation and Yes to Apply statics to ﬁrst break times.
+Select the source static from the SIN GEOMETRY database,
+usually S_STATIC.
+Select Receiver statics
+This appears if Compute offsets to Refractor offset
+speciﬁcation and Yes to Apply statics to ﬁrst break times.
+Select the source static from the SRF GEOMETRY database,
+usually R_STATIC.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2483
+
+ProMAX® Reference
+
+Select CDP statics
+This appears if Compute offsets to Refractor offset
+speciﬁcation and Yes to Apply statics to ﬁrst break times.
+Select the source static from the CDP GEOMETRY database,
+usually C_STATIC.
+Compute Refractor Velocities
+Select Yes to compute refractor velocities by simple least
+squares or L1 norm line ﬁt to ﬁrst break picks within the
+horizontal refractor offset deﬁnition. The velocity values are
+output to the SIN database and projected into the CDP
+domain, optionally smoothed, then output to the CDP
+database.
+Type of Initial velocity computation
+This appears if Yes to Compute Refractor Velocities. Select
+the Type of initial velocity computation:
+• Mean ﬁts a mean (least squares) line to picks in each
+layer.
+• Median ﬁts a median (L1 Norm) line to picks in each
+layer. Median computation may prove more robust especially when pick quality is questionable.
+Smooth Initial velocities before output
+This appears if Yes to Compute Refractor Velocities. Select
+Yes to smooth the velocities in CDP, output to the CDP
+database, projected back to SIN, and output to the SIN
+database. Refractor velocity for each layer is projected into
+CDP domain. Select No for no CDP smoothing.
+Length of Initial velocity smoother
+This appears if Yes to Smooth initial velocities before
+output. Enter the length of the initial CDP velocity smoother
+in odd CDPs.
+Edit ﬁrst break times (standard deviation)
+This appears if Median to Type of Initial velocity
+computation. Select Yes to edit ﬁrst break picks based on
+pick time deviation from the median line deﬁning refractor
+velocity. If a pick is more than the Standard deviation factor
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2484
+
+ProMAX® Reference
+
+times the standard deviation away from the median line, it is
+set to RNULL. The edited ﬁrst break pick ﬁle is output to TRC
+F_B_PICK FBPEDITX, where X is the identiﬁcation number.
+Standard deviation factor
+This appears if Yes to Edit ﬁrst break times. Enter the
+factor such that if a pick time deviates this factor times the
+standard deviation from the computed median line, this pick
+is eliminated before velocity is recomputed.
+Note: Experimentation is necessary to tune this procedure.
+Start with a large factor such as 6.5 to 8 and check the
+velocity output in the SIN database. If there is little difference
+between non-edited velocity values and the median standard
+deviation edited values with little velocity smoothing and the
+velocity values have high scatter, decrease the standard
+deviation factor.
+Edit ﬁrst break times (median velocity)
+This appears if Yes to Compute Refractor Velocities. Select
+Yes to edit ﬁrst break picks based on refractor velocity. If the
+refractor velocity for any SIN for a layer is outside a
+percentage range of median velocity for the whole layer, the
+picks for that layer are set to RNULL, and will not be used in
+further computations during this run. The edited ﬁrst break
+pick ﬁle is output to TRC F_B_PICK FBPEDITX, where X is
+the identiﬁcation number.
+Percent deviation allowed
+This appears if Yes to Edit ﬁrst break times. Enter the
+percent deviation for layer velocities to deviate from the layer
+median.
+Compute Delay Times?
+Select Yes to compute and output delay times and ﬁnal CDP
+layer velocities to the database.
+Type of delay time Algorithm
+Select the type of delay time algorithm:
+• Gauss-Seidel: Gauss-Seidel source-receiver-velocity
+iteration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2485
+
+ProMAX® Reference
+
+• DRM: Diminishing residual matrices (domain averaging)
+source-receiver iteration.
+Number of iterations
+This appears if Yes to Compute Delay Times. Enter the
+number of iterations for delay time computation. Each
+iteration cycle includes source delay time estimation followed
+by receiver delay time estimation optionally followed by CDP
+velocity updating.
+Type of GS computation statics
+This appears if Yes to Compute Delay Times and GaussSeidel to Type of delay time Algorithm. Select the Type of
+Delay Time computation:
+• Mean uses mean statistics to estimate delay time.
+• Median uses the median of the delay time contributions.
+The median may be more robust if the quality of the ﬁrst
+break picks is questionable.
+Iterate refractor velocity
+This appears if Yes to Compute Delay Times and GaussSeidel to Type of delay time Algorithm. Select Yes to
+include layer velocity iteration after source and receiver delay
+time iteration.
+Smooth velocity between iterations
+This appears if Yes to Iterate refractor velocity and GaussSeidel to Type of delay time Algorithm. Select Yes to
+smooth refractor velocity for each layer in the CDP domain
+after each iteration.
+Length of velocity smoother
+This appears if Yes to Smooth velocity between iterations
+and Gauss-Seidel to Type of delay time Algorithm. Enter
+the length of the CDP velocity smoother in odd CDPs.
+Compute Refractor Depth Model
+Select Yes to compute and output the refractor depth model
+to the SIN and SRF databases. The SRF depth of the ﬁrst
+refractor may optionally be projected into CDP domain,
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2486
+
+ProMAX® Reference
+
+smoothed, then projected back to SRF where V0 is
+recomputed based on the updated depth. The new SRF V0 is
+projected into SIN domain and the remaining refractor depths
+are computed and written to the database.
+First refractor smoothing
+Select the type of ﬁrst refractor smoothing:
+• No smoothing: Do not smooth the ﬁrst refractor.
+• Smooth Depth: Smooth the depth values of the ﬁrst
+refractor and use this depth and delay times to recompute V0.
+• Smooth Elevation: Smooth the elevation values of the
+ﬁrst refractor and use this elevation and delay times to
+recompute V0.
+Length of smoother
+This appears if Yes to Compute Refractor Depth Model and
+Smooth Depth or Smooth Elevation to First refractor
+smoothing. Enter the length of ﬁrst refractor depth smoother
+in odd CDPs. Enter 1 for no smoothing to the ﬁrst refractor
+depth
+Compute Source and Receiver Statics
+Select Yes to compute and output source and receiver statics
+to ﬁnal datum.
+Final Datum Elevation
+This appears if Yes to Compute Source and Receiver
+Statics. Enter the elevation of ﬁnal datum in ft. or m.
+Replacement Method
+This appears if Yes to Compute Source and Receiver
+Statics. Select the replacement method:
+• User speciﬁed: Use a Constant velocity.
+• Refractor velocity: Compute time from the bottom of
+the model to ﬁnal datum.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2487
+
+ProMAX® Reference
+
+Replacement Velocity
+This appears if User speciﬁed to Replacement Method.
+Enter the constant replacement velocity value to compute
+time from bottom of model to ﬁnal datum.
+Compute Residual Statics
+Select Yes to compute and output residual source and
+receiver statics at the processing datum.
+Number of iterations
+This appears if Yes to Compute Residual Statics. Enter the
+number of DRM iterations for residual statics computation. A
+value of zero (0) means use the ﬁrst DRM estimate.
+Length of surface elevation smoother
+This appears if Yes to Compute Residual Statics. Enter the
+length of the smoother in odd CDPs. This value should be the
+same as the smoother length in Apply Refraction Statics.
+Length of low frequency ﬁlter
+This appears if Yes to Compute Residual Statics. Enter the
+length of the smoothing ﬁlter in odd CDPs used to remove the
+low frequency trends in the residual statics.
+Final Datum Elevation
+This appears if No to Compute Source and Receiver
+Statics. Enter the elevation of ﬁnal datum in ft. or m.
+Replacement Method
+This appears if No to Compute Source and Receiver
+Statics. Select the replacement method:
+• User speciﬁed: Use a Constant velocity.
+• Refractor velocity: Compute time from the bottom of
+the model to ﬁnal datum.
+Replacement Velocity
+This appears if No to Compute Source and Receiver Statics
+and User speciﬁed to Replacement Method. Enter the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2488
+
+ProMAX® Reference
+
+constant replacement velocity value to compute time from
+bottom of model to ﬁnal datum.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Refraction Statics Calculation*2489
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

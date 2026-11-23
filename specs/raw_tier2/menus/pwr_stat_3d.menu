@@ -1,0 +1,381 @@
+; 1 IIID IVD DEV DEPTHC
+'(
+ name: PWR_STAT_3D
+label: "2D/3D Max. Power Autostatics*"
+value_tab: 50
+
+
+;parameter: IDIS_OPT
+;text: "Display smash zone traces ?"
+;type: boolean:
+;value: nil
+;mouse_text: "Display smash zone traces and windows ?"
+
+
+;parameter: X_SERVER
+;text: "  Select display DEVICE"
+;type: :typein
+;type_desc: (:string 32)
+:value "This Screen"
+;mouse_text: "'This Screen' for current display or type in a display name to override the current display default."
+
+
+parameter: LABEL
+text: "Select Trace data file"
+type: function:
+type_desc: (dataset_list datasets)
+value: "no entry"
+selected_item: "* No Datasets Found *"
+mouse_text: "Use Mouse Button 1 to select a trace data file description from the datasets menu."
+
+
+parameter: HRZ_NAME
+text: "Select Autostatics horizon file"
+type: function:
+type_desc: ((parm_list "AHZ") parms)
+value:  "no entry"
+selected_item: "* No Horizon File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select an Autostatics Horizon file from the horizon file menu."
+
+
+parameter: RMS_STAT
+text: "RMS static change convergence criteria"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 0.05
+mouse_text: "If the RMS of the change in computed statics between iterations is less than this value, terminate calculations."
+
+
+parameter: MAX_ITER
+text: "Maximum number of iterations"
+type: typein:
+type_desc: ( int: 3 1 999 )
+value: 4
+mouse_text: "If the RMS static convergence limit is never satisfied, limit the statics iterations to this maximum count."
+
+
+parameter: TLIVEMIN
+text: "Minimum live samples in a gate (percent)"
+type: typein:
+type_desc: ( real: 5 1.0e-3 100.0 )
+value: 60.0
+mouse_text: "If fewer than this percentage of samples in any gate are non-zero, the gate is excluded from statics estimates."
+
+
+
+parameter: STAT_MAX
+text: "Maximum static allowed (ms)"
+type: typein:
+type_desc: (string: 25)
+value: "10.0,15.0,20.0,30.0"
+mouse_text: "Enter the maximum RESIDUAL static value allowed for each iteration."
+plot_label: t
+
+
+parameter: ER_PCNT
+text: "Correlation accept percent"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 10.
+mouse_text: "If correlation positive peak is LESS than this percent of the pilot energy, do NOT use correlation (0. - use all correlations)"
+
+
+parameter: idata_res
+text: "Compute Statics for whole line?"
+type: boolean:
+value: t
+mouse_text: "If this is NO, select the useful part of the dataset."
+
+
+
+parameter: REST_OPT
+text: " Dataset restriction option"
+type: pop_choose:
+type_desc: (
+("CDP range" 1 "Enter start and end CDPs to use for statics analysis.")
+("INLINE and CROSS LINE range" 2 "Enter start and end INLINES and CROSS LINES."))
+mouse_text: "Choose the method of dataset restriction for statics analysis."
+
+
+
+parameter: IST_CDP
+text: "    Start CDP of input dataset"
+type: typein:
+type_desc: ( int: 10 -1 nil )
+value: -1
+mouse_text: "Enter the start CDP number of the input dataset. (do not exceed 2 billion)"
+
+
+
+parameter: IEND_CDP
+text: "    End   CDP of input dataset"
+type: typein:
+type_desc: ( int: 10 -1 nil )
+value: -1
+mouse_text: "Enter the end CDP number of the input dataset. (do not exceed 2 billion)"
+
+
+
+parameter: ILINE_ST
+text: "    Start INLINE"
+type: typein:
+type_desc: ( int: 6 -1 nil )
+value: -1
+mouse_text: "Enter the starting INLINE number for statics analysis."
+
+
+
+parameter: ILINEEND
+text: "    End   INLINE"
+type: typein:
+type_desc: ( int: 6 -1 nil )
+value: -1
+mouse_text: "Enter the ending INLINE number for statics analysis."
+
+
+
+parameter: XLINE_ST
+text: "    Start CROSS LINE"
+type: typein:
+type_desc: ( int: 6 -1 nil )
+value: -1
+mouse_text: "Enter the starting CROSS LINE number for statics analysis."
+
+
+parameter: XLINEEND
+text: "    End   CROSS LINE"
+type: typein:
+type_desc: ( int: 6 -1 nil )
+value: -1
+mouse_text: "Enter the ending CROSS LINE number for statics analysis."
+
+
+parameter: LIN
+text: "Length of smash INLINE"
+type: typein:
+type_desc: ( int: 6 1 nil )
+value: 3
+mouse_text: "Enter the inline length of the smash area (must be ODD)."
+
+
+
+parameter: NXL
+text: "Length of smash CROSS LINE"
+type: typein:
+type_desc: ( int: 6 1 nil )
+value: 3
+mouse_text: "Enter the cross line length of the smash area (must be ODD)."
+
+
+
+
+parameter: IENV_OPT
+text: "Use envelope of correlations ?"
+type: boolean:
+value: nil
+mouse_text: "If YES, the positive envelope of the correlations will be summed and picked for statics?"
+
+
+
+parameter: STAT_OPT
+text: "Apply previously computed residuals?"
+type: boolean:
+value: nil
+mouse_text: "If YES, a previously computed set of SOURCE and RECEIVER statics may be applied prior to this residual computation."
+
+
+
+parameter: SIN_STAT
+text: "  Source residual statics database parameter"
+type: action:
+type_desc: ("SIN STATICS  SPWR0000")
+mouse_text: "Use MB1 to specify the SOURCE residual statics parameter to read from the database and apply to the input traces."
+
+
+
+parameter: SRF_STAT
+text: "  Receiver residual statics database parameter"
+type: action:
+type_desc: ("SRF STATICS  RPWR0000")
+mouse_text: "Use MB1 to specify the RECEIVER residual statics parameter to read from the database and apply to input traces."
+
+
+
+parameter: OFFS_OPT
+text: "Restrict offsets?"
+type: boolean:
+value: nil
+mouse_text: "If YES, specify the offset range of traces used in statics computations?"
+
+
+parameter: OFF_MIN
+text: "  Minimum absolute offset"
+type: typein:
+type_desc: ( real: 7 0 nil )
+value: 0.0
+mouse_text: "Enter the MINIMUM absolute offset of traces for statics computation."
+
+
+parameter: OFF_MAX
+text: "  Maximum absolute offset"
+type: typein:
+type_desc: ( real: 7 0 nil )
+value: 5000.0
+mouse_text: "Enter the MAXIMUM absolute offset of traces for statics computation."
+
+
+parameter: FMINSTAT
+text: "Final minimum static"
+type: typein:
+type_desc: ( real: 6 nil nil )
+value: -100.0
+mouse_text: "If any final source or receiver statics are below this value, they will be set to zero."
+
+
+parameter: FMAXSTAT
+text: "Final maximum static"
+type: typein:
+type_desc: ( real: 5 0 nil )
+value: 100.0
+mouse_text: "If any final source or receiver statics are above this value, they will be set to zero."
+
+
+parameter: DB_NUM
+text: "Run ID"
+type: typein:
+type_desc: ( string: 4 )
+value: "0000"
+mouse_text: "Enter 4 characters (numbers) identifying the database output parameters as SPRW0000, or SPRWABCD, etc."
+
+
+parameter: IREPORT
+text: "Report static values after each iteration?"
+type: boolean:
+value: nil
+mouse_text: "If this is NO, only the final static values will be reported."
+
+exec_data: ("PWR_STAT_3D"
+		("SPECIAL"
+			("TOOLTYPE"     implicit: "STAND_ALONE")
+			("PATHNAME"     implicit: "pwr_stat_3d.exe")
+		)
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: pwr_stat_3d.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+;			("IDIS_OPT"   implicit: ( if (value 'IDIS_OPT) 1 0 ))
+			("IDIS_OPT"   implicit: 0 )
+;			("X_SERVER" implicit:
+;          		     (if (= (value 'X_SERVER) "This Screen")
+;                                (where_promax_displays)
+;		         (value 'X_SERVER)))
+			("LABEL"     implicit: (value 'LABEL))
+			("HRZ_NAME"  implicit: (value 'HRZ_NAME))
+			("RMS_STAT"  implicit: (value 'RMS_STAT))
+			("MAX_ITER"  implicit: (value 'MAX_ITER))
+			("TLIVEMIN"  implicit: (value 'TLIVEMIN))
+			("STAT_MAX"  implicit: (value 'STAT_MAX))
+			("ER_PCNT"   implicit: (value 'ER_PCNT))
+			("DATA_RES"  implicit: (if (value 'idata_res) 1 0 ))
+			("REST_OPT"  implicit: (value 'REST_OPT))
+			("IST_CDP"   implicit: (value 'IST_CDP))
+			("IEND_CDP"  implicit: (value 'IEND_CDP))
+			("ILINE_ST"  implicit: (value 'ILINE_ST))
+			("ILINEEND"  implicit: (value 'ILINEEND))
+			("XLINE_ST"  implicit: (value 'XLINE_ST))
+			("XLINEEND"  implicit: (value 'XLINEEND))
+			("LIN     "  implicit: (value 'LIN))
+			("NXL     "  implicit: (value 'NXL))
+			("STAT_OPT"  implicit: (if (value 'STAT_OPT) 1 0 ))
+			("IENV_OPT"  implicit: (if (value 'IENV_OPT) 1 0 ))
+			("SIN_STAT"  implicit: (first (type_desc 'SIN_STAT)))
+			("SRF_STAT"  implicit: (first (type_desc 'SRF_STAT)))
+			("OFFS_OPT"  implicit: (if (value 'OFFS_OPT) 1 0 ))
+			("OFF_MIN "  implicit: (value 'OFF_MIN))
+			("OFF_MAX "  implicit: (value 'OFF_MAX))
+			("FMINSTAT"  implicit: (value 'FMINSTAT))
+			("FMAXSTAT"  implicit: (value 'FMAXSTAT))
+			("IREPORT "  implicit: (if (value 'IREPORT) 1 0 ))
+			("DB_NUM  "  implicit: (value 'DB_NUM) )
+		)
+	   )
+
+rules: 
+(
+ (rule_stat_opt (value 'STAT_OPT)
+                (do_show '(SIN_STAT SRF_STAT))
+                (do_not_show '(SIN_STAT SRF_STAT)) )
+
+ (rule1_call_dbparm ( and (value 'STAT_OPT) (value 'SIN_STAT))
+             ( progn
+                   (set_value 'SIN_STAT nil)
+		   (set_selected_item 'SIN_STAT nil)
+	           (set_type_desc 'SIN_STAT (list (choose_old_db_parm)))))
+
+ (rule2_call_dbparm ( and (value 'STAT_OPT) (value 'SRF_STAT))
+             ( progn
+                   (set_value 'SRF_STAT nil)
+		   (set_selected_item 'SRF_STAT nil)
+	           (set_type_desc 'SRF_STAT (list (choose_old_db_parm)))))
+
+; (rule0 (value 'IDIS_OPT)(do_show 'X_SERVER)(do_not_show 'X_SERVER))		     
+; (test_host_name (NOT (= (value 'X_SERVER) "This Screen"))
+;			(progn
+;			  (setq temp (host_valid_p (value 'X_SERVER)))
+;			  (if temp 
+;			      (add_error 'X_SERVER temp)
+;			    (set_error_list 'X_SERVER temp)))
+;			(set_error_list 'X_SERVER nil)
+;			)
+ (rule_res ( and (not(value 'idata_res)) ( = (db_parmget_line "I3Dz") 1 )) 
+	     (do_show 'REST_OPT)
+	     (do_not_show '(REST_OPT IST_CDP IEND_CDP ILINE_ST
+                            ILINEEND XLINE_ST XLINEEND))
+	     )
+ (rule_res ( and (not(value 'idata_res)) (not( = (db_parmget_line "I3Dz") 1))) 
+	     (progn (do_show '(IST_CDP IEND_CDP))
+	     (do_not_show '(REST_OPT ILINE_ST ILINEEND XLINE_ST XLINEEND)))
+	     )
+
+ (rule_cdp_lin1 (and (showing 'REST_OPT) ( = (value 'REST_OPT) 1 ))
+            (progn(do_show '(IST_CDP IEND_CDP))
+                  (do_not_show '(ILINE_ST ILINEEND XLINE_ST XLINEEND))
+            ))
+ (rule_cdp_lin2 (and (showing 'REST_OPT) ( = (value 'REST_OPT) 2 )
+             ( = (db_parmget_line "I3Dz") 1 )  )
+             (progn(do_show '(ILINE_ST ILINEEND XLINE_ST XLINEEND))
+                   (do_not_show '(IST_CDP IEND_CDP))
+             ))
+ (rule_ist ( = (value 'IST_CDP) -1 )
+	   (set_value 'IST_CDP (db_parmget_line "MINCDPz"))
+	   )
+
+ (rule_iend ( = (value 'IEND_CDP) -1 )
+	    (set_value 'IEND_CDP (db_parmget_line "MAXCDPz"))
+	    )
+ (rule_iline ( = (value 'ILINE_ST) -1 )
+	   (set_value 'ILINE_ST (db_parmget_line "MINILINz"))
+	   )
+ (rule_iline ( = (value 'ILINEEND) -1 )
+	   (set_value 'ILINEEND (db_parmget_line "MAXILINz"))
+	   )
+ (rule_xline ( = (value 'XLINE_ST) -1 )
+	   (set_value 'XLINE_ST (db_parmget_line "MINXLINz"))
+	   )
+ (rule_xline ( = (value 'XLINEEND) -1 )
+	   (set_value 'XLINEEND (db_parmget_line "MAXXLINz"))
+	   )
+ (rule_3d   ( = (db_parmget_line "I3Dz") 1 )
+            (do_show '(LIN NXL))
+            (do_not_show '(LIN NXL))
+            )
+ (rule_odd_lin ( evenp (value 'LIN) )
+               (set_value 'LIN ( + (value 'LIN) 1 ))
+               )
+ (rule_odd_lxn ( evenp (value 'NXL) )
+               (set_value 'NXL ( + (value 'NXL) 1 ))
+               )
+ (rule_off_res (value 'OFFS_OPT) 
+ 	     (do_show      '(OFF_MIN OFF_MAX))
+	     (do_not_show  '(OFF_MIN OFF_MAX))
+               )
+ )
+)

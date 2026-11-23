@@ -1,0 +1,128 @@
+{
+  "menu_id": "tvs",
+  "tool_name": "TVS",
+  "label": "Time-Variant Scaling",
+  "parameter_count": 13,
+  "parameters": [
+    {
+      "name": "GAINTYPE",
+      "prompt": "Basis for scaling",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "The user may select RMS, MEAN, MAXIMUM or USER-SUPPLIED VALUES as a basis for TVS scalars."
+    },
+    {
+      "name": "POWR_EXP",
+      "prompt": "Root power for scalar adjustment",
+      "kind": "typein",
+      "default": "1.0",
+      "help": "This is the power exponent for adjusting computed gain scalars.  1.0=no extra adjustment, 0.5='softer' scaling."
+    },
+    {
+      "name": "USRP_KEY",
+      "prompt": "SELECT Primary User Value Header WORD",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Use MB1 to select a header word from the headers menu as the PRIMARY key for specifying TVS User supplied gain values."
+    },
+    {
+      "name": "USRS_KEY",
+      "prompt": "SELECT Secondary User Value Header WORD",
+      "kind": "function",
+      "default": "OFFSET  ",
+      "help": "Use MB1 to select a header word from the headers menu as the SECONDARY key for specifying TVS User supplied gain values."
+    },
+    {
+      "name": "TVS_USRV",
+      "prompt": "USER TVS Gain Values",
+      "kind": "edit",
+      "default": "1:0:1.5,3.7,6.5/",
+      "help": "Define the TVS gain values (example: '1:0:1.1,2.3,5.5/1:5280:1.5,3.0,6.0/')."
+    },
+    {
+      "name": "TVS_MODE",
+      "prompt": "Basis for application",
+      "kind": "circular",
+      "default": null,
+      "help": "This option determines how the computed scalars will be applied to the trace samples.",
+      "choices": [
+        {
+          "label": "CENTER",
+          "value": "1",
+          "help": "Interpolate and apply scalars from gate center to gate center."
+        },
+        {
+          "label": "EDGE",
+          "value": "2",
+          "help": "Apply a constant scalar within the gate and interpolate between gate edges."
+        }
+      ]
+    },
+    {
+      "name": "MIN_SAMP",
+      "prompt": "Minimum samples per gate",
+      "kind": "typein",
+      "default": "5",
+      "help": "Minimum number of samples per TVS gate.  If fewer samples are available, the gate is removed."
+    },
+    {
+      "name": "db_option",
+      "prompt": "Get TVS time gates from database?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'YES' if the time gates were entered interactively."
+    },
+    {
+      "name": "GATENAME",
+      "prompt": "SELECT Time Gate Parameter FILE",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a TVS time gate parameter file from the parameter file menu."
+    },
+    {
+      "name": "PRIM_KEY",
+      "prompt": "SELECT Primary Time Gate Header WORD",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Use MB1 to select a header word from the headers menu as the PRIMARY key for specifying TVS time gate parameters."
+    },
+    {
+      "name": "SCND_KEY",
+      "prompt": "SELECT Secondary Time Gate Header WORD",
+      "kind": "function",
+      "default": "OFFSET  ",
+      "help": "Use MB1 to select a header word from the headers menu as the SECONDARY key for specifying TVS time gate parms."
+    },
+    {
+      "name": "TVS_GATE",
+      "prompt": "SPECIFY TVS time gates",
+      "kind": "edit",
+      "default": "1:0:0-500,700-1800,2500-4000/",
+      "help": "Define the TVS time gates (example: '1:0:0-500,700-1800,2500-4000/1:5280:500-1000,1200-2000,2600-4000/')."
+    },
+    {
+      "name": "OUT_TYPE",
+      "prompt": "Type of output",
+      "kind": "circular",
+      "default": null,
+      "help": "This option determines what values are in the output traces.",
+      "choices": [
+        {
+          "label": "TRACES",
+          "value": "1",
+          "help": "Output the scaled input traces."
+        },
+        {
+          "label": "SCALARS",
+          "value": "2",
+          "help": "Output the scalar values as traces."
+        },
+        {
+          "label": "version",
+          "value": "implicit:",
+          "help": "ProMAX $Id: tvs.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $"
+        }
+      ]
+    }
+  ]
+}

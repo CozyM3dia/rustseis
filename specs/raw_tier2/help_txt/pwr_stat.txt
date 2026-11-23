@@ -1,0 +1,185 @@
+Maximum Power Autostatics2057
+
+ProMAX® Reference
+
+Maximum Power Autostatics
+Maximum Power Autostatics uses a method which selects
+the source and receiver statics maximizing the CDP stack
+power.
+
+Theory
+Maximum Power also measures channel consistent residual
+statics. These can be used to detect multiplex skew
+correction errors, or generally poor statics solutions, since
+channel residual statics should be close to zero. Maximum
+Power Autostatics can be effective in poor signal-to-noise
+data, but should work well for a wide range of data quality if
+the velocity errors are reasonably small. For a general
+discussion of input requirements, database entries, and how
+residual statics are applied, refer to the Residual Statics
+Overview.
+Maximum Power Autostatics uses a modiﬁcation of the
+method described in Ronen and Claerbout’s paper
+(Geophysics 1985). A pilot trace for a reference CDP and user
+speciﬁed time horizon is formed by stacking traces ﬂattened
+on the horizon from the number of CDPs speciﬁed by Smash.
+For each trace in the reference CDP, the trace is subtracted
+from the pilot trace, then crosscorrelated with the pilot trace
+in a correlation gate with a maximum shift of the Maximum
+static allowed (ms) parameter. This crosscorrelation measures
+the stack power and is accumulated to a correlation sum for
+Receiver position of this trace and to a correlation sum for the
+shot position of this trace. This procedure is repeated for
+every trace in the reference CDP, the reference CDP is
+incremented, and the complete process repeated until all
+CDPs are processed for all horizons. The maximum values of
+all the correlations are picked relative to the center and the
+time difference is the static shift for that source or receiver.
+The statics are applied to the input traces and the complete
+process iterated. On the last iteration, an estimate is made
+for the channel consistent statics: all correlation traces are
+summed in the Channel domain, and a Channel domain time
+shift is also picked and stored. Channel consistent statics
+should be close to zero, unless an error was made in the
+computation or application of the multiplex skew corrections.
+Large channel statics in particularly poor data may also
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Maximum Power Autostatics2058
+
+ProMAX® Reference
+
+imply a non-convergent residual statics solution. This could
+actually degrade the reliability of the ﬁnal stack. The source
+and receiver statics are constrained to a speciﬁed maximum
+value.
+
+Usage
+In addition to the maximum number of iterations, you may
+specify an RMS static change convergence criteria. If the RMS
+of the change in the computed statics between iterations is
+less than this value, the additional iterations are not
+performed.
+The program includes a parameter for the percentage of live
+samples in a gate. If less than this percentage of the samples
+in any gate are non-zero, the gate is excluded from the
+residual static estimate. Zero sample values normally result
+from NMO stretch muting or surgical mutes.
+Successful execution of Maximum Power Autostatics will
+create the following database entries. These attributes may
+be viewed and edited in the Ordered Database. It is necessary
+to run the Apply Residual Statics module, in order to apply
+these database entries.
+Database Entries
+Order
+
+Info Type
+
+Parameter
+
+Description
+
+SIN
+
+STATICS
+
+SPWR0000
+
+Shot Static
+
+SIN
+
+STATICS
+
+S_PQ0000
+
+Shot Static Quality
+
+SRF
+
+STATICS
+
+RPWR0000
+
+Receiver Static
+
+SRF
+
+STATICS
+
+R_PQ0000
+
+Receiver Static Quality
+
+Parameters
+Select Trace data ﬁle
+Select an NMO-corrected CDP gather trace dataset.
+Select Autostatics horizon ﬁle
+Select an Autostatics horizon ﬁle. This is a ﬁle which contains
+the previously chosen time gates for the autostatics reference
+horizons.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Maximum Power Autostatics2059
+
+ProMAX® Reference
+
+RMS static change convergence criteria
+Enter a check for the convergence of the solution. If the RMS
+of the change in computed statics between iterations is less
+than this value, calculations will be terminated. Enter 0.0 to
+disable this feature.
+Maximum number of iterations
+Enter the maximum number of iterations in case the RMS
+static convergence limit is never satisﬁed.
+Minimum live samples in a gate (percent)
+Enter the percentage of non-zero samples to accept in a gate.
+Traces exceeding this value are excluded from estimates.
+Maximum static allowed (ms)
+Enter the maximum static to limit the maximum magnitude
+of the computed statics.
+Compute Statics for whole line?
+Select Yes to compute statics for the complete line. Select No
+to compute statics for a subset of the line.
+Start CDP of input dataset
+This appears if No to Compute Statics for the whole line.
+Enter the start CDP of the input dataset.
+End CDP of input dataset
+This appears if No to Compute Statics for the whole line.
+Enter the end CDP of the input dataset.
+Create a NEW database entry for each run
+Select No to overwrite a previous database entry. This will
+save space on the disk. Select Yes to write new database
+values for each run. This allows returning to a previous set of
+residual static values but uses more storage space.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Maximum Power Autostatics2060
+
+ProMAX® Reference
+
+Report static values after each iteration
+Select No to only report the ﬁnal statics values. Select Yes to
+report static values after each iteration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

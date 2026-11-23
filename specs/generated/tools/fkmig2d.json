@@ -1,0 +1,202 @@
+{
+  "menu_id": "fkmig2d",
+  "tool_name": "fkmig2d",
+  "label": "Stolt or Phase Shift 2D Mig",
+  "parameter_count": 26,
+  "parameters": [
+    {
+      "name": "mig_hosts",
+      "prompt": "Name of migration server host(s)",
+      "kind": "edit",
+      "default": "",
+      "help": "Specify the name of host(s) for the migration server(s)."
+    },
+    {
+      "name": "n_cpu",
+      "prompt": "Number of migration server nodes",
+      "kind": "typein",
+      "default": "1",
+      "help": "Enter the number of nodes to use as migration servers"
+    },
+    {
+      "name": "mig_type",
+      "prompt": "Migration algorithm",
+      "kind": "circular",
+      "default": null,
+      "help": "Select Phase Shift or Stolt migration",
+      "choices": [
+        {
+          "label": "Phase Shift",
+          "value": "1",
+          "help": ""
+        },
+        {
+          "label": "Stolt",
+          "value": "2",
+          "help": ""
+        }
+      ]
+    },
+    {
+      "name": "demig",
+      "prompt": "Migrate, Demigrate or Inverse Migrate?",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select Migrate, Demigrate or Inverse Migrate."
+    },
+    {
+      "name": "dodips",
+      "prompt": "Migration of dips",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "You can migrate dips up to and/or beyond 90 degrees."
+    },
+    {
+      "name": "stolt_stretch",
+      "prompt": "Stolt stretch factor",
+      "kind": "typein",
+      "default": "0.6",
+      "help": "Range 0 < factor < 2.  Use 1.0 for constant velocity, 0.6 for gradual velocity increase with depth typical of young, uncompacted sediments."
+    },
+    {
+      "name": "stolt_obliq",
+      "prompt": "Apply Stolt obliquity correction?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Set this to 'No' ONLY if you plan to do a Stolt demigration on the data later."
+    },
+    {
+      "name": "max_angle",
+      "prompt": "Start of high-dip taper",
+      "kind": "typein",
+      "default": "78.463",
+      "help": "Enter angle in degrees. Range 0 < angle < 90. High-dip taper reduces amplitude of dipping linear artifacts created by inverse migration."
+    },
+    {
+      "name": "vel_file",
+      "prompt": "Select interval velocity file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Select an Interval Velocity in Time file from the menu."
+    },
+    {
+      "name": "min_xline_no",
+      "prompt": "Minimum CDP to migrate",
+      "kind": "typein",
+      "default": "-987654",
+      "help": "Minimum CDP bin number of image aperture."
+    },
+    {
+      "name": "max_xline_no",
+      "prompt": "Maximum CDP to migrate",
+      "kind": "typein",
+      "default": "-987654",
+      "help": "Maximum CDP bin number of image aperture."
+    },
+    {
+      "name": "dcdp",
+      "prompt": "CDP interval (feet or meters)",
+      "kind": "typein",
+      "default": "-987654.",
+      "help": "CDP spacing in ft or meters (consistent with headers)."
+    },
+    {
+      "name": "max_tau",
+      "prompt": "Output trace length",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the trace length in ms for output (de)migrated data. 0.0 means use input trace length."
+    },
+    {
+      "name": "dtau",
+      "prompt": "Output sampling interval",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the sampling interval in ms for output (de)migrated data. 0.0 means use input sampling interval."
+    },
+    {
+      "name": "min_frequency",
+      "prompt": "Minimum frequency to (de)migrate",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Minimum frequency to (de)migrate, in Hz."
+    },
+    {
+      "name": "max_frequency",
+      "prompt": "Maximum frequency to (de)migrate",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Maximum frequency to (de)migrate, in Hz. This value has a strong impact on run time. 0.0 means go to 0.6*Nyquist."
+    },
+    {
+      "name": "n_xline_pad",
+      "prompt": "Number of traces to pad",
+      "kind": "typein",
+      "default": "0",
+      "help": "Enter the padding to avoid spatial wrap around."
+    },
+    {
+      "name": "changeTapering",
+      "prompt": "Change the default tapering?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Tapering is automatically applied to the bottom and edges of the data.  Enter YES to change the amount of tapering."
+    },
+    {
+      "name": "ms_taper",
+      "prompt": "Bottom taper (in milliseconds)",
+      "kind": "typein",
+      "default": "200.0",
+      "help": "The bottom of all traces is tapered to avoid data truncation artifacts."
+    },
+    {
+      "name": "taperTop",
+      "prompt": "Upper edge taper (in traces)",
+      "kind": "typein",
+      "default": "2",
+      "help": "Edge taper varies linearly between upper and lower parts of section."
+    },
+    {
+      "name": "taperBot",
+      "prompt": "Lower edge taper (in traces)",
+      "kind": "typein",
+      "default": "20",
+      "help": "Edge taper varies linearly between upper and lower parts of section.  Edge taper is usually greater toward bottom of section."
+    },
+    {
+      "name": "remute",
+      "prompt": "Reapply trace mutes?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If 'Yes', input trace mutes are reapplied on output.  If 'No', no mutes are applied and mute header entries are adjusted."
+    },
+    {
+      "name": "rekill",
+      "prompt": "Rekill dead traces?",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select desired type of rekill behavior: All, None or Edges only."
+    },
+    {
+      "name": "file_factor",
+      "prompt": "File refinement factor",
+      "kind": "typein",
+      "default": "1",
+      "help": "Data are spread over n by n array of scratch files, where n='Number of nodes'*'File factor'. Increasing file factor may improve performance."
+    },
+    {
+      "name": "file_name",
+      "prompt": "Scratch file ID",
+      "kind": "typein",
+      "default": "fkmig2d",
+      "help": "Scratch file names start with ID_area_line_flow_.  Code different IDs to run multiple jobs at the same time from the same flow."
+    },
+    {
+      "name": "verbose",
+      "prompt": "Verbose listing?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "'Yes' provides extra printout on what is going on, especially in migration servers."
+    }
+  ]
+}

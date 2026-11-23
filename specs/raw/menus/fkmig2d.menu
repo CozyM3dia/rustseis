@@ -1,0 +1,343 @@
+; IIID IVD 1 PROSPECTOR FIELD DEV DEPTHC
+; Remember that a change to this menu may also require a change to fkmig3d.menu
+'(
+ name: fkmig2d
+label: "Stolt or Phase Shift 2D Mig"
+value_tab: 40
+
+parameter: mig_hosts
+text: "Name of migration server host(s)"
+type: edit:
+type_desc: (15 80 5 " Examples: packhorse, mustang
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and
+                          paste'; (Can move the cursor first) " 3 )
+value: ""
+mouse_text: "Specify the name of host(s) for the migration server(s)."
+
+parameter: n_cpu
+text: "Number of migration server nodes"
+type: typein:
+type_desc: ( int: 4 1 nil)
+value: 1
+mouse_text: "Enter the number of nodes to use as migration servers"
+plot_label: t
+
+parameter: mig_type
+text: "Migration algorithm"
+type: :circular
+type_desc: (
+   ("Phase Shift" 1)
+   ("Stolt" 2)
+	    )
+selected_item: "Phase Shift"
+mouse_text: "Select Phase Shift or Stolt migration"
+plot_label: t
+
+parameter: demig
+text: "Migrate, Demigrate or Inverse Migrate?"
+type: pop_choose:
+type_desc: (
+   ("Migrate input data" 0)
+   ("Demigrate input data" 1)
+   ("Inverse migrate input data" 2)
+)
+mouse_text: "Select Migrate, Demigrate or Inverse Migrate."
+plot_label: t
+
+parameter: dodips
+text: "Migration of dips"
+type: pop_choose:
+type_desc: (
+   ("Up to 90 degrees only" 1)
+   ("Beyond 90 degrees only" 2)
+   ("Up to and beyond 90 degrees" 3)
+)
+mouse_text: "You can migrate dips up to and/or beyond 90 degrees."
+plot_label: t
+
+parameter: stolt_stretch
+text: "Stolt stretch factor"
+type: typein:
+type_desc:  ( real: 6 0.001 1.999)
+value: 0.6
+mouse_text: "Range 0 < factor < 2.  Use 1.0 for constant velocity, 0.6 for gradual velocity increase with depth typical of young, uncompacted sediments."
+plot_label: t
+
+parameter: stolt_obliq
+text: "Apply Stolt obliquity correction?"
+type: boolean:
+value: t
+mouse_text: "Set this to 'No' ONLY if you plan to do a Stolt demigration on the data later."
+plot_label: t
+
+parameter: max_angle
+text: "Start of high-dip taper"
+type: typein:
+type_desc:  ( real: 6 0.001 89.999)
+value: 78.463
+mouse_text: "Enter angle in degrees. Range 0 < angle < 90. High-dip taper reduces amplitude of dipping linear artifacts created by inverse migration."
+plot_label: t
+
+parameter: vel_file
+text: "Select interval velocity file"
+type: function:
+type_desc: ((parm_list "VIT") parms)
+value: "no entry"
+selected_item: "* No File has been Selected *"
+mouse_text: "Select an Interval Velocity in Time file from the menu."
+plot_label: t
+
+parameter: min_xline_no
+text: "Minimum CDP to migrate"
+type: typein:
+type_desc: ( int: 7 nil nil)
+value: -987654
+mouse_text: "Minimum CDP bin number of image aperture."
+plot_label: t
+
+parameter: max_xline_no
+text: "Maximum CDP to migrate"
+type: typein:
+type_desc: ( int: 7 nil nil)
+value: -987654
+mouse_text: "Maximum CDP bin number of image aperture."
+plot_label: t
+
+parameter: dcdp
+text: "CDP interval (feet or meters)"
+type: typein:
+type_desc:  ( real: 7 0.001 nil )
+value: -987654.
+mouse_text: "CDP spacing in ft or meters (consistent with headers)."
+
+parameter: max_tau
+text: "Output trace length"
+type: typein:
+type_desc:  ( real: 6 0.0 nil)
+value: 0.0
+mouse_text: "Enter the trace length in ms for output (de)migrated data. 0.0 means use input trace length."
+plot_label: t
+
+parameter: dtau
+text: "Output sampling interval"
+type: typein:
+type_desc:  ( real: 6 0.0 nil)
+value: 0.0
+mouse_text: "Enter the sampling interval in ms for output (de)migrated data. 0.0 means use input sampling interval."
+plot_label: t
+
+parameter: min_frequency
+text: "Minimum frequency to (de)migrate"
+type: typein:
+type_desc:  ( real: 6 0.0 nil)
+value: 0.0
+mouse_text: "Minimum frequency to (de)migrate, in Hz."
+plot_label: t
+
+parameter: max_frequency
+text: "Maximum frequency to (de)migrate"
+type: typein:
+type_desc:  ( real: 6 0.0 nil)
+value: 0.0
+mouse_text: "Maximum frequency to (de)migrate, in Hz. This value has a strong impact on run time. 0.0 means go to 0.6*Nyquist."
+plot_label: t
+
+parameter: n_xline_pad
+text: "Number of traces to pad"
+type: typein:
+type_desc: ( int: 6 0 nil)
+value: 0
+mouse_text: "Enter the padding to avoid spatial wrap around."
+plot_label: t
+
+parameter: changeTapering
+text: "Change the default tapering?"
+type: boolean:
+value: nil
+mouse_text: "Tapering is automatically applied to the bottom and edges of the data.  Enter YES to change the amount of tapering."
+plot_label: t
+
+parameter: ms_taper
+text: "   Bottom taper (in milliseconds)"
+type: typein:
+type_desc: ( real: 6 0 nil )
+value: 200.0
+mouse_text: "The bottom of all traces is tapered to avoid data truncation artifacts."
+plot_label: t
+
+parameter: taperTop
+text: "   Upper edge taper (in traces)"
+type: typein:
+type_desc: ( int: 3 0 nil )
+value: 2
+mouse_text: "Edge taper varies linearly between upper and lower parts of section."
+plot_label: t
+
+parameter: taperBot
+text: "   Lower edge taper (in traces)"
+type: typein:
+type_desc: ( int: 4 0 nil )
+value: 20
+mouse_text: "Edge taper varies linearly between upper and lower parts of section.  Edge taper is usually greater toward bottom of section."
+plot_label: t
+
+parameter: remute
+text: "Reapply trace mutes?"
+type: boolean:
+value: t
+mouse_text: "If 'Yes', input trace mutes are reapplied on output.  If 'No', no mutes are applied and mute header entries are adjusted."
+plot_label: t
+ 
+parameter: rekill
+text: "Rekill dead traces?"
+type: pop_choose:
+type_desc: (
+   ("All" 1 "All input dead traces are rezeroed on output.")
+   ("None" 0 "All input dead traces are output as live.")
+   ("Edges only" 2 "Only dead traces on edges are rezeroed on output. Internal dead traces are output as live.")
+)
+mouse_text: "Select desired type of rekill behavior: All, None or Edges only."
+plot_label: t
+
+parameter: file_factor
+text: "File refinement factor"
+type: typein:
+type_desc: ( int: 4 1 nil)
+value: 1
+mouse_text: "Data are spread over n by n array of scratch files, where n='Number of nodes'*'File factor'. Increasing file factor may improve performance."
+plot_label: t
+ 
+parameter: file_name
+text: "Scratch file ID"
+type: typein:
+type_desc: ( string: 16)
+value: "fkmig2d"
+mouse_text: "Scratch file names start with ID_area_line_flow_.  Code different IDs to run multiple jobs at the same time from the same flow."
+plot_label: t
+ 
+parameter: verbose
+text: "Verbose listing?"
+type: boolean:
+value: nil
+mouse_text: "'Yes' provides extra printout on what is going on, especially in migration servers."
+
+exec_data: (
+
+	("PAD_TRACES"
+	("GENERAL"
+		("header"	implicit: "CDP     ")
+		("defineBounds"	implicit: 1)
+		("dval"		implicit: 1.0)
+		("val1"		implicit: (* 1.0 (value 'min_xline_no)))
+		("valG"		implicit: (* 1.0 (value 'max_xline_no)))
+		("removeTraces"	implicit: 1)
+	)
+	)	
+	("MIGTAPER"
+	("GENERAL"
+		("ms_taper"	implicit: (if (value 'changeTapering) (value 'ms_taper) 200.))
+		("estimateTaper"implicit: 0)
+		("taperTop"	implicit: (if (value 'changeTapering) (value 'taperTop) 2))
+		("taperBot"	implicit: (if (value 'changeTapering) (value 'taperBot) 20))
+	)
+	)
+	("PT_FKMIG3D"
+	("GENERAL"
+		("version" implicit: "ProMAX $Id: fkmig2d.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+		("dimension"	implicit: 2)
+		("mig_hosts"	implicit: (value 'mig_hosts))
+		("n_cpu"	implicit: (value 'n_cpu))
+		("mig_type"	implicit: (value 'mig_type))
+		("demig"	implicit: (value 'demig))
+		("dodips"	implicit: (value 'dodips))
+		("stolt_stretch"implicit: (value 'stolt_stretch))
+		("stolt_obliq"	implicit: (if (value 'stolt_obliq) 1 0))
+		("max_angle"	implicit: (value 'max_angle))
+		("vel_file"	implicit: (value 'vel_file))
+		("min_iline_no"	implicit: 1)
+		("max_iline_no"	implicit: 1)
+		("min_xline_no"	implicit: (value 'min_xline_no))
+		("max_xline_no"	implicit: (value 'max_xline_no))
+		("dcdp"		implicit: (value 'dcdp))
+		("max_tau"	implicit: (value 'max_tau))
+		("dtau"		implicit: (value 'dtau))
+		("min_frequency"implicit: (value 'min_frequency))
+		("max_frequency"implicit: (value 'max_frequency))
+		("n_iline_pad"	implicit: 0)
+		("n_xline_pad"	implicit: (value 'n_xline_pad))
+		("l_iline_taper"implicit: 0)
+		("l_xline_taper"implicit: 0)
+		("top_taper"	implicit: 0.0)
+		("bot_taper"	implicit: 0.0)
+		("remute"	implicit: (if (value 'remute) 1 0))
+		("rekill"	implicit: (value 'rekill))
+		("file_factor"	implicit: (value 'file_factor))
+		("file_name"	implicit: (value 'file_name))
+		("verbose"	implicit: (if (value 'verbose) 1 0))
+	)
+	)
+	("RMPAD_TRACES"
+	("GENERAL"
+	)
+	)	
+)
+rules: (
+	(rule1a	(AND	(= (value 'min_xline_no) -987654 )
+			(db_parmget_line "MINCDPz")
+		)
+		(set_value 'min_xline_no (db_parmget_line "MINCDPz"))
+	)
+	(rule1b	(AND	(= (value 'max_xline_no) -987654 )
+			(db_parmget_line "MAXCDPz")
+		)
+		(set_value 'max_xline_no (db_parmget_line "MAXCDPz"))
+	)
+	(rule1c	(AND	(= (value 'dcdp) -987654.)
+			(db_parmget_line "DCDPILNz")
+		)
+		(set_value 'dcdp (db_parmget_line "DCDPILNz"))
+	)
+	(rule3	(= (value 'mig_type) 2)
+		(progn
+			(do_not_show 'dodips)
+			(do_not_show 'min_frequency)
+		)
+		(progn
+			(do_show 'dodips)
+			(do_show 'min_frequency)
+		)
+	)
+	(rule4  (or (= (value 'demig) 2) (= (value 'mig_type) 2))
+		(do_show 'stolt_stretch)
+		(do_not_show 'stolt_stretch)
+	)
+	(rule4a	(and (= (value 'demig) 0) (= (value 'mig_type) 2))
+		(do_show 'stolt_obliq)
+		(do_not_show 'stolt_obliq)
+	)
+	(rule5  (= (value 'demig) 2)
+		(do_show 'max_angle)
+		(do_not_show 'max_angle)
+	)
+	(rule6	(value 'changeTapering)
+		(progn 
+			(do_show 'ms_taper)
+			(do_show 'taperTop)
+			(do_show 'taperBot)
+		)
+		(progn 
+			(do_not_show 'ms_taper)
+			(do_not_show 'taperTop)
+			(do_not_show 'taperBot)
+		)
+	)
+       )
+)

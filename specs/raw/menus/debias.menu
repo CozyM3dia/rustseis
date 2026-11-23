@@ -1,0 +1,23 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: DEBIAS
+label: "Trace dc Removal"
+value_tab: 35
+
+parameter: CEN_OPT
+text: "Type of central value"
+;type: choose:
+type: circular:
+type_desc: (
+ ("Mean        " 1 "Use the mean as the central value.")
+ ("(Min+Max)/2 " 2 "Use the mean of the min and max as the central value."))
+mouse_text: "Select the type of central value you wish to use to correct the 'bias' of your traces."
+
+exec_data: ("DEBIAS"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: debias.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("CEN_OPT" implicit: (value 'CEN_OPT))
+		)
+	    )	
+       
+)

@@ -1,0 +1,21 @@
+{
+  "name": "Parity_FXDECON",
+  "steps": [
+    { "tool": "segy_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy" } },
+    {
+      "tool": "fxdecon",
+      "params": {
+        "method": "WienerLevinson",
+        "white_noise_pct": 1.0,
+        "horiz_window_traces": 24,
+        "filter_len": 5,
+        "time_window_ms": 1000.0,
+        "time_overlap_ms": 100.0,
+        "f_min_hz": 6.0,
+        "f_max_hz": 90.0,
+        "reapply_mute": false
+      }
+    },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_fxdecon.sgy" } }
+  ]
+}

@@ -1,0 +1,459 @@
+Common Offset F-K DMO289
+
+ProMAX® Reference
+
+Common Offset F-K DMO
+Common Offset F-K DMO is applied to common offset
+gathers. New traces are not produced by this process.
+
+Theory
+We offer three DMO processes: Common Offset F-K DMO,
+Ensemble DMO in T-X Domain, and Dip Decomposition
+DMO. A comparison of the three can be found in the DMO
+Overview.
+Dip-moveout correction is a dip-dependent partial migration,
+applied so nonzero offset seismic data exhibits the same zerooffset for all offsets. This transformation from nonzero offset
+to zero offset yields improved velocity estimates and higher
+lateral resolution, as well as a few other desirable side effects,
+such as the attenuation of coherent noise.
+Common Offset F-K DMO can be more accurate than
+alternative DMO methods, particularly in its handling of
+velocity variations with depth, partly through a modiﬁcation
+of logarithmic time stretching. This modiﬁcation is a step in
+the right direction, but it may be inadequate for steep dips
+when velocity increases signiﬁcantly with depth. To more
+accurately process steep dips, this process also uses a DMO
+stretch factor. This factor enhances the accuracy of F-K DMO
+for steep dips, much as Stolt’s stretch (W) factor improves the
+accuracy of F-K migration, when velocity varies with depth.
+This implementation of Common Offset F-K DMO makes time
+corrections to data to account for time varying velocity V(t)
+effects. The following explains the advantages of time varying
+DMO.
+• Constant velocity DMO tends to over-DMO the data. The
+V(z) correction attempts to correct V(t)-adjusted DMO
+with smaller corrections than constant velocity DMO.
+The important issue here is not the magnitude of the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO290
+
+ProMAX® Reference
+
+velocity but the rate of change with time.
+Velocity
+V(0)
+T
+I
+M
+E
+V(T)
+
+A large ratio V(t)/V(0) means a large variation in velocity.
+It also means a smaller DMO correction of the data
+leading to narrower DMO operators over the midpoints.
+This results in moveouts of dipping reﬂectors being
+corrected less and therefore appearing faster than ﬂat
+events at the same time.
+• DMO reduces the apparent moveout velocity (increases
+the curvature over offset) of dipping reﬂections to match
+the moveouts of ﬂat reﬂections at the same time. Constant-velocity DMO applies too large a DMO correction,
+making dipping events appear slower than ﬂat reﬂections at the same time.
+Offset
+Dipping Event
+Before DMO
+T
+I
+M
+E
+
+Flat Event
+Dipping Event
+After Constant
+Velocity DMO
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO291
+
+ProMAX® Reference
+
+• The V(t) adjustment is independent of the magnitude of
+the velocity, only the relative changes with depth matter.
+You can multiply the V(t) function by a constant, or
+change the units from ft. to m, without any effect on the
+DMO corrections.
+• The exact expression is more complicated, but you can
+approximate the size of the V(t) adjustment by examining
+the ratio V(t)/V(0) of the RMS velocity V(t) at a time t to
+the velocity V(0) at the surface. You always expect
+V(t)/V(0) to be greater than 1. In the Gulf of Mexico, this
+ratio is approximately 2 at 2 seconds, 3 at 4 seconds,
+and 4 at 7 seconds. (This implies a velocity function=
+1500 at 0, 3000 at 2 sec, 4500 at 4 sec, 6000 at 7 sec)
+Given an example where the velocity picks on the ﬂat
+events form a nice linear velocity function increasing in
+V with T, if you have dipping events at the same time as
+ﬂat events, these events will show up to the right of the
+ﬂat events on the semblance. (So you get two picks at the
+same time). If you DMO correctly and then do Velocity
+Analysis again, the picks for the dipping events should
+be on the same line (at the same velocity) as the ﬂat
+events. Applying too much DMO pushes these picks left
+of the line; applying too little DMO leaves them to the
+right of the line.
+
+Velocity
+Flat Events
+Dipping Events
+T
+i
+m
+e
+
+If you apply a V(t)-adjustment with too large a ratio, then
+too little DMO is applied. Too little DMO correction
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO292
+
+ProMAX® Reference
+
+leaves dipping reﬂections too fast, as they would be
+without DMO. If you apply the V(t)-adjustment with too
+small a ratio, then you over-correct, although less so
+than a constant-velocity DMO.
+Velocity
+Flat Events
+DMO Over-corrected
+Dipping Events
+T
+I
+M
+E
+
+DMO Under-corrected
+
+• The quality of F-K DMO depends fairly heavily on the
+smoothness of V(t). The internal V(t)-adjusted logarithmic stretch depends upon the fourth power of V(t), the
+smoothness of which in turn depends upon the fourth
+derivative of V(t). Since standard ProMAX® stacking
+velocity interpolation is second-order smooth, we recommend that at least two addition passes of vertical
+smoothing be applied with Velocity Manipulation. You
+can use Trace-Velocity Table Transfer to display the
+smoothed V(t) curve side-by-side with the original V(t)
+curve. This will assure that the main features of V(t)
+have not been smoothed away inadvertently. In most
+cases you will not see any visual difference between the
+two curves but the F-K DMO results with the extra velocity smoothing are noticeably better and free of distinct
+regions of low-frequency banding.
+• The effect of the V(t) adjustment is hard to distinguish
+from a adjustment of DMO for anisotropy. A greater
+anisotropy, where horizontal velocities are greater than
+vertical velocities, requires a larger DMO correction. A
+smaller V(t)/V(0) ratio has the almost the same effect as
+a larger anisotropy. As a result, many adjust for anisotropy in their DMO by reducing the variations in the
+assumed V(t). In the anisotropic Gulf of Mexico, some
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO293
+
+ProMAX® Reference
+
+have found that a constant-velocity DMO will produce
+better results than an accurate V(t) adjustment.
+In short, if you are ignoring anisotropy, then there is no
+point in worrying about great accuracy in an assumed
+v(t). The only reliable way to tune the assumed V(t) is by
+applying DMO with different functions. You will then
+discover how relatively insensitive DMO corrections are
+to variations in v(t) and will usually assume standard
+functions thereafter.
+Operation Efﬁciency
+This DMO method has been highly optimized for
+computational efﬁciency. The algorithm Fourier transforms a
+common offset section from space to wavenumber. Then, for
+each wavenumber, it stretches time logarithmically so DMO
+can be performed as a convolution. This convolution is then
+performed by multiplication in the frequency domain. Finally,
+the Fourier transforms and stretching are inverted to obtain
+the DMO-corrected common-offset gather.
+Dip Filtering examples
+Main parameters:
+CDP spacing=6.2
+Velocity is a constant 2000
+
+Original data consists of three common offset section
+with band limited spikes:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO294
+
+ProMAX® Reference
+
+Offset section after DMO without dip ﬁltering
+
+Note low
+frequency
+components
+added to data
+
+The low frequency components are most signiﬁcant in the shallow parts of the
+data. They may smear above the mute zone or may be gained by an AGC.
+
+Offset section after DMO With dip ﬁltering
+
+The steeply dipping components are attenuated. These are the evanescent components and their removal will not affect the migration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO295
+
+ProMAX® Reference
+
+Stolt migration of offset section after DMO without dip ﬁltering
+
+Stolt migration of offset section after DMO WITH dip ﬁltering
+
+The dip ﬁltering has not affected the migration.
+
+The FK DMO dip ﬁlter only removes dips above the
+evanescent dip of 1/V, using the minimum velocity. The
+slower the velocity, the steeper the maximum dip allowed. If a
+velocity table is provided, then the minimum velocity is taken
+from the table. Otherwise, the constant velocity is used. FK
+DMO allows for depth-variable velocity by stretching the
+input data so that it appears to be constant velocity.
+
+Usage
+The trace spacing within a typical common offset ensemble is
+equivalent to the shotpoint spacing of the data. Aliasing
+effects may severely degrade the results of Common Offset FK DMO preferred on these ensembles. For this reason, it is
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO296
+
+ProMAX® Reference
+
+strongly recommended to perform Trace Binning before
+Common Offset F-K DMO. Trace Binning allows you to deﬁne
+offset bins, generating common offset ensembles with a trace
+spacing equal to the nominal CMP spacing. Trace Binning is
+also used to further reduce the number of common offset
+ensembles by using larger offset bin sizes. Trace Binning
+creates a new trace header word like BOFFSET. Data
+entering this process then must be sorted with BOFFSET as
+the primary key, and CDP as the secondary key. This allows
+for traces with similar offsets to be processed within the same
+ensemble.
+Ideally, DMO should follow autostatics and NMO corrections
+in the processing ﬂow. Furthermore, the velocities used in
+NMO (before DMO) should be the dip-independent velocities
+appropriate for horizontal reﬂectors. Estimating these
+velocities without ﬁrst applying DMO can be difﬁcult.
+Therefore, a useful processing sequence is:
+Sort to Common offset domain (Use Disk Data Input or Inline sort)
+NMO (Use the best estimate of velocities)
+DMO
+Inverse NMO (Use the same velocities as for the initial NMO)
+Velocity analysis
+
+When the difference between initial and ﬁnal velocities is
+signiﬁcant, repeat this sequence. Having arrived at your ﬁnal
+stacking velocities, the processing ﬂow will continue with:
+Sort to Common offset domain (Use Disk Data Input or Inline sort)
+NMO (Use the ﬁnal velocities)
+DMO
+Sort to CDP domain (Use Disk Data Input or Inline sort)
+CDP Stack
+
+In cases of skidded shots or other irregular shooting
+geometry, traces may spill from one DMO bin into an
+adjacent bin, yielding two or more traces per CDP within a
+given DMO bin. Traces within the same DMO bin having
+identical CDP numbers are stacked together prior to DMO
+being applied to the common offset sections. Thus, less
+traces may be output from this module than were input. This
+will cause the DMO output to be stamped as not matching
+the database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO297
+
+ProMAX® Reference
+
+References
+Deregowski, S. M., 1986, What is DMO?: First Break, 4, 7.
+Notfors, C. D., and Godfrey, R. J., 1987, Dip moveout in the frequency- wavenumber domain: Geophysics, 52, 1718-1721.
+Hale, D., 1988, Dip moveout processing - course notes: SEG Continuing Education.
+Liner, D., 1990, General theory and comparative anatomy of dip moveout: Geophysics, 55, 595-607.
+Hale, D, and Artley, Squeezing dip moveout for depth-variable velocity: Geophysics, 58, 257-264
+Stolt, R. H., 1978, Migration by Fourier transform: Geophysics, 43, 23-48.
+Lynn, Walt, Gonzalez, A. and Mackay, S., 1991, Where are the fault-plane reﬂections?: 61st Annual International. Mtg., Soc. Expl. Geophysics., Expanded
+Abstracts, 91, 1151-1154.
+
+Parameters
+CDP interval
+Enter the CDP spacing in ft. or m, depending on what units
+are used in the headers. This parameter and the sourcereceiver offset determine the width of the DMO operator. If
+you enter the CDP interval incorrectly, your DMO operator
+will have the wrong shape.
+Typical common-offset trace spacing
+Enter the trace spacing of the input/output common offset
+gathers in ft. or m, depending on what units are used in the
+headers; this spacing should not be less than the CDP
+spacing. This parameter determines the highest wavenumber
+contained in the DMO operator. The DMO operator contains
+wavenumbers less than 1/2 cycle per typical CDP spacing to
+avoid operator aliasing. If Common Offset DMO Binning is
+properly applied to the data, this value is equal to CDP
+spacing.
+If you read in every other CDP per DMO ensemble, and the
+CDP spacing is 25, you would enter 50 for this parameter.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO298
+
+ProMAX® Reference
+
+Maximum number of CDPs in a panel
+Enter the maximum number of CDPs in any of the common
+offset panels. In other words, enter the maximum common
+offset fold. The default is the maximum number of CDPs in
+your dataset.
+If this value is set too small, the job aborts and produces an
+error message stating the process attempted to output too
+many traces per ensemble. It is better to enter a few more
+CDPs rather than a few less CDPs.
+Maximum offset in the data
+Enter the maximum offset to determine the operator size. The
+default is the maximum offset in the line.
+Header entry to use for offsets
+Select the binned offset header entry from the Headers menu.
+This is typically the trace header word, BOFFSET.
+Maximum frequency (in Hz)
+Enter the maximum frequency of the seismic traces.
+Frequencies between this maximum and the Nyquist
+frequency may be aliased during DMO. Typically, a value less
+than Nyquist is appropriate, and needless computations for
+frequencies above this maximum can be avoided.
+Perform dip ﬁltering?
+Select Yes to remove the evanescent energy from the ﬂow.
+The evanescent energy is deﬁned as the energy steeper
+(greater) than a dip of dt/dx=2.0/min_vel_in_table.
+The use of this ﬂag will reduce low frequency artifacts at
+shallow times. See ﬁgures above.
+Get RMS Velocity from the database
+Select Yes to select an RMS velocity ﬁle from the database.
+Select No to create a single RMS velocity function.
+Select RMS Velocity ﬁle
+This appears if Yes to Get RMS Velocity from the database.
+Select an RMS velocity ﬁle from the database.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO299
+
+ProMAX® Reference
+
+RMS velocities for DMO
+This appears if No to Get RMS Velocity from the database.
+Enter a single RMS velocity function that, together with the
+stretch factor, enables DMO to more accurately handle
+velocity variations with depth. This RMS velocity function
+should be smooth. For constant-velocity DMO, specify the
+appropriate velocity at time zero. The format is:
+T1-V1,T2-V2,...,Tn-Vn.
+
+DMO stretch factor
+Enter the DMO stretch factor. Use 1.0 for constant velocity.
+For a typical velocity increase with depth, try a value of 0.6.
+In general, a smaller stretch factor results in less DMO than
+a larger factor.
+Most of the variable velocity corrections are made internally
+from the v(z) function. This stretch factor is a higher-order
+correction that has a weak effect. However, we include this
+parameter so that a constant value of 1 can be used for
+synthetics. A typical velocity gradient evidently calls for a
+value of 0.6. The difference between the two will be hard to
+see.
+Maximum memory to use (in Mbytes)
+Enter the maximum memory to use in megabytes. If the
+amount of data would cause the process to exceed this limit,
+the DMO is performed in overlapping panels. If less data is
+passed to this module, less memory is used. Note that this
+module operates in the frequency domain and oversampling
+does not improve performance.
+Reapply trace mutes?
+Select Yes to reapply trace mutes after DMO. Select No to
+adjust the mutes based on the ﬁrst and last non-zero
+samples after DMO. In either case, if tapered mutes were
+used before DMO, the same taper length will be used after
+DMO.
+Rekill dead traces?
+Select Yes to rekill dead traces after DMO. Select No to leave
+previously dead traces alive, and mutes will be determined
+from the ﬁrst and last non-zero samples.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset F-K DMO300
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

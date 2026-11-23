@@ -1,0 +1,46 @@
+{
+  "menu_id": "header_values",
+  "tool_name": "HEADER_VALUES",
+  "label": "Header Values",
+  "parameter_count": 3,
+  "parameters": [
+    {
+      "name": "OUT_DEVC",
+      "prompt": "Output device",
+      "kind": "choose",
+      "default": null,
+      "help": "This is where any output created by this process is sent.",
+      "choices": [
+        {
+          "label": "Output",
+          "value": "SCREEN",
+          "help": "Send resulting output to JOB.OUTPUT."
+        },
+        {
+          "label": "File",
+          "value": "FILE",
+          "help": "Send resulting output to a FILE."
+        },
+        {
+          "label": "Printer",
+          "value": "PRINTER",
+          "help": "Send resulting output to the PRINTER."
+        }
+      ]
+    },
+    {
+      "name": "IENDENS",
+      "prompt": "List only last trace in ensemble?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If 'YES', only the header values for the last trace in the ensemble are listed."
+    },
+    {
+      "name": "HDR_LIST",
+      "prompt": "SPECIFY header entries",
+      "kind": "edit",
+      "default": "SOURCE,CHAN,OFFSET,CDP",
+      "help": "List the header entries that you wish to 'dump' (up to 20)."
+    }
+  ]
+}

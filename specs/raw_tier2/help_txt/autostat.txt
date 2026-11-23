@@ -1,0 +1,299 @@
+Correlation Autostatics2386
+
+ProMAX® Reference
+
+Correlation Autostatics
+Correlation Autostatics measures time shifts relative to a
+model trace and uses a modiﬁed Gauss-Seidel method to
+partition these time shifts into source and receiver statics.
+
+Theory
+This process also performs a horizon velocity analysis as part
+of the estimation of the residual NMO term and writes these
+results to the database. It is relatively insensitive to moderate
+velocity errors.
+Correlation Autostatics, also measure channel consistent
+residual statics. These can be used to detect multiplex skew
+correction errors, or generally poor statics solutions, since
+channel residual statics should be close to 0. Correlation
+Autostatics is most effective in good to fair signal-to-noise
+ratio data.
+For a general discussion of input requirements, database
+entries, and how residual statics are applied, refer to the
+Residual Statics Overview.
+An initial model is built from various time gates interactively
+selected by you. Pilot or reference traces are formed for each
+time gate by ﬂattening all traces along the autostatics horizon
+over the number of CDPs speciﬁed by the Smash parameter
+for each horizon. All of these traces are summed to form a
+single pilot trace. All traces within the CDP Smash are then
+crosscorrelated against the pilot trace and a time shift is
+computed for each trace. In what is referred to as a trim
+static operation, all of the traces within the CDP Smash are
+time shifted and summed to form a new master pilot trace.
+This trim static operation is performed once when computing
+a pilot trace for a given CDP. All traces within the current
+CDP are crosscorrelated with the pilot trace, and time shifts
+are computed for these traces. The widths of each
+crosscorrelation time gate are enlarged by offset, based on
+the speciﬁed velocity conﬁdence factor. Larger gates at longer
+offsets are needed to estimate the residual NMO shifts.
+Residual velocities are estimated using a weighted linear
+regression in T-X space, and are smoothed over a speciﬁed
+number of CDPs.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Correlation Autostatics2387
+
+ProMAX® Reference
+
+Source and receiver statics are partitioned from the residual
+time shifts using a Gauss-Seidel method modiﬁed to
+compensate for low correlation covariance time gates plus the
+rejection of anomalous shifts. Linear trends, including dc
+time shift components are removed after each statics
+partitioning. A structural term is also computed and removed
+from the statics estimate. After the last iteration, a channel
+consistent static is computed. This should be near 0 unless
+the solution is poor, or multiplex skew corrections have not
+been properly applied. The source and receiver statics are
+constrained to a speciﬁed maximum value.
+The program includes a parameter for the percentage of live
+samples in a gate. If less than this percentage of the samples
+in any gate are non-zero, the gate is excluded from the
+residual static estimate. Zero sample values normally result
+from NMO stretch muting or surgical mutes.
+Correlation Autostatics computes a horizon velocity
+analysis and stores these results in the database under the
+CDP order and the VELOCITY information type. This
+information can be plotted and used as a quality control
+factor for velocity picks.
+In addition to the statics estimation, Correlation
+Autostatics also offers an optional feature that searches for
+reversed polarity receivers, shots or channels. If this feature
+is activated, the program attempts to automatically detect
+and correct such trace reversals. This is done for the purpose
+of estimating statics. The actual traces in the dataset are not
+reversed. A report is generated which documents the detected
+receiver, source and channel reversals, along with a programestimated probability of reversal. Only those traces with a
+probability of reversal of greater than 60% are reversed for
+the statics estimation. The reversals are never applied
+directly to the input ﬁle, as we feel that you should compare
+this report with the trace data, and then decide whether such
+reversals actually exist.
+
+Usage
+Successful execution of Correlation Autostatics creates the
+following database entries. These attributes can be viewed
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Correlation Autostatics2388
+
+ProMAX® Reference
+
+and edited from the database. Statics are applied with Apply
+Residual Statics.
+Database Entries
+Order
+
+Info Type
+
+Parameter
+
+Description
+
+SIN
+
+STATICS
+
+SCOR0000
+
+Shot Static
+
+SIN
+
+STATICS
+
+S_CQ0000
+
+Shot Static Quality
+
+SRF
+
+STATICS
+
+RCOR0000
+
+Receiver Static
+
+SRF
+
+STATICS
+
+R_CQ0000
+
+Receiver Static Quality
+
+CDP
+
+VELOCITY
+
+V__10000
+
+Vel along Autostat Horizon 1
+
+CDP
+
+VELOCITY
+
+T__10000
+
+Time of Autostat Horizon 1
+
+CDP
+
+VELOCITY
+
+V__20000
+
+Autostat Horizon 2
+
+CDP
+
+VELOCITY
+
+T__20000
+
+Time of Autostat Horizon 2
+
+CDP
+
+VELOCITY
+
+Vnnn0000
+
+Vel along Autostat Horizon nnn
+
+CDP
+
+VELOCITY
+
+Tnnn0000
+
+Time of Autostat Horizon nnn
+
+References
+Sheriff, R. E., and Geldart, L. P., 1983, Exploration Seismology Vol 2: Data Processing 47-48. Cambridge University Press.
+Taner, M. T., Koehler, F., and Alhilali, K.A., 1974, Estimation and Correction of
+near-surface time anomalies; Geophysics, Vol. 41, p.441-463.
+Wiggins, R.A., Larner, K. L., and Wisecup, R.D., 1976, Residual Statics Analysis
+as a General Linear Inverse Problem: Geophysics, Vol. 41, p.922-938.
+
+Parameters
+Select Trace data ﬁle
+Select an NMO-corrected CDP gather trace ﬁle.
+Select Autostatics HORIZON ﬁle
+Select an Autostatics horizon ﬁle. This ﬁle contains
+previously chosen time gates for the autostatics reference
+horizons.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Correlation Autostatics2389
+
+ProMAX® Reference
+
+Select Autostatics VELOCITY ﬁle
+Select an Autostatics velocity ﬁle. This ﬁle is not used to NMO
+correct the CDP gathers. NMO must be applied prior to
+computing residual statics. This velocity ﬁle is used to
+compute the velocity that would have stacked this CDP
+gather after computing and applying residual normal
+moveout. This new velocity function is used to generate a
+horizon velocity analysis, which is computed at the center of
+the autostatics horizon gate.
+Maximum velocity error (percent)
+Enter the estimated maximum error in percent within any
+gate of previously-applied velocities.
+Number of CDPs for velocity smoothing
+Enter the number of CDPs over which to smooth the
+correlation shift estimates of the reﬂection gate velocities.
+Minimum # of traces for vel. estimate
+Enter the minimum number of traces to include in a velocity
+estimate. The program automatically expands the CDP range
+up to four CDPs on each side of the velocity analysis location.
+Minimum% of offset range for vel. estimate
+Enter the minimum percentage of the normal offset range for
+a velocity estimate. The program will automatically expand
+the CDP range up to four CDPs on each side of the velocity
+analysis location.
+Maximum static allowed (ms)
+Enter the maximum static to limit the maximum magnitude
+of the computed statics.
+Statics partitioning iterations
+Enter the number of iterations for partitioning statics into
+velocities and source/receiver/channel/structure statics.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Correlation Autostatics2390
+
+ProMAX® Reference
+
+Seek/report reversed sources/receivers/channels
+Select Yes to automatically detect reversed trace ensembles,
+and temporarily reverse traces for statics calculations only.
+Enter No to turn off this option.
+Minimum live samples in a gate (percent)
+Enter the percentage of minimum live samples in a gate. If
+more than 100% minus this percentage of samples in any
+gate are zero, the trace is excluded from statics estimates.
+Create a New database entry for each run
+Select No to overwrite a previous database entry. This will
+save space on the disk. Select Yes to write new database
+values for each run. This allows the option of returning to a
+previous set of residual static values, but uses more storage
+space.
+Enter 4 digit ID number
+This appears if Yes to Create a new database entry for each
+run. Enter a 4 digit number to identify the database output
+parameters, such as SCORXXXX or RCORXXXX. Where
+XXXX is a character or number.
+Caution: This job will not run if you use a blank for one of
+the digits.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Correlation Autostatics2391
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

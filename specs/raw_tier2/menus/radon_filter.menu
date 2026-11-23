@@ -1,0 +1,347 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+'(
+ name: RADON_FILTER
+label: "Radon Filter"
+value_tab: 45
+
+
+parameter: NP 
+text: "Number of P-values"
+type: typein:
+type_desc: ( int: 7 1 nil )
+value: 31
+mouse_text: "Enter the number of P-values in the transform."
+
+parameter: NUMGATES
+text: "Number of time gates"
+type: typein:
+type_desc: ( int: 2 1 10 )
+value: 1
+mouse_text: "Enter the number of time gates to use.  Full-fold data will comprise the last gate."
+
+
+parameter: PMIN
+text: "Minimum P-value of interest (ms)"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: -100.
+mouse_text: "This is the minimum P-value in msecs ( overcorrected )."
+
+
+parameter: PMAX
+text: "Maximum P-value of interest (ms)"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: 400.
+mouse_text: "This is the maximum P-value in msecs ( undercorrected )."
+
+
+parameter: REF_OFFS
+text: "Reference offset for P-values"
+type: typein:
+type_desc: ( real: 8 -1.0 1.0e9 )
+value: -1.
+mouse_text: "This is the reference offset used to pick the P-values."
+
+parameter: DAMPING
+text: "Damping (white noise) for radon solution"
+type: typein:
+type_desc: ( real: 8 0.0001 1.0 )
+value: 0.03
+mouse_text: "Minimum fraction of damping to add for matrix solver. Value between 0 and 1."
+
+parameter: MININENS 
+text: "Minimum number of traces to process"
+type: typein:
+type_desc: ( int: 5 -100 100 )
+value: 5
+mouse_text: "Minimum number of traces per ensemble to process, if less than zero, the output is zeroed."
+
+parameter: RDNTMIN
+text: "Minimum time of interest (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the minimum time in msecs for Radon transform."
+
+
+parameter: RDNTMAX
+text: "Maximum time of interest (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the maximum time in msecs for Radon transform. (0 = maximum data time)."
+
+
+parameter: FMIN
+text: "Minimum frequency of interest"
+type: typein:
+type_desc: ( real: 8 0.0 1.0e6 )
+value: 10.0
+mouse_text: "This is the minimum coherent frequency (in Hertz) that is of interest in the data."
+
+
+parameter: FMAX
+text: "Maximum frequency of interest"
+type: typein:
+type_desc: ( real: 8 1.0e-6 1.0e9 )
+value: 80.0
+mouse_text: "This is the maximum coherent frequency (in Hertz) that is of interest in the data."
+
+
+parameter: XFORMTYP
+text: "Type of transform to perform"
+type: pop_choose:
+type_desc: ( ("Parabolic" 2 "Parabolic radon transform")
+	     ("Hyperbolic" 3 "Hyperbolic radon transform (approx)")
+             ("Linear" 1 "Linear radon transform"))
+mouse_text: "Choose whether you want to model events which are Linear,
+Parabolic, or Hyperbolic."
+
+
+;parameter: HPOWER
+;text: "Power to raise offset to"
+;type: typein:
+;type_desc: ( real: 8 1.0e-6 1.0e6 )
+;value: 2.0
+;mouse_text: "1: linear radon transform; 2: parabolic radon transform; ..."
+
+
+parameter: DIFTR
+text: "Pass modeled data or subtract from input?"
+type: circular:
+type_desc: ( ( "MODELED" 0 "Pass the forward and inverse transformed data on in the flow.")
+             ( "SUBTRACT" 1 "Subtract the transformed data from the input ensembles."))
+mouse_text: "Use SUBTRACT with a mute on the primaries to achieve multiple attenuation without worminess."
+
+
+;parameter: RDNECHO
+;text: "Echo parameters and run-time messages?"
+;type: boolean:
+;value: t
+;mouse_text: "Set to 'YES' if you want to echo parameters and see run-time messages."
+
+
+parameter: MUTETF
+text: "Mute the data in the radon domain?"
+type: boolean:
+value:  t
+mouse_text: "Primaries or multiples can be muted after transforming."
+
+
+parameter: MUTETYPE
+text: "  Type of mute"
+type: pop_choose:
+type_desc: ( ("Top" 1 "Mute energy from time zero to the specified times." )
+             ("Surgical"  2 "Mute a slice of the data between the specified times." )
+             ("Bottom"    3 "Mute energy from the specified times to the bottom of the data." ) )
+;mouse_text: "Use MB1 to select from the available muting option types (1st break, surgical, bottom)."
+mouse_text: "The mute type determines how the input times and locations will be used to mute the traces."
+
+
+parameter: RAMPON
+text: "    Starting ramp"
+type: typein:
+type_desc: ( real: 10 0.0 nil )
+value:  30.0
+mouse_text: "The time in milliseconds to 'ramp on' amplitudes at the start of the mute."
+
+
+parameter: RAMPOFF
+text: "    Ending ramp"
+type: typein:
+type_desc: ( real: 10 0.0 nil )
+value:  30.0
+mouse_text: "The time in milliseconds to 'ramp off' amplitudes at the end of the mute."
+
+
+parameter: SURGLEN
+text: "    Surgical mute ramp"
+type: typein:
+type_desc: ( real: 10 0.0 nil )
+value:  30.0
+mouse_text: "The time in milliseconds to 'ramp on and off' amplitudes for surgical mutes."
+
+
+parameter: EXTRAP
+text: "    Extrapolate mute times?"
+type: boolean:
+value:  t
+;mouse_text: "The mute times will be extrapolated past specified control locations."
+mouse_text: "Set to 'NO' if you do not wish the mute times to be extrapolated past specified control locations."
+
+
+parameter: EXTEND
+text: "    Apply mutes only where specified?"
+type: boolean:
+value:  nil
+mouse_text: "Set to 'NO' if you want surgical mutes to be interpolated between specified control locations."
+
+
+parameter: db_option
+text: "  Get mute file from the DATABASE?"
+type: boolean:
+value: t
+mouse_text: "A mute parameter file may be selected from the database, or mute parameters may be specified manually."
+
+
+parameter: MUTENAME
+text: "    Select mute parameter file"
+type: function:
+type_desc: ((parm_list "MUT") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a mute parameter file description from the parameter file menu."
+
+
+parameter: PRIM_KEY
+text: "    Select primary mute header word"
+type: function:
+type_desc: (header_list headers)
+value: "CDP     "
+selected_item: 	"CDP bin number"
+mouse_text: "Use MB1 to select a header word from the HEADERS menu to use as the PRIMARY key for specifying mute parameters."
+
+
+parameter: MUTESPEC
+text: "    Specify mute parameters"
+type: edit:
+type_desc: (28 80 5 " FORMAT: Primary Mute Location Value: Moveout P value: Mute time/
+ EXAMPLE: 1:-400:1000 / 1:0:300 / 1:400:1000 /" )
+value: "1:"
+mouse_text: "Use MB1 to define/enter the mute specifications."
+ 
+parameter: SPARSE
+text: "Perform sparse inversion?"
+type: boolean:
+value: nil 
+mouse_text: "Sparse inversion constructs a sparse Radon domain solution that also reconstructs the input data in a least-squares sense."
+ 
+parameter: LAMBDA
+text: "  Sparseness parameter"
+type: typein:
+type_desc: ( real: 8 1.0e-6 9999.0 )
+value: 0.1
+mouse_text: "Amount of sparseness in solution measured as a fraction of the main matrix diagonal. Use value between 0 and 1.0."
+ 
+parameter: SPARSE_B
+text: "  Sparseness stability parameter"
+type: typein:
+type_desc: ( real: 8 1.0e-4 1.0 )
+value: 0.1
+mouse_text: "This parameter (measured as a fraction of sparseness parameter) avoids division by zero. Use value between 0.0001 and 1.0."
+
+parameter: EPSILON
+text: "  Stopping parameter"
+type: typein:
+type_desc: ( real: 8 1.e-6 1.0 )
+value: 0.001
+mouse_text: "Parameter to determine when sparse solution has been reached. When change in solution is less than this amount, iterations stop." 
+
+parameter: MAXITER
+text: "  Maximum number of sparse iterations"
+type: typein:
+type_desc: ( int: 4 0 9999 )
+value: 2
+mouse_text: "Maximum number of iterations that will be performed at each frequency to arrive at sparse solution."
+
+parameter: NCGITER
+text: "Number of CG iterations"
+type: typein:
+type_desc: ( int: 4 1 100 )
+value: 3
+mouse_text: "Maximum number of conjugate gradient iterations."
+
+parameter: REMUTETX
+text: "Re-apply T-X trace mute after filter?"
+type: boolean:
+value: t
+mouse_text: "Trace mutes (such as first break suppression mutes) may be re-applied after filtering."
+ 
+
+exec_data: ("RADON_FILTER"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: radon_filter.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("NP"       implicit: (value 'NP))
+			("NUMGATES" implicit: (value 'NUMGATES))
+			("PMIN"     implicit: (value 'PMIN))
+			("PMAX"     implicit: (value 'PMAX))
+			("RDNTMIN"  implicit: (value 'RDNTMIN))
+			("RDNTMAX"  implicit: (value 'RDNTMAX))
+			("FMIN"     implicit: (value 'FMIN))
+			("FMAX"     implicit: (value 'FMAX))
+			("HPOWER"  implicit: (if (= (value 'XFORMTYP) 1)
+						 1.0 
+		        (if (= (value 'XFORMTYP) 2) 2.0 1100.0) ))
+;			("HPOWER"   implicit: (value 'HPOWER))
+			("REF_OFFS" implicit: (value 'REF_OFFS))
+			("DAMPING"  implicit: (value 'DAMPING))
+	      ("SPARSE"   implicit: (if (value 'SPARSE) 1 0))
+	      ("LAMBDA"   implicit: (value 'LAMBDA))
+	      ("SPARSE_B" implicit: (value 'SPARSE_B))
+	      ("EPSILON"  implicit: (value 'EPSILON))
+	      ("MAXITER"  implicit: (value 'MAXITER))
+	      ("NCGITER"  implicit: (value 'NCGITER))
+			("MININENS" implicit: (value 'MININENS))
+			("DIFTR"    implicit: (value 'DIFTR))
+			("RDNECHO"  implicit: 0 )
+			("MUTETF"   implicit: (if (value 'MUTETF) 1 0))
+			("MUTETYPE" implicit: (value 'MUTETYPE))
+			("EXTRAP"   implicit: (if (value 'EXTRAP) 1 0))
+			("EXTEND"   implicit: (if (value 'EXTEND) 0 1))
+			("RAMPON"   implicit: (value 'RAMPON))
+			("RAMPOFF"  implicit: (value 'RAMPOFF))
+			("SURGLEN"  implicit: (value 'SURGLEN))
+			("MUTENAME" implicit: (if (value 'db_option)
+						  (value 'MUTENAME) "NONE"))
+			("PRIM_KEY" implicit: (value 'PRIM_KEY))
+			("SCND_KEY" implicit: "MOVEOUT ")
+			("MUTESPEC" implicit: (value 'MUTESPEC))
+			("REMUTETX" implicit: (if (value 'REMUTETX) 1 0 ))
+		)
+	    )
+	
+
+rules: (
+ (rule1 (and (value 'MUTETF) (equal ( value 'MUTETYPE ) 1 )) (do_show 'RAMPON))
+ (rule1a (and (value 'MUTETF) (not (equal ( value 'MUTETYPE ) 1 ))) (do_not_show 'RAMPON))
+ (rule2 (and (value 'MUTETF) (equal ( value 'MUTETYPE ) 3 )) (do_show 'RAMPOFF))
+ (rule2a (and (value 'MUTETF) (not (equal ( value 'MUTETYPE ) 3 ))) (dont_show 'RAMPOFF))
+ (rule3 (and (value 'MUTETF) (equal ( value 'MUTETYPE ) 2 )) (do_show 'SURGLEN))
+ (rule3a (and (value 'MUTETF) (not (equal ( value 'MUTETYPE ) 2 ))) (dont_show 'SURGLEN))
+ (rule4 (and (value 'MUTETF) (equal ( value 'MUTETYPE ) 2 )) (do_show 'EXTEND))
+ (rule4a (and (value 'MUTETF) (not (equal ( value 'MUTETYPE ) 2 ))) (dont_show 'EXTEND))
+ (rule5 (and (value 'MUTETF) (equal ( value 'MUTETYPE ) 2 )) (do_not_show 'EXTRAP))
+ (rule5a (and (value 'MUTETF) (not (equal ( value 'MUTETYPE ) 2 ))) (do_show 'EXTRAP))
+ (rule6 (and (value 'MUTETF) (value 'db_option)) (progn (do_show 'MUTENAME)
+							(do_not_show 'PRIM_KEY)
+							(do_not_show 'MUTESPEC)))
+ (rule6a (and (value 'MUTETF) (not (value 'db_option))) (progn (do_not_show 'MUTENAME)
+							       (do_show 'PRIM_KEY)
+							       (do_show 'MUTESPEC)))
+ (rule7nopoofters (not ( value 'MUTETF )) (dont_show '(MUTETYPE RAMPON RAMPOFF SURGLEN EXTRAP EXTEND db_option MUTENAME PRIM_KEY MUTESPEC))
+		                          (do_show '(MUTETYPE db_option)))
+;
+; Do not show the sparse parameter, default to not-sparse
+; Remove this rule to activate sparse Radon transform.
+;
+;	(rule_no_sparse (do_not_show 'SPARSE))
+ (hide_parms_rule ( do_not_show '(EPSILON MAXITER NCGITER)))
+ 
+	(rule6 (equal (value 'SPARSE) t)
+	       (progn 
+                 (do_show 'LAMBDA) 
+                 (do_show 'SPARSE_B)) 
+	       (progn 
+                 (do_not_show 'LAMBDA) 
+                 (do_not_show 'SPARSE_B))) 
+
+ (REF_OFFS_default_rule ( = ( value 'REF_OFFS) -1.0 )
+             (set_value 'REF_OFFS (  db_parmget_line "OFFMAXz"))) 
+
+      )
+
+)
+
+
+

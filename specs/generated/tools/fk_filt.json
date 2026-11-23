@@ -1,0 +1,193 @@
+{
+  "menu_id": "fk_filt",
+  "tool_name": "FK_FILT",
+  "label": "F-K Filter",
+  "parameter_count": 23,
+  "parameters": [
+    {
+      "name": "FILT_OPT",
+      "prompt": "Type of F-K filter",
+      "kind": "pop_choose",
+      "default": "1",
+      "help": "These three types of filters may be applied in F-K space: fan filters, power exponent, arbitrary polygon."
+    },
+    {
+      "name": "MSPERTRC",
+      "prompt": "Units of pie slice parameterization",
+      "kind": "circular",
+      "default": null,
+      "help": "",
+      "choices": [
+        {
+          "label": "Velocity",
+          "value": "0",
+          "help": "Velocity units used to parameterize pie slice."
+        },
+        {
+          "label": "Ms per trace",
+          "value": "1",
+          "help": "Units of milliseconds per trace used to parameterize pie slice."
+        }
+      ]
+    },
+    {
+      "name": "XSPACING",
+      "prompt": "Distance between input traces",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Distance between input traces, default to 0.0 for value from global parameters. Check job.output for value used."
+    },
+    {
+      "name": "PA_WIDTH",
+      "prompt": "Panel width in traces",
+      "kind": "typein",
+      "default": "200",
+      "help": "Number of traces to process at one time; use number of traces per ensemble for pre-stack."
+    },
+    {
+      "name": "IMPULSE",
+      "prompt": "Test the filter impulse response?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "If 'YES', the output will be the impulse response of the filter; if 'NO', apply the filter to data."
+    },
+    {
+      "name": "TFLATPCT",
+      "prompt": "Percent flat for time ramping",
+      "kind": "typein",
+      "default": "100.",
+      "help": "The traces may be tapered prior to T-F transform to minimize FFT edge effects (100.0 = no ramping)."
+    },
+    {
+      "name": "XFLATPCT",
+      "prompt": "Percent flat for offset ramping",
+      "kind": "typein",
+      "default": "100.",
+      "help": "The offsets may be tapered prior to X-K transform to minimize FFT edge effects (100.0 = no ramping)."
+    },
+    {
+      "name": "POWER",
+      "prompt": "Power to raise F-K space to:",
+      "kind": "typein",
+      "default": "2.0",
+      "help": "The F-K transform values are raised to this power and then inverse \ntransformed."
+    },
+    {
+      "name": "DB_OPT",
+      "prompt": "Get polygon mute file from the database?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "A polygon mute parm file may be selected from the database, or an arbitrary polygon may be specified manually."
+    },
+    {
+      "name": "POLYNAME",
+      "prompt": "Select mute parameter file",
+      "kind": "function",
+      "default": "NONE",
+      "help": "Use Mouse Button 1 to select a polygon (mute) parameter file description from the parameter file menu."
+    },
+    {
+      "name": "POLYSTRN",
+      "prompt": "Specify arbitrary polygon",
+      "kind": "edit",
+      "default": "1:10.0-0.0,30.0-20.0,60.0-20.0,70.0-0.0/2:12.0-0.0,30.0-20.0,70-20,90-0/",
+      "help": "Use MB1 to enter groups of (frequency-wavenumber) values to define a polygon. **SEE EXAMPLE!!!**"
+    },
+    {
+      "name": "REJOPT",
+      "prompt": "Mode of F-K filter operation",
+      "kind": "circular",
+      "default": null,
+      "help": "F-K filter can either pass or reject the specified F-K regions.",
+      "choices": [
+        {
+          "label": "REJECT",
+          "value": "1",
+          "help": "Reject the specified F-K region."
+        },
+        {
+          "label": "ACCEPT",
+          "value": "0",
+          "help": "Pass the specified F-K region."
+        }
+      ]
+    },
+    {
+      "name": "FFLATPCT",
+      "prompt": "Percent flat for F-K filter windowing",
+      "kind": "typein",
+      "default": "90.0",
+      "help": "The F-K filter may be ramped (in T-X) to control the smoothness of the filter."
+    },
+    {
+      "name": "TFILT_SZ",
+      "prompt": "Time length of F-K filter (ms)",
+      "kind": "typein",
+      "default": "500.0",
+      "help": "The F-K filter is transformed to T-X domain and windowed.  This will be the time extent of the filter."
+    },
+    {
+      "name": "XFILT_SZ",
+      "prompt": "Spatial extent of F-K filter (traces)",
+      "kind": "typein",
+      "default": "50",
+      "help": "The F-K filter is transformed to T-X domain and windowed.  This will be the spatial extent of the filter."
+    },
+    {
+      "name": "REMUTE",
+      "prompt": "Re-apply T-X trace mute after filter?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Trace mutes (such as first break suppression mutes) may be re-applied after filtering."
+    },
+    {
+      "name": "FAN_PARMVE",
+      "prompt": "Fan filter parameters",
+      "kind": "edit",
+      "default": "-1500,-2500,5,18/",
+      "help": "Use MB1 to enter groups of velocity-frequency values to define pie \nslice(s) =>'1800,2300,5.5,22/-4500,-3500,8,40/'"
+    },
+    {
+      "name": "FAN_PARMMS",
+      "prompt": "Fan filter parameters",
+      "kind": "edit",
+      "default": "-5,-2,5,18/",
+      "help": "Use MB1 to enter groups of dip-frequency values to define pie \nslice(s) =>'8,2,5.5,22/-4,-3,8,40/'"
+    },
+    {
+      "name": "KWRAP",
+      "prompt": "Wrap fan in K-space past Nyquist?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Set this parameter to 'No' if you do NOT wish to wrap in K-space past K-Nyquist. Default 'Yes' means wrap past Nyquist."
+    },
+    {
+      "name": "KSUPPCT",
+      "prompt": "Percent K-space restricted for fan",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Specify a percentage of total K-space to restrict F-K velocity filtering and prevent fan spreading at higher freqs."
+    },
+    {
+      "name": "TPCT_PAD",
+      "prompt": "Time filter padding in percent",
+      "kind": "typein",
+      "default": "25.0",
+      "help": "The percentage of zero padding for FFTs desired for the TIME filter."
+    },
+    {
+      "name": "XPCT_PAD",
+      "prompt": "Space filter padding in percent",
+      "kind": "typein",
+      "default": "25.0",
+      "help": "The percentage of zero padding for FFTs desired for the SPATIAL filter."
+    },
+    {
+      "name": "KSKEEPCT",
+      "prompt": "Percentage of K-space to keep around K=0",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "The percentage of K-space to leave unfiltered in a corridor around K=0."
+    }
+  ]
+}

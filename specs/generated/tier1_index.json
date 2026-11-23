@@ -1,0 +1,227 @@
+{
+  "count": 37,
+  "tools": [
+    {
+      "menu_id": "agc",
+      "tool_name": "AGC",
+      "label": "Automatic Gain Control",
+      "parameter_count": 7
+    },
+    {
+      "menu_id": "datum_stat_apply",
+      "tool_name": "DATUM_STAT_APPLY",
+      "label": "Datum Statics Apply",
+      "parameter_count": 3
+    },
+    {
+      "menu_id": "datum_stat_calc",
+      "tool_name": "DATUM_STAT_CALC",
+      "label": "Datum Statics Calculation*",
+      "parameter_count": 14
+    },
+    {
+      "menu_id": "debias",
+      "tool_name": "DEBIAS",
+      "label": "Trace dc Removal",
+      "parameter_count": 1
+    },
+    {
+      "menu_id": "decon",
+      "tool_name": "DECON",
+      "label": "Spiking/Predictive Decon",
+      "parameter_count": 21
+    },
+    {
+      "menu_id": "diskread2",
+      "tool_name": "DISKREAD2",
+      "label": "Disk Data Input",
+      "parameter_count": 15
+    },
+    {
+      "menu_id": "diskwrite",
+      "tool_name": "DISKWRITE",
+      "label": "Disk Data Output",
+      "parameter_count": 5
+    },
+    {
+      "menu_id": "elev_stat",
+      "tool_name": "ELEV_STAT",
+      "label": "Apply Elevation Statics",
+      "parameter_count": 8
+    },
+    {
+      "menu_id": "ens_define",
+      "tool_name": "ENS_DEFINE",
+      "label": "Ensemble Redefine",
+      "parameter_count": 4
+    },
+    {
+      "menu_id": "filter",
+      "tool_name": "FILTER",
+      "label": "Bandpass Filter",
+      "parameter_count": 22
+    },
+    {
+      "menu_id": "fk_anal",
+      "tool_name": "fk_anal",
+      "label": "FK Analysis (NEW)",
+      "parameter_count": 22
+    },
+    {
+      "menu_id": "fk_filt",
+      "tool_name": "FK_FILT",
+      "label": "F-K Filter",
+      "parameter_count": 23
+    },
+    {
+      "menu_id": "fkmig2d",
+      "tool_name": "fkmig2d",
+      "label": "Stolt or Phase Shift 2D Mig",
+      "parameter_count": 26
+    },
+    {
+      "menu_id": "geom_load",
+      "tool_name": "GEOM_LOAD",
+      "label": "Inline Geom Header Load",
+      "parameter_count": 10
+    },
+    {
+      "menu_id": "geomspread_land",
+      "tool_name": "GEOMSPREAD_LAND",
+      "label": "geomspread_land",
+      "parameter_count": 0
+    },
+    {
+      "menu_id": "geomspread_marine",
+      "tool_name": "GEOMSPREAD_MARINE",
+      "label": "geomspread_marine",
+      "parameter_count": 0
+    },
+    {
+      "menu_id": "header_values",
+      "tool_name": "HEADER_VALUES",
+      "label": "Header Values",
+      "parameter_count": 3
+    },
+    {
+      "menu_id": "inline_sort",
+      "tool_name": "INLINE_SORT",
+      "label": "Inline Sort",
+      "parameter_count": 16
+    },
+    {
+      "menu_id": "inter_spect",
+      "tool_name": "ispecana",
+      "label": "Interactive Spectral Analysis",
+      "parameter_count": 37
+    },
+    {
+      "menu_id": "kirtime2dstk",
+      "tool_name": "kirtime2dstk",
+      "label": "2D Poststack Kirchhoff Time Migration",
+      "parameter_count": 1
+    },
+    {
+      "menu_id": "mute",
+      "tool_name": "MUTE",
+      "label": "mute",
+      "parameter_count": 0
+    },
+    {
+      "menu_id": "nmo",
+      "tool_name": "NMO",
+      "label": "Normal Moveout Correction",
+      "parameter_count": 17
+    },
+    {
+      "menu_id": "resamp",
+      "tool_name": "RESAMP",
+      "label": "Resample/Desample",
+      "parameter_count": 6
+    },
+    {
+      "menu_id": "segd_read",
+      "tool_name": "SEG_READ",
+      "label": "SEG-D Input",
+      "parameter_count": 46
+    },
+    {
+      "menu_id": "segy_read",
+      "tool_name": "SEG_READ",
+      "label": "SEG-Y Input",
+      "parameter_count": 26
+    },
+    {
+      "menu_id": "segy_write",
+      "tool_name": "SEGY_WRITE",
+      "label": "segy_write",
+      "parameter_count": 0
+    },
+    {
+      "menu_id": "stack",
+      "tool_name": "STACK",
+      "label": "CDP/Ensemble Stack",
+      "parameter_count": 8
+    },
+    {
+      "menu_id": "tar",
+      "tool_name": "TAR",
+      "label": "True Amplitude Recovery",
+      "parameter_count": 19
+    },
+    {
+      "menu_id": "teq",
+      "tool_name": "TEQ",
+      "label": "Trace Equalization",
+      "parameter_count": 9
+    },
+    {
+      "menu_id": "thdrmath",
+      "tool_name": "THDRMATH",
+      "label": "Trace Header Math",
+      "parameter_count": 17
+    },
+    {
+      "menu_id": "trace_len",
+      "tool_name": "TRACE_LEN",
+      "label": "Trace Length",
+      "parameter_count": 1
+    },
+    {
+      "menu_id": "traceDisplay",
+      "tool_name": "TRACEDISPLAY",
+      "label": "traceDisplay",
+      "parameter_count": 0
+    },
+    {
+      "menu_id": "trc_edit",
+      "tool_name": "TRC_EDIT",
+      "label": "Trace Kill/Reverse",
+      "parameter_count": 9
+    },
+    {
+      "menu_id": "tvs",
+      "tool_name": "TVS",
+      "label": "Time-Variant Scaling",
+      "parameter_count": 13
+    },
+    {
+      "menu_id": "tvw",
+      "tool_name": "TVW",
+      "label": "TV Spectral Whitening",
+      "parameter_count": 11
+    },
+    {
+      "menu_id": "vaprecom71",
+      "tool_name": "VAPRECOM71",
+      "label": "vaprecom71",
+      "parameter_count": 0
+    },
+    {
+      "menu_id": "velAnal71",
+      "tool_name": "velAnal",
+      "label": "Velocity Analysis",
+      "parameter_count": 157
+    }
+  ]
+}

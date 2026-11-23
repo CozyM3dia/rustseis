@@ -1,0 +1,699 @@
+; IIID IVD 1 FIELD DEV DEPTHC BSI BHSS
+'(
+name: SCAMP2
+label: "Surface Consistent Amps"
+value_tab: 55
+
+
+parameter: MODEOPER
+text: "Mode of operation"
+type: pop_choose:
+type_desc: ( 
+("Input"             1 "Input traces, compute and store trace amplitude values to database." )
+("Compute only"      2 "Compute surface consistent gains and write to database.")
+("Apply only"        3 "Apply previously computed gains to the data.")
+("Compute and Apply" 4 "Compute surface consistent gains and Apply gains to the data.")
+            )
+mouse_text: "Select one of three modes - Input, Compute or Apply."
+plot_label: t
+
+
+parameter: REM_OPT
+text: "Remove previously applied gains?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to remove previously applied gains."
+plot_label: t
+
+
+parameter: AMPLTYPE
+text: "Type of amplitude computations"
+type: pop_choose:
+type_desc: ( 
+("Absolute values of samples" 1 "Trace amplitude estimate using mean of absolute values of samples." )
+("RMS of samples" 2 "Trace amplitude estimate using RMS of samples.")
+("Complex trace amplitude analysis" 3 "Trace amplitude estimate based on median of amplitudes of 21 subgates of amplitude envelope trace.")
+            )
+mouse_text: "Compute amplitude in gate using 1) Absolute values of samples, 2) RMS value of samples, or 3) Complex trace amplitude analysis."
+
+
+parameter: USEOTHER
+text: "OTHER will be part of decomposition?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' if the decomposition will include OTHER, a user-defined component."
+
+
+parameter: COMPONENTS
+text: "Components of amplitude decomposition"
+type: multiple_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+ ("OTHER"   6 "Include user-defined component in amplitude decomposition.")
+	   )
+:selected_item (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+	       )
+mouse_text: "Use MB1 to select the components of trace amplitude decomposition."
+
+
+parameter: APPLICATION
+text: "Components to use in amplitude scaling"
+type: :multiple_choose
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude correction.")
+ ("RCVR"    2 "Include receiver component in amplitude correction.")
+ ("OFFSET"  3 "Include offset component in amplitude correction.")
+ ("CDP"     4 "Include cdp component in amplitude correction.")
+ ("CHAN"    5 "Include channel component in amplitude correction.")
+ ("OTHER"   6 "Include user-defined component in amplitude decomposition.")
+	   )
+:selected_item (
+ ("SHOT"    1 "Include source component in amplitude correction.")
+ ("RCVR"    2 "Include receiver component in amplitude correction.")
+	       )
+:mouse_text "Use MB1 to select the subset of decomposition components to use in trace amplitude scaling"
+
+
+parameter: OTHERNAM
+text: "SELECT header word for OTHER component"
+type: function:
+type_desc: (header_list headers)
+value: "NONE    "
+selected_item: "No trace header entry selected"
+mouse_text: "Select a header word to use as OTHER component of amplitude decomposition. Must have INTEGER format."
+                                                                                
+
+parameter: OTHERMIN
+text: "  Minimum value for OTHER"
+type: typein:
+type_desc: (int: 7 1 nil )
+value: 1
+mouse_text: "Enter minimum value for OTHER component header word."
+                                                                                
+
+parameter: OTHERMAX
+text: "  Maximum value for OTHER"
+type: typein:
+type_desc: (int: 7 1 nil )
+value: 1
+mouse_text: "Enter maximum value for OTHER component header word."
+                                                                                
+
+parameter: OTHERINC
+text: "  Increment for OTHER"
+type: typein:
+type_desc: (int: 7 1 nil )
+value: 1
+mouse_text: "Enter increment for OTHER component header word."
+                                                                                
+
+parameter: OTHERFLD
+text: "  Maximum fold for OTHER"
+type: typein:
+type_desc: (int: 7 1 nil )
+value: 1
+mouse_text: "Enter maximum number of traces in a common OTHER gather."
+                                                                                
+
+parameter: COMP1
+text: "First component to decompose"
+type: pop_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+           )
+selected_item: ("SHOT" 1 "Include source component in amplitude decomposition.")
+mouse_text: "Select the first component to decompose."
+
+
+parameter: COMP2
+text: "  Second component to decompose"
+type: pop_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+           )
+selected_item: ("RCVR" 2 "Include receiver component in amplitude decomposition")
+mouse_text: "Select the second component to decompose."
+
+
+parameter: COMP3
+text: "  Third component to decompose"
+type: pop_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+           )
+selected_item: ("OFFSET" 3 "Include offset component in amplitude decomposition.")
+mouse_text: "Select the third component to decompose."
+
+
+parameter: COMP4
+text: "  Fourth component to decompose"
+type: pop_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+           )
+selected_item: ("CDP" 4 "Include cdp component in amplitude decomposition.")
+mouse_text: "Select the fourth component to decompose."
+
+
+parameter: COMP5
+text: "  Fifth component to decompose"
+type: pop_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+           )
+selected_item: ("CHAN" 5 "Include channel component in amplitude decomposition.")
+mouse_text: "Select the fifth component to decompose."
+
+
+parameter: COMP6
+text: "  Sixth component to decompose"
+type: pop_choose:
+type_desc: (
+ ("SHOT"    1 "Include source component in amplitude decomposition.")
+ ("RCVR"    2 "Include receiver component in amplitude decomposition")
+ ("OFFSET"  3 "Include offset component in amplitude decomposition.")
+ ("CDP"     4 "Include cdp component in amplitude decomposition.")
+ ("CHAN"    5 "Include channel component in amplitude decomposition.")
+ ("OTHER"   6 "Include user-defined component in amplitude decomposition.")
+           )
+selected_item: ("OTHER" 6 "Include user-defined component in amplitude decomposition.")
+mouse_text: "Select the sixth component to decompose."
+
+
+parameter: DB_PARM1
+text: "  Source gain database attribute"
+type: action:
+type_desc: ("SIN AMP_COMP AMPL0001")
+mouse_text: "Use MB1 to specify the SOURCE gain attribute to read from the database and apply to the input traces."
+
+
+parameter: DB_PARM2
+text: "  Receiver gain database attribute"
+type: action:
+type_desc: ("SRF AMP_COMP AMPL0001")
+mouse_text: "Use MB1 to specify the RECEIVER gain attribute to read from the database and apply to the input traces."
+
+
+parameter: DB_PARM3
+text: "  Offset bin gain database attribute"
+type: action:
+type_desc: ("OFB AMP_COMP AMPL0001")
+mouse_text: "Use MB1 to specify the OFFSET BIN gain attribute to read from the database and apply to the input traces."
+
+
+parameter: DB_PARM4
+text: "  CDP gain database attribute"
+type: action:
+type_desc: ("CDP AMP_COMP AMPL0001")
+mouse_text: "Use MB1 to specify the CDP gain attribute to read from the database and apply to the input traces."
+
+
+parameter: DB_PARM5
+text: "  Channel gain database attribute"
+type: action:
+type_desc: ("CHN AMP_COMP AMPL0001")
+mouse_text: "Use MB1 to specify the CHANNEL gain attribute to read from the database and apply to the input traces."
+
+
+parameter: DB_PARM6
+text: "  OTHER gain database attribute"
+type: action:
+type_desc: ("TRC AMP_COMP AMPL0001")
+mouse_text: "Use MB1 to specify the user-defined gain attribute to read from the database and apply to the input traces."
+
+
+parameter: GATE_REF
+text: "Analysis gate reference time"
+type: circular:
+type_desc: (
+("Time zero"    1 "Gate times are referenced to time zero.")
+("Water bottom" 2 "Gate times are referenced to the water-bottom time.")
+	   )
+mouse_text: "Select analysis gate reference time."
+
+
+parameter: gateflag
+text: "Get analysis time gate from the DATABASE?"
+type: boolean:
+value: t
+mouse_text: "Set to 'NO' to enter an analysis time gate parameter file manually."
+
+
+parameter: GATELIST
+text: "  SELECT time gate parameter FILE"
+type: function:
+type_desc: ((parm_list "GAT") parms)
+value:  "no entry"
+selected_item: "INVALID"
+mouse_text: "Use Mouse Button 1 to select an analysis time gate parameter file from the parameter file menu."
+
+
+parameter: PRIM_KEY
+text: "  SELECT Primary time gate header word"
+type: function:
+type_desc: (header_list headers)
+value: "SOURCE  "
+selected_item: "Live source number"
+mouse_text: "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying time gate parameters."
+
+
+parameter: SCND_KEY
+text: "  SELECT Secondary time gate header word"
+type: function:
+type_desc: (header_list headers)
+value: "AOFFSET "
+selected_item: "Absolute value of offset"
+mouse_text: "Use MB1 to select a header word from the HEADERS menu as the SECONDARY key for specifying time gate parmeters."
+
+parameter: AMP_GATE
+text: "  SPECIFY time gate parameters"
+type: edit:
+type_desc: (25 80 5 " FORMAT: Primary Gate Location Value:Secondary Gate Location Value:Time Gate/
+ EXAMPLE: 1:0.0:700-2000 / 1:2640:1000-2200 / 1:5280:1500-2500 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1:0:1000-2500/"
+mouse_text: "Use MB1 to access the text editor and define the time gates. (Example: '1:0:800-2200/1:5280:1300-2500/'.)"
+
+
+parameter: NUM_ITER
+text: "Number of amplitude partitioning iterations"
+type: typein:
+type_desc: ( int: 4 1 99999 )
+value: 5
+mouse_text: "Number of Gauss-Seidel amplitude partitioning iterations."
+
+
+parameter: CDP_SMTH
+text: "Number of CDPs for structural amplitude smoothing"
+type: typein:
+type_desc: ( int: 4 1 9999 )
+value: 5
+mouse_text: "Number of CDPs over which to smooth reflection amplitude estimates (enter 1 for no smoothing)."
+
+
+parameter: GATE_MIN
+text: "Minimum gate width (ms)"
+type: typein:
+type_desc: ( real: 6 1.0e-4 nil )
+value: 200.0
+mouse_text: "Minimum width of any analysis time gate (gates are automatically enlarged to this width)."
+
+
+parameter: EST_TYPE
+text: "Initial ensemble statistics"
+type: pop_choose:
+type_desc: ( 
+("Mean with min/max exclude" 1 "Use mean of amplitudes within min and max values (fast)." )
+("Alpha-trim mean"           2 "Use alpha-trim mean to compute initial ensemble amplitude estimates.")
+           )
+mouse_text: "Select one of two methods to compute initial ensemble amplitude estimates."
+
+
+parameter: ATM_PCNT
+text: "  Alpha trim percent"
+type: typein:
+type_desc: ( real: 5 0.0 100.0 )
+value: 40.0
+mouse_text: "Percentage of amplitude samples rejected in computing initial amplitude estimates (enter 0.0 for mean, 100.0 for median)."
+
+
+parameter: AMP_MIN
+text: "  Minimum amplitude for analysis"
+type: typein:
+type_desc: ( real: 6 0 nil )
+value: 0.1
+mouse_text: "Any trace with amplitude BELOW this value will not be used in analysis."
+
+
+parameter: AMP_MAX
+text: "  Maximum amplitude for analysis"
+type: typein:
+type_desc: ( real: 6 1.0e-4 nil )
+value: 10.0
+mouse_text: "Any trace with amplitude ABOVE this value will not be used in analysis."
+
+
+parameter: MEM_OPT
+text: "Conserve memory?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to conserve memory by reading from database repeatedly instead of reading once and storing in memory."
+
+
+parameter: DB_NUM
+text: "4-character ID for trace amps"
+type: typein:
+type_desc: ( string: 4 )
+value: "0001"
+mouse_text: "Enter a 4-character (or numeric) identifier for the trace amplitude database attribute created during Input mode."
+
+parameter: OVERWRIT
+text: "Add to existing trace amps?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to add to any existing attribute with this ID. Select 'No' to initialize database attribute to null."
+
+parameter: DB_NUM2
+text: "4-character ID for component amps"
+type: typein:
+type_desc: ( string: 4 )
+value: "0001"
+mouse_text: "Enter a 4-character (or numeric) identifier for the component amplitude database attributes created during Compute mode."
+
+exec_data: (
+	("SCAMP2"
+		( (if (= (value 'MODEOPER) 2) "SPECIAL" "GENERAL")
+		       ("TOOLTYPE" implicit: "INPUT") ;only used when MODEOPER=2
+		       ("version" implicit: "ProMAX $Id: scamp2.menu 45204 2010-02-22 19:08:07Z David Johnston $ $Revision: 45204 $ $Date: 2010-02-22 12:08:07 -0700 (Mon, 22 Feb 2010) $")
+		       ("MODEOPER" implicit: (value 'MODEOPER))
+		       ("REM_OPT " implicit: (if (value 'REM_OPT) 1 0 ))
+		       ("GATE_REF" implicit: (value 'GATE_REF))
+		       ("GATELIST" implicit: (if (value 'gateflag)
+						 (value 'GATELIST) "NONE"))
+		       ("PRIM_KEY" implicit: (value 'PRIM_KEY))
+		       ("SCND_KEY" implicit: (value 'SCND_KEY))
+		       ("AMP_GATE" implicit: (value 'AMP_GATE))
+		       ("GATE_MIN" implicit: (value 'GATE_MIN))
+		       ("NUM_ITER" implicit: (value 'NUM_ITER))
+		       ("EST_TYPE" implicit: (value 'EST_TYPE))
+		       ("ATM_PCNT" implicit: (value 'ATM_PCNT))
+		       ("AMP_MIN"  implicit: (value 'AMP_MIN))
+		       ("AMP_MAX"  implicit: (value 'AMP_MAX))
+		       ("AMPLTYPE" implicit: (value 'AMPLTYPE))
+		       ("USEOTHER" implicit: (if (value 'USEOTHER) 1 0))
+		       
+		       ("S_DECOMP"   implicit: ( if (member 1 (value 'COMPONENTS)) 1 0 ))
+		       ("R_DECOMP"   implicit: ( if (member 2 (value 'COMPONENTS)) 1 0 ))
+		       ("O_DECOMP"   implicit: ( if (member 3 (value 'COMPONENTS)) 1 0 ))
+		       ("C_DECOMP"   implicit: ( if (member 4 (value 'COMPONENTS)) 1 0 ))
+		       ("CHDECOMP"   implicit: ( if (member 5 (value 'COMPONENTS)) 1 0 ))
+		       ("X_DECOMP"   implicit: ( if (member 6 (value 'COMPONENTS)) 1 0 ))
+
+		       ("OTHERNAM"   implicit: (value 'OTHERNAM))
+		       ("OTHERMIN"   implicit: (value 'OTHERMIN))
+		       ("OTHERMAX"   implicit: (value 'OTHERMAX))
+		       ("OTHERINC"   implicit: (value 'OTHERINC))
+		       ("OTHERFLD"   implicit: (value 'OTHERFLD))
+
+		       ("COMP1"    implicit: (value 'COMP1))
+		       ("COMP2"    implicit: (value 'COMP2))
+		       ("COMP3"    implicit: (value 'COMP3))
+		       ("COMP4"    implicit: (value 'COMP4))
+		       ("COMP5"    implicit: (value 'COMP5))
+		       ("COMP6"    implicit: (value 'COMP6))
+		       
+		       ("CDP_SMTH" implicit: (value 'CDP_SMTH))
+		       
+		       ("SHOT_COM"   implicit: ( if (member 1 (value 'APPLICATION)) 1 0 ))
+		       ("RCVR_COM"   implicit: ( if (member 2 (value 'APPLICATION)) 1 0 ))
+		       ("OFFS_COM"   implicit: ( if (member 3 (value 'APPLICATION)) 1 0 ))
+		       ("CDP__COM"   implicit: ( if (member 4 (value 'APPLICATION)) 1 0 ))
+		       ("CHAN_COM"   implicit: ( if (member 5 (value 'APPLICATION)) 1 0 ))
+		       ("OTH__COM"   implicit: ( if (member 6 (value 'APPLICATION)) 1 0 ))
+		       
+		       ("DB_PARM1" implicit: (first (type_desc 'DB_PARM1)))
+		       ("DB_PARM2" implicit: (first (type_desc 'DB_PARM2)))
+		       ("DB_PARM3" implicit: (first (type_desc 'DB_PARM3)))
+		       ("DB_PARM4" implicit: (first (type_desc 'DB_PARM4)))
+		       ("DB_PARM5" implicit: (first (type_desc 'DB_PARM5)))
+		       ("DB_PARM6" implicit: (first (type_desc 'DB_PARM6)))
+
+		       ;MEM_OPT: switch 0 and 1 so that in program 1 means use memory.
+		       ("MEM_OPT " implicit: (if (value 'MEM_OPT) 0 1))
+		       ("CDB_NAME" implicit: (string_concatinate "AMPL" (value 'DB_NUM)))
+		       ;OVERWRIT: switch 0 and 1 so that in program 1 means clear/overwrite.
+		       ("OVERWRIT" implicit: (if (value 'OVERWRIT) 0 1))
+		       ("CDB_NAM2" implicit: (string_concatinate "AMPL" (value 'DB_NUM2)))
+		)
+	)
+)
+
+
+rules: (
+
+ (rule_rem_opt ( = (value 'MODEOPER) 3 )
+	       (do_show 'REM_OPT) (do_not_show 'REM_OPT) )
+
+ (rule0 ( = (value 'MODEOPER) 1 )
+		  (do_show '(GATE_REF gateflag GATE_MIN AMPLTYPE USEOTHER OVERWRIT))
+		  (do_not_show '(GATE_REF gateflag GATE_MIN AMPLTYPE USEOTHER OVERWRIT)))
+
+ ( gate_show_rule (and (value 'gateflag) (showing 'gateflag))
+		  (do_show 'GATELIST)
+		  (dont_show 'GATELIST))
+
+ ( gate_show_rule2 (and (not (value 'gateflag)) (showing 'gateflag))
+		   (do_show '(PRIM_KEY SCND_KEY AMP_GATE))
+		   (dont_show '(PRIM_KEY SCND_KEY AMP_GATE)))
+
+ (((value GATE_REF)) GATELIST_type_rule
+	(set_type_desc 'GATELIST
+		(list (list 'parm_list 
+			(if (= (value 'GATE_REF) 1) "GAT" "WBG")) 'parms)
+	)
+ )
+
+ (rule2 ( > (value 'MODEOPER) 2 ) 
+	(do_show   'APPLICATION  )
+	(dont_show 'APPLICATION  ))
+
+ (rule2a ( or ( = (value 'MODEOPER) 2 ) ( = (value 'MODEOPER) 4 ) )
+	 (do_show '(COMPONENTS NUM_ITER EST_TYPE MEM_OPT) )
+	 (do_not_show '(COMPONENTS NUM_ITER EST_TYPE MEM_OPT) ))
+
+  ; Only OTHERNAM OTHERMIN OTHERINC values are used during 
+  ; INPUT and APPLY modes, but show all for simplicity.
+  (rule_other_show (or	(and (showing 'USEOTHER) (value 'USEOTHER))
+			(and (showing 'COMPONENTS) (member 6 (value 'COMPONENTS)))
+			(and (showing 'APPLICATION) (member 6 (value 'APPLICATION)))
+		   )
+	(do_show '(OTHERNAM OTHERMIN OTHERMAX OTHERINC OTHERFLD))
+	(do_not_show '(OTHERNAM OTHERMIN OTHERMAX OTHERINC OTHERFLD))
+  )
+
+  (rule_other_text (value 'OTHERNAM)
+	(progn
+		(set_text 'OTHERMIN (string_concatinate
+			"  Minimum value for " (value 'OTHERNAM)))
+		(set_text 'OTHERMAX (string_concatinate
+			"  Maximum value for " (value 'OTHERNAM)))
+		(set_text 'OTHERINC (string_concatinate
+			"  Increment for " (value 'OTHERNAM)))
+		(set_text 'OTHERFLD (string_concatinate
+			"  Maximum fold for " (value 'OTHERNAM)))
+		(set_mouse_text 'OTHERMIN (string_concatinate
+			"Enter minimum value for OTHER component header word " (value 'OTHERNAM)))
+		(set_mouse_text 'OTHERMAX (string_concatinate
+			"Enter maximum value for OTHER component header word " (value 'OTHERNAM)))
+		(set_mouse_text 'OTHERINC (string_concatinate
+			"Enter increment for OTHER component header word " (value 'OTHERNAM)))
+		(set_mouse_text 'OTHERFLD (string_concatinate
+			"Enter maximum number of traces in a common " (value 'OTHERNAM) " gather."))
+	)
+  )
+
+  (comp_type_desc_rule (value 'COMPONENTS)
+	(progn
+		(set_type_desc 'COMP1 (selected_item 'COMPONENTS))
+		(set_type_desc 'COMP2 (selected_item 'COMPONENTS))
+		(set_type_desc 'COMP3 (selected_item 'COMPONENTS))
+		(set_type_desc 'COMP4 (selected_item 'COMPONENTS))
+		(set_type_desc 'COMP5 (selected_item 'COMPONENTS))
+		(set_type_desc 'COMP6 (selected_item 'COMPONENTS))
+	)
+  )
+
+  (comp1_show_rule (showing 'COMPONENTS)
+	(do_show 'COMP1) (do_not_show 'COMP1))
+  (comp2_show_rule (and (showing 'COMPONENTS) (> (length (value 'COMPONENTS)) 1))
+	(do_show 'COMP2) (do_not_show 'COMP2))
+  (comp3_show_rule (and (showing 'COMPONENTS) (> (length (value 'COMPONENTS)) 2))
+	(do_show 'COMP3) (do_not_show 'COMP3))
+  (comp4_show_rule (and (showing 'COMPONENTS) (> (length (value 'COMPONENTS)) 3))
+	(do_show 'COMP4) (do_not_show 'COMP4))
+  (comp5_show_rule (and (showing 'COMPONENTS) (> (length (value 'COMPONENTS)) 4))
+	(do_show 'COMP5) (do_not_show 'COMP5))
+  (comp6_show_rule (and (showing 'COMPONENTS) (> (length (value 'COMPONENTS)) 5))
+	(do_show 'COMP6) (do_not_show 'COMP6))
+
+  (comp1_error_rule (not (member (value 'COMP1) (value 'COMPONENTS)))
+	(add_error 'COMP1 "Not part of decomposition")
+	(delete_error 'COMP1 "Not part of decomposition")
+  )
+  (comp2_error_rule (not (member (value 'COMP2) (value 'COMPONENTS)))
+	(add_error 'COMP2 "Not part of decomposition")
+	(delete_error 'COMP2 "Not part of decomposition")
+  )
+  (comp3_error_rule (not (member (value 'COMP3) (value 'COMPONENTS)))
+	(add_error 'COMP3 "Not part of decomposition")
+	(delete_error 'COMP3 "Not part of decomposition")
+  )
+  (comp4_error_rule (not (member (value 'COMP4) (value 'COMPONENTS)))
+	(add_error 'COMP4 "Not part of decomposition")
+	(delete_error 'COMP4 "Not part of decomposition")
+  )
+  (comp5_error_rule (not (member (value 'COMP5) (value 'COMPONENTS)))
+	(add_error 'COMP5 "Not part of decomposition")
+	(delete_error 'COMP5 "Not part of decomposition")
+  )
+  (comp6_error_rule (not (member (value 'COMP6) (value 'COMPONENTS)))
+	(add_error 'COMP6 "Not part of decomposition")
+	(delete_error 'COMP6 "Not part of decomposition")
+  )
+
+  (comp2_dup_error_rule (= (value 'COMP2) (value 'COMP1))
+	(add_error 'COMP2 "Duplicate of earlier component")
+	(delete_error 'COMP2 "Duplicate of earlier component")
+  )
+  (comp3_dup_error_rule (or (= (value 'COMP3) (value 'COMP1))
+			    (= (value 'COMP3) (value 'COMP2))
+			)
+	(add_error 'COMP3 "Duplicate of earlier component")
+	(delete_error 'COMP3 "Duplicate of earlier component")
+  )
+  (comp4_dup_error_rule (or (= (value 'COMP4) (value 'COMP1))
+			    (= (value 'COMP4) (value 'COMP2))
+			    (= (value 'COMP4) (value 'COMP3))
+			)
+	(add_error 'COMP4 "Duplicate of earlier component")
+	(delete_error 'COMP4 "Duplicate of earlier component")
+  )
+  (comp5_dup_error_rule (or (= (value 'COMP5) (value 'COMP1))
+			    (= (value 'COMP5) (value 'COMP2))
+			    (= (value 'COMP5) (value 'COMP3))
+			    (= (value 'COMP5) (value 'COMP4))
+			)
+	(add_error 'COMP5 "Duplicate of earlier component")
+	(delete_error 'COMP5 "Duplicate of earlier component")
+  )
+  (comp6_dup_error_rule (or (= (value 'COMP6) (value 'COMP1))
+			    (= (value 'COMP6) (value 'COMP2))
+			    (= (value 'COMP6) (value 'COMP3))
+			    (= (value 'COMP6) (value 'COMP4))
+			    (= (value 'COMP6) (value 'COMP5))
+			)
+	(add_error 'COMP6 "Duplicate of earlier component")
+	(delete_error 'COMP6 "Duplicate of earlier component")
+  )
+
+  (rule2a ( and (showing 'EST_TYPE) ( = (value 'EST_TYPE) 1 ) )
+ 	 (do_show   '(AMP_MIN AMP_MAX) )
+ 	 (do_not_show '(AMP_MIN AMP_MAX) ))
+
+  (rule2a ( and (showing 'EST_TYPE) ( = (value 'EST_TYPE) 2 ) )
+ 	 (do_show     'ATM_PCNT )
+ 	 (do_not_show 'ATM_PCNT ))
+
+ (rule4a ( and (member 1 (value 'APPLICATION)) ( = (value 'MODEOPER) 3 ) )
+	 (do_show   'DB_PARM1 ) (dont_show   'DB_PARM1 ) ) 
+
+ (rule4b ( and (member 2 (value 'APPLICATION)) ( = (value 'MODEOPER) 3 ) )
+	 (do_show   'DB_PARM2 ) (dont_show   'DB_PARM2 ) ) 
+ 
+ (rule4c ( and (member 3 (value 'APPLICATION)) ( = (value 'MODEOPER) 3 ) )
+	 (do_show   'DB_PARM3 ) (dont_show   'DB_PARM3 ) ) 
+
+ (rule4d ( and (member 4 (value 'APPLICATION)) ( = (value 'MODEOPER) 3 ) )
+	 (do_show   'DB_PARM4 ) (dont_show   'DB_PARM4 ) ) 
+
+ (rule4e ( and (member 5 (value 'APPLICATION)) ( = (value 'MODEOPER) 3 ) )
+	 (do_show   'DB_PARM5 ) (dont_show   'DB_PARM5 ) ) 
+
+ (rule4f ( and (member 6 (value 'APPLICATION)) ( = (value 'MODEOPER) 3 ) )
+	 (do_show   'DB_PARM6 ) (dont_show   'DB_PARM6 ) ) 
+
+ (rule_cdp_smth ( and (member 4 (value 'COMPONENTS)) ( or ( = (value 'MODEOPER) 2 ) ( = (value 'MODEOPER) 4 )) ) 
+		(do_show   'CDP_SMTH ) (dont_show   'CDP_SMTH ) ) 
+
+ (rule_cdp_even (evenp (value 'CDP_SMTH)) 
+		(set_value 'CDP_SMTH ( + (value 'CDP_SMTH) 1 ) ) )
+
+ (rule1_call_dbparm (value 'DB_PARM1)
+		    ( progn
+		      (set_value 'DB_PARM1 nil)
+		      (set_selected_item 'DB_PARM1 nil)
+		      (set_type_desc 'DB_PARM1 (list (choose_defaulted_db_parm "SIN" "AMP_COMP")) ) ) )
+
+ (rule2_call_dbparm (value 'DB_PARM2)
+		    ( progn
+		      (set_value 'DB_PARM2 nil)
+		      (set_selected_item 'DB_PARM2 nil)
+		      (set_type_desc 'DB_PARM2 (list (choose_defaulted_db_parm "SRF" "AMP_COMP")) ) ) )
+ 
+ (rule3_call_dbparm (value 'DB_PARM3)
+		    ( progn
+		      (set_value 'DB_PARM3 nil)
+		      (set_selected_item 'DB_PARM3 nil)
+		      (set_type_desc 'DB_PARM3 (list (choose_defaulted_db_parm "OFB" "AMP_COMP")) ) ) )
+ 
+ (rule4_call_dbparm (value 'DB_PARM4)
+		    ( progn
+		      (set_value 'DB_PARM4 nil)
+		      (set_selected_item 'DB_PARM4 nil)
+		      (set_type_desc 'DB_PARM4 (list (choose_defaulted_db_parm "CDP" "AMP_COMP")) ) ) )
+
+ (rule5_call_dbparm (value 'DB_PARM5)
+		    ( progn
+		      (set_value 'DB_PARM5 nil)
+		      (set_selected_item 'DB_PARM5 nil)
+		      (set_type_desc 'DB_PARM5 (list (choose_defaulted_db_parm "CHN" "AMP_COMP")) ) ) )
+
+ (rule6_call_dbparm (value 'DB_PARM6)
+		    ( progn
+		      (set_value 'DB_PARM6 nil)
+		      (set_selected_item 'DB_PARM6 nil)
+		      (set_type_desc 'DB_PARM6 (list (choose_defaulted_db_parm "TRC" "AMP_COMP")) ) ) )
+
+  (rule_db_num ( = (value 'MODEOPER) 3 )
+	       (do_not_show 'DB_NUM) (do_show 'DB_NUM) )
+
+  (rule_db_num2 (or ( = (value 'MODEOPER) 2 ) ( = (value 'MODEOPER) 4 ) )
+	       (do_show 'DB_NUM2) (do_not_show 'DB_NUM2) )
+
+  (rule_db_num_equal (and (member 6 (value 'COMPONENTS))
+			  (= (value 'DB_NUM) (value 'DB_NUM2))
+		     )
+	(add_error 'DB_NUM2 "IDs for trace and component amps are equal")
+	(delete_error 'DB_NUM2 "IDs for trace and component amps are equal")
+  )
+
+  )
+)

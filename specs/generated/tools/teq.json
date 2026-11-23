@@ -1,0 +1,88 @@
+{
+  "menu_id": "teq",
+  "tool_name": "TEQ",
+  "label": "Trace Equalization",
+  "parameter_count": 9,
+  "parameters": [
+    {
+      "name": "GAINTYPE",
+      "prompt": "BASIS for scaling",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Use MB1 to choose among MEAN, RMS, or MAXIMUM amplitude as a basis for TE scalar computation."
+    },
+    {
+      "name": "GATETIME",
+      "prompt": "Time gate reference",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Use MB1 to select the time gate reference."
+    },
+    {
+      "name": "db_option",
+      "prompt": "Get TE gates from the DATABASE?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Set this to 'NO' if a TE time gate parameter file was not created interactively. (Will enter manually.)"
+    },
+    {
+      "name": "GATENAME",
+      "prompt": "SELECT time gate parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a trace equalization time gate parameter file from the parameter file menu."
+    },
+    {
+      "name": "GATENAWB",
+      "prompt": "SELECT water relative time gate file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a water relative trace equalization time gate parameter file from the parameter file menu."
+    },
+    {
+      "name": "PRIM_KEY",
+      "prompt": "SELECT Primary time gate header word",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying TE time gate parameters."
+    },
+    {
+      "name": "SCND_KEY",
+      "prompt": "SELECT Secondary time gate header word",
+      "kind": "function",
+      "default": "AOFFSET ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the SECONDARY key for specifying TE time gate parms."
+    },
+    {
+      "name": "TE_GATE",
+      "prompt": "SPECIFY TE gate parameters",
+      "kind": "edit",
+      "default": "1:0:1000-2500/",
+      "help": "Use MB1 to access the text editor and define the TE time gates. (Example: '1:0:800-2200/1:5280:1300-2500/'.)"
+    },
+    {
+      "name": "OUT_TYPE",
+      "prompt": "Type of output",
+      "kind": "circular",
+      "default": null,
+      "help": "This option determines what values are in the output traces.",
+      "choices": [
+        {
+          "label": "TRACES",
+          "value": "1",
+          "help": "Output the scaled input traces."
+        },
+        {
+          "label": "SCALARS",
+          "value": "2",
+          "help": "Output the scalar value as a trace."
+        },
+        {
+          "label": "version",
+          "value": "implicit:",
+          "help": "ProMAX $Id: teq.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $"
+        }
+      ]
+    }
+  ]
+}

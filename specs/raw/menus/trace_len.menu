@@ -1,0 +1,21 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: TRACE_LEN
+label: "Trace Length"
+value_tab: 35
+
+parameter: TRACELEN
+text: "New trace length"
+type: typein:
+type_desc: ( real: 10 1.0e-8 nil )
+value: 2000.0
+mouse_text: "Revised trace length to output: trace is clipped if shortened, padded with zeros if lengthened."
+plot_label: t
+
+exec_data: ("TRACE_LEN"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: trace_len.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("TRACELEN"   implicit: (value 'TRACELEN))
+		)
+	    )	
+)

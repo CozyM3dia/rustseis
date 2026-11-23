@@ -1,0 +1,250 @@
+Prestack Kirchhoff Time Migration651
+
+ProMAX® Reference
+
+Prestack Kirchhoff Time Migration
+Prestack Kirchhoff Time Migration performs a migration
+by applying a Green’s function to each CDP location using an
+analytic RMS-velocity NMO curve.
+
+Theory
+This common-offset migration uses a vertically and laterallyvariant RMS velocity ﬁeld in time, VRMS(x,t). It provides good
+handling of steep dips up to 90 degrees. Refer to the
+Migration Overview for more information on this process.
+We provide the Avoid Spatial Aliasing parameter if there is a
+concern with spatial aliasing. This option gives you dynamic
+frequency limiting, depending upon local velocity, trace
+spacing and dip. However, this will double the run time.
+This migration can run in parallel on several remote
+machines at once using the parallel socket tools to improve
+throughput. See Parallel Socket Tools Conﬁguration.
+The primary advantages of this algorithm are relative speed
+and good handling of vertically-variant velocity ﬁelds and
+steep dip handling, and fair handling of lateral velocity
+variations.
+
+Usage
+The following are processing requirements of the input data
+and velocity ﬁeld for proper migration using this process:
+• Input data input must be common offset gathers. You
+can create common offset gathers with Trace Binning.
+• Input gathers cannot be NMO-corrected. NMO-corrected
+gathers results in an improper migration.
+• Input data must be corrected to a ﬂat datum. If your
+data is referenced to a ﬂoating datum, you need to apply
+datum statics, or use Prestack Wave Equation Datuming to move your data to a ﬂat datum.
+• Input velocity ﬁeld must be corrected to same ﬂat datum
+as the input gathers. If your velocity ﬁeld is referenced to
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff Time Migration652
+
+ProMAX® Reference
+
+a ﬂoating datum, you need to modify the velocity ﬁeld
+with Velocity Field Manipulation.
+The location of the source and receiver of each trace is taken
+from the header words CDP and OFFSET. The source is at
+location (CDP - 0.5*OFFSET/cdpSpacing) where cdpSpacing
+is the value input for CDP interval. The receiver location is
+(CDP + 0.5*OFFSET/cdpSpacing). The correct offset, and
+hence the proper source and receiver position, is used for
+each trace.
+The headers CDP and RCDP are properly set on the output
+traces. The headers OFFSET and AOFFSET are set to the
+average of those header values for the input traces. This is
+only useful if you are migrating offset sections.
+The headers CDP_X, REC_X, SOU_X, CDP_Y, REC_Y, SOU_Y,
+REC_SLOC, SOU_SLOC are set to NULL because they are
+meaningless after migration.
+These headers should enable you to copy the migrated offset
+section to a new line and extract geometry from the headers
+so that you may process the prestack data while taking full
+advantage of the database.
+
+Parameters
+Perform parallel processing?
+Select Yes to simultaneously run the migration in parallel on
+several remote machines. When parallel processing is
+performed, ensembles are brought back into the ﬂow as the
+remote process is completed. The output migrated ensembles
+may have a slightly different order than the input ensembles.
+Fast and idle machines which complete migrating their
+ensemble before others will receive new shot gathers to
+migrate.
+Number of parallel processes to spawn
+This appears if Yes to Perform parallel processing. Enter
+the number jobs to run simultaneously.
+Specify the machines to run processes on
+This appears if Yes to Perform parallel processing. Enter a
+list of the machines each process is to run on. The list should
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff Time Migration653
+
+ProMAX® Reference
+
+be comma or space separated. Extra machines are ignored.
+Two processes will start on a machine if it is listed twice. This
+takes advantage of the new multi-CPU machines.
+To ease entering long lists of machines, this ﬁeld is initialized
+to the environment variable: PROMAX_MACHINES.
+CDP interval (ft. or m)
+Enter the CDP spacing, in ft. or m, whichever is consistent
+with the headers.
+Explicitly deﬁne bounds of output ﬁeld?
+Select Yes to specify the bounds and trace spacing of the
+output ﬁeld. If you select Yes and are migrating offset
+sections, consider the following:
+• Do your input sections contain varying CDP ranges and
+you want to output to a speciﬁc CDP range?
+• Do you want to extend migration ﬁelds beyond the beginning or end of a line?
+• If you are migrating for velocity analysis, output every
+4th CDP or so; this should save considerable time.
+Select No to migrate onto traces whose bounds are
+determined by the bounds of the input trace spacing. Use
+this option when migrating shot gathers.
+First CDP of output ﬁeld
+This appears if Yes to Explicitly deﬁne bounds of output
+ﬁeld. Enter the ﬁrst CDP value of the output trace. This value
+should be the minimum CDP number.
+Last CDP of output ﬁeld
+This appears if Yes to Explicitly deﬁne bounds of output
+ﬁeld. Enter the last CDP value of the output trace. This value
+should be the maximum CDP number.
+CDP spacing of traces in output ﬁeld
+Enter the spacing of the output ﬁeld in CDPs. Enter 1.0 to
+output every CDP, 2.0 to output every other CDP, and 0.5 to
+output at half the input CDP spacing.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff Time Migration654
+
+ProMAX® Reference
+
+Extend output ﬁeld beyond ﬁrst and last CDP
+This appears if No to Explicitly deﬁne bounds of output
+ﬁeld. Enter how many CDPs your output ﬁeld extends
+beyond the ﬁrst and last CDP of the input ensemble.
+This is useful when migrating shot gathers to capture steeply
+dipping energy that migrates a little distance away from the
+location of the sources and receivers.
+Maximum number of traces in the output ﬁeld
+This appears if No to Explicitly deﬁne bounds of output
+ﬁeld. Enter the maximum number of CDPs the migrated
+output ﬁeld will contain based on the CDP range of each
+ensemble and your CDP spacing.
+Input a Horizon Table?
+Select Yes to use a Horizon table to limit the migration to
+certain zones. Data will not be migrated outside of the zones;
+saving considerable time.
+Select a Horizon Table
+This appears if Yes to Input a Horizon Table. Select the
+autostatics horizon table deﬁning the zones to migrate.
+Maximum frequency to migrate (in Hz)
+Enter the maximum usable frequency in the data. A value
+less than the Nyquist frequency for the dataset will speed up
+computations. If the input data has frequencies above this
+maximum, it should be bandpass ﬁltered before migration to
+avoid artifacts caused by abruptly truncating the frequency
+band.
+Migration aperture (ft. or m)
+Enter the maximum horizontal distance that energy can
+move in the migration. This distance determines the width of
+the travel time maps to the left and right of a given surface
+location. If 0.0 is speciﬁed, the maximum possible aperture is
+computed. Run time is proportional to this value, and can be
+signiﬁcantly decreased by calculating the maximum
+aperture, rather than using the default value.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff Time Migration655
+
+ProMAX® Reference
+
+Avoid Spatial Aliasing?
+Select No for maximum speed when spatial aliasing is not a
+concern. Select Yes to avoid spatial aliasing. This will
+produce cleaner migration when spatial sampling is large but
+also increase run time. Artifacts can be introduced in to the
+migration, especially near the surface where velocities are
+low.
+Approximate input traces spacing in CDPs
+This appears if Yes to Avoid Spatial Aliasing. Enter a value
+for the approximate input trace spacing to avoid spatial
+aliasing. Select 0 to compute the approximate input trace
+spacing by taking the largest and smallest CDP in each
+ensemble and dividing by the number of traces in the
+ensemble minus 1.
+Get RMS velocities from database?
+Select Yes to select a RMS stacking velocity ﬁle from the
+database. Select No to input the RMS velocity-versus-time
+function using the editor.
+Select RMS vs. time velocity ﬁle
+This appears if Yes to Get RMS velocities from database.
+Select an RMS-velocity vs. time ﬁle from the database.
+RMS velocities in time for migration
+This appears if No to Get RMS velocities from database.
+Access the editor and enter or read in a velocity function. To
+read in an ASCII ﬁle, specify the full path name to the ﬁle
+followed by a Ctrl-r.
+Change the default tapering?
+Select Yes to change the edge tapering defaults. Tapering is
+performed on the section before migration in order to reduce
+edge effects.
+Bottom taper (in ms)
+This appears if Yes to Change the default tapering. Enter
+the length of the taper, in ms, between the last sample of
+each trace set to zero amplitude, and the untapered data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff Time Migration656
+
+ProMAX® Reference
+
+Upper edge taper (in traces)
+This appears if Yes to Change the default tapering. The
+sides of the section should be tapered before migration. In
+general, the upper edge taper will be smaller that the lower
+edge taper because of the increase in migration aperture with
+time.
+Lower edge taper (in traces)
+This appears if Yes to Change the default tapering. The
+sides of the section should be tapered before migration. In
+general, the upper edge taper is smaller than the lower edge
+taper because of the increase in migration aperture with
+time. The taper is varied linearly with time between the upper
+and lower edges of the section.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

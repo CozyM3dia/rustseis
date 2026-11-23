@@ -1,0 +1,381 @@
+173
+
+Developer’s Programming Guide
+
+Ordered Parameter Files
+
+This chapter describes the ProMAX database, which consists of
+a set of ordered parameter ﬁles that are used to store
+information. See the Ordered Parameter File Examples
+appendix for code examples.
+
+Topics covered in this chapter:
+
+➲ Overview of the ProMAX Database
+➲ Standard Orders
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of the ProMAX Database174
+
+Developer’s Programming Guide
+
+Overview of the ProMAX Database
+The ProMAX Database consists of a set of ordered parameter
+ﬁles used to store information for each seismic line in structured
+categories representing unique sets of information. There are
+nine standard Orders that are created when the geometry is
+loaded:
+•
+•
+•
+•
+•
+•
+•
+•
+•
+
+LIN (line)
+SIN (source index number)
+SRF (surface location)
+CDP (Common Depth Points)
+CHN (channel)
+TRC (trace)
+OFB (offset bin)
+ILN (3D inline number)
+XLN (3D crossline number)
+
+Information stored in these Ordered Parameter Files is
+considered common to all datasets in the line (or survey)
+directory level. Information that is dataset dependent should be
+stored in trace headers. See the discussion in the Trace Headers
+chapter.
+In each Order there are N slots available for storage of
+information, where N is the number of elements in the Order
+(number of sources, number of surface locations, number of
+CDPs, etc.). Each slot contains various parameters (in various
+formats) for one particular element of the Order. If values for a
+particular parameter are not stored in all of the available slots,
+the empty slots contain the proper null value for that parameter.
+The following ﬁgure shows a sketch of an ordered parameter
+ﬁle. The order has N elements (columns) and ﬁve parameters
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of the ProMAX Database175
+
+Developer’s Programming Guide
+
+(rows). Values would be stored in each of the boxes
+(intersection of a row and column).
+ORDER ELEMENTS
+1
+
+2
+
+3
+
+4
+
+5
+
+....
+
+....
+
+N
+
+PARM 1
+PARM 2
+PARM 3
+PARM 4
+PARM 5
+
+An ordered parameter ﬁle with
+N elements and 5 parameters
+
+Collectively, the Ordered Parameter Files are used to store large
+classes of data, including the acquisition parameters, the
+geometry, statics (and other surface-consistent information),
+and pointers between the source, receiver, and CDP domains.
+The design of the Orders is tailored for seismic data and
+provides a compact format without duplication of information.
+Of particular interest to programmers is the cross-referencing
+between domains, which reduces the book-keeping in programs
+such as residual statics.
+The ordered parameter ﬁles serve four main purposes:
+•
+
+Other Docs
+
+They serve as a geometry database to Executive tools,
+stand-alone processes, and to the ﬂow builder. Menu
+parameters can be defaulted to parameters in the line (LIN)
+Order; examples include minimum CDP number or
+nominal CDP spacing. Surface consistent processing
+modules can access these ﬁles to determine buffer sizes
+and surface relation of shots and receivers, etc.
+
+Search Page
+
+Known Problems
+
+Overview of the ProMAX Database176
+
+Developer’s Programming Guide
+
+•
+
+•
+
+They allow domain mapping between the CDP, SIN, SRF
+and TRC Orders. When geometry is installed, these
+domains are cross-referenced for fast access. Two
+convenience routines exist that utilize this
+cross-referencing: DB_ENSEMBLE_MAP and
+DB_TRACE_MAP. For example, when using
+DB_ENSEMBLE_MAP, from a particular CDP, the
+routine can return the receiver static of the nearest station
+or the uphole time of the nearest shot. The analogous
+routines in C are dbEnsembleMap and dbTraceMap.
+
+•
+
+Other Docs
+
+They provide general inter-tool communication of
+information that is global to all datasets in the line or
+survey; ﬁrst break or residual statics picks are typical
+examples. In ProMAX, in-line tools make these time picks
+and place the picks in the trace Order. Another in-line or
+stand-alone tool reduces these picks to shot and receiver
+statics that are stored, respectively, as parameters in the
+SIN and SRF Orders. Once in the database, these ﬁnal shot
+and receiver static parameters can be applied to any of the
+line’s datasets. As with trace headers, user deﬁned Ordered
+parameters can be of any length or format.
+
+They provide quick sorting of traces off disk. Each trace
+dataset has a mapping ﬁle which maps the relative position
+of each trace on disk to the original geometry trace number.
+For each of the common ensemble sorts (CDP, shot,
+receiver, offset bin, 3D inline, and 3D crossline), a row in
+the TRC Ordered Parameter ﬁle serves as a look-up table
+containing these original trace numbers sorted by the
+associated ensemble. A corresponding starting address
+look-up row (SLOOKUP) in each of the ensemble Order
+ﬁles points to the start of each ensemble group in the
+corresponding TRC look-up row. For example, assume you
+want to read CDP 437 off a disk dataset of unknown sort
+order. Disk Data Input will use the column associated with
+CDP 437 in the CDP Order to determine the CDP fold—
+we will use 30 for this example—and the starting position
+(SLOOKUP) in the TRC look-up row for CDP—we will
+use 4201. At position 4201 in the CDP look-up row of the
+TRC Order is the original trace number for the ﬁrst trace in
+CDP 437, and the next consecutive 29 positions contain the
+remaining trace numbers for CDP 437. From this set of
+trace numbers, the dataset map ﬁle can be used to directly
+
+Search Page
+
+Known Problems
+
+Overview of the ProMAX Database177
+
+Developer’s Programming Guide
+
+determine the disk positions of the CDP traces. This
+appears complicated, but it sufﬁces to say that Orders
+facilitate quick sorts of data from disk.
+The quick sort from disk using the MAP ﬁle, as described in the
+preceeding paragraph, depends on the trace numbers (in the
+trace headers) being valid; that is, they are unique and
+associated to a column in the TRC Order. If this is not the case,
+the dataset will be ﬂagged as such (run-time variable
+ITRNO_VALIDz=0), and the sort will be performed using trace
+headers.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Standard Orders178
+
+Developer’s Programming Guide
+
+Standard Orders
+The following table describes the nine standard orders.
+Standard Orders
+Order
+
+Description
+
+LIN Order
+
+The LIN Order contains information that is unique to the LINE, such as:
+Geometry:
+EXDATUMz - Final datum elevation (if not variable)
+IUNITSz - Type of units
+ISRCTYPz - Source type
+NSHOTSz - Total number of live shots
+NUMCDPz - Total number of CDPs
+Etc.
+
+TRC Order
+
+The TRC Order contains information that is unique to each trace, such as:
+Geometry:
+SIN - Shot index numbers of every trace
+SRF - Receiver surface location number of every trace
+CDP - CDP bin number of every trace
+CHN - Channel number of every trace
+OFFSET - Source-receiver offset of every trace
+SIN_LTBL - SIN look-up table
+SRF_LTBL - Receiver surface location look-up table
+OFB_LTBL - OFB look-up table
+CDP_LTBL - CDP look-up table
+ILN_LTBL - ILN look-up table
+XLN_LTBL - XLN look-up table
+User parameters:
+First break pick times
+Trim statics
+Source-receiver offsets
+Etc.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Standard Orders179
+
+Developer’s Programming Guide
+
+Standard Orders (Continued)
+Order
+
+Description
+
+SIN Order
+
+The SIN Order contains information that is unique to each source, such as:
+Geometry:
+NCHANS - Number of channels in each source
+X_COORD - X coordinate of every source
+Y_COORD - Y coordinate of every source
+ELEV - Elevation of every source
+SRF - Nearest surface location number of every source
+SOURCE - Live source number of every source
+PATTERN - Pattern number of every source
+PATT_REF - Pattern reference surface location of every source
+DEPTH - Hole depth of every source
+UPHOLE - Uphole time of every source
+SLOOKUP - Starting address in SIN look-up table for every source
+User parameters:
+Source statics
+Etc.
+Source index numbers are unique sequential numbers that are assigned to all of the
+records that exist in the dataset that is used to initialize the database. They include
+records that are not live sources. Live sources are therefore a subset of shot index
+numbers and not a suitable order.
+
+SRF Order
+
+The SRF Order contains information that is unique to each surface location, such as:
+Geometry:
+FOLD - Receiver fold of every surface location
+X_COORD - X coordinate of every surface location
+Y_COORD - Y coordinate of every surface location
+ELEV - Elevation of every surface location
+SLOOKUP - Starting address in SRF look-up table for every surface location
+Plus user parameters:
+Surface location statics
+Etc.
+Surface locations are surveyed positions where either a shot or receiver may be placed.
+For 2D data, surface locations are generally equivalent to stations. However, 3D data
+generally have separate locations for shots and receivers resulting in stations locations
+being the super-set of all shot and receiver positions. Receiver locations are therefore
+subset and not a suitable order.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Standard Orders180
+
+Developer’s Programming Guide
+
+Standard Orders (Continued)
+Order
+
+Description
+
+CDP Order
+
+The CDP Order contains information that is unique to each CDP bin, such as:
+Geometry:
+FOLD - Fold of every CDP
+X_COORD - X coordinate of every CDP
+Y_COORD - Y coordinate of every CDP
+ELEV - Elevation of every CDP
+SRF - Nearest surface location to every CDP
+SLOOKUP - Starting address in CDP look-up table for every CDP
+Plus user parameters:
+CDP statics
+Etc.
+
+ILN Order
+
+The ILN Order contains information that is unique to each ILN bin, such as:
+Geometry:
+FOLD - Fold of every ILN
+SLOOKUP - Starting address in ILN look-up table for every ILN
+
+XLN Order
+
+The XLN Order contains information that is unique to each XLN bin, such as:
+Geometry:
+FOLD - Fold of every XLN
+SLOOKUP - Starting address in XLN look-up table for every XLN
+
+OFB Order
+
+The OFB Order contains information that is unique to each OFB bin, such as:
+Geometry:
+OFB_CNTR - Offset bin center
+MEAN_OFF - Mean offset within the bin
+FOLD - Fold of every OFB
+SLOOKUP - Starting address in OFB look-up table for every OFB
+Plus user parameters:
+Offset amplitude adjustment
+Etc.
+
+CHN Order
+
+The CHN Order contains information that is unique to each channel, such as:
+Channel gain constants
+Channel statics (if appropriate)
+Etc.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

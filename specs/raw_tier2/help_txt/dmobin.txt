@@ -1,0 +1,173 @@
+Common Offset DMO Binning1999
+
+ProMAX® Reference
+
+Common Offset DMO Binning
+Before DMO can be applied in the common offset domain, all
+traces must be binned into DMO offset bins by adding a new
+trace header word, DMOOFF. Traces having the same
+DMOOFF value will then be used to build common-offset
+sections prior to applying DMO in the common-offset domain.
+
+Theory
+It is usually desirable to have each common-offset section
+fully populated, that is, a live trace present at every CDP
+location. To insure that a common offset section is fully
+populated, it is normally necessary to set the DMO Bin
+increment to two times the shot interval. Another way to
+ensure that all common-offset sections are fully populated is
+to examine the nominal change in offset as you proceed from
+trace to trace within a given CDP. Again, you will normally
+ﬁnd this offset increment to be twice the shot interval. If your
+data contains very ﬂat dips, the bin increment could be
+increased to as much as four or even eight times the shot
+interval. Run times decrease markedly as the number of
+common-offset sections needing to be dip moveout corrected
+decreases.
+Once you have determined the bin increment, it is relatively
+simple to determine the center of the ﬁrst DMO bin: it is
+simply the center-point of the offsets found in the ﬁrst bin.
+As an example, if the shot interval is 200 meters (yielding a
+bin increment of 400 meters), and the group interval along
+your line is 100 meters, with 300 meters being the distance
+to the ﬁrst group, the shot-receiver offsets within your
+dataset would be:
+300, 400, 500, 600, 700, 800, 900,.......
+
+The center of your ﬁrst offset bin, assuming a bin increment
+of 400 meters, and therefore a binning together of every four
+traces, would lie midway between 400 and 500, and would
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset DMO Binning2000
+
+ProMAX® Reference
+
+equal 450 meters. Your DMO offset bins would now be 450
++/- 200, 850 +/- 200, 1250 +/- 200, etc.
+300 400 500 600 700 800 900 1000 1100 1200 1300 1400........
+
+450
+
+850
+
+1250
+
+Note that for every positive offset bin, a negative offset bin is
+also created unless you select the option to absolute value of
+offset for binning in which case all DMO bins are positive. For
+example, in split spread shooting, the above example would
+contain DMO bins +450, -450, +850, -850, etc. In marine
+shooting where the ﬁrst channel is farthest from the boat, all
+offsets are negative, and only the negative DMO bins would
+be populated. Generally, binning by absolute value and
+creating only positive binned offsets is advisable. There is
+nothing to be gained by running DMO on both positive and
+negative offsets and then combining in a subsequent NMO
+and stack, the process just takes twice as long.
+In cases of skidded shots or other irregular shooting
+geometry, traces may spill from one DMO bin into an
+adjacent bin, yielding two or more traces per CDP within a
+given DMO bin. Within the DMO application module, traces
+within the same DMO bin having identical CDP numbers are
+stacked together prior to DMO being applied to the common
+offset sections.
+
+Usage
+Remember that data entering Common Offset DMO must be
+sorted with DMOOFF as the primary key, and CDP as the
+secondary key. If you attempt to assign DMOOFF, perform an
+inline sort to DMOOFF, and then apply Common Offset
+DMO within the same ﬂow, you will potentially require large
+amounts of disk space, as the entire seismic line must be
+buffered on disk during the inline sort from CDP domain to
+common-offset domain. A better means of accomplishing this
+task is to:
+• Perform Disk Data Input using Process Trace Headers
+Only? set to Yes.
+• DMO Binning
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset DMO Binning2001
+
+ProMAX® Reference
+
+• Perform Disk Data Output to the same dataset using
+Overwrite.
+The above steps will do nothing more than add the DMOOFF
+header word to all of your traces without creating any
+intermediate datasets. To perform DMO, use Disk Data
+Input with a primary header word of DMOOFF and
+secondary header word of CDP.
+Caution: When you bin a dataset, all the far offsets are
+placed into the last bin center. For example, if you have a
+dataset with offset from 220-6380 and bin 220-1000(440),
+then the majority of the traces are placed into the last bin; in
+this example 660. Some processes, for example Prestack
+Kirchoff Migration, fail with memory errors because one
+ensemble will have thousands of more traces than the other
+ensembles.
+
+Parameters
+Distance to center of nearest offset bin:
+Enter the distance to center of nearest DMO offset bin,
+always positive. Traces with offsets less than this are
+included in the ﬁrst bin.
+Bin increment:
+Enter the increment for DMO offset binning, always positive.
+It is usually desirable to have each common offset section
+fully populated, that is a live trace present at every CDP
+location. To ensure that a common offset section is fully
+populated, it is normally necessary to set the bin increment
+to two times the shot interval.
+Maximum number of bins
+Enter the number of DMO offset bins and the maximum
+DMO offset:
+DMO Offset Max = Near Offset Center + (Number of bins 1)*Bin increment
+Traces with offsets greater than this are included in the last
+bin. The number of commons offset sorts will be equal to this
+parameter.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset DMO Binning2002
+
+ProMAX® Reference
+
+Use absolute value of offset?
+If Yes, the binning is done with the absolute value of offset
+and only creates positive DMO offset bins. For split spread
+shooting this could result in half as many common offsets
+(positive and negative offset are merged) and much less
+computational effort in DMO and later processes.
+Set offset header to binned center?
+If Yes, the OFFSET header word is set equal to the DMO bin
+center offset, DMOOFF. This may be desirable for subsequent
+NMO and velocity analysis because the process of combining
+several slightly different offsets into a common offset section
+and then performing a mixing algorithm such as DMO tends
+to blend many traces with offsets centered around the bin
+center. In this case the bin center offset may be a more
+appropriate offset than the original.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

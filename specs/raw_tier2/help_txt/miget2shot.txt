@@ -1,0 +1,454 @@
+Prestack FD Shot Migration589
+
+ProMAX® Reference
+
+Prestack FD Shot Migration
+Prestack FD Shot Migration performs prestack depth
+migration on shot gathers using explicit ﬁnite difference
+extrapolators.
+
+Theory
+This algorithm performs prestack depth migration with
+explicit F-X spatially-varient extrapolators similar to those
+described by Soubaras. These extrapolators have lengths of
+7, 11, or 25 points depending on the maximum dip to
+migrate. Like other ﬁnite difference schemes, the approach
+can handle fully-variable interval velocity ﬁelds in depth. The
+scheme is also capable of migrating data from true surface
+elevation if desired. The main advantage of this approach
+over other prestack migrations is its accuracy for migrating in
+very complex velocity ﬁelds. Its main disadvantage is that it is
+slower, cannot migrate dips as steep, and is not as suitable
+for interval velocity analysis as the Kirchhoff or Gaussian
+beam prestack migration. You may want to use this migration
+for the ﬁnal, high quality migration after determining the
+velocity ﬁeld using the other prestack migrations.
+The explicit extrapolators differ from the standard implicit
+extrapolators (the Claerbout 45 or 65 degree variety) in that
+each ﬁltered output sample is computed independently of the
+others via convolution. This approach is fast, particularly for
+vector computers. Moreover, the explicit extrapolators have
+nice impulse responses. The evanescent energy is naturally
+attenuated which produces no cusps in the impulse
+response. However, the explicit approach cannot propagate
+very steep dips, no more than about 70 degrees. In contrast,
+the Kirchhoff and Gaussian beam prestack migrations can
+propagate turning waves.
+This migration can be run in parallel on several remote
+machines at once using parallel socket tools to improve
+throughput. Refer to Parallel Socket Tools Conﬁguration.
+
+Usage
+Shot migration downward continues: receivers backwards in
+time, and sources forward in time. At each depth step, the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration590
+
+ProMAX® Reference
+
+correlation of the receiver waveﬁeld and the source waveﬁeld
+produces the image. This is the Up-Down imaging condition.
+The resulting image from the migration of a given shot will
+naturally have some artifacts from the limited aperture. In
+particular, there will be edge effects and reﬂectors with
+different dip will be positioned at different locations. This is
+analogous to a shot illuminating reﬂectors with different dips
+at different locations. Thus, the individual migration of each
+shot is generally not very useful. However, on stacking, the
+edge effects generally stack out and disappear and the
+reﬂectors become continuous.
+For steeply dipping reﬂectors, the section of the reﬂector
+illuminated by the shot may not be positioned under the
+shot. This is especially true for single ended spreads. For a
+split spread with a cable to the right of the shot, a reﬂector
+dipping down to the right will be illuminated to the left of the
+shot, such as
+source
+
+receivers
+
+Portion illuminated does not lie
+underneath the source or receivers
+
+In order to avoid losing the energy associated with this
+steeply dipping reﬂector, the imaging zone must be expanded
+beyond the extent of the source and receivers. The parameter
+Padding beyond ﬁrst and last group allows you to do this.
+This padding will be more important for single ended spreads
+but may also be necessary for split spreads with deep, steeply
+dipping reﬂectors.
+Output traces from this migration represent the earth below
+each receiver as illuminated by a given shot. Due to this
+refocusing, the header values for CDP in the output traces
+represent the same surface location as the SRF_SLOC for
+that trace and will be different than the CDP values of the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration591
+
+ProMAX® Reference
+
+input traces. The migrated output can be stacked using
+CDP/Ensemble Stack, after re-sorting the data. The header
+word to stack on is either CDP or SRF_SLOC.
+You can check the quality of the velocity ﬁeld with these
+migrated shot gathers. If the correct velocity function was
+used, each shot migration would image the reﬂectors at the
+correct depth. The coherency of the shot migrations is a
+measure of the accuracy of the velocity ﬁeld. By re-sorting the
+traces of the shot migration on the header CDP or
+SRF_SLOC, you collect all the traces corresponding to the
+same positions in depth. These are usually called coherency
+panels and are analogous to the CRP gathers of migrated
+offset sections. If the correct velocity ﬁeld was used in the
+migration, events should be ﬂat on the coherency panels.
+Edge effects will cause the sides of the coherency panels to
+curve up. We do not know how to tell where the edge effects
+start.
+Migrated offset sections and CRP gathers are usually better
+migration velocity analyses tools than coherency panels. The
+exception to this rule occurs when there are large skips in the
+shot spacing.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration592
+
+ProMAX® Reference
+
+Sample Migrations
+Impulse response, 70 degree option, 120 m offset
+source
+receiver (120m offset)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration593
+
+ProMAX® Reference
+
+Impulse response, 70 degree option, 500 m offset
+source
+
+receiver (500m offset)
+
+side
+reﬂection
+
+1000 m
+
+Impulse response, 50 degree option, 500 m offset
+source
+
+receiver (500m offset)
+
+1000
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration594
+
+ProMAX® Reference
+
+Impulse response, 30 degree option
+source
+
+receiver (500m offset)
+
+1000 m
+
+The 30o option is not good for shallow data relative to the source-receiver offset.
+
+Shot migration of 3 reﬂectors using 70 degree option
+
+Edge effects
+
+Edge effects
+
+1000 m
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration595
+
+ProMAX® Reference
+
+Shot migration of 3 reﬂectors using 70 degree option—side padding
+has been reduced
+
+data lost off left side
+
+1
+
+Lack of sufﬁcient side padding results in data loss
+
+FD Shot Migration of the Marmousi synthetic data using the correct
+velocity ﬁeld.
+
+Data consists of 240 shots with 96 channels. Far channel is at -2575 meters offset; channel spacing meters.Frequency content is 5-55 Hz.Migration was performed with a depth step of 6.25 meters the 70 degree extrapolator. 40 channels
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration596
+
+ProMAX® Reference
+
+were padded to the left and right of the shot to capture energy from steeply dipping events.
+
+Faster run of FD Shot Migration of the Marmousi data:
+
+Depth step size of 8 m was used with the 50 degree extrapolator. 40 channels
+were padded before the padded near offset, but not the far offset using Pad
+Traces.
+
+Prestack Kirchhoff migration of Marmousi Data set.
+
+The fast explicit eikonal solver with no anti-aliasing ﬁlter was used. Run time on
+RS/6000 550: 53CPU minutes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration597
+
+ProMAX® Reference
+
+Prestack Kirchhoff migration with anti-aliasing ﬁlter
+
+Run time on RS/6000 550: 110 CPU minutes.With partial stacking of offset sections, run time will be signiﬁcantly reduced. For example, stacking of 8 adjacent
+offset sections will reduce run time to about 15 CPU minutes.
+
+Prestack Kirchhoff Migration with Multi-Arrival Ray Tracing
+
+Run time on IBM RS/6000 550: 4.9 hours
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration598
+
+ProMAX® Reference
+
+Prestack Gaussian Beam migration
+
+Migration of offset sections after stacking 8 adjacent sections. Frequency range
+speciﬁed: 10-50 Hz. Velocity ﬁeld was smoothed by a Gaussian smoother about
+150 m in diameter. Run time on IBM RS/6000 500: 7.9 CPU hours
+
+References
+Soubaras, R., 1992, Explicit 3D migration using equiripple polynomial expansion
+and Laplacian synthesis: SEG annual meeting, New Orleans, Expanded
+Abstracts, 905-908.
+
+Parameters
+Perform parallel processing?
+Select Yes to simultaneously run the migration in parallel on
+several remote machines. When parallel processing is
+performed, ensembles are brought back into the ﬂow as the
+remote process is completed. The output migrated ensembles
+may have a slightly different order than the input ensembles.
+Fast and idle machines which complete migrating their
+ensemble before others will receive new shot gathers to
+migrate.
+Number of parallel processes to spawn
+This appears if Yes to Perform parallel processing. Enter
+the number jobs to run simultaneously.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration599
+
+ProMAX® Reference
+
+Specify the machines to run processes on
+This appears if Yes to Perform parallel processing. Enter a
+list of the machines each process is to run on. The list should
+be comma or space separated. Extra machines are ignored.
+Two processes will start on a machine if it is listed twice. This
+takes advantage of the new multi-CPU machines.
+To ease entering long lists of machines, this ﬁeld is initialized
+to the environment variable: PROMAX_MACHINES.
+Surface location interval (ft. or m)
+Enter the surface location spacing in ft. or m, consistent with
+the headers. This is generally twice the CDP spacing.
+Initial migration surface?
+Select how to handle elevations for migrations from:
+• Datum does not take surface elevation or shot depths
+into account. It is assumed to be the top of the velocity
+model.
+• Surface elevation uses surface elevation at source and
+receiver locations as initial migration surface.
+• True elevation uses surface elevation and shot depths
+as initial migration surface.
+Reference datum for the velocity ﬁeld
+This appears if Surface or True elevation to Initial
+migration surface. Enter the reference datum for the velocity
+ﬁeld. The velocity reference datum is the elevation that marks
+zero depth for the velocity ﬁeld and is assumed to start at a
+constant elevation. Enter -9999.0 to set reference datum.
+Minimum frequency (in Hz)
+Enter the minimum usable frequency in the data. Migrating
+frequencies below the minimum frequency will slow down
+computations.
+Maximum frequency (in Hz)
+Enter the maximum usable frequency in the data. A value
+less than the Nyquist frequency for the dataset will speed up
+computations.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration600
+
+ProMAX® Reference
+
+Percent to pad trace length
+Enter the percentage of the input trace length to pad with
+zeros to avoid wrap-around effects of circular Fourier
+Transforms.
+Depth sampling interval of output data
+Enter the depth sampling interval for the output data. Enter
+0.0 to automatically compute the output depth sampling
+interval. Note: Because precomputed extrapolation tables are
+used, the actual size of the migration step may be smaller
+than the requested output sample interval.
+Maximum depth to migrate
+Enter the maximum depth to migrate. The default, 0.0,
+computes the maximum depth.
+Padding beyond ﬁrst and last group for migration
+Select the number of traces to pad beyond ﬁrst and last
+group. Padding may be necessary to avoid losing energy off
+the edges for a single ended cable or deep steeply dipping
+reﬂectors. Enter 0, the default, for no padding.
+What maximum dip would you like to migrate to?
+Select the maximum dip to migrate. Steeper dips take longer
+to migrate since they use a longer ﬁlter length. The options
+are:
+• 70 degrees uses a 25 point ﬁlter. This is the slowest
+option.
+• 50 degrees uses a 11-point ﬁlter.
+• 30 degrees uses a 7-point ﬁlter. This is the fastest
+option.
+Note: For shallow reﬂectors which may have a dip of 30
+degrees, the energy to the receivers can travel vertically while
+the energy to the sources can travel 70 degrees off vertical. In
+this case, you will want to use the 70 degree option.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration601
+
+ProMAX® Reference
+
+Get interval velocities from database?
+Select Yes to use interval velocities in depth functions stored
+in a velocity ﬁle in the database. Select No to manually enter
+interval velocities using the editor.
+Select interval vs. depth velocity ﬁle
+This appears if Yes to Get Interval velocities from
+database. Select a velocity ﬁle from the database.
+Interval velocities in depth for migration
+This appears if No to Get Interval velocities from database.
+Enter the depth-velocity pairs for one CDP.
+Change the default tapering?
+Select No to apply a bottom taper of 200 ms. Select Yes to
+change this default. The default prevents migration artifacts
+due to the abrupt truncation at the bottom of the input
+section. The edge taper will vary from 2 traces at the top of
+the section to 20 traces at the bottom of the section. Because
+migration artifacts originating deeper in the section tend to
+move a longer distance, the magnitude of the edge taper
+should normally increase with depth. A Hamming taper is
+used, which consists of a cosine weighting that varies from
+100% to 8% over the length of the taper.
+Bottom taper (in ms)
+This appears if Yes to Change the default tapering. Enter
+the bottom taper in ms. The bottom of each trace will be
+tapered to 0 over this number of ms. This tapering will
+prevent the creation of migration artifacts caused by the
+abrupt truncation at the last live sample of each input trace.
+Upper edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the width of edge taper in traces at top of seismic section.
+Both edges of the seismic section will have their outermost
+traces tapered to 0 over this number of traces. The width of
+the taper zone can be made to vary linearly between the top
+and bottom of the seismic section. Because migration
+artifacts generally move a greater lateral distance when they
+originate deeper in the section, it is usually desirable to
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack FD Shot Migration602
+
+ProMAX® Reference
+
+increase edge taper width toward the bottom of the section.
+Note: If the speciﬁed taper width is more than half the total
+number of traces in the seismic section, taper width will be
+set to half the total number of traces.
+Lower edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the width of edge taper in traces at bottom of seismic section.
+Note: If the speciﬁed taper width is more than half the total
+number of traces, taper width will be set to half the total
+number of traces.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

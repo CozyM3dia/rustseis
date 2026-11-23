@@ -1,0 +1,4263 @@
+; IIID IVD 1 PROSPECTOR DEV DEPTHC
+;  Include Menu for Prestack Kirchhoff 2D/3D Time Mig.
+;  The boolean parameter KT2D must be defined in the menus that include this.
+'(
+  parameter: NCPUS
+  text: "Number of CPUS"
+  type: typein:
+  type_desc: ( int: 6 1 nil )
+  value: 1
+  mouse_text: "Enter the maximum number of processors to use."
+  plot_label: t
+
+
+  parameter: VELTAB
+  text: "Table with RMS Velocity parameters"
+  type: function:
+  type_desc: ((parm_list "VEL") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a RMS Velocity file from the menu."
+  showp: t
+  plot_label: t
+
+  parameter: ANISOTAB
+  text: "Table with ETA parameters"
+  type: function:
+  type_desc: ((parm_list "ETA") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select an ETA file for curved ray adjustments from the menu."
+  showp: nil
+  plot_label: t
+
+  parameter: DCDP
+  text: "CDP interval (ft or m)"
+  type: typein:
+  type_desc: ( real: 7 0.001 nil)
+  value: 999999.
+  mouse_text: "CDP spacing in feet or meters (consistent with headers)."
+  showp: nil  ; turned on for 2D menu
+  plot_label: t
+
+  parameter: OTMAX
+  text: "Maximum Image Output Time(ms)"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum output time for this run. - 0.0 = max time in input dataset."
+  plot_label: t
+
+  parameter: ISETNAM
+  text: "Image Sets Selected"
+  type: multiple_choose:
+  type_desc: (
+	      ("Set 1" :name1 "Image Set 1.")
+	      ("Set 2" :name2 "Image Set 2.")
+	      ("Set 3" :name3 "Image Set 3.")
+	      ("Set 4" :name4 "Image Set 4.")
+	      )
+  :selected_item ( 
+                  ("Set 1" :name1 "Image Set 1.")
+                 )
+  mouse_text: "Use MB1 to pop up a menu, and select up to 4 image sets."
+  plot_label: t
+  
+
+  parameter: P_SHOWIM
+  text: "Show Image Set"
+  type: pop_choose:
+  value: nil
+  ;type_desc: ("INVALID")
+  mouse_text: "Use MB1 to pop up a menu to select which image set parameters you want to display."
+
+
+
+; Parameters for Image Set 1
+
+  ; Output parameters
+  parameter: FINLIN1
+  text: "      Minimum Output Inline 1"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+
+  parameter: LINLIN1
+  text: "      Maximum Output Inline 1"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: INLINC1
+  text: "      Inline Output Sampling Interval 1"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the output inline increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: FXLIN1
+  text: "      Minimum Output Xline/CDP 1"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LXLIN1
+  text: "      Maximum Output Xline/CDP 1"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: XLINC1
+  text: "      Xline/CDP Output Sampling Interval 1"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the crossline/CDP output increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+
+;  parameter: OTMIN1
+;  text: "     Minimum Output Time(ms) 1"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0
+;  mouse_text: "Enter the minimum output time in milliseconds for this Image Set."
+
+  parameter: OTMAX1
+  text: "      Maximum Output Time(ms) 1"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum output time for this Image Set. - 0.0 = max time in input dataset."
+  plot_label: t
+  showp: nil
+
+;  parameter: ODT1
+;  text: "      Output Sampling Rate(ms) 1"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0 
+;  mouse_text: "Enter the output sampling rate for this Image Set. - 0.0 = input sampling rate."
+
+
+  ; Supergather parameters
+  parameter: SG_APPL1
+  text: "      Output Supergathers 1?"
+  type: boolean:
+  value: nil
+  mouse_text: "Output a rectangle/range of image traces around each of the above locations."
+  plot_label: t
+
+  parameter: SGINWD1
+  text: "         Inlines to combine 1"
+  type: typein:
+  type_desc: ( int: 9 1 nil)
+  value: 1
+  mouse_text: "Supply the odd inline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+  parameter: SGXLWD1
+  text: "         Crosslines/CDPs to combine 1"
+  type: typein:
+  type_desc: ( int: 9  nil)
+  value: 1
+  mouse_text: "Supply the odd crossline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+  ; Antialias parameters
+  parameter: AA_APPL1
+  text: "      Apply Antialias 1?"
+  type: boolean:
+  value: nil
+  mouse_text: "Antialias filters are used for cleaner imaging of steep dips and wide offset data."
+  plot_label: t
+
+  parameter: AAIMAGE1
+  text: "         Use summation antialias only?"
+  type: :boolean
+  value: t
+  mouse_text: "Summation antialias is generally sufficient, but in some circumstances properly imaged steep dips will appear aliased.  If tests show this effect, then set this parameter to 'No'."
+  plot_label: t
+
+  parameter: IMAGEDX1
+  text: "         Nominal Inline Antialias Spacing 1"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the inline direction."
+  plot_label: t
+
+  parameter: IMAGEDY1
+  text: "         Nominal Xline/CDP Antialias Spacing 1"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0 
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline/CDP direction."
+  plot_label: t
+
+
+  ; Inline or Crossline only?
+  parameter: DIRECTN1
+  text: "      Migration Direction 1"
+  type: :pop_choose
+  type_desc: (
+	      ("No restriction" 0 "Full Migration.")
+ 	      ("Crossline Only" 1 "Crossline Only Migration.")
+ 	      ("Inline Only"    2 "Inline Only Migration.")
+ 	      )
+  value: 0
+  mouse_text: "You can restrict imaging to inline-only or crossline-only."
+  showp: nil
+  plot_label: t
+
+
+  ; Aperture parameters
+  parameter: APRTYP1
+  text: "      Aperture Limit Type 1"
+  type: multiple_choose:
+  type_desc: (
+	      ("Not Aperture Limited "  0 "Not Aperture Limited.")
+	      ("Image Location Distance "  3 "Image Location Limited in panel.")
+;	      ("Normal Ray Distance "   4 "Normal Ray Distance Limited.")
+	      ("Stretch Mute "   5 "Stretch Mute Limited.")
+	      ("Maximum Dip "   6 "Maximum Dip Limited.")
+;	      ("Crossline Migration Only "   1 "Crossline Migration Only.")
+;	      ("Inline Migration Only "   2 "Inline Migration Only.")
+	      ("External Mute "   7 "External Mute Table.")
+	      )
+  :selected_item (
+	               ("Stretch Mute "   5 "Stretch Mute Limited.")
+                 )
+  value: 5
+  mouse_text: "Choose zero or more aperture limit restrictions for this Image Set."
+  plot_label: t
+
+  parameter: APDTYP1
+  text: "         Distance Limit Measure 1"
+  type: pop_choose:
+  type_desc: (
+	      ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+	      ("Either source or receiver"  1 "Either source or receiver within distance limits.")
+	      ("Midpoint "  2 "Midpoint within distance limits.")
+	      )
+  :selected_item (
+		  ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+                 )
+  value: 0
+  mouse_text: "Choose how you want to measure aperture distance for this Image Set."
+  plot_label: t
+
+  parameter: TBLAPD1
+  text: "         Use time variable distance table(s)?"
+  type: pop_choose:
+  type_desc: (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+  :selected_item (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+                 )
+  value: 0
+  mouse_text: "Tables may be supplied to specify time and space variant distance limits."
+  plot_label: t
+
+  parameter: DBILD1
+  text: "         Inline Aperture Distance Table Input Type 1"
+  type: pop_choose:
+  type_desc: (
+	      ("Cutoffs from database" 1 "Cutoffs from database.")
+ 	      ("Manual cutoffs"   2 "Manual cutoffs.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Inline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLILD1
+  text: "         Inline Maximum Aperture Distance Table 1"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: DBXLD1
+  text: "         Crossline Aperture Distance Table Input Type 1"
+  type: pop_choose:
+  type_desc: (
+              ("Cutoffs from database" 1 "Cutoffs from database.")
+              ("Manual cutoffs"   2 "Manual cutoffs.")
+              )
+  value: 1
+  mouse_text: "Select how Crossline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLXLD1
+  text: "         Crossline Maximum Aperture Distance Table 1"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: MINAPD1
+  text: "         Minimum Aperture Distance 1"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MAXAPD1
+  text: "         Maximum Aperture Distance 1"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 5000.0
+  mouse_text: "Enter the maximum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MXSTRM1
+  text: "         Maximum Stretch Mute 1"
+  type: typein:
+  type_desc: ( real: 6 0.0 1000.0)
+  value: 15 
+  mouse_text: "Enter the maximum percentage stretch mute to allow in the aperture."
+  plot_label: t
+
+  parameter: MXAPDP1
+  text: "         Maximum Dip Limit 1"
+  type: typein:
+  type_desc: ( real: 4 0.0 90.0)
+  value: 90
+  mouse_text: "Enter the maximum dip aperture limit of less than the default 90 degrees."
+  plot_label: t
+
+  parameter: DBMUTE1
+  text: "         Mute Input Type 1"
+  type: pop_choose:
+  type_desc: (
+	      ("Mutes from database" 1 "Mutes from database.")
+ 	      ("Manual mutes"   2 "Manual mutes.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Mutes are input for this Image Set."
+  showp: nil
+
+  parameter: MUTETAB1
+  text: "         Table with Mute parameters 1"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+;  parameter: INVAL1
+;  text: "      INVALID APERTURE LIMIT TYPE 1"
+;  type: typein:
+;  type_desc:  ( string: 35)
+;  value: "Modify the Aperture Limit Type 1 Parameter!!!!"
+;  mouse_text: "Problem in Menu. Must Select at least one option"
+
+
+
+
+  parameter: IMGRTYP1
+  text: "      Image Gather Type 1"
+  type: pop_choose:
+  type_desc: (
+	      ("Full Offset Image Traces " 1 "Full Offset Image Traces.")
+ 	      ("Sou-Rec Offset Limited Gathers"   2 "Source-Receiver Offset Limited Gathers.")
+ 	      ("Sou-Img_Loc-Rec Offset Limited Gathers"   3 "Source-Image_Location-Receiver Offset Limited Gathers.")
+ 	      )
+  value: 1
+  mouse_text: "Select the Image Gather Type for this Image Set."
+  plot_label: t
+
+
+
+
+  ; Binning parameters - Function of the Gather Type
+  parameter: MINOFF1
+  text: "         Absolute Offset of First Bin Center 1"
+  type: typein:
+  type_desc: ( real: 9 0.0 nil)
+  value: 0.0 
+  mouse_text: "Enter the minimum input offset for this Image Set."
+  plot_label: t
+
+  parameter: MAXOFF1
+  text: "         Maximum Migrated Gather Offset 1"
+  type: typein:
+  type_desc: ( real: 9 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the maximum input offset for this Image Set."
+  plot_label: t
+
+  parameter: OFFBNSZ1
+  text: "         Bin Size for Offset Gather 1"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the input offset bin interval for this Image Set."
+  plot_label: t
+
+
+
+  parameter: ACQFOOT1
+  text: "      Acquisition Footprint 1"
+  type: pop_choose:
+  type_desc: (
+	      ("No Footprint Compensation " 1 "No Acquisition Footprint Compensation Traces.")
+	      ("Migration Fold Compensation " 2 "Migration Fold Aquisition Footprint Compensation Traces.")
+ 	      )
+  value: 1
+  mouse_text: "Choose whether to calculate and interleave FOLDCOMP traces in the output for later analysis and/or application."
+  plot_label: t
+
+
+
+  parameter: P_NAME1
+  text: "      Replace Set Name 1"
+  type: typein:
+  type_desc:  ( string: 32)
+  value: "Image Set 1"
+  mouse_text: "Supply a descriptive name for this Image Set."
+  plot_label: t
+
+
+
+
+
+; Parameters for Image Set 2
+
+  ; Output parameters
+
+  parameter: FINLIN2
+  text: "      Minimum Output Inline 2"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LINLIN2
+  text: "      Maximum Output Inline 2"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: INLINC2
+  text: "      Inline Output Sampling Interval 2"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the output inline increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: FXLIN2
+  text: "      Minimum Output XLine/CDP 2"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LXLIN2
+  text: "      Maximum Output Xline/CDP 2"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: XLINC2
+  text: "      Xline/CDP Output Sampling Interval 2"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the crossline/CDP output increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+
+;  parameter: OTMIN2
+;  text: "     Minimum Output Time(ms) 2"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0
+;  mouse_text: "Enter the minimum output time in milliseconds for this Image Set."
+
+  parameter: OTMAX2
+  text: "      Maximum Output Time(ms) 2"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum output time for this Image Set. - 0.0 = max time in input dataset"
+  plot_label: t
+  showp: nil
+
+;  parameter: ODT2
+;  text: "      Output Sampling Rate(ms) 2"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0 
+;  mouse_text: "Enter the output sampling rate for this Image Set. - 0.0 = input sampling rate."
+
+  ; Supergather parameters
+  parameter: SG_APPL2
+  text: "      Output Supergathers 2?"
+  type: boolean:
+  value: nil
+  mouse_text: "Output a rectangle/range of image traces around each of the above locations."
+  plot_label: t
+
+  parameter: SGINWD2
+  text: "         Inlines to combine 2"
+  type: typein:
+  type_desc: ( int: 9 1 nil)
+  value: 1
+  mouse_text: "Supply the odd inline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+  parameter: SGXLWD2
+  text: "         Crosslines/CDPs to combine 2"
+  type: typein:
+  type_desc: ( int: 9  nil)
+  value: 1
+  mouse_text: "Supply the odd crossline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+
+  ; Antialias parameters
+  parameter: AA_APPL2
+  text: "      Apply Antialias 2?"
+  type: boolean:
+  value: nil
+  mouse_text: "Apply Antialias filter."
+  mouse_text: "Antialias filters are used for cleaner imaging of steep dips and wide offset data."
+  plot_label: t
+
+  parameter: AAIMAGE2
+  text: "         Use summation antialias only?"
+  type: :boolean
+  value: t
+  mouse_text: "Summation antialias is generally sufficient, but in some circumstances properly imaged steep dips will appear aliased.  If tests show this effect, then set this parameter to 'No'."
+  plot_label: t
+
+  parameter: IMAGEDX2
+  text: "         Nominal Inline Antialias Spacing 2"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the inline direction."
+  plot_label: t
+
+  parameter: IMAGEDY2
+  text: "         Nominal Xline/CDP Antialias Spacing 2"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0 
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline/CDP direction."
+  plot_label: t
+
+
+
+  ; Inline or Crossline only?
+  parameter: DIRECTN2
+  text: "      Migration Direction 2"
+  type: :pop_choose
+  type_desc: (
+	      ("No restriction" 0 "Full Migration.")
+ 	      ("Crossline Only" 1 "Crossline Only Migration.")
+ 	      ("Inline Only"    2 "Inline Only Migration.")
+ 	      )
+  value: 0
+  mouse_text: "You can restrict imaging to inline-only or crossline-only."
+  showp: nil
+  plot_label: t
+
+
+  ; Aperture parameters
+  parameter: APRTYP2
+  text: "      Aperture Limit Type 2"
+  type: multiple_choose:
+  type_desc: (
+	      ("Not Aperture Limited "  0 "Not Aperture Limited.")
+	      ("Image Location Distance "  3 "Image Location Limited in panel.")
+;	      ("Normal Ray Distance "   4 "Normal Ray Distance Limited.")
+	      ("Stretch Mute "   5 "Stretch Mute Limited.")
+	      ("Maximum Dip "   6 "Maximum Dip Limited.")
+;	      ("Crossline Migration Only "   1 "Crossline Migration Only.")
+;	      ("Inline Migration Only "   2 "Inline Migration Only.")
+	      ("External Mute "   7 "External Mute Table.")
+	      )
+  :selected_item (
+	               ("Stretch Mute "   5 "Stretch Mute Limited.")
+                 )
+  value: 5
+  mouse_text: "Choose zero or more aperture limit restrictions for this Image Set."
+  plot_label: t
+
+  parameter: APDTYP2
+  text: "         Distance Limit Measure 2"
+  type: pop_choose:
+  type_desc: (
+	      ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+	      ("Either source or receiver"  1 "Either source or receiver within distance limits.")
+	      ("Midpoint "  2 "Midpoint within distance limits.")
+	      )
+  :selected_item (
+		  ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+                 )
+  value: 0
+  mouse_text: "Choose how you want to measure aperture distance for this Image Set."
+  plot_label: t
+
+  parameter: TBLAPD2
+  text: "         Use time variable distance table(s)?"
+  type: pop_choose:
+  type_desc: (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+  :selected_item (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+                 )
+  value: 0
+  mouse_text: "Tables may be supplied to specify time and space variant distance limits."
+  plot_label: t
+
+  parameter: DBILD2
+  text: "         Inline Aperture Distance Table Input Type 2"
+  type: pop_choose:
+  type_desc: (
+	      ("Cutoffs from database" 1 "Cutoffs from database.")
+ 	      ("Manual cutoffs"   2 "Manual cutoffs.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Inline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLILD2
+  text: "         Inline Maximum Aperture Distance Table 2"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: DBXLD2
+  text: "         Crossline Aperture Distance Table Input Type 2"
+  type: pop_choose:
+  type_desc: (
+              ("Cutoffs from database" 1 "Cutoffs from database.")
+              ("Manual cutoffs"   2 "Manual cutoffs.")
+              )
+  value: 1
+  mouse_text: "Select how Crossline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLXLD2
+  text: "         Crossline Maximum Aperture Distance Table 2"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: MINAPD2
+  text: "         Minimum Aperture Distance 2"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MAXAPD2
+  text: "         Maximum Aperture Distance 2"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 5000.0
+  mouse_text: "Enter the maximum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MXSTRM2
+  text: "         Maximum Stretch Mute 2"
+  type: typein:
+  type_desc: ( real: 6 0.0 1000.0)
+  value: 15 
+  mouse_text: "Enter the maximum percentage stretch mute to allow in the aperture."
+  plot_label: t
+
+  parameter: MXAPDP2
+  text: "         Maximum Dip Limit 2"
+  type: typein:
+  type_desc: ( real: 4 0.0 90.0)
+  value: 90
+  mouse_text: "Enter the maximum dip aperture limit of less than the default 90 degrees."
+  plot_label: t
+
+  parameter: DBMUTE2
+  text: "         Mute Input Type 2"
+  type: pop_choose:
+  type_desc: (
+	      ("Mutes from database" 1 "Mutes from database.")
+ 	      ("Manual mutes"   2 "Manual mutes.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Mutes are input for this Image Set."
+  showp: nil
+
+  parameter: MUTETAB2
+  text: "         Table with Mute parameters 2"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+;  parameter: INVAL2
+;  text: "      INVALID APERTURE LIMIT TYPE 2"
+;  type: typein:
+;  type_desc:  ( string: 35)
+;  value: "Modify the Aperture Limit Type 2 Parameter!!!!"
+;  mouse_text: "Problem in Menu. Must Select at least one option"
+
+
+  parameter: IMGRTYP2
+  text: "      Image Gather Type 2"
+  type: pop_choose:
+  type_desc: (
+	      ("Full Offset Image Traces " 1 "Full Offset Image Traces.")
+ 	      ("Sou-Rec Offset Limited Gathers"   2 "Source-Receiver Offset Limited Gathers.")
+ 	      ("Sou-Img_Loc-Rec Offset Limited Gathers"   3 "Source-Image_Location-Receiver Offset Limited Gathers.")
+ 	      )
+  value: 1
+  mouse_text: "Select the Image Gather Type for this Image Set."
+  plot_label: t
+
+
+
+
+  ; Binning parameters - Function of the Gather Type
+  parameter: MINOFF2
+  text: "         Absolute Offset of First Bin Center 2"
+  type: typein:
+  type_desc: ( real: 9 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum input offset for this Image Set."
+  plot_label: t
+
+  parameter: MAXOFF2
+  text: "         Maximum Migrated Gather Offset 2"
+  type: typein:
+  type_desc: ( real: 9 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the maximum input offset for this Image Set."
+  plot_label: t
+
+  parameter: OFFBNSZ2
+  text: "         Bin Size for Offset Gather 2"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the input offset bin interval for this Image Set."
+  plot_label: t
+
+
+
+  parameter: ACQFOOT2
+  text: "      Acquisition Footprint 2"
+  type: pop_choose:
+  type_desc: (
+	      ("No Footprint Compensation " 1 "No Acquisition Footprint Compensation Traces.")
+	      ("Migration Fold Compensation " 2 "Migration Fold Aquisition Footprint Compensation Traces.")
+ 	      )
+  value: 1
+  mouse_text: "Choose whether to calculate and interleave FOLDCOMP traces in the output for later analysis and/or application."
+  plot_label: t
+
+
+
+
+  parameter: P_NAME2
+  text: "      Replace Set Name 2"
+  type: typein:
+  type_desc:  ( string: 32)
+  value: "Image Set 2"
+  mouse_text: "Supply a descriptive name for this Image Set."
+  plot_label: t
+
+
+
+; Parameters for Image Set 3
+
+  ; Output parameters
+  parameter: FINLIN3
+  text: "      Minimum Output Inline 3"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LINLIN3
+  text: "      Maximum Output Inline 3"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: INLINC3
+  text: "      Inline Output Sampling Interval 3"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the output inline increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: FXLIN3
+  text: "      Minimum Output XLine/CDP 3"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LXLIN3
+  text: "      Maximum Output Xline/CDP 3"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: XLINC3
+  text: "      Xline/CDP Output Sampling Interval 3"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the crossline/CDP output increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+;  parameter: OTMIN3
+;  text: "     Minimum Output Time(ms) 3"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0
+;  mouse_text: "Enter the minimum output time in milliseconds for this Image Set."
+
+  parameter: OTMAX3
+  text: "      Maximum Output Time(ms) 3"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum output time for this Image Set. - 0.0 = max time in input dataset."
+  plot_label: t
+  showp: nil
+
+;  parameter: ODT3
+;  text: "      Output Sampling Rate(ms) 3"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0 
+;  mouse_text: "Enter the output sampling rate for this Image Set. - 0.0 = input sampling rate."
+
+
+  ; Supergather parameters
+  parameter: SG_APPL3
+  text: "      Output Supergathers 3?"
+  type: boolean:
+  value: nil
+  mouse_text: "Output a rectangle/range of image traces around each of the above locations."
+  plot_label: t
+
+  parameter: SGINWD3
+  text: "         Inlines to combine 3"
+  type: typein:
+  type_desc: ( int: 9 1 nil)
+  value: 1
+  mouse_text: "Supply the odd inline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+  parameter: SGXLWD3
+  text: "         Crosslines/CDPs to combine 3"
+  type: typein:
+  type_desc: ( int: 9  nil)
+  value: 1
+  mouse_text: "Supply the odd crossline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+
+  ; Antialias parameters
+  parameter: AA_APPL3
+  text: "      Apply Antialias 3?"
+  type: boolean:
+  value: nil
+  mouse_text: "Antialias filters are used for cleaner imaging of steep dips and
+wide offset data."
+  plot_label: t
+
+  parameter: AAIMAGE3
+  text: "         Use summation antialias only?"
+  type: :boolean
+  value: t
+  mouse_text: "Summation antialias is generally sufficient, but in some circumstances properly imaged steep dips will appear aliased.  If tests show this effect, then set this parameter to 'No'."
+  plot_label: t
+
+  parameter: IMAGEDX3
+  text: "         Nominal Inline Antialias Spacing 3"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the inline direction."
+  plot_label: t
+
+  parameter: IMAGEDY3
+  text: "         Nominal Xline/CDP Antialias Spacing 3"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0 
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline/CDP direction."
+  plot_label: t
+
+
+
+  ; Inline or Crossline only?
+  parameter: DIRECTN3
+  text: "      Migration Direction 3"
+  type: :pop_choose
+  type_desc: (
+	      ("No restriction" 0 "Full Migration.")
+ 	      ("Crossline Only" 1 "Crossline Only Migration.")
+ 	      ("Inline Only"    2 "Inline Only Migration.")
+ 	      )
+  value: 0
+  mouse_text: "You can restrict imaging to inline-only or crossline-only."
+  showp: nil
+  plot_label: t
+
+
+  ; Aperture parameters
+  parameter: APRTYP3
+  text: "      Aperture Limit Type 3"
+  type: multiple_choose:
+  type_desc: (
+	      ("Not Aperture Limited "  0 "Not Aperture Limited.")
+	      ("Image Location Distance "  3 "Image Location Limited in panel.")
+;	      ("Normal Ray Distance "   4 "Normal Ray Distance Limited.")
+	      ("Stretch Mute "   5 "Stretch Mute Limited.")
+	      ("Maximum Dip "   6 "Maximum Dip Limited.")
+;	      ("Crossline Migration Only "   1 "Crossline Migration Only.")
+;	      ("Inline Migration Only "   2 "Inline Migration Only.")
+	      ("External Mute "   7 "External Mute Table.")
+	      )
+  :selected_item (
+	               ("Stretch Mute "   5 "Stretch Mute Limited.")
+                 )
+  value: 5
+  mouse_text: "Choose zero or more aperture limit restrictions for this Image Set."
+  plot_label: t
+
+  parameter: APDTYP3
+  text: "         Distance Limit Measure 3"
+  type: pop_choose:
+  type_desc: (
+	      ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+	      ("Either source or receiver"  1 "Either source or receiver within distance limits.")
+	      ("Midpoint "  2 "Midpoint within distance limits.")
+	      )
+  :selected_item (
+		  ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+                 )
+  value: 0
+  mouse_text: "Choose how you want to measure aperture distance for this Image Set."
+  plot_label: t
+
+  parameter: TBLAPD3
+  text: "         Use time variable distance table(s)?"
+  type: pop_choose:
+  type_desc: (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+  :selected_item (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+                 )
+  value: 0
+  mouse_text: "Tables may be supplied to specify time and space variant distance limits."
+  plot_label: t
+
+  parameter: DBILD3
+  text: "         Inline Aperture Distance Table Input Type 3"
+  type: pop_choose:
+  type_desc: (
+	      ("Cutoffs from database" 1 "Cutoffs from database.")
+ 	      ("Manual cutoffs"   2 "Manual cutoffs.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Inline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLILD3
+  text: "         Inline Maximum Aperture Distance Table 3"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: DBXLD3
+  text: "         Crossline Aperture Distance Table Input Type 3"
+  type: pop_choose:
+  type_desc: (
+              ("Cutoffs from database" 1 "Cutoffs from database.")
+              ("Manual cutoffs"   2 "Manual cutoffs.")
+              )
+  value: 1
+  mouse_text: "Select how Crossline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLXLD3
+  text: "         Crossline Maximum Aperture Distance Table 3"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: MINAPD3
+  text: "         Minimum Aperture Distance 3"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MAXAPD3
+  text: "         Maximum Aperture Distance 3"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 5000.0
+  mouse_text: "Enter the maximum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MXSTRM3
+  text: "         Maximum Stretch Mute 3"
+  type: typein:
+  type_desc: ( real: 6 0.0 1000.0)
+  value: 15 
+  mouse_text: "Enter the maximum percentage stretch mute to allow in the aperture."
+  plot_label: t
+
+  parameter: MXAPDP3
+  text: "         Maximum Dip Limit 3"
+  type: typein:
+  type_desc: ( real: 4 0.0 90.0)
+  value: 90
+  mouse_text: "Enter the maximum dip aperture limit of less than the default 90 degrees."
+  plot_label: t
+
+  parameter: DBMUTE3
+  text: "         Mute Input Type 3"
+  type: pop_choose:
+  type_desc: (
+	      ("Mutes from database" 1 "Mutes from database.")
+ 	      ("Manual mutes"   2 "Manual mutes.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Mutes are input for this Image Set."
+  showp: nil
+
+  parameter: MUTETAB3
+  text: "         Table with Mute parameters 3"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+;  parameter: INVAL3
+;  text: "      INVALID APERTURE LIMIT TYPE 3"
+;  type: typein:
+;  type_desc:  ( string: 35)
+;  value: "Modify the Aperture Limit Type 3 Parameter!!!!"
+;  mouse_text: "Problem in Menu. Must Select at least one option"
+
+
+
+  parameter: IMGRTYP3
+  text: "      Image Gather Type 3"
+  type: pop_choose:
+  type_desc: (
+	      ("Full Offset Image Traces " 1 "Full Offset Image Traces.")
+ 	      ("Sou-Rec Offset Limited Gathers"   2 "Source-Receiver Offset Limited Gathers.")
+ 	      ("Sou-Img_Loc-Rec Offset Limited Gathers"   3 "Source-Image_Location-Receiver Offset Limited Gathers.")
+ 	      )
+  value: 1
+  mouse_text: "Select the Image Gather Type for this Image Set."
+  plot_label: t
+
+
+
+
+
+  ; Binning parameters - Function of the Gather Type
+  parameter: MINOFF3
+  text: "         Absolute Offset of First Bin Center 3"
+  type: typein:
+  type_desc: ( real: 9 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum input offset for this Image Set."
+  plot_label: t
+
+  parameter: MAXOFF3
+  text: "         Maximum Migrated Gather Offset 3"
+  type: typein:
+  type_desc: ( real: 9 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the maximum input offset for this Image Set."
+  plot_label: t
+
+  parameter: OFFBNSZ3
+  text: "         Bin Size for Offset Gather 3"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the input offset bin interval for this Image Set."
+  plot_label: t
+
+
+
+  parameter: ACQFOOT3
+  text: "      Acquisition Footprint 3"
+  type: pop_choose:
+  type_desc: (
+	      ("No Footprint Compensation " 1 "No Acquisition Footprint Compensation Traces.")
+	      ("Migration Fold Compensation " 2 "Migration Fold Aquisition Footprint Compensation Traces.")
+ 	      )
+  value: 1
+  mouse_text: "Choose whether to calculate and interleave FOLDCOMP traces in the output for later analysis and/or application."
+  plot_label: t
+
+
+
+
+  parameter: P_NAME3
+  text: "      Replace Set Name 3"
+  type: typein:
+  type_desc:  ( string: 32)
+  value: "Image Set 3"
+  mouse_text: "Supply a descriptive name for this Image Set."
+  plot_label: t
+
+
+
+
+
+; Parameters for Image Set 4
+
+  ; Output parameters
+  parameter: FINLIN4
+  text: "      Minimum Output Inline 4"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LINLIN4
+  text: "      Maximum Output Inline 4"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output inline for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: INLINC4
+  text: "      Inline Output Sampling Interval 4"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the output inline increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: FXLIN4
+  text: "      Minimum Output XLine/CDP 4"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the first output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: LXLIN4
+  text: "      Maximum Output Xline/CDP 4"
+  type: typein:
+  type_desc: ( int: 9 nil nil)
+  value: -1
+  mouse_text: "Enter the last output crossline/CDP for this Image Set."
+  showp: nil
+  plot_label: t
+
+  parameter: XLINC4
+  text: "      Xline/CDP Output Sampling Interval 4"
+  type: typein:
+  type_desc: ( int: 6 nil nil)
+  value: 1
+  mouse_text: "Enter the crossline/CDP output increment for this Image Set."
+  showp: nil
+  plot_label: t
+
+;  parameter: OTMIN4
+;  text: "     Minimum Output Time(ms) 4"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0
+;  mouse_text: "Enter the minimum output time in milliseconds for this Image Set."
+
+  parameter: OTMAX4
+  text: "      Maximum Output Time(ms) 4"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum output time for this Image Set. - 0.0 = max time in input dataset."
+  plot_label: t
+  showp: nil
+
+;  parameter: ODT4
+;  text: "      Output Sampling Rate(ms) 4"
+;  type: typein:
+;  type_desc: ( real: 6 0.0 nil)
+;  value: 0.0 
+;  mouse_text: "Enter the output sampling rate for this Image Set. - 0.0 = input sampling rate."
+
+
+  ; Supergather parameters
+  parameter: SG_APPL4
+  text: "      Output Supergathers 4?"
+  type: boolean:
+  value: nil
+  mouse_text: "Output a rectangle/range of image traces around each of the above locations."
+  plot_label: t
+
+  parameter: SGINWD4
+  text: "         Inlines to combine 4"
+  type: typein:
+  type_desc: ( int: 9 1 nil)
+  value: 1
+  mouse_text: "Supply the odd inline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+  parameter: SGXLWD4
+  text: "         Crosslines/CDPs to combine 4"
+  type: typein:
+  type_desc: ( int: 9  nil)
+  value: 1
+  mouse_text: "Supply the odd crossline width of each supergather rectangle."
+  plot_label: t
+  showp: nil
+
+
+  ; Antialias parameters
+  parameter: AA_APPL4
+  text: "      Apply Antialias 4?"
+  type: boolean:
+  value: nil
+  mouse_text: "Antialias filters are used for cleaner imaging of steep dips and wide offset data."
+  plot_label: t
+
+  parameter: AAIMAGE4
+  text: "         Use summation antialias only?"
+  type: :boolean
+  value: t
+  mouse_text: "Summation antialias is generally sufficient, but in some circumstances properly imaged steep dips will appear aliased.  If tests show this effect, then set this parameter to 'No'."
+  plot_label: t
+
+  parameter: IMAGEDX4
+  text: "         Nominal Inline Antialias Spacing 4"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the inline direction."
+  plot_label: t
+
+  parameter: IMAGEDY4
+  text: "         Nominal Xline/CDP Antialias Spacing 4"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0 
+  mouse_text: "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline/CDP direction."
+  plot_label: t
+
+
+
+  ; Inline or Crossline only?
+  parameter: DIRECTN4
+  text: "      Migration Direction 4"
+  type: :pop_choose
+  type_desc: (
+	      ("No restriction" 0 "Full Migration.")
+ 	      ("Crossline Only" 1 "Crossline Only Migration.")
+ 	      ("Inline Only"    2 "Inline Only Migration.")
+ 	      )
+  value: 0
+  mouse_text: "You can restrict imaging to inline-only or crossline-only."
+  showp: nil
+  plot_label: t
+
+
+  ; Aperture parameters
+  parameter: APRTYP4
+  text: "      Aperture Limit Type 4"
+  type: multiple_choose:
+  type_desc: (
+	      ("Not Aperture Limited "  0 "Not Aperture Limited.")
+	      ("Image Location Distance "  3 "Image Location Limited in panel.")
+;	      ("Normal Ray Distance "   4 "Normal Ray Distance Limited.")
+	      ("Stretch Mute "   5 "Stretch Mute Limited.")
+	      ("Maximum Dip "   6 "Maximum Dip Limited.")
+;	      ("Crossline Migration Only "   1 "Crossline Migration Only.")
+;	      ("Inline Migration Only "   2 "Inline Migration Only.")
+	      ("External Mute "   7 "External Mute Table.")
+	      )
+  :selected_item (
+	               ("Stretch Mute "   5 "Stretch Mute Limited.")
+                 )
+  value: 5
+  mouse_text: "Choose zero or more aperture limit restrictions for this Image Set."
+  plot_label: t
+
+  parameter: APDTYP4
+  text: "         Distance Limit Measure 4"
+  type: pop_choose:
+  type_desc: (
+	      ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+	      ("Either source or receiver"  1 "Either source or receiver within distance limits.")
+	      ("Midpoint "  2 "Midpoint within distance limits.")
+	      )
+  :selected_item (
+		  ("Both source and receiver"  0 "Both source and receiver within distance limits.")
+                 )
+  value: 0
+  mouse_text: "Choose how you want to measure aperture distance for this Image Set."
+  plot_label: t
+
+  parameter: TBLAPD4
+  text: "         Use time variable distance table(s)?"
+  type: pop_choose:
+  type_desc: (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+  :selected_item (
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+                 )
+  value: 0
+  mouse_text: "Tables may be supplied to specify time and space variant distance limits."
+  plot_label: t
+
+  parameter: DBILD4
+  text: "         Inline Aperture Distance Table Input Type 4"
+  type: pop_choose:
+  type_desc: (
+	      ("Cutoffs from database" 1 "Cutoffs from database.")
+ 	      ("Manual cutoffs"   2 "Manual cutoffs.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Inline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLILD4
+  text: "         Inline Maximum Aperture Distance Table 4"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: DBXLD4
+  text: "         Crossline Aperture Distance Table Input Type 4"
+  type: pop_choose:
+  type_desc: (
+              ("Cutoffs from database" 1 "Cutoffs from database.")
+              ("Manual cutoffs"   2 "Manual cutoffs.")
+              )
+  value: 1
+  mouse_text: "Select how Crossline Aperture Distance Cutoffs are input for this Image Set."
+  showp: nil
+
+  parameter: TBLXLD4
+  text: "         Crossline Maximum Aperture Distance Table 4"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+  parameter: MINAPD4
+  text: "         Minimum Aperture Distance 4"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MAXAPD4
+  text: "         Maximum Aperture Distance 4"
+  type: typein:
+  type_desc: ( real: 7 0.0 nil)
+  value: 5000.0
+  mouse_text: "Enter the maximum distance from the aperture center to include."
+  plot_label: t
+
+  parameter: MXSTRM4
+  text: "         Maximum Stretch Mute 4"
+  type: typein:
+  type_desc: ( real: 6 0.0 1000.0)
+  value: 15 
+  mouse_text: "Enter the maximum percentage stretch mute to allow in the aperture."
+  plot_label: t
+
+  parameter: MXAPDP4
+  text: "         Maximum Dip Limit 4"
+  type: typein:
+  type_desc: ( real: 4 0.0 90.0)
+  value: 90
+  mouse_text: "Enter the maximum dip aperture limit of less than the default 90 degrees."
+  plot_label: t
+
+  parameter: DBMUTE4
+  text: "         Mute Input Type 4"
+  type: pop_choose:
+  type_desc: (
+	      ("Mutes from database" 1 "Mutes from database.")
+ 	      ("Manual mutes"   2 "Manual mutes.")
+ 	      )
+  value: 1
+  mouse_text: "Select how Mutes are input for this Image Set."
+  showp: nil
+
+  parameter: MUTETAB4
+  text: "         Table with Mute parameters 4"
+  type: :function
+  type_desc: ((parm_list "MUT") parms)
+  value: "no entry"
+  mouse_text: "Use Mouse Button 1 to select a Mute file from the menu."
+  plot_label: t
+
+;  parameter: INVAL4
+;  text: "      INVALID APERTURE LIMIT TYPE 4"
+;  type: typein:
+;  type_desc:  ( string: 35)
+;  value: "Modify the Aperture Limit Type 4 Parameter!!!!"
+;  mouse_text: "Problem in Menu. Must Select at least one option"
+
+
+
+  parameter: IMGRTYP4
+  text: "      Image Gather Type 4"
+  type: pop_choose:
+  type_desc: (
+	      ("Full Offset Image Traces " 1 "Full Offset Image Traces.")
+ 	      ("Sou-Rec Offset Limited Gathers"   2 "Source-Receiver Offset Limited Gathers.")
+ 	      ("Sou-Img_Loc-Rec Offset Limited Gathers"   3 "Source-Image_Location-Receiver Offset Limited Gathers.")
+ 	      )
+  value: 1
+  mouse_text: "Select the Image Gather Type for this Image Set."
+  plot_label: t
+
+
+
+
+
+  ; Binning parameters - Function of the Gather type
+  parameter: MINOFF4
+  text: "         Absolute Offset of First Bin Center 4"
+  type: typein:
+  type_desc: ( real: 9 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the minimum input offset for this Image Set."
+  plot_label: t
+
+  parameter: MAXOFF4
+  text: "         Maximum Migrated Gather Offset 4"
+  type: typein:
+  type_desc: ( real: 9 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the maximum input offset for this Image Set."
+  plot_label: t
+
+  parameter: OFFBNSZ4
+  text: "         Bin Size for Offset Gather 4"
+  type: typein:
+  type_desc: ( real: 6 -1.0 nil)
+  value: -1.0
+  mouse_text: "Enter the input offset bin interval for this Image Set."
+  plot_label: t
+
+
+
+  parameter: ACQFOOT4
+  text: "      Acquisition Footprint 4"
+  type: pop_choose:
+  type_desc: (
+	      ("No Footprint Compensation " 1 "No Acquisition Footprint Compensation Traces.")
+	      ("Migration Fold Compensation " 2 "Migration Fold Aquisition Footprint Compensation Traces.")
+ 	      )
+  value: 1
+  mouse_text: "Choose whether to calculate and interleave FOLDCOMP traces in the output for later analysis and/or application."
+  plot_label: t
+
+
+
+
+  parameter: P_NAME4
+  text: "      Replace Set Name 4"
+  type: typein:
+  type_desc:  ( string: 32)
+  value: "Image Set 4"
+  mouse_text: "Supply a descriptive name for this Image Set."
+  plot_label: t
+
+
+
+
+
+  parameter: JOBTYPE
+  text: "Run Type"
+  type: pop_choose:
+  type_desc: (
+          ("Normal (safe)"   1 "Normal Safe.")
+          ("Normal (overwrite)"   2 "Normal Overwrite.")
+          ("Cleanup "   3 "Cleanup.")
+;          ("Restart"   4 "Restart.")
+          ("Recover Output"  5 "Rerun output step from failed run.")
+          )
+  mouse_text: "Select type of job to run."
+  plot_label: t
+
+  parameter: CHKSAVE
+  text: "Checkpoint the migration?"
+  type: boolean:
+  value: nil
+  mouse_text: "Request periodic checkpointing during the migration run."
+  plot_label: t
+
+  parameter: CHKHOURS
+  text: "   Hours Between Checkpoint"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 24.0
+  mouse_text: "Enter the time in hours between checkpoint."
+  plot_label: t
+
+  parameter: CHKDIRS
+  text: "   Alternate checkpoint dir list"
+  type: :edit
+  type_desc: (32 80 8 " Examples: segy_file, /usr/joe/segyfile
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and
+                          paste'; (Can move the cursor first) " 3 )
+  value: "promax_scratch"
+  mouse_text: "Optional list of directories for checkpoint files. Extended ProMAX scratch is the default."
+  :showp nil
+
+  parameter: VBROWSE
+  text: "  Browse for alternate directory path name(s)"
+  type: :circular
+  type_desc:  (
+      ("Browse" 0 "Browse file system")
+      ("Browse1" 1 "Browse file system")
+              )
+  showp: nil
+  value: 0
+  mouse_text: "Navigate through file system to pick alternate checkpoint directories."
+
+  parameter: CHKSNAP
+  text: "Snapshot migration at each checkpoint?"
+  type: boolean:
+  value: nil
+  mouse_text: "Snapshots, distinguished by incremented DS_SEQNO's may be optionally output."
+  plot_label: t
+
+  parameter: RESTART
+  text: "Restart from checkpoint?"
+  type: boolean:
+  value: nil
+  mouse_text: "Request the job restart from the last saved checkpoint."
+  plot_label: t
+
+
+
+  parameter: dummy
+  text: "_________________________________________________"
+
+
+;  parameter: ADVANCED
+;  text: "Show Advanced Feature ?"
+;  type: boolean:
+;  value: nil
+;  mouse_text: "Show Advanced Feature?"
+
+  parameter: ADVANCED
+  text: "Advanced Features"
+  type: circular:
+  type_desc: (
+	      ("hide"  1 "Do not show Advanced Feature.")
+	      ("show"  0 "Show Advanced Features.")
+	      )
+  :selected_item ("show" 0 "Show Advanced Features.")
+  value: 0
+  mouse_text: "Show Advanced Feature?"
+
+;  parameter: VELOCI
+;  text: "   Show Velocity parameters?"
+;  type: boolean:
+;  value: nil
+;  mouse_text: "Are velocity parameters set?"
+
+  parameter: VELOCI
+  text: "   Velocity parameters"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Velocity Parameters.")
+	      (" show"  0 "Show Velocity Parameters.")
+	      )
+  :selected_item (" show" 0 "Show Velocity Parameters.")
+  value: 0
+  mouse_text: "Show velocity parameters?"
+
+
+
+;  parameter: CACHEMB
+;  text: "      Cache Velocity Size (MB)"
+;  type: typein:
+;  type_desc: ( int: 6 32 nil )
+;  value: 128
+;  mouse_text: "Cache velocity size in MB."
+
+  parameter: VSCANTYP
+  text: "      Scan Velocity Type"
+  type: pop_choose:
+  type_desc: (
+	      ("No Scan"   1 "No scan.")
+	      ("Uniform percentage velocity"   2 "Uniform percentage velocity.")
+	      ("Uniform percentage slowness"   3 "Uniform percentage slowness.")
+	      ("Uniform percentage sloth"  4 "Uniform percentage sloth (1/v**2).")
+	      )
+  mouse_text: "Choose to migrate with a range of percentage-scaled velocities?  The float header entry VELSCAN will record the percent."
+  plot_label: t
+
+  parameter: VSCANST
+  text: "      Velocity Scan Start (%)"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil )
+  value: 90.0
+  mouse_text: "Initial percentage velocity for migration velocity scan."
+  plot_label: t
+
+  parameter: VSCANEND
+  text: "      Velocity Scan End (%)"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil )
+  value: 110.0
+  mouse_text: "Final percentage velocity for migration velocity scan."
+  plot_label: t
+
+
+  parameter: VSCANNUM
+  text: "      Number of Velocity Scans"
+  type: typein:
+  type_desc: ( int: 6 1 nil )
+  value: 3
+  mouse_text: "Number of Velocity Scans to output. A gather will be output at each CDP."
+  plot_label: t
+
+
+  parameter: ADV_AALI
+  text: "   Antialias parameters"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Antialias parameters.")
+	      (" show"  0 "Show Antialias parameters.")
+	      )
+  :selected_item (" show" 0 "Show Antialias parameters.")
+  value: 0
+  mouse_text: "Show advance antialias parameters?"
+
+  parameter: AANBAND
+  text: "      Number of Alias Bands" 
+  type: typein:
+  type_desc: ( int: 3 1 10)
+  value: 10 
+  mouse_text: "Enter the number of frequency bands in which to subdivide each input trace for antialias application."
+  plot_label: t
+
+  parameter: MAXFREQ
+  text: "      Maximum Frequency"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum frequency for antialias use. - 0.0 for Nyquist"
+  plot_label: t
+
+
+
+
+
+;  parameter: PREPROC
+;  text: "   Show Preprocessing parameters"
+;  type: boolean:
+;  value: nil
+;  mouse_text: "Adjust preprocessing parameters"
+
+  parameter: PREPROC
+  text: "   Preprocessing parameters"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show preprocessing parameters.")
+	      (" show"  0 "Show preprocessing parameters.")
+	      )
+  :selected_item (" show" 0 "Show Preprocessing parameters.")
+  value: 0
+  mouse_text: "Show Preprocessing parameters?"
+
+  parameter: PHASECO2
+  text: "      Amplitude/Phase Correction"
+  type: pop_choose:
+  type_desc: (
+	      ("2D Correction"   2 "Apply 2D Amplitude/Phase Correction.")
+	      ("No Correction"   3 "Do Not Apply 2D Amplitude/Phase Correction.")
+	      )
+  value: 2
+  mouse_text: "Choose Amplitude/Phase Correction to Apply.  2D is recommended."
+  showp: nil
+  plot_label: t
+
+  parameter: PHASECO3
+  text: "      Amplitude/Phase Correction"
+  type: pop_choose:
+  type_desc: (
+	      ("3D Correction"   1 "Apply 3D Amplitude/Phase Correction.")
+	      ("2D Correction"   2 "Apply 2D Amplitude/Phase Correction.")
+	      ("No Correction"   3 "Do Not Apply 3D Amplitude/Phase Correction.")
+	      )
+  value: 1
+  mouse_text: "Choose Amplitude/Phase Correction to Apply.  2D is appropriate for narrow swath imaging, e.g. Inline-Only or Crossline-Only migration apertures."
+  showp: nil
+  plot_label: t
+
+  parameter: RMSTHRE
+  text: "      Noisy Trace RMS Threshold value"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil)
+  value: 0.0
+  mouse_text: "Enter the maximum rms threshhold value for rejecting noisy input traces. - 0.0 means no RMS check."
+  plot_label: t
+
+  parameter: T_POWER
+  text: "      Time-Power gain removal constant"
+  type: typein:
+  type_desc: ( real: 6 -10.0 nil)
+  value: 0.0
+  mouse_text: "Rescale input traces by dividing them by time raised to the specified power, i.e. 1.0 divides by t."
+  plot_label: t
+
+  parameter: DB_PER_S
+  text: "      db/Sec gain removal constant"
+  type: typein:
+  type_desc: ( real: 6 -120.0 nil)
+  value: 0.0
+  mouse_text: "Remove previously applied dB/sec gain. Use 6.0 if True Amplitude Recovery defaults were applied."
+  plot_label: t
+
+
+  parameter: COMPRESSION
+  text: "   Scratch disk parameters"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not Show Scratch disk parameters.")
+	      (" show"  0 "Show Scratch disk parameters.")
+	      )
+  :selected_item (" show" 0 "Show Scratch disk parameters.")
+  value: 0
+  mouse_text: "Show Scratch disk parameters?"
+
+  parameter: ICTKDIST
+  text: "      Scratch file layout policy"
+  type: pop_choose:
+  type_desc: (
+	      ("Largest space"   1 "Put each new subfile in the scratch directory with the largest space.")
+ 	      ("Sequential fill"   2 "Fill up each scratch directory in turn.")
+ 	      ("Round robin"   3 "Put new subfiles in the scratch directories in round-robin fashion, space permitting.")
+ 	      )
+  :selected_item ("Largest space"   1 "Put each new subfile in the scratch directory with the largest space.")
+  value: 1
+  mouse_text: "Choose how internal scratch files are laid out. Use Sequential fill if you have a non-local disk for secondary scratch spill.  Use Round robin to stripe data across multiple disks for performance."
+  plot_label: t
+
+  parameter: ICMPRTYP
+  text: "      Compression Type"
+  type: pop_choose:
+  type_desc: (
+	      ("No Compression"   1 "No compression.")
+ 	      ("16 bit internal"   2 "16 bit internal compression.")
+ 	      ("8 bit internal"   3 "8 bit internal compression.")
+ 	      ("RMS distortion"  4 "RMS distortion limited.")
+ 	      )
+  value: 1
+  mouse_text: "Use Compression for internal working files?"
+  plot_label: t
+
+
+  parameter: CTKRMSDB
+  text: "      Maximum RMS Distortion (dB)"
+  type: typein:
+  type_desc: ( real: 6 nil nil )
+  value: -36.
+  mouse_text: "Maximum permitted RMS Distortion for Compression in dB."
+  plot_label: t
+
+
+; Block NMO parameters
+
+  parameter: BLKNMO
+  text: "   Block Moveout parameters"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Block Moveout parameter.")
+	      (" show"  0 "Show Block Moveout parameters.")
+	      )
+  :selected_item (" show" 0 "Show Block Moveout parameters.")
+  value: 0
+  mouse_text: "Adjust Block Moveout parameters?"
+
+
+  parameter: BNMOTYP
+  text: "      Block Moveout Type"
+  type: pop_choose:
+  type_desc: (
+	      ("No Block Moveout" 1 "No Block Moveout.")
+ 	      ("Uniform Block Moveout Sampling"   2 "Uniform Block Moveout Sampling.")
+ 	      ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+ 	      )
+  selected_item: ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+  value: 3
+  mouse_text: "Choose Block Moveout Type for this run."
+  plot_label: t
+
+  parameter: BNMOSTP
+  text: "         Block Moveout Step"
+  type: typein:
+  type_desc: ( integer: 6 1 nil)
+  value: 8
+  mouse_text: "Enter the Block Moveout Step size in samples."
+  plot_label: t
+
+
+
+  parameter: MAXPREP
+  text: "   Maximum Preprocessed Traces"
+  type: typein:
+  type_desc: ( int: 6 1 nil )
+  value: 256
+  mouse_text: "Maximum number of input traces to buffer in memory at a time."
+  plot_label: t
+
+
+  parameter: MAXIMAG
+  text: "   Maximum Image Traces"
+  type: typein:
+  type_desc: ( int: 6 1 nil )
+  value: 16
+  mouse_text: "Maximum number of image traces to buffer in memory for each internal working image file."
+  plot_label: t
+
+  parameter: MNTWIN
+  text: "   Minimum Aperture Window Length (ms)"
+  type: typein:
+  type_desc: (real: 7 0.0 250.0)
+  value: 0.0
+  mouse_text: "For speed, very short trace aperture windows can be dropped in the migration."
+  plot_label: t
+
+  parameter: CACHEBLK
+  text: "   Maximum Number of Cache Blocks"
+  type: typein:
+  type_desc: ( int: 9 1 nil )
+  value: 100000
+  mouse_text: "Maximum number of (possibly compressed) image blocks to store in memory at one time.  Each uncompressed block is 2 KB."
+  plot_label: t
+
+  parameter: HIWATER
+  text: "   Maximum job memory usage (MB)"
+  type: typein:
+  type_desc: ( int: 9 0 nil )
+  value: 0
+  mouse_text: "If nonzero, the maximum number of cache blocks will be reduced if needed to keep the virtual memory within the limit."
+  showp: nil
+
+
+;  parameter: dummyfac
+;  text: "_________________________________________________"
+
+
+  parameter: DEBUG
+  text: "   Debug mode?"
+  type: circular:
+  type_desc: (
+	  (" Yes"  1 "Not Debug Mode.")
+          (" No"  0 "Debug Mode.")
+	      )
+  :selected_item (" No" 0 "Debug Mode.")
+  value: 0
+  mouse_text: "To debug program, enter YES."
+  showp: nil
+ 
+  parameter: program
+  text: "      Program executable name"
+  type: edit:
+  type_desc: (30 100 2 " Example: /home/user/promax/sys/exe/kirtime2d.exe
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:show,hide,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "kirtime{2,3}d.exe"
+  mouse_text: "Type path name of program executable."  
+
+
+
+
+; turn off this title for now and expose only one
+; common block moveout field
+
+; parameter: dummy_se
+; text: "   ___ Advanced Image Set Parameters ___"
+; showp: nil
+
+; Parameters for Image Set 1
+  ; Preprocessing parameters
+
+  ; Grid parameters
+  parameter: GRDPRMS1
+  text: "      Grid parameters 1"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Grid parameters 1.")
+	      (" show"  0 "Show Grid parameters 1.")
+	      )
+  :selected_item (" show" 0 "Show Grid parameters 1.")
+  value: 0
+  mouse_text: "Adjust Grid parameters for this Image Set?"
+
+
+
+  parameter: SBGRTYP1
+  text: "         Grid XY Type 1"
+  type: pop_choose:
+  type_desc: (
+ 	      ("Regular XY Grid"   1 "Regular XY Grid.")
+	      ("Arbitrary Line" 2 "Arbitrary Line.")
+ 	      )
+  value: 1
+  mouse_text: "Choose X-Y Grid Type for this Image Set."
+  showp: nil
+  plot_label: nil
+
+  parameter: TGRPTYP1
+  text: "         Grid T Type 1"
+  type: pop_choose:
+  type_desc: (
+	      ("Uniform Line" 1 "Uniform T Grid.")
+ 	      ("T Horizons"   2 "T Horizons.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Time Grid Type for this Image Set."
+  plot_label: nil
+
+
+  parameter: ARBMETH1
+  text: "         Arbitrary Line Definition Method 1"
+  type: pop_choose:
+  type_desc: (
+	      ("Manual Input" 1 "Manual Input.")
+ 	      ("ARB Table"   2 "ARB Table.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Arbitrary Line Definition Method for this Image Set."
+  plot_label: nil
+
+  parameter: ARBCOOR1
+  text: "         Arbitrary Line Definition Coordinate System 1"
+  type: pop_choose:
+  type_desc: (
+	      ("X-Y" 1 "X-Y.")
+ 	      ("Inline-Crossline"   2 "Inline-Crossline.")
+ 	      )
+  value: 1
+  mouse_text: "Choose a Coordinate System for Arbitrary Line definition."
+  plot_label: nil
+
+
+
+
+  parameter: BLKNMO1
+  text: "      Block Moveout parameters 1"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Block Moveout parameter 1.")
+	      (" show"  0 "Show Block Moveout parameters 1.")
+	      )
+  :selected_item (" show" 0 "Show Block Moveout parameters 1.")
+  value: 0
+  mouse_text: "Adjust Block Moveout parameters for this Image Set?"
+  showp: nil
+
+
+  parameter: BNMOTYP1
+  text: "         Block Moveout Type 1"
+  type: pop_choose:
+  type_desc: (
+	      ("No Block Moveout" 1 "No Block Moveout.")
+ 	      ("Uniform Block Moveout Sampling"   2 "Uniform Block Moveout Sampling.")
+ 	      ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+ 	      )
+  selected_item: ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+  value: 3
+  showp: nil
+  mouse_text: "Choose Block Moveout Type for this Image Set."
+  plot_label: nil
+
+  parameter: BNMOSTP1
+  text: "            Block Moveout Step 1"
+  type: typein:
+  type_desc: ( integer: 6 1 nil)
+  value: 8
+  mouse_text: "Enter the Block Moveout Step size in samples for this Image Set."
+  plot_label: nil
+  showp: nil
+
+
+
+
+; Parameters for Image Set 2
+
+  ; Grid parameters
+  parameter: GRDPRMS2
+  text: "      Grid parameters 2"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Grid parameters 2.")
+	      (" show"  0 "Show Grid parameters 2.")
+	      )
+  :selected_item (" show" 0 "Show Grid parameters 2.")
+  value: 0
+  mouse_text: "Adjust Grid parameters for this Image Set?"
+
+  parameter: SBGRTYP2
+  text: "         Grid XY Type 2"
+  type: pop_choose:
+  type_desc: (
+ 	      ("Regular XY Grid"   1 "Regular XY Grid.")
+	      ("Arbitrary Line" 2 "Arbitrary Line.")
+ 	      )
+  value: 1
+  mouse_text: "Choose X-Y Grid Type for this Image Set."
+  showp: nil
+  plot_label: nil
+
+  parameter: TGRPTYP2
+  text: "         Grid T Type 2"
+  type: pop_choose:
+  type_desc: (
+	      ("Uniform Line" 1 "Uniform T Grid.")
+ 	      ("T Horizons"   2 "T Horizons.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Time Grid Type for this Image Set."
+  plot_label: nil
+
+
+  parameter: ARBMETH2
+  text: "         Arbitrary Line Definition Method 2"
+  type: pop_choose:
+  type_desc: (
+	      ("Manual Input" 1 "Manual Input.")
+ 	      ("ARB Table"   2 "ARB Table.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Arbitrary Line Definition Method for this Image Set."
+  plot_label: nil
+
+  parameter: ARBCOOR2
+  text: "         Arbitrary Line Definition Coordinate System 2"
+  type: pop_choose:
+  type_desc: (
+	      ("X-Y" 1 "X-Y.")
+ 	      ("Inline-Crossline"   2 "Inline-Crossline.")
+ 	      )
+  value: 1
+  mouse_text: "Choose a Coordinate System for Arbitrary Line definition."
+  plot_label: nil
+
+
+
+
+
+  ; Block NMO parameters
+
+  parameter: BLKNMO2
+  text: "      Block Moveout parameters 2"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not Show Block Moveout parameter 2.")
+	      (" show"  0 "Show Block Moveout parameters 2.")
+	      )
+  :selected_item (" show" 0 "Show Block Moveout parameters 2.")
+  value: 0
+  mouse_text: "Adjust Block Moveout parameters for this Image Set?"
+  showp: nil
+
+
+  parameter: BNMOTYP2
+  text: "         Block Moveout Type  2"
+  type: pop_choose:
+  type_desc: (
+	      ("No Block Moveout" 1 "No Block Moveout.")
+ 	      ("Uniform Block Moveout Sampling"   2 "Uniform Block Moveout Sampling.")
+ 	      ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+ 	      )
+  selected_item: ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+  value: 3
+  mouse_text: "Choose Block Moveout Type for this Image Set."
+  plot_label: nil
+  showp: nil
+
+  parameter: BNMOSTP2
+  text: "            Block Moveout Step 2"
+  type: typein:
+  type_desc: ( integer: 6 1 nil)
+  value: 8
+  mouse_text: "Enter the Block Moveout Step size in samples for this Image Set."
+  plot_label: nil
+  showp: nil
+
+
+
+; Parameters for Image Set 3
+
+  ; Grid parameters
+  parameter: GRDPRMS3
+  text: "      Grid parameters 3"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Grid parameters 3.")
+	      (" show"  0 "Show Grid parameters 3.")
+	      )
+  :selected_item (" show" 0 "Show Grid parameters 3.")
+  value: 0
+  mouse_text: "Adjust Grid parameters for this Image Set?"
+
+
+  parameter: SBGRTYP3
+  text: "         Grid XY Type 3"
+  type: pop_choose:
+  type_desc: (
+ 	      ("Regular XY Grid"   1 "Regular XY Grid.")
+	      ("Arbitrary Line" 2 "Arbitrary Line.")
+ 	      )
+  value: 1
+  mouse_text: "Choose X-Y Grid Type for this Image Set."
+  showp: nil
+  plot_label: nil
+
+  parameter: TGRPTYP3
+  text: "         Grid T Type 3"
+  type: pop_choose:
+  type_desc: (
+	      ("Uniform Line" 1 "Uniform T Grid.")
+ 	      ("T Horizons"   2 "T Horizons.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Time Grid Type for this Image Set."
+  plot_label: nil
+
+
+  parameter: ARBMETH3
+  text: "         Arbitrary Line Definition Method 3"
+  type: pop_choose:
+  type_desc: (
+	      ("Manual Input" 1 "Manual Input.")
+ 	      ("ARB Table"   2 "ARB Table.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Arbitrary Line Definition Method for this Image Set."
+  plot_label: nil
+
+  parameter: ARBCOOR3
+  text: "         Arbitrary Line Definition Coordinate System 3"
+  type: pop_choose:
+  type_desc: (
+	      ("X-Y" 1 "X-Y.")
+ 	      ("Inline-Crossline"   2 "Inline-Crossline.")
+ 	      )
+  value: 1
+  mouse_text: "Choose a Coordinate System for Arbitrary Line definition."
+  plot_label: nil
+
+
+
+  ; Block NMO parameters
+
+  parameter: BLKNMO3
+  text: "      Block Moveout parameters 3"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Block Moveout parameter 3.")
+	      (" show"  0 "Show Block Moveout parameters 3.")
+	      )
+  :selected_item (" show" 0 "Show Block Moveout parameters 3.")
+  value: 0
+  mouse_text: "Adjust Block Moveout parameters for this Image Set?"
+  showp: nil
+
+
+  parameter: BNMOTYP3
+  text: "         Block Moveout Type  3"
+  type: pop_choose:
+  type_desc: (
+	      ("No Block Moveout" 1 "No Block Moveout.")
+ 	      ("Uniform Block Moveout Sampling"   2 "Uniform Block Moveout Sampling.")
+ 	      ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+ 	      )
+  selected_item: ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+  value: 3
+  mouse_text: "Choose Block Moveout Type for this Image Set."
+  plot_label: nil
+  showp: nil
+
+  parameter: BNMOSTP3
+  text: "            Block Moveout Step 3"
+  type: typein:
+  type_desc: ( integer: 6 1 nil)
+  value: 8
+  mouse_text: "Enter the Block Moveout Step size in samples for this Image Set."
+  plot_label: nil
+  showp: nil
+
+
+
+
+  
+; Parameters for Image Set 4
+
+  ; Grid parameters
+  parameter: GRDPRMS4
+  text: "      Grid parameters 4"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Grid parameters 4.")
+         (" show"  0 "Show Grid parameters 4.")
+	      )
+  :selected_item (" show" 0 "Show Grid parameters 4.")
+  value: 0
+  mouse_text: "Adjust Grid parameters for this Image Set?"
+
+
+  parameter: SBGRTYP4
+  text: "         Grid XY Type 4"
+  type: pop_choose:
+  type_desc: (
+ 	      ("Regular XY Grid"   1 "Regular XY Grid.")
+	      ("Arbitrary Line" 2 "Arbitrary Line.")
+ 	      )
+  value: 1
+  mouse_text: "Choose X-Y Grid Type for this Image Set."
+  showp: nil
+  plot_label: nil
+
+  parameter: TGRPTYP4
+  text: "         Grid T Type 4"
+  type: pop_choose:
+  type_desc: (
+	      ("Uniform Line" 1 "Uniform T Grid.")
+ 	      ("T Horizons"   2 "T Horizons.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Time Grid Type for this Image Set."
+  plot_label: nil
+
+
+
+  parameter: ARBMETH4
+  text: "         Arbitrary Line Definition Method 4"
+  type: pop_choose:
+  type_desc: (
+	      ("Manual Input" 1 "Manual Input.")
+ 	      ("ARB Table"   2 "ARB Table.")
+ 	      )
+  value: 1
+  mouse_text: "Choose Arbitrary Line Definition Method for this Image Set."
+  plot_label: nil
+
+  parameter: ARBCOOR4
+  text: "         Arbitrary Line Definition Coordinate System 4"
+  type: pop_choose:
+  type_desc: (
+	      ("X-Y" 1 "X-Y.")
+ 	      ("Inline-Crossline"   2 "Inline-Crossline.")
+ 	      )
+  value: 1
+  mouse_text: "Choose a Coordinate System for Arbitrary Line definition."
+  plot_label: nil
+
+
+
+
+
+  ; Block NMO parameters
+
+  parameter: BLKNMO4
+  text: "      Block Moveout parameters 4"
+  type: circular:
+  type_desc: (
+	      (" hide"  1 "Do not show Block Moveout parameter 4.")
+	      (" show"  0 "Show Block Moveout parameters 4.")
+	      )
+  :selected_item (" show" 0 "Show Block Moveout parameters 4.")
+  value: 0
+  mouse_text: "Adjust Block Moveout parameters for this Image Set?"
+  showp: nil
+
+
+  parameter: BNMOTYP4
+  text: "         Block Moveout Type  4"
+  type: pop_choose:
+  type_desc: (
+	      ("No Block Moveout" 1 "No Block Moveout.")
+ 	      ("Uniform Block Moveout Sampling"   2 "Uniform Block Moveout Sampling.")
+ 	      ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+ 	      )
+  selected_item: ("Stretched Block Moveout Sampling"   3 "Stretched Block Moveout Sampling.")
+  value: 3
+  mouse_text: "Choose Block Moveout Type for this Image Set."
+  plot_label: nil
+  showp: nil
+
+  parameter: BNMOSTP4
+  text: "            Block Moveout Step 4"
+  type: typein:
+  type_desc: ( integer: 6 1 nil)
+  value: 8
+  mouse_text: "Enter the Block Moveout Step size in samples for this Image Set."
+  plot_label: nil
+  showp: nil
+
+
+
+
+  parameter: INIT
+  type: int:
+  value: 1
+  showp: nil
+
+  parameter: PATH
+  type: string:
+  value: nil
+  showp: nil
+
+
+  exec_data: (
+    ("version" implicit: "ProMAX $Id: kirtime_inc.menu 45213 2010-02-24 22:55:54Z Stewart Levin $ $Revision: 45213 $ $Date: 2010-02-24 15:55:54 -0700 (Wed, 24 Feb 2010) $")
+
+
+    ("MAXPREP"  implicit: (value 'MAXPREP) )
+    ("MAXIMAG"  implicit: (value 'MAXIMAG) )
+    ("MNTWIN"   implicit: (value 'MNTWIN) )
+    ("CACHEBLK" implicit: (value 'CACHEBLK) )
+    ("HIWATER"  implicit: (value 'HIWATER) )
+    ("DCDP"	implicit: (value 'DCDP) )
+    ("OTMAX"    implicit: (value 'OTMAX) ) 
+
+
+    ("program"  implicit: (value 'program) )
+    ("DEBUG"     implicit: ( if (= (value 'DEBUG) 1) 2 0))
+
+    ("ISETNAM1"  implicit: ( if (member :name1 (value 'ISETNAM )) (value 'P_NAME1) "" ) )
+    ("ISETNAM2"  implicit: ( if (member :name2 (value 'ISETNAM )) (value 'P_NAME2) "" ) )
+    ("ISETNAM3"  implicit: ( if (member :name3 (value 'ISETNAM )) (value 'P_NAME3) "" ) )
+    ("ISETNAM4"  implicit: ( if (member :name4 (value 'ISETNAM )) (value 'P_NAME4) "" ) )
+
+    ("NCPUS"  implicit: (value 'NCPUS) )
+;    ("MAXMEMMB"  implicit: (value 'MAXMEMMB) )
+
+
+    ("VELTAB"  implicit: (value 'VELTAB) )
+;   ("ANISOTAB"  implicit: (value 'ANISOTAB) )
+;    ("CACHEMB"  implicit: (value 'CACHEMB) )
+    ("VSCANTYP"  implicit: (value 'VSCANTYP) )
+    ("VSCANST"  implicit: (value 'VSCANST) )
+    ("VSCANEND"  implicit: (value 'VSCANEND) )
+    ("VSCANNUM"  implicit: (value 'VSCANNUM) )
+
+;    ("DBANISO"  implicit:  ( if (value 'DBANISO) 1 0 ) )
+;    ("ANISOTAB"   implicit:  (value 'ANISOTAB) )
+;    ("ANISMANU"   implicit:  (value 'ANISMANU) )
+
+    ("AANBAND"   implicit:  (value 'AANBAND) )
+    ("MAXFREQ"   implicit:  (value 'MAXFREQ) ) 
+
+    ("PHASECO"   implicit:  (if (value 'KT2D) (value 'PHASECO2) (value 'PHASECO3)) ) 
+    ("RMSTHRE"   implicit:  (value 'RMSTHRE) ) 
+
+; We use TAR to apply (i.e. remove) these properly
+;   ("T_POWER"     implicit:  (value 'T_POWER) ) 
+;   ("DB_PER_S"     implicit:  (value 'DB_PER_S) ) 
+
+    ("CHKSAVE"   implicit:  ( if (and (/= (value 'JOBTYPE) 3) (value 'CHKSAVE)) 1 0 ) )
+    ("CHKHOURS"   implicit:  (value 'CHKHOURS) ) 
+    ("CHKDIRS"   implicit:  (value 'CHKDIRS) ) 
+    ("CHKSNAP"   implicit:  ( if (and (value 'CHKSNAP) (value 'CHKSAVE)) 1 0 ) )
+    ("RESTART"   implicit:  (if (and (/= (value 'JOBTYPE) 3) (value 'RESTART)) 1 0 ) ) 
+    ("JOBTYPE"   implicit:  (value 'JOBTYPE) ) 
+
+    ("ICTKDIST"   implicit:  (value 'ICTKDIST) )
+    ("ICMPRTYP"   implicit:  (value 'ICMPRTYP) )
+    ("CTKRMSDB"   implicit:  (value 'CTKRMSDB) )
+
+; workaround for scopus 512667 - set global, disable image-set specific
+
+    ("BNMOTYP"   implicit:  (value 'BNMOTYP) ) 
+    ("BNMOSTP"   implicit:  (value 'BNMOSTP) ) 
+
+; workaround for scopus 513206 - set correct data dx and dy
+    ("DATA_DX"   implicit: (if (value 'KT2D) 0.0 ( db_parmget_line "DCDPXLNz")) )
+    ("DATA_DY"   implicit: ( db_parmget_line "DCDPILNz") )
+
+
+; Begin Multiple Image Set Parameters
+
+	; Image Set 1  
+    ("SG_APPL1"   implicit:  ( if (value 'SG_APPL1) 1 0 ) )
+    ("SGINWD1"   implicit:  (if (value 'KT2D) 1 ( if (value 'SG_APPL1) (value 'SGINWD1) 1 )) )
+    ("SGXLWD1"   implicit:  ( if (value 'SG_APPL1) (value 'SGXLWD1) 1 ) )
+    ("AA_APPL1"   implicit:  ( if (value 'AA_APPL1) 1 0 ) )
+    ("AAIMAGE1"   implicit:  ( if (value 'AAIMAGE1) 1 0 ) )
+    ("IMAGEDX1"   implicit:  (value 'IMAGEDX1) ) 
+    ("IMAGEDY1"   implicit:  (value 'IMAGEDY1) ) 
+
+    ("APRTYP11"   implicit:  ( if (value 'KT2D) 0 ( if (= (value 'DIRECTN1) 1 ) 1 0 )) ) 
+    ("APRTYP12"   implicit:  ( if (value 'KT2D) 0 ( if (= (value 'DIRECTN1) 2 ) 2 0 )) ) 
+    ("APRTYP13"   implicit:  ( if (member 3 (value 'APRTYP1) ) 3 0 ) ) 
+    ("APRTYP14"   implicit:  ( if (member 4 (value 'APRTYP1) ) 4 0 ) ) 
+    ("APRTYP15"   implicit:  ( if (member 5 (value 'APRTYP1) ) 5 0 ) ) 
+    ("APRTYP16"   implicit:  ( if (member 6 (value 'APRTYP1) ) 6 0 ) ) 
+    ("APRTYP17"   implicit:  ( if (member 7 (value 'APRTYP1) ) 7 0 ) ) 
+    ("DBMUTE1"   implicit:  ( if (member 7 (value 'APRTYP1) ) (value 'DBMUTE1) 0 ) ) 
+    ("MXAPDP1"   implicit:  (value 'MXAPDP1) ) 
+    ("MXSTRM1"   implicit:  (value 'MXSTRM1) ) 
+    ("APDTYP1"   implicit:  (value 'APDTYP1) ) 
+    ("TBLAPD1"   implicit:  (value 'TBLAPD1) )
+    ("DBILD1"    implicit:  (if (value 'KT2D) 0 (if (= (value 'TBLAPD1) 0) 0 (value 'DBILD1))))
+    ("DBXLD1"    implicit:  (if (= (value 'TBLAPD1) 0) 0 (value 'DBXLD1)))
+    ("TBLILD1"   implicit:  (if (value 'KT2D)(value 'TBLXLD1)(value 'TBLILD1)) ) 
+    ("TBLXLD1"   implicit:  (value 'TBLXLD1) )
+    ("MINAPD1"   implicit:  (value 'MINAPD1) ) 
+    ("MAXAPD1"   implicit:  (value 'MAXAPD1) ) 
+    ("MUTETAB1"   implicit:  (value 'MUTETAB1) ) 
+
+    ("IMGRTYP1"   implicit:  (value 'IMGRTYP1) ) 
+    ("ACQFOOT1"   implicit:  (value 'ACQFOOT1) ) 
+    ("SBGRTYP1"   implicit:  (value 'SBGRTYP1) ) 
+    ("TGRPTYP1"   implicit:  (value 'TGRPTYP1) ) 
+    ("ARBMETH1"   implicit:  (value 'ARBMETH1) ) 
+    ("ARBCOOR1"   implicit:  (value 'ARBCOOR1) ) 
+    ("INITOFF1"   implicit:  (value 'MINOFF1) ) 
+    ("LASTOFF1"   implicit:  (value 'MAXOFF1) ) 
+    ("BNSZOFF1"   implicit:  (value 'OFFBNSZ1) ) 
+
+
+;   ("BNMOTYP1"   implicit:  (value 'BNMOTYP1) ) 
+;   ("BNMOSTP1"   implicit:  (value 'BNMOSTP1) ) 
+
+
+;    ("OTMIN1"   implicit:  (value 'OTMIN1) ) 
+;    ("OTMAX1"   implicit:  (value 'OTMAX1) ) 
+;    ("ODT1"   implicit:  (value 'ODT1) ) 
+    ("FINLIN1"   implicit:  (if (value 'KT2D) 1 (value 'FINLIN1)) ) 
+    ("LINLIN1"   implicit:  (if (value 'KT2D) 1 (value 'LINLIN1)) ) 
+    ("INLINC1"   implicit:  (if (value 'KT2D) 1 (value 'INLINC1)) ) 
+    ("FXLIN1"   implicit:  (value 'FXLIN1) ) 
+    ("LXLIN1"   implicit:  (value 'LXLIN1) ) 
+    ("XLINC1"   implicit:  (value 'XLINC1) ) 
+
+
+
+	; Image Set 2
+    ("SG_APPL2"   implicit:  ( if (value 'SG_APPL2) 1 0 ) )
+    ("SGINWD2"   implicit:  (if (value 'KT2D) 1 ( if (value 'SG_APPL2) (value 'SGINWD2) 1 )) )
+    ("SGXLWD2"   implicit:  ( if (value 'SG_APPL2) (value 'SGXLWD2) 1 ) )
+    ("AA_APPL2"   implicit:  ( if (value 'AA_APPL2) 1 0 ) )
+    ("AAIMAGE2"   implicit:  ( if (value 'AAIMAGE2) 1 0 ) )
+    ("IMAGEDX2"   implicit:  (value 'IMAGEDX2) ) 
+    ("IMAGEDY2"   implicit:  (value 'IMAGEDY2) ) 
+
+    ("APRTYP21"   implicit:  (if (value 'KT2D) 0 ( if (= (value 'DIRECTN2) 1 ) 1 0 )) )
+    ("APRTYP22"   implicit:  (if (value 'KT2D) 0 ( if (= (value 'DIRECTN2) 2 ) 2 0 )) )
+    ("APRTYP23"   implicit:  ( if (member 3 (value 'APRTYP2) ) 3 0 ) ) 
+    ("APRTYP24"   implicit:  ( if (member 4 (value 'APRTYP2) ) 4 0 ) ) 
+    ("APRTYP25"   implicit:  ( if (member 5 (value 'APRTYP2) ) 5 0 ) ) 
+    ("APRTYP26"   implicit:  ( if (member 6 (value 'APRTYP2) ) 6 0 ) ) 
+    ("APRTYP27"   implicit:  ( if (member 7 (value 'APRTYP2) ) 7 0 ) ) 
+    ("DBMUTE2"   implicit:  ( if (member 7 (value 'APRTYP2) ) (value 'DBMUTE2) 0 ) ) 
+    ("MXAPDP2"   implicit:  (value 'MXAPDP2) ) 
+    ("MXSTRM2"   implicit:  (value 'MXSTRM2) ) 
+    ("APDTYP2"   implicit:  (value 'APDTYP2) ) 
+    ("TBLAPD2"   implicit:  (value 'TBLAPD2) )
+    ("DBILD2"    implicit:  (if (value 'KT2D) 0 (if (= (value 'TBLAPD2) 0) 0 (value 'DBILD2))))
+    ("DBXLD2"    implicit:  (if (= (value 'TBLAPD2) 0) 0 (value 'DBXLD2)))
+    ("TBLILD2"   implicit:  (if (value 'KT2D)(value 'TBLXLD2)(value 'TBLILD2)) ) 
+    ("TBLXLD2"   implicit:  (value 'TBLXLD2) )
+    ("MINAPD2"   implicit:  (value 'MINAPD2) ) 
+    ("MAXAPD2"   implicit:  (value 'MAXAPD2) ) 
+    ("MUTETAB2"   implicit:  (value 'MUTETAB2) ) 
+
+    ("IMGRTYP2"   implicit:  (value 'IMGRTYP2) ) 
+    ("ACQFOOT2"   implicit:  (value 'ACQFOOT2) ) 
+    ("SBGRTYP2"   implicit:  (value 'SBGRTYP2) ) 
+    ("TGRPTYP2"   implicit:  (value 'TGRPTYP2) ) 
+    ("ARBMETH2"   implicit:  (value 'ARBMETH2) ) 
+    ("ARBCOOR2"   implicit:  (value 'ARBCOOR2) ) 
+    ("INITOFF2"   implicit:  (value 'MINOFF2) ) 
+    ("LASTOFF2"   implicit:  (value 'MAXOFF2) ) 
+    ("BNSZOFF2"   implicit:  (value 'OFFBNSZ2) ) 
+
+
+;   ("BNMOTYP2"   implicit:  (value 'BNMOTYP2) ) 
+;   ("BNMOSTP2"   implicit:  (value 'BNMOSTP2) ) 
+
+
+;    ("OTMIN2"   implicit:  (value 'OTMIN2) ) 
+;    ("OTMAX2"   implicit:  (value 'OTMAX2) ) 
+;    ("ODT2"   implicit:  (value 'ODT2) ) 
+    ("FINLIN2"   implicit:  (if (value 'KT2D) 1 (value 'FINLIN2))) 
+    ("LINLIN2"   implicit:  (if (value 'KT2D) 1 (value 'LINLIN2))) 
+    ("INLINC2"   implicit:  (if (value 'KT2D) 1 (value 'INLINC2))) 
+    ("FXLIN2"   implicit:  (value 'FXLIN2) ) 
+    ("LXLIN2"   implicit:  (value 'LXLIN2) ) 
+    ("XLINC2"   implicit:  (value 'XLINC2) ) 
+
+
+
+	; Image Set 3
+    ("SG_APPL3"   implicit:  ( if (value 'SG_APPL3) 1 0 ) )
+    ("SGINWD3"   implicit:  (if (value 'KT2D) 1 ( if (value 'SG_APPL3) (value 'SGINWD3) 1 )) )
+    ("SGXLWD3"   implicit:  ( if (value 'SG_APPL3) (value 'SGXLWD3) 1 ) )
+    ("AA_APPL3"   implicit:  ( if (value 'AA_APPL3) 1 0 ) )
+    ("AAIMAGE3"   implicit:  ( if (value 'AAIMAGE3) 1 0 ) )
+    ("IMAGEDX3"   implicit:  (value 'IMAGEDX3) ) 
+    ("IMAGEDY3"   implicit:  (value 'IMAGEDY3) ) 
+
+    ("APRTYP31"   implicit:  (if (value 'KT2D) 0 ( if (= (value 'DIRECTN3) 1 ) 1 0 ) ))
+    ("APRTYP32"   implicit:  (if (value 'KT2D) 0 ( if (= (value 'DIRECTN3) 2 ) 2 0 ) ))
+    ("APRTYP33"   implicit:  ( if (member 3 (value 'APRTYP3) ) 3 0 ) ) 
+    ("APRTYP34"   implicit:  ( if (member 4 (value 'APRTYP3) ) 4 0 ) ) 
+    ("APRTYP35"   implicit:  ( if (member 5 (value 'APRTYP3) ) 5 0 ) ) 
+    ("APRTYP36"   implicit:  ( if (member 6 (value 'APRTYP3) ) 6 0 ) ) 
+    ("APRTYP37"   implicit:  ( if (member 7 (value 'APRTYP3) ) 7 0 ) ) 
+    ("DBMUTE3"   implicit:  ( if (member 7 (value 'APRTYP3) ) (value 'DBMUTE3) 0 ) ) 
+    ("MXAPDP3"   implicit:  (value 'MXAPDP3) ) 
+    ("MXSTRM3"   implicit:  (value 'MXSTRM3) ) 
+    ("APDTYP3"   implicit:  (value 'APDTYP3) ) 
+    ("TBLAPD3"   implicit:  (value 'TBLAPD3) )
+    ("DBILD3"    implicit:  (if (value 'KT2D) 0 (if (= (value 'TBLAPD3) 0) 0 (value 'DBILD3))))
+    ("DBXLD3"    implicit:  (if (= (value 'TBLAPD3) 0) 0 (value 'DBXLD3)))
+    ("TBLILD3"   implicit:  (if (value 'KT2D)(value 'TBLXLD3)(value 'TBLILD3)) ) 
+    ("TBLXLD3"   implicit:  (value 'TBLXLD3) )
+    ("MINAPD3"   implicit:  (value 'MINAPD3) ) 
+    ("MAXAPD3"   implicit:  (value 'MAXAPD3) ) 
+    ("MUTETAB3"   implicit:  (value 'MUTETAB3) ) 
+
+    ("IMGRTYP3"   implicit:  (value 'IMGRTYP3) ) 
+    ("ACQFOOT3"   implicit:  (value 'ACQFOOT3) ) 
+    ("SBGRTYP3"   implicit:  (value 'SBGRTYP3) ) 
+    ("TGRPTYP3"   implicit:  (value 'TGRPTYP3) ) 
+    ("ARBMETH3"   implicit:  (value 'ARBMETH3) ) 
+    ("ARBCOOR3"   implicit:  (value 'ARBCOOR3) ) 
+    ("INITOFF3"   implicit:  (value 'MINOFF3) ) 
+    ("LASTOFF3"   implicit:  (value 'MAXOFF3) ) 
+    ("BNSZOFF3"   implicit:  (value 'OFFBNSZ3) ) 
+
+
+;   ("BNMOTYP3"   implicit:  (value 'BNMOTYP3) ) 
+;   ("BNMOSTP3"   implicit:  (value 'BNMOSTP3) ) 
+
+
+;    ("OTMIN3"   implicit:  (value 'OTMIN3) ) 
+;    ("OTMAX3"   implicit:  (value 'OTMAX3) ) 
+;    ("ODT3"   implicit:  (value 'ODT3) ) 
+    ("FINLIN3"   implicit:  (if (value 'KT2D) 1 (value 'FINLIN3) ) )
+    ("LINLIN3"   implicit:  (if (value 'KT2D) 1 (value 'LINLIN3) ) )
+    ("INLINC3"   implicit:  (if (value 'KT2D) 1 (value 'INLINC3) ) )
+    ("FXLIN3"   implicit:  (value 'FXLIN3) ) 
+    ("LXLIN3"   implicit:  (value 'LXLIN3) ) 
+    ("XLINC3"   implicit:  (value 'XLINC3) ) 
+
+
+
+	; Image Set 4
+    ("SG_APPL4"   implicit:  ( if (value 'SG_APPL4) 1 0 ) )
+    ("SGINWD4"   implicit:  (if (value 'KT2D) 1 ( if (value 'SG_APPL4) (value 'SGINWD4) 1 )) )
+    ("SGXLWD4"   implicit:  ( if (value 'SG_APPL4) (value 'SGXLWD4) 1 ) )
+    ("AA_APPL4"   implicit:  ( if (value 'AA_APPL4) 1 0 ) )
+    ("AAIMAGE4"   implicit:  ( if (value 'AAIMAGE4) 1 0 ) )
+    ("IMAGEDX4"   implicit:  (value 'IMAGEDX4) ) 
+    ("IMAGEDY4"   implicit:  (value 'IMAGEDY4) ) 
+
+    ("APRTYP41"   implicit:  (if (value 'KT2D) 0 ( if (= (value 'DIRECTN4) 1 ) 1 0 ) ) )
+    ("APRTYP42"   implicit:  (if (value 'KT2D) 0 ( if (= (value 'DIRECTN4) 2 ) 2 0 ) ) )
+    ("APRTYP43"   implicit:  ( if (member 3 (value 'APRTYP4) ) 3 0 ) ) 
+    ("APRTYP44"   implicit:  ( if (member 4 (value 'APRTYP4) ) 4 0 ) ) 
+    ("APRTYP45"   implicit:  ( if (member 5 (value 'APRTYP4) ) 5 0 ) ) 
+    ("APRTYP46"   implicit:  ( if (member 6 (value 'APRTYP4) ) 6 0 ) ) 
+    ("APRTYP47"   implicit:  ( if (member 7 (value 'APRTYP4) ) 7 0 ) ) 
+    ("DBMUTE4"   implicit:  ( if (member 7 (value 'APRTYP4) ) (value 'DBMUTE4) 0 ) ) 
+    ("MXAPDP4"   implicit:  (value 'MXAPDP4) ) 
+    ("MXSTRM4"   implicit:  (value 'MXSTRM4) ) 
+    ("APDTYP4"   implicit:  (value 'APDTYP4) ) 
+    ("TBLAPD4"   implicit:  (value 'TBLAPD4) )
+    ("DBILD4"    implicit:  (if (value 'KT2D) 0 (if (= (value 'TBLAPD4) 0) 0 (value 'DBILD4))))
+    ("DBXLD4"    implicit:  (if (= (value 'TBLAPD4) 0) 0 (value 'DBXLD4)))
+    ("TBLILD4"   implicit:  (if (value 'KT2D)(value 'TBLXLD4)(value 'TBLILD4)) ) 
+    ("TBLXLD4"   implicit:  (value 'TBLXLD4) )
+    ("MINAPD4"   implicit:  (value 'MINAPD4) ) 
+    ("MAXAPD4"   implicit:  (value 'MAXAPD4) ) 
+    ("MUTETAB4"   implicit:  (value 'MUTETAB4) ) 
+
+    ("IMGRTYP4"   implicit:  (value 'IMGRTYP4) ) 
+    ("ACQFOOT4"   implicit:  (value 'ACQFOOT4) ) 
+    ("SBGRTYP4"   implicit:  (value 'SBGRTYP4) ) 
+    ("TGRPTYP4"   implicit:  (value 'TGRPTYP4) ) 
+    ("ARBMETH4"   implicit:  (value 'ARBMETH4) ) 
+    ("ARBCOOR4"   implicit:  (value 'ARBCOOR4) ) 
+    ("INITOFF4"   implicit:  (value 'MINOFF4) ) 
+    ("LASTOFF4"   implicit:  (value 'MAXOFF4) ) 
+    ("BNSZOFF4"   implicit:  (value 'OFFBNSZ4) ) 
+
+
+;   ("BNMOTYP4"   implicit:  (value 'BNMOTYP4) ) 
+;   ("BNMOSTP4"   implicit:  (value 'BNMOSTP4) ) 
+
+
+;    ("OTMIN4"   implicit:  (value 'OTMIN4) ) 
+;    ("OTMAX4"   implicit:  (value 'OTMAX4) ) 
+;    ("ODT4"   implicit:  (value 'ODT4) ) 
+    ("FINLIN4"   implicit:  (if (value 'KT2D) 1 (value 'FINLIN4) ) )
+    ("LINLIN4"   implicit:  (if (value 'KT2D) 1 (value 'LINLIN4) ) )
+    ("INLINC4"   implicit:  (if (value 'KT2D) 1 (value 'INLINC4) ) )
+    ("FXLIN4"   implicit:  (value 'FXLIN4) ) 
+    ("LXLIN4"   implicit:  (value 'LXLIN4) ) 
+    ("XLINC4"   implicit:  (value 'XLINC4) ) 
+
+    ("KT2D"	implicit:  (if (value 'KT2D) 1 0 ) )
+
+  ) ; end exec_data
+
+
+  rules:(
+        (menu_2D_3D_setup t (progn
+	    (if (value 'KT2D) 
+		 ; 2D menu
+		   (progn
+		      (set_value 'program "kirtime2d.exe")
+		      (do_show 'DCDP)
+		      (set_text 'FXLIN1 "      Minimum Output CDP 1")
+		      (set_mouse_text 'FXLIN1 "Enter the first output CDP for this Image Set.")
+		      (set_text 'LXLIN1 "      Maximum Output CDP 1")
+		      (set_mouse_text 'LXLIN1 "Enter the last output CDP for this Image Set.")
+		      (set_text 'XLINC1 "      CDP Output Sampling Interval 1")
+		      (set_mouse_text 'XLINC1 "Enter the CDP output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL1 "Output a range of image traces around each of the above locations.")
+		      (set_text 'SGXLWD1 "         CDPs to combine 1")
+		      (set_mouse_text 'SGXLWD1 "Supply the odd CDP width of each supergather.")
+		      (set_text 'IMAGEDY1 "         Nominal CDP Antialias Spacing 1")
+		      (set_mouse_text 'IMAGEDY1 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the CDP direction.")
+		      (set_type_desc 'TBLAPD1  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes"  2 "Use a time-variable aperture distance limit.")
+              )
+		      )
+		      (set_text 'TBLAPD1 "         Use time variable distance table?")
+	              (set_mouse_text 'TBLAPD1 "A table may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD1 "         Aperture Distance Table Input Type 1")
+		      (set_mouse_text 'DBXLD1 "Select how Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD1 "         Maximum Aperture Distance Table 1")
+
+		      (set_text 'FXLIN2 "      Minimum Output CDP 2")
+		      (set_mouse_text 'FXLIN2 "Enter the first output CDP for this Image Set.")
+		      (set_text 'LXLIN2 "      Maximum Output CDP 2")
+		      (set_mouse_text 'LXLIN2 "Enter the last output CDP for this Image Set.")
+		      (set_text 'XLINC2 "      CDP Output Sampling Interval 2")
+		      (set_mouse_text 'XLINC2 "Enter the CDP output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL2 "Output a range of image traces around each of the above locations.")
+		      (set_text 'SGXLWD2 "         CDPs to combine 2")
+		      (set_mouse_text 'SGXLWD2 "Supply the odd CDP width of each supergather.")
+		      (set_text 'IMAGEDY2 "         Nominal CDP Antialias Spacing 2")
+		      (set_mouse_text 'IMAGEDY2 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the CDP direction.")
+		      (set_type_desc 'TBLAPD2  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes"  2 "Use a time-variable aperture distance limit.")
+              )
+		      )
+		      (set_text 'TBLAPD2 "         Use time variable distance table?")
+	              (set_mouse_text 'TBLAPD2 "A table may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD2 "         Aperture Distance Table Input Type 2")
+		      (set_mouse_text 'DBXLD2 "Select how Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD2 "         Maximum Aperture Distance Table 2")
+
+		      (set_text 'FXLIN3 "      Minimum Output CDP 3")
+		      (set_mouse_text 'FXLIN3 "Enter the first output CDP for this Image Set.")
+		      (set_text 'LXLIN3 "      Maximum Output CDP 3")
+		      (set_mouse_text 'LXLIN3 "Enter the last output CDP for this Image Set.")
+		      (set_text 'XLINC3 "      CDP Output Sampling Interval 3")
+		      (set_mouse_text 'XLINC3 "Enter the CDP output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL3 "Output a range of image traces around each of the above locations.")
+		      (set_text 'SGXLWD3 "         CDPs to combine 3")
+		      (set_mouse_text 'SGXLWD3 "Supply the odd CDP width of each supergather.")
+		      (set_text 'IMAGEDY3 "         Nominal CDP Antialias Spacing 3")
+		      (set_mouse_text 'IMAGEDY3 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the CDP direction.")
+		      (set_type_desc 'TBLAPD3  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes"  2 "Use a time-variable aperture distance limit.")
+              )
+		      )
+		      (set_text 'TBLAPD3 "         Use time variable distance table?")
+	              (set_mouse_text 'TBLAPD3 "A table may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD3 "         Aperture Distance Table Input Type 3")
+		      (set_mouse_text 'DBXLD3 "Select how Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD3 "         Maximum Aperture Distance Table 3")
+
+		      (set_text 'FXLIN4 "      Minimum Output CDP 4")
+		      (set_mouse_text 'FXLIN4 "Enter the first output CDP for this Image Set.")
+		      (set_text 'LXLIN4 "      Maximum Output CDP 4")
+		      (set_mouse_text 'LXLIN4 "Enter the last output CDP for this Image Set.")
+		      (set_text 'XLINC4 "      CDP Output Sampling Interval 4")
+		      (set_mouse_text 'XLINC4 "Enter the CDP output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL4 "Output a range of image traces around each of the above locations.")
+		      (set_text 'SGXLWD4 "         CDPs to combine 4")
+		      (set_mouse_text 'SGXLWD4 "Supply the odd CDP width of each supergather.")
+		      (set_text 'IMAGEDY4 "         Nominal CDP Antialias Spacing 4")
+		      (set_mouse_text 'IMAGEDY4 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the CDP direction.")
+		      (set_type_desc 'TBLAPD4  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes"  2 "Use a time-variable aperture distance limit.")
+              )
+		      )
+		      (set_text 'TBLAPD4 "         Use time variable distance table?")
+	              (set_mouse_text 'TBLAPD4 "A table may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD4 "         Aperture Distance Table Input Type 4")
+		      (set_mouse_text 'DBXLD4 "Select how Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD4 "         Maximum Aperture Distance Table 4")
+
+		   )
+                 ; 3D menu
+		   (progn
+		      (set_value 'program "kirtime3d.exe")
+		      (do_not_show 'DCDP)
+		      (set_text 'FXLIN1 "      Minimum Output Xline 1")
+		      (set_mouse_text 'FXLIN1 "Enter the first output crossline for this Image Set.")
+		      (set_text 'LXLIN1 "      Maximum Output Xline 1")
+		      (set_mouse_text 'LXLIN1 "Enter the last output crossline for this Image Set.")
+		      (set_text 'XLINC1 "      Xline Output Sampling Interval 1")
+		      (set_mouse_text 'XLINC1 "Enter the crossline output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL1 "Output a rectangle of image traces around each of the above locations.")
+		      (set_text 'SGXLWD1 "         Crosslines to combine 1")
+		      (set_mouse_text 'SGXLWD1 "Supply the odd crossline width of each supergather rectangle.")
+		      (set_text 'IMAGEDY1 "         Nominal Xline Antialias Spacing 1")
+		      (set_mouse_text 'IMAGEDY1 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline direction.")
+		      (set_type_desc 'TBLAPD1  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+		      )
+		      (set_text 'TBLAPD1 "         Use time variable distance tables?")
+	              (set_mouse_text 'TBLAPD1 "Tables may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD1 "         Crossline Aperture Distance Table Input Type 1")
+		      (set_mouse_text 'DBXLD1 "Select how Crossline Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD1 "         Crossline Maximum Aperture Distance Table 1")
+
+		      (set_text 'FXLIN2 "      Minimum Output Xline 2")
+		      (set_mouse_text 'FXLIN2 "Enter the first output crossline for this Image Set.")
+		      (set_text 'LXLIN2 "      Maximum Output Xline 2")
+		      (set_mouse_text 'LXLIN2 "Enter the last output crossline for this Image Set.")
+		      (set_text 'XLINC2 "      Xline Output Sampling Interval 2")
+		      (set_mouse_text 'XLINC2 "Enter the crossline output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL2 "Output a rectangle of image traces around each of the above locations.")
+		      (set_text 'SGXLWD2 "         Crosslines to combine 2")
+		      (set_mouse_text 'SGXLWD2 "Supply the odd crossline width of each supergather rectangle.")
+		      (set_text 'IMAGEDY2 "         Nominal Xline Antialias Spacing 2")
+		      (set_mouse_text 'IMAGEDY2 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline direction.")
+		      (set_type_desc 'TBLAPD2  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+		      )
+		      (set_text 'TBLAPD2 "         Use time variable distance tables?")
+	              (set_mouse_text 'TBLAPD2 "Tables may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD2 "         Crossline Aperture Distance Table Input Type 2")
+		      (set_mouse_text 'DBXLD2 "Select how Crossline Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD2 "         Crossline Maximum Aperture Distance Table 2")
+
+		      (set_text 'FXLIN3 "      Minimum Output Xline 3")
+		      (set_mouse_text 'FXLIN3 "Enter the first output crossline for this Image Set.")
+		      (set_text 'LXLIN3 "      Maximum Output Xline 3")
+		      (set_mouse_text 'LXLIN3 "Enter the last output crossline for this Image Set.")
+		      (set_text 'XLINC3 "      Xline Output Sampling Interval 3")
+		      (set_mouse_text 'XLINC3 "Enter the crossline output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL3 "Output a rectangle of image traces around each of the above locations.")
+		      (set_text 'SGXLWD3 "         Crosslines to combine 3")
+		      (set_mouse_text 'SGXLWD3 "Supply the odd crossline width of each supergather rectangle.")
+		      (set_text 'IMAGEDY3 "         Nominal Xline Antialias Spacing 3")
+		      (set_mouse_text 'IMAGEDY3 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline direction.")
+		      (set_type_desc 'TBLAPD3  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+		      )
+		      (set_text 'TBLAPD3 "         Use time variable distance tables?")
+	              (set_mouse_text 'TBLAPD3 "Tables may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD3 "         Crossline Aperture Distance Table Input Type 3")
+		      (set_mouse_text 'DBXLD3 "Select how Crossline Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD3 "         Crossline Maximum Aperture Distance Table 3")
+
+		      (set_text 'FXLIN4 "      Minimum Output Xline 4")
+		      (set_mouse_text 'FXLIN4 "Enter the first output crossline for this Image Set.")
+		      (set_text 'LXLIN4 "      Maximum Output Xline 4")
+		      (set_mouse_text 'LXLIN4 "Enter the last output crossline for this Image Set.")
+		      (set_text 'XLINC4 "      Xline Output Sampling Interval 4")
+		      (set_mouse_text 'XLINC4 "Enter the crossline output increment for this Image Set.")
+		      (set_mouse_text 'SG_APPL4 "Output a rectangle of image traces around each of the above locations.")
+		      (set_text 'SGXLWD4 "         Crosslines to combine 4")
+		      (set_mouse_text 'SGXLWD4 "Supply the odd crossline width of each supergather rectangle.")
+		      (set_text 'IMAGEDY4 "         Nominal Xline Antialias Spacing 4")
+		      (set_mouse_text 'IMAGEDY4 "A smaller value than the default may increases frequency content at the expense of increased aliasing of events in the crossline direction.")
+		      (set_type_desc 'TBLAPD4  '(
+              ("No"  0 "Do not use time-variable aperture distance for this image set.")
+              ("Yes, elliptical"  1 "The time-variable aperture distance limit tables define a rounded cross section.")
+              ("Yes, rectangular"  2 "The time-variable aperture distance limit tables define a rectangular cross section.")
+              )
+		      )
+		      (set_text 'TBLAPD4 "         Use time variable distance tables?")
+	              (set_mouse_text 'TBLAPD4 "Tables may be supplied to specify time and space variant distance limits.")
+		      (set_text 'DBXLD4 "         Crossline Aperture Distance Table Input Type 4")
+		      (set_mouse_text 'DBXLD4 "Select how Crossline Aperture Distance Cutoffs are input for this Image Set.")
+		      (set_text 'TBLXLD4 "         Crossline Maximum Aperture Distance Table 4")
+
+		   )
+	    )
+        ))
+ 
+	 (initialization (= (value 'INIT) 1)
+					(progn 
+	                                   (set_value 'PATH (flow_directory))
+					   (set_value 'INIT 0)
+					   )
+			 )
+
+	(cdp_interval_default_rule (and (value 'KT2D) ( = (value 'DCDP) 999999.))
+		(set_value 'DCDP (db_parmget_line "DCDPILNz")))
+
+	; Dummy set message
+;	 (DUMMYSE_rule (= (value 'ADVANCED) 1)
+;		       (do_show 'dummy_se) (do_not_show 'dummy_se) )
+	 
+	 
+
+	; Velocity Parameters	
+	 (ADVANCE_PAR_rule (= (value 'ADVANCED) 1)
+			   (progn
+			     (do_show 'VELOCI)
+			     ;(do_show 'SHOWANISO)
+			     (do_show 'ADV_AALI) 
+			     (do_show 'PREPROC) 
+			     (do_show 'COMPRESSION) 
+			     (do_show 'MAXPREP) 
+			     (do_show 'MAXIMAG) 
+			     (do_show 'MNTWIN) 
+			     (do_show 'CACHEBLK) 
+			     ;(do_show 'HIWATER) 
+			     ;(do_show 'DEBUG) 
+                       (do_not_show 'GRDPRMS1)
+                       (do_not_show 'GRDPRMS2)
+                       (do_not_show 'GRDPRMS3)
+                       (do_not_show 'GRDPRMS4)
+			     )
+			   (progn
+			     (do_not_show 'VELOCI)
+			     ;(do_not_show 'SHOWANISO)
+			     (do_not_show 'ADV_AALI) 
+			     (do_not_show 'PREPROC) 
+			     (do_not_show 'COMPRESSION) 
+			     (do_not_show 'MAXPREP) 
+			     (do_not_show 'MAXIMAG) 
+			     (do_not_show 'MNTWIN) 
+			     (do_not_show 'CACHEBLK) 
+			     ;(do_not_show 'HIWATER) 
+			     ;(do_not_show 'DEBUG) 
+                       (do_not_show 'GRDPRMS1)
+                       (do_not_show 'GRDPRMS2)
+                       (do_not_show 'GRDPRMS3)
+                       (do_not_show 'GRDPRMS4)
+			     )
+			   )
+
+
+
+	 (VELOCI_PAR_rule (and (= (value 'VELOCI ) 1) (= (value 'ADVANCED) 1) )
+			    (progn 
+;			      (do_show 'CACHEMB)
+			      (do_show 'VSCANTYP)
+			      )
+			    (progn
+;			      (do_not_show 'CACHEMB)
+			      (do_not_show 'VSCANTYP)
+			      (do_not_show 'VSCANST)
+			      (do_not_show 'VSCANEND)
+			      (do_not_show 'VSCANNUM)
+			      )
+			    ) 
+					
+         ; Check Scan parameters - If No SCAN or not display VSCANST- VSCANEND-VSCANNUM
+	 (VELSCANPARM_rule (and (and (= (value 'VELOCI) 1) (= (value 'ADVANCED) 1) )( not ( = (value 'VSCANTYP) 1) ) )
+			    (progn 
+			      (do_show 'VSCANST)
+			      (do_show 'VSCANEND)
+			      (do_show 'VSCANNUM)
+			      )
+			     (progn 
+			      (do_not_show 'VSCANST)
+			      (do_not_show 'VSCANEND)
+			      (do_not_show 'VSCANNUM)
+			      )
+			)
+
+
+
+
+	; Anisotropy Parameters	
+;	(SHOWANISO_rule (and (= (value 'SHOWANISO) 1) (= (value 'ADVANCED) 1) )
+;			(progn
+;			  (do_show 'DBANISO)
+;			  )
+;			(progn
+;			  (do_not_show 'DBANISO)
+;			  (do_not_show 'ANISOTAB)
+;			  (do_not_show 'ANISMANU)
+;			  )
+;			)
+;
+;	(ANISMANU_default_rule1 (and ( equal ( value 'ANISMANU) "XXX" )
+;				     ( = ( db_parmget_line "IUNITSz") 1 ) ) (set_value 'ANISMANU "1:1:0-10,1000-30:/100:1:2000-5,3000-6/" ) )
+;
+;	(ANISMANU_default_rule2 ( equal ( value 'ANISMANU) "XXX" )
+;				(set_value 'ANISMANU "1:1:0-10,1000-30:/100:1:2000-5,3000-6/" ) ) 
+;
+;	(DBANISO_rule (and (value 'DBANISO) (showing 'DBANISO) )
+;			  (progn
+;			     (do_show 'ANISOTAB)
+;			     (do_not_show 'ANISMANU)
+;			     )
+;			  )
+;	(DBANISO1_rule (and (not (value 'DBANISO)) (showing 'DBANISO) )
+;			  (progn
+;			    (do_not_show 'ANISOTAB)
+;			    (do_show 'ANISMANU)
+;			    )
+;			  )
+ 
+ 
+ 	
+	; Antialias Advance Parameters	
+	(SHOWANISO_rule (and (= (value 'ADV_AALI) 1) (= (value 'ADVANCED) 1) )
+			(progn
+			  (do_show 'AANBAND)
+			  (do_show 'MAXFREQ)
+			  )
+			(progn
+			  (do_not_show 'AANBAND)
+			  (do_not_show 'MAXFREQ)
+			  )
+			)
+
+
+	; Preprocess Parameters
+	 (PREPROC_PAR_rule (and (= (value 'ADVANCED) 1) (= (value 'PREPROC) 1) ) 
+			    (progn 
+			      (if (value 'KT2D) (do_show 'PHASECO2) (do_show 'PHASECO3)) 
+			      (do_show 'RMSTHRE) 
+			      (do_show 'T_POWER) 
+			      (do_show 'DB_PER_S) 
+			      ) 
+			    (progn 
+			      (if (value 'KT2D) (do_not_show 'PHASECO2) (do_not_show 'PHASECO3))
+			      (do_not_show 'RMSTHRE) 
+			      (do_not_show 'T_POWER) 
+			      (do_not_show 'DB_PER_S) 
+			      )
+			    )
+
+
+
+	; Compression parameters
+	(COMPRESSION_PAR_rule (and (= (value 'COMPRESSION ) 1) (= (value 'ADVANCED) 1) )
+			      (do_show '(ICMPRTYP ICTKDIST)) 
+			      (do_not_show '(ICMPRTYP ICTKDIST))
+			      )
+
+        ; Check Compression Parameter
+	(COMPRESSION_rule (and  ( = (value 'ICMPRTYP) 4) (and (= (value 'COMPRESSION) 1) (= (value 'ADVANCED) 1) ) ) 
+			  (progn 
+			    (do_show 'CTKRMSDB)
+			    )
+			  (progn 
+			    (do_not_show 'CTKRMSDB)
+			    )
+			  )
+
+
+         (CLEANUP_rule (= (value 'JOBTYPE) 3)
+                          (progn
+                            (do_not_show 'CHKSAVE)
+                            (do_not_show 'RESTART)
+                          )
+                          (progn
+                            (do_show 'CHKSAVE)
+                            (do_show 'RESTART)
+                          )
+		      )
+
+	 (CHKHOURS_rule (and (showing 'CHKSAVE) (value 'CHKSAVE))
+			  (progn
+			    (do_show 'CHKHOURS)
+			    (do_show 'CHKSNAP)
+			    (do_show 'CHKDIRS)
+			    (do_show 'VBROWSE)
+			  ) 
+			  (progn
+			    (do_not_show 'CHKHOURS)
+			    (do_not_show 'CHKSNAP)
+			    (do_not_show 'CHKDIRS)
+			    (do_not_show 'VBROWSE)
+			  )
+			)
+
+         (popup_dir_browser_rule ( = 1 (value 'VBROWSE))
+             (progn
+                 (setq trialname (xsystem (string_concatinate "PROMAX_FLOW_DIRECTORY=" (flow_directory) " " (promax_path "sys/bin/multidirselect") " " ^'^ (value 'CHKDIRS) ^'^ )))
+                 (if (> (length trialname) 0) (set_value 'CHKDIRS trialname))
+                 (set_value 'VBROWSE 0)
+                 (set_selected_item 'VBROWSE (first (type_desc 'VBROWSE)))
+              ))
+
+	 (RESTART_rule (value 'RESTART)
+			  (progn
+                (do_not_show 'JOBTYPE)
+			    )
+			  (progn 
+			    (do_show 'JOBTYPE)
+			    )
+			  )
+
+	 
+
+	; Debug Parameters
+	(DEBUG_rule (do_not_show 'DEBUG))
+	 (program_rule (and (= (value 'DEBUG) 1) (= (value 'ADVANCED) 1) )
+		       (do_show 'program) (do_not_show 'program))
+
+	 ; Block NMO
+	 (BLKNMO_rule (= (value 'ADVANCED) 1)
+			(do_show 'BLKNMO) (do_not_show 'BLKNMO) )
+	 (BLKNMO_PAR_rule (and (showing 'BLKNMO) (= (value 'BLKNMO) 1) ) 
+			    (progn 
+			      (do_show 'BNMOTYP) 
+			      ) 
+			    (progn 
+			      (do_not_show 'BNMOTYP) 
+			      )
+			    )
+	 (BNMOTYPPARM_rule (and (= (value 'ADVANCED) 1) (and (= (value 'BLKNMO) 1) (> (value 'BNMOTYP) 1) ) )
+			    (progn 
+			      (do_show 'BNMOSTP)
+			      ) 
+			    (progn 
+			      (do_not_show 'BNMOSTP)
+			      )
+			    )
+
+
+	; Begin Image Set Parameters
+
+	; Image Set Parameters	
+	(P_SHOWIM_rule (or (value 'ISETNAM) (or ( value 'P_NAME1) (or (value 'P_NAME2) (or (value 'P_NAME3) (value 'P_NAME4) ) )  ) ) 
+		(progn 
+		  (let ( ( result ) )
+		    
+		    (if (member :name4 (value 'ISETNAM) ) 
+			(progn
+			  (setq result
+				( push (list (value 'P_NAME4) 4 "Display Set 4" ) result )
+				)
+			  (set_value 'P_SHOWIM 4)
+			  )
+		      )
+
+		    (if (member :name3 (value 'ISETNAM) ) 
+			(progn
+			  (setq result
+				( push (list (value 'P_NAME3) 3 "Display Set 3" ) result )
+				)
+			  (set_value 'P_SHOWIM 3)
+			  )
+		      )
+
+		    (if (member :name2 (value 'ISETNAM) ) 
+			(progn
+			  (setq result
+				( push (list (value 'P_NAME2) 2 "Display Set 2" ) result )
+				)
+			  (set_value 'P_SHOWIM 2)
+			  )
+		      )
+
+		    (if (member :name1 (value 'ISETNAM) ) 
+			(progn
+			  (setq result
+				( push (list (value 'P_NAME1) 1 "Display Set 1" ) result )
+				)
+			 (set_value 'P_SHOWIM 1)
+			 )
+		      ) 
+		    
+		    (set_type_desc 'P_SHOWIM result)
+		    (set_selected_item 'P_SHOWIM (first (type_desc 'P_SHOWIM ) ) )
+		    )
+		  
+		  )
+		)
+
+
+	; Image Set Parameters	
+;	 (P_ISETNAM_rule (value 'ISETNAM)
+;			  (progn 
+;			    (set_type_desc 'ISETNAM
+;				   '( 
+;					     ("Set 1" :name1 "Display Set 1" )
+;					     ("Set 2" :name2 "Display Set 2")
+;					     ("Set 3" :name3 "Display Set 3") 
+;					     ("Set 4" :name4 "Display Set 4") 
+;					     )
+;					   )
+;			    )
+;     )
+
+;	 (P_ISETNAM_rule (value 'P_SHOWIM)
+;	      (let ( ( result ) )
+;			(progn
+;			  (setq result
+;				( push (list (value 'P_NAME4) :name4 "Display Set 4" ) result )
+;				)
+;			  (setq result
+;				( push (list (value 'P_NAME3) :name3 "Display Set 3" ) result )
+;				)
+;			  (setq result
+;				( push (list (value 'P_NAME2) :name2 "Display Set 2" ) result )
+;				)
+;			  (set_value 'P_SHOWIM 2)
+;			  (setq result
+;				( push (list (value 'P_NAME1) :name1 "Display Set 1" ) result )
+;				)
+;		      (set_type_desc 'ISETNAM result)
+;			  )
+;		      ;(set_selected_item 'ISETNAM (second (type_desc 'ISETNAM ) ) )
+;		    )		
+;    )
+
+	 (POP_NO_DISPLAY_rule (or 
+			       (member :name1 (value 'ISETNAM ) )
+			       (or (member :name2 (value 'ISETNAM ) ) 
+				   (or (member :name3 (value 'ISETNAM ) ) 
+				       (or (member :name4 (value 'ISETNAM ) ) 
+					   )
+				       )
+				   )
+			       )
+			      (progn
+				(do_show 'P_SHOWIM)
+				(set_selected_item 'P_SHOWIM (first (type_desc 'P_SHOWIM ) ) )
+				;(set_value 'P_SHOWIM 1)
+				)
+			      (do_not_show 'P_SHOWIM )
+			      )
+	 
+
+
+
+
+	 ;  Begin Parameters for Image Set 1
+
+	 ; Name Parameters	
+	 (P_NAME1_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) )
+			(do_show 'P_NAME1) (do_not_show 'P_NAME1))
+
+
+	 ; Supergather Parameters
+	 (SUPERG1_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) ) 
+			(do_show 'SG_APPL1) (do_not_show 'SG_APPL1) )
+
+	 (SUPERG11_rule (and (value 'SG_APPL1) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) ) )
+			(progn
+			  (if (value 'KT2D) (do_not_show 'SGINWD1) (do_show 'SGINWD1))
+			  (do_show 'SGXLWD1)
+			  )
+			(progn
+			  (do_not_show 'SGINWD1) 
+			  (do_not_show 'SGXLWD1)
+			  )
+			)
+          (SUPERG12_rule (evenp (value 'SGINWD1))
+			  (set_value 'SGINWD1 (+ 1 (value 'SGINWD1)))
+			)
+          (SUPERG13_rule (evenp (value 'SGXLWD1))
+			  (set_value 'SGXLWD1 (+ 1 (value 'SGXLWD1)))
+			)
+
+	 ; Antialias Parameters	
+	 (ANTIALI1_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) ) 
+			(do_show 'AA_APPL1) (do_not_show 'AA_APPL1) )
+
+	 (ANTIALI11_rule (and (value 'AA_APPL1) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) ) )
+			(progn
+                          (do_show 'AAIMAGE1)
+			  (if (value 'AAIMAGE1) (do_not_show 'IMAGEDY1) (do_show 'IMAGEDY1))
+			  (if (or (value 'KT2D) (value 'AAIMAGE1)) (do_not_show 'IMAGEDX1) (do_show 'IMAGEDX1))
+			  )
+			(progn
+                          (do_not_show 'AAIMAGE1)
+			  (do_not_show 'IMAGEDX1) 
+			  (do_not_show 'IMAGEDY1)
+			  )
+			)
+
+         ; Migration Direction Parameter
+	 (DIRECPAR01_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) )
+			(if (not (value 'KT2D)) (do_show 'DIRECTN1)) (do_not_show 'DIRECTN1))
+
+        ; massage APRTYP1 ?
+        (NOAP1_rule (and (< 1 (length (value 'APRTYP1))) (member 0 (value 'APRTYP1))) (progn
+		    (set_value 'APRTYP1 (remove 0 (value 'APRTYP1)))
+		    (set_selected_item 'APRTYP1 (cdr (selected_item 'APRTYP1 ) ) )
+		    ))
+
+         ; Aperture Parameters	
+	 (APERPAR01_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) )
+			(do_show 'APRTYP1) (do_not_show 'APRTYP1))
+	 
+         (NOSHOWAPRD1_rule (not (showing 'TBLAPD1))
+                          (progn
+				(do_not_show 'TBLILD1)
+                                (do_not_show 'TBLXLD1)
+                                (do_not_show 'MINAPD1)
+                                (do_not_show 'MAXAPD1)
+                          ))
+
+         ( ((value TBLAPD1) (value DIRECTN1)) TBLSHOWAPRD1_rule (and (showing 'TBLAPD1) (not (= (value 'TBLAPD1) 0)))
+                        (progn
+                                (do_not_show 'MINAPD1)
+                                (do_not_show 'MAXAPD1)
+				(if (and (not (value 'KT2D)) (not (= (value 'DIRECTN1) 1))) (do_show 'TBLILD1))
+				(if (not (= (value 'DIRECTN1) 2)) (do_show 'TBLXLD1))
+                        ))
+
+         (CONSTSHOWAPRD1_rule (and (showing 'TBLAPD1) (= (value 'TBLAPD1) 0))
+                        (progn
+                                (do_show 'MINAPD1)
+                                (do_show 'MAXAPD1)
+				(do_not_show 'TBLILD1)
+                                (do_not_show 'TBLXLD1)
+                        ))
+
+	 (APERTYP11PARM_rule (and (value 'P_SHOWIM) (or (value 'APRTYP1) (not (= (value 'P_SHOWIM) 1) ) ) )
+			    (progn 
+			      (do_not_show 'MXAPDP1)
+			      (do_not_show 'MXSTRM1) 
+			      (do_not_show 'APDTYP1)
+			      (do_not_show 'TBLAPD1)
+			      (do_not_show 'MUTETAB1)
+			      ) 
+     		    )
+
+
+	 (APERTYP12PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP1) (and (member 3 (value 'APRTYP1) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP1)
+			      (do_show 'TBLAPD1)
+			      ) 
+		    )
+
+	 (APERTYP13PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP1) (and (member 4 (value 'APRTYP1) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP1)
+			      (do_show 'TBLAPD1)
+			      ) 
+		    )
+
+	 (APERTYP14PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP1) (and (member 5 (value 'APRTYP1) ) ) ) )
+			    (progn 
+			      (do_show 'MXSTRM1) 
+			      ) 
+		    )
+
+	 (APERTYP15PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP1) (and (member 6 (value 'APRTYP1) ) ) ) )
+			    (progn 
+			      (do_show 'MXAPDP1)
+			      ) 
+		    )
+
+	 (APERTYP16PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP1) (and (member 7 (value 'APRTYP1) ) ) ) )
+			    (progn 
+			      (do_show 'MUTETAB1)
+			      ) 
+		    )
+
+
+	; Output Parameters	
+	 (FINLIN1_DB_rule (and (not (value 'KT2D)) ( = ( value 'FINLIN1) -1))
+			   (set_value 'FINLIN1 ( db_parmget_line "MINILINz") ) )
+	 (LINLIN1_DB_rule (and (not (value 'KT2D)) ( = ( value 'LINLIN1) -1))
+			   (set_value 'LINLIN1 ( db_parmget_line "MAXILINz") ) )
+	 (FXLIN1_DB_rule ( = ( value 'FXLIN1) -1)
+			    (if (value 'KT2D)
+				(set_value 'FXLIN1 ( db_parmget_line "MINCDPz") ) 
+				(set_value 'FXLIN1 ( db_parmget_line "MINXLINz") ) 
+                            ))
+	 (LXLIN1_DB_rule ( = ( value 'LXLIN1) -1)
+                            (if (value 'KT2D)
+				(set_value 'LXLIN1 ( db_parmget_line "MAXCDPz") ) 
+				(set_value 'LXLIN1 ( db_parmget_line "MAXXLINz") ) 
+			    ))
+
+	 (IMAGEDX1_DB_rule (and (not (value 'KT2D)) ( = ( value 'IMAGEDX1) -1.0))
+			    (set_value 'IMAGEDX1 (* ( db_parmget_line "DCDPXLNz") (value 'INLINC1) ) ) )
+	 (IMAGEDY1_DB_rule ( = ( value 'IMAGEDY1) -1.0)
+			    (set_value 'IMAGEDY1 (* ( db_parmget_line "DCDPILNz") (value 'XLINC1) )  ) )
+
+
+	 (OUTPARM1_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1) )
+			    (progn
+			      ;(do_show 'ODT1)
+			      ;(do_show 'OTMIN1)
+			      ;(do_show 'OTMAX1)
+			      (if (not (value 'KT2D)) (do_show '(FINLIN1 LINLIN1 INLINC1) ))
+			      (do_show 'FXLIN1)
+			      (do_show 'LXLIN1)
+			      (do_show 'XLINC1)
+			      )
+			    (progn
+			      ;(do_not_show 'ODT1)
+			      ;(do_not_show 'OTMIN1)
+			      ;(do_not_show 'OTMAX1)
+			      (do_not_show 'FINLIN1)
+			      (do_not_show 'LINLIN1)
+			      (do_not_show 'INLINC1)
+			      (do_not_show 'FXLIN1)
+			      (do_not_show 'LXLIN1)
+			      (do_not_show 'XLINC1)
+			      )
+
+			    )
+
+
+
+	 ; Grid Parameters
+	 (GRDPRMS1_rule (and  (and (= (value 'ADVANCED) 1) (showing 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 1) )
+			(do_not_show 'GRDPRMS1)
+            (do_not_show 'GRDPRMS1)
+     )
+	 (GRDPRMS1_PAR_rule (and (showing 'GRDPRMS1) (= (value 'GRDPRMS1) 1) ) 
+			    (progn 
+			      (do_show 'SBGRTYP1) 
+			      (do_show 'TGRPTYP1) 
+			      (do_show 'ARBMETH1) 
+			      (do_show 'ARBCOOR1) 
+
+			      ) 
+			    (progn 
+			      (do_not_show 'SBGRTYP1)
+			      (do_not_show 'TGRPTYP1) 
+			      (do_not_show 'ARBMETH1) 
+			      (do_not_show 'ARBCOOR1) 
+
+			      )
+			    )
+
+	; Offset Bin Parameters	
+;	 (MINOFFS1_rule ( = ( value 'MINOFF1) -1.0)
+;			(set_value 'MINOFF1 ( db_parmget_line "OFFMINz") ) )
+	 (MAXOFFS1_rule ( = ( value 'MAXOFF1) -1.0)
+			(set_value 'MAXOFF1 ( db_parmget_line "OFFMAXz") ) )
+	 (OFFBNSZ1_rule ( = ( value 'OFFBNSZ1) -1.0)
+		       (set_value 'OFFBNSZ1 ( db_parmget_line "OFFBINCz") ) )
+	 (OFFORD1_rule ( < (value 'MAXOFF1) (value 'MINOFF1))
+			(set_value 'MAXOFF1 (value 'MINOFF1)))
+
+     (OFFSETPARM10_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) )
+            (do_show 'IMGRTYP1) (do_not_show 'IMGRTYP1))
+
+	 (OFFSETPARM1_PAR_rule (and (= (value 'P_SHOWIM) 1) (or (= (value 'IMGRTYP1) 2 ) (= (value 'IMGRTYP1) 3) ) )
+			    (progn
+			      (do_show 'MINOFF1)
+			      (do_show 'MAXOFF1)
+			      (do_show 'OFFBNSZ1)
+			      )
+			    (progn
+			      (do_not_show 'MINOFF1)
+			      (do_not_show 'MAXOFF1)
+			      (do_not_show 'OFFBNSZ1)
+			      )
+
+			    )
+
+     ; Acquisition Footprint
+     (ACQUISITION1_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 1 ) )
+            (do_show 'ACQFOOT1) (do_not_show 'ACQFOOT1))
+
+
+	 ; Block NMO
+;	 (BLKNMO11_rule (and  (and (= (value 'ADVANCED) 1) (value 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 1) )
+;			(do_show 'BLKNMO1) (do_not_show 'BLKNMO1) )
+;	 (BLKNMO1_PAR_rule (and (showing 'BLKNMO1) (= (value 'BLKNMO1) 1) ) 
+;			    (progn 
+;			      (do_show 'BNMOTYP1) 
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOTYP1) 
+;			      )
+;			    )
+;	 (BNMOTYP1PARM_rule (and (and (= (value 'ADVANCED) 1) (and (= (value 'BLKNMO1) 1) (> (value 'BNMOTYP1) 1) ) ) ( = (value 'P_SHOWIM) 1 ) )
+;			    (progn 
+;			      (do_show 'BNMOSTP1)
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOSTP1)
+;			      )
+;			    )
+;
+
+
+
+
+	 ;  Begin Parameters for Image Set 2
+
+	 ; Name Parameters	
+	 (P_NAME2_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) )
+			(do_show 'P_NAME2) (do_not_show 'P_NAME2))
+
+	 ; Supergather Parameters
+	 (SUPERG2_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) ) 
+			(do_show 'SG_APPL2) (do_not_show 'SG_APPL2) )
+
+	 (SUPERG21_rule (and (value 'SG_APPL2) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) ) )
+			(progn
+			  (if (not (value 'KT2D)) (do_show 'SGINWD2))
+			  (do_show 'SGXLWD2)
+			  )
+			(progn
+			  (do_not_show 'SGINWD2) 
+			  (do_not_show 'SGXLWD2)
+			  )
+			)
+          (SUPERG22_rule (evenp (value 'SGINWD2))
+			  (set_value 'SGINWD2 (+ 1 (value 'SGINWD2)))
+			)
+          (SUPERG23_rule (evenp (value 'SGXLWD2))
+			  (set_value 'SGXLWD2 (+ 1 (value 'SGXLWD2)))
+			)
+
+	 ; Antialias Parameters	
+	 (ANTIALI2_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) ) 
+			(do_show 'AA_APPL2) (do_not_show 'AA_APPL2) )
+
+	 (ANTIALI21_rule (and (value 'AA_APPL2) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) ) )
+			(progn
+                          (do_show 'AAIMAGE2)
+			  (if (or (value 'KT2D) (value 'AAIMAGE2)) (do_not_show 'IMAGEDX2) (do_show 'IMAGEDX2))
+			  (if (value 'AAIMAGE2) (do_not_show 'IMAGEDY2) (do_show 'IMAGEDY2) ) 
+                        )
+			(progn
+                          (do_not_show 'AAIMAGE2)
+			  (do_not_show 'IMAGEDX2) 
+			  (do_not_show 'IMAGEDY2)
+			  )
+			)
+
+
+         ; Migration Direction Parameter
+	 (DIRECPAR02_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) )
+			(if (not (value 'KT2D)) (do_show 'DIRECTN2)) (do_not_show 'DIRECTN2))
+	 
+        ; massage APRTYP2 ?
+        (NOAP2_rule (and (< 1 (length (value 'APRTYP2))) (member 0 (value 'APRTYP2))) (progn
+		    (set_value 'APRTYP2 (remove 0 (value 'APRTYP2)))
+		    (set_selected_item 'APRTYP2 (cdr (selected_item 'APRTYP2 ) ) )
+		    ))
+
+         ; Aperture Parameters	
+	 (APERPAR02_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) )
+			(do_show 'APRTYP2) (do_not_show 'APRTYP2))
+	 
+         (NOSHOWAPRD2_rule (not (showing 'TBLAPD2))
+                          (progn
+				(do_not_show 'TBLILD2)
+                                (do_not_show 'TBLXLD2)
+                                (do_not_show 'MINAPD2)
+                                (do_not_show 'MAXAPD2)
+                          ))
+
+         ( ((value TBLAPD2) (value DIRECTN2)) TBLSHOWAPRD2_rule (and (showing 'TBLAPD2) (not (= (value 'TBLAPD2) 0)))
+                        (progn
+                                (do_not_show 'MINAPD2)
+                                (do_not_show 'MAXAPD2)
+				(if (and (not (value 'KT2D)) (not (= (value 'DIRECTN2) 1))) (do_show 'TBLILD2))
+				(if (not (= (value 'DIRECTN2) 2)) (do_show 'TBLXLD2))
+                        ))
+
+         (CONSTSHOWAPRD2_rule (and (showing 'TBLAPD2) (= (value 'TBLAPD2) 0))
+                        (progn
+                                (do_show 'MINAPD2)
+                                (do_show 'MAXAPD2)
+				(do_not_show 'TBLILD2)
+                                (do_not_show 'TBLXLD2)
+                        ))
+
+	 (APERTYP21PARM_rule (and (value 'P_SHOWIM) (or (value 'APRTYP2) (not (= (value 'P_SHOWIM) 2) ) ) )
+			    (progn 
+			      (do_not_show 'MXAPDP2)
+			      (do_not_show 'MXSTRM2) 
+			      (do_not_show 'APDTYP2)
+			      (do_not_show 'TBLAPD2)
+			      (do_not_show 'MUTETAB2)
+			      ) 
+     		    )
+
+	 (APERTYP22PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP2) (and (member 3 (value 'APRTYP2) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP2)
+			      (do_show 'TBLAPD2)
+			      ) 
+		    )
+
+	 (APERTYP23PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP2) (and (member 4 (value 'APRTYP2) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP2)
+			      (do_show 'TBLAPD2)
+			      ) 
+		    )
+
+	 (APERTYP24PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP2) (and (member 5 (value 'APRTYP2) ) ) ) )
+			    (progn 
+			      (do_show 'MXSTRM2) 
+			      ) 
+		    )
+
+	 (APERTYP25PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP2) (and (member 6 (value 'APRTYP2) ) ) ) )
+			    (progn 
+			      (do_show 'MXAPDP2)
+			      ) 
+		    )
+
+	 (APERTYP26PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP2) (and (member 7 (value 'APRTYP2) ) ) ) )
+			    (progn 
+			      (do_show 'MUTETAB2)
+			      ) 
+		    )
+
+
+	; Output Parameters	
+	 (FINLIN2_DB_rule (and (not (value 'KT2D)) ( = ( value 'FINLIN2) -1))
+			   (set_value 'FINLIN2 ( db_parmget_line "MINILINz") ) )
+	 (LINLIN2_DB_rule (and (not (value 'KT2D)) ( = ( value 'LINLIN2) -1))
+			   (set_value 'LINLIN2 ( db_parmget_line "MAXILINz") ) )
+	 (FXLIN2_DB_rule ( = ( value 'FXLIN2) -1.0)
+			    (if (value 'KT2D)
+				(set_value 'FXLIN2 ( db_parmget_line "MINCDPz") ) 
+				(set_value 'FXLIN2 ( db_parmget_line "MINXLINz") ) 
+                            ))
+	 (LXLIN2_DB_rule ( = ( value 'LXLIN2) -1.0)
+                            (if (value 'KT2D)
+				(set_value 'LXLIN2 ( db_parmget_line "MAXCDPz") ) 
+				(set_value 'LXLIN2 ( db_parmget_line "MAXXLINz") ) 
+			    ))
+ 
+
+	 (IMAGEDX2_DB_rule (and (not (value 'KT2D)) ( = ( value 'IMAGEDX2) -1.0))
+			    (set_value 'IMAGEDX2 (* ( db_parmget_line "DCDPXLNz") (value 'INLINC2) ) ) )
+	 (IMAGEDY2_DB_rule ( = ( value 'IMAGEDY2) -1.0)
+			    (set_value 'IMAGEDY2 (* ( db_parmget_line "DCDPILNz") (value 'XLINC2) )  ) )
+
+
+
+	 (OUTPARM2_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2) )
+			    (progn
+			      ;(do_show 'ODT2)
+			      ;(do_show 'OTMIN2)
+			      ;(do_show 'OTMAX2)
+			      (if (not (value 'KT2D)) (do_show '(FINLIN2 LINLIN2 INLINC2) ))
+			      (do_show 'FXLIN2)
+			      (do_show 'LXLIN2)
+			      (do_show 'XLINC2)
+			      )
+			    (progn
+			      ;(do_not_show 'ODT2)
+			      ;(do_not_show 'OTMIN2)
+			      ;(do_not_show 'OTMAX2)
+			      (do_not_show 'FINLIN2)
+			      (do_not_show 'LINLIN2)
+			      (do_not_show 'INLINC2)
+			      (do_not_show 'FXLIN2)
+			      (do_not_show 'LXLIN2)
+			      (do_not_show 'XLINC2)
+			      )
+
+			    )
+
+
+	 ; Grid Parameters
+	 (GRDPRMS2_rule (and  (and (= (value 'ADVANCED) 1) (showing 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 2) )
+			(do_not_show 'GRDPRMS2)
+            (do_not_show 'GRDPRMS2)
+     )
+	 (GRDPRMS2_PAR_rule (and (showing 'GRDPRMS2) (= (value 'GRDPRMS2) 1) ) 
+			    (progn 
+			      (do_show 'SBGRTYP2) 
+			      (do_show 'TGRPTYP2) 
+			      (do_show 'ARBMETH2) 
+			      (do_show 'ARBCOOR2) 
+
+			      ) 
+			    (progn 
+			      (do_not_show 'SBGRTYP2)
+			      (do_not_show 'TGRPTYP2) 
+			      (do_not_show 'ARBMETH2) 
+			      (do_not_show 'ARBCOOR2) 
+			      )
+			    )
+
+	; Offset Bin Parameters	
+;	 (MINOFFS2_rule ( = ( value 'MINOFF2) -1.0)
+;			(set_value 'MINOFF2 ( db_parmget_line "OFFMINz") ) )
+	 (MAXOFFS2_rule ( = ( value 'MAXOFF2) -1.0)
+			(set_value 'MAXOFF2 ( db_parmget_line "OFFMAXz") ) )
+	 (OFFBNSZ2_rule ( = ( value 'OFFBNSZ2) -1.0)
+		       (set_value 'OFFBNSZ2 ( db_parmget_line "OFFBINCz") ) )
+	 (OFFORD2_rule ( < (value 'MAXOFF2) (value 'MINOFF2))
+			(set_value 'MAXOFF2 (value 'MINOFF2)))
+     (OFFSETPARM20_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) )
+            (do_show 'IMGRTYP2) (do_not_show 'IMGRTYP2))
+	 (OFFSETPARM2_PAR_rule (and (= (value 'P_SHOWIM) 2) (or (= (value 'IMGRTYP2) 2 ) (= (value 'IMGRTYP2) 3) ) )
+			    (progn
+			      (do_show 'MINOFF2)
+			      (do_show 'MAXOFF2)
+			      (do_show 'OFFBNSZ2)
+			      )
+			    (progn
+			      (do_not_show 'MINOFF2)
+			      (do_not_show 'MAXOFF2)
+			      (do_not_show 'OFFBNSZ2)
+			      )
+			    )
+
+     ; Acquisition Footprint
+     (ACQUISITION2_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 2 ) )
+            (do_show 'ACQFOOT2) (do_not_show 'ACQFOOT2))
+
+
+
+	 ; Block NMO
+;	 (BLKNMO12_rule (and  (and (= (value 'ADVANCED) 1) (value 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 2) )
+;			(do_show 'BLKNMO2) (do_not_show 'BLKNMO2) )
+;	 (BLKNMO2_PAR_rule (and (showing 'BLKNMO2) (= (value 'BLKNMO2) 1) ) 
+;			    (progn 
+;			      (do_show 'BNMOTYP2) 
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOTYP2) 
+;			      )
+;			    )
+;	 (BNMOTYP2PARM_rule (and (and (= (value 'ADVANCED) 1) (and (= (value 'BLKNMO2) 1) (> (value 'BNMOTYP2) 1) ) ) ( = (value 'P_SHOWIM) 2 ) )
+;			    (progn 
+;			      (do_show 'BNMOSTP2)
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOSTP2)
+;			      )
+;			    )
+;
+
+	 ;  Begin Parameters for Image Set 3
+
+	 ; Name Parameters	
+	 (P_NAME3_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) )
+			(do_show 'P_NAME3) (do_not_show 'P_NAME3))
+
+	 ; Supergather Parameters
+	 (SUPERG3_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) ) 
+			(do_show 'SG_APPL3) (do_not_show 'SG_APPL3) )
+
+	 (SUPERG31_rule (and (value 'SG_APPL3) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) ) )
+			(progn
+			  (if (not (value 'KT2D)) (do_show 'SGINWD3))
+			  (do_show 'SGXLWD3)
+			  )
+			(progn
+			  (do_not_show 'SGINWD3) 
+			  (do_not_show 'SGXLWD3)
+			  )
+			)
+          (SUPERG32_rule (evenp (value 'SGINWD3))
+			  (set_value 'SGINWD3 (+ 1 (value 'SGINWD3)))
+			)
+          (SUPERG33_rule (evenp (value 'SGXLWD3))
+			  (set_value 'SGXLWD3 (+ 1 (value 'SGXLWD3)))
+			)
+
+	 ; Antialias Parameters	
+	 (ANTIALI3_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) ) 
+			(do_show 'AA_APPL3) (do_not_show 'AA_APPL3) )
+
+	 (ANTIALI31_rule (and (value 'AA_APPL3) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) ) )
+			(progn
+                          (do_show 'AAIMAGE3)
+			  (if (or (value 'KT2D) (value 'AAIMAGE3)) (do_not_show 'IMAGEDX3) (do_show 'IMAGEDX3))
+			  (if (value 'AAIMAGE3) (do_not_show 'IMAGEDY3) (do_show 'IMAGEDY3))
+			  )
+			(progn
+                          (do_not_show 'AAIMAGE3)
+			  (do_not_show 'IMAGEDX3) 
+			  (do_not_show 'IMAGEDY3)
+			  )
+			)
+
+
+
+         ; Migration Direction Parameter
+	 (DIRECPAR03_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) )
+			(if (not (value 'KT2D)) (do_show 'DIRECTN3)) (do_not_show 'DIRECTN3))
+	 
+        ; massage APRTYP3 ?
+        (NOAP3_rule (and (< 1 (length (value 'APRTYP3))) (member 0 (value 'APRTYP3))) (progn
+		    (set_value 'APRTYP3 (remove 0 (value 'APRTYP3)))
+		    (set_selected_item 'APRTYP3 (cdr (selected_item 'APRTYP3 ) ) )
+		    ))
+
+
+         ; Aperture Parameters	
+	 (APERPAR03_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) )
+			(do_show 'APRTYP3) (do_not_show 'APRTYP3))
+	 
+         (NOSHOWAPRD3_rule (not (showing 'TBLAPD3))
+                          (progn
+				(do_not_show 'TBLILD3)
+                                (do_not_show 'TBLXLD3)
+                                (do_not_show 'MINAPD3)
+                                (do_not_show 'MAXAPD3)
+                          ))
+
+         ( ((value TBLAPD3) (value DIRECTN3)) TBLSHOWAPRD3_rule (and (showing 'TBLAPD3) (not (= (value 'TBLAPD3) 0)))
+                        (progn
+                                (do_not_show 'MINAPD3)
+                                (do_not_show 'MAXAPD3)
+				(if (and (not (value 'KT2D)) (not (= (value 'DIRECTN3) 1))) (do_show 'TBLILD3))
+				(if (not (= (value 'DIRECTN3) 2)) (do_show 'TBLXLD3))
+                        ))
+
+         (CONSTSHOWAPRD3_rule (and (showing 'TBLAPD3) (= (value 'TBLAPD3) 0))
+                        (progn
+                                (do_show 'MINAPD3)
+                                (do_show 'MAXAPD3)
+				(do_not_show 'TBLILD3)
+                                (do_not_show 'TBLXLD3)
+                        ))
+
+	 (APERTYP31PARM_rule (and (value 'P_SHOWIM) (or (value 'APRTYP3) (not (= (value 'P_SHOWIM) 3) ) ) )
+			    (progn 
+			      (do_not_show 'MXAPDP3)
+			      (do_not_show 'MXSTRM3) 
+			      (do_not_show 'APDTYP3)
+			      (do_not_show 'TBLAPD3)
+			      (do_not_show 'MUTETAB3)
+			      ) 
+     		    )
+
+	 (APERTYP32PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP3) (and (member 3 (value 'APRTYP3) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP3)
+			      (do_show 'TBLAPD3)
+			      ) 
+		    )
+
+	 (APERTYP33PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP3) (and (member 4 (value 'APRTYP3) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP3)
+			      (do_show 'TBLAPD3)
+			      ) 
+		    )
+
+	 (APERTYP34PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP3) (and (member 5 (value 'APRTYP3) ) ) ) )
+			    (progn 
+			      (do_show 'MXSTRM3) 
+			      ) 
+		    )
+
+	 (APERTYP35PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP3) (and (member 6 (value 'APRTYP3) ) ) ) )
+			    (progn 
+			      (do_show 'MXAPDP3)
+			      ) 
+		    )
+
+	 (APERTYP36PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP3) (and (member 7 (value 'APRTYP3) ) ) ) )
+			    (progn 
+			      (do_show 'MUTETAB3)
+			      ) 
+		    )
+
+
+
+	; Output Parameters	
+	 (FINLIN3_DB_rule (and (not (value 'KT2D)) ( = ( value 'FINLIN3) -1))
+			   (set_value 'FINLIN3 ( db_parmget_line "MINILINz") ) )
+	 (LINLIN3_DB_rule (and (not (value 'KT2D)) ( = ( value 'LINLIN3) -1))
+			   (set_value 'LINLIN3 ( db_parmget_line "MAXILINz") ) )
+	 (FXLIN3_DB_rule ( = ( value 'FXLIN3) -1.0)
+			    (if (value 'KT2D)
+				(set_value 'FXLIN3 ( db_parmget_line "MINCDPz") ) 
+				(set_value 'FXLIN3 ( db_parmget_line "MINXLINz") ) 
+                            ))
+	 (LXLIN3_DB_rule ( = ( value 'LXLIN3) -1.0)
+                            (if (value 'KT2D)
+				(set_value 'LXLIN3 ( db_parmget_line "MAXCDPz") ) 
+				(set_value 'LXLIN3 ( db_parmget_line "MAXXLINz") ) 
+			    ))
+
+
+	 (IMAGEDX3_DB_rule (and (not (value 'KT2D)) ( = ( value 'IMAGEDX3) -1.0))
+			    (set_value 'IMAGEDX3 (* ( db_parmget_line "DCDPXLNz") (value 'INLINC3) ) ) )
+	 (IMAGEDY3_DB_rule ( = ( value 'IMAGEDY3) -1.0)
+			    (set_value 'IMAGEDY3 (* ( db_parmget_line "DCDPILNz") (value 'XLINC3) )  ) )
+
+
+	 (OUTPARM3_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3) )
+			    (progn
+			      ;(do_show 'ODT3)
+			      ;(do_show 'OTMIN3)
+			      ;(do_show 'OTMAX3)
+			      (if (not (value 'KT2D)) (do_show '(FINLIN3 LINLIN3 INLINC3) ))
+			      (do_show 'FXLIN3)
+			      (do_show 'LXLIN3)
+			      (do_show 'XLINC3)
+			      )
+			    (progn
+			      ;(do_not_show 'ODT3)
+			      ;(do_not_show 'OTMIN3)
+			      ;(do_not_show 'OTMAX3)
+			      (do_not_show 'FINLIN3)
+			      (do_not_show 'LINLIN3)
+			      (do_not_show 'INLINC3)
+			      (do_not_show 'FXLIN3)
+			      (do_not_show 'LXLIN3)
+			      (do_not_show 'XLINC3)
+			      )
+
+			    )
+
+
+	 ; Grid Parameters
+	 (GRDPRMS3_rule (and  (and (= (value 'ADVANCED) 1) (showing 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 3) )
+			(do_not_show 'GRDPRMS3) 
+            (do_not_show 'GRDPRMS3)
+     )
+	 (GRDPRMS3_PAR_rule (and (showing 'GRDPRMS3) (= (value 'GRDPRMS3) 1) ) 
+			    (progn 
+			      (do_show 'SBGRTYP3) 
+			      (do_show 'TGRPTYP3) 
+			      (do_show 'ARBMETH3) 
+			      (do_show 'ARBCOOR3) 
+
+			      ) 
+			    (progn 
+			      (do_not_show 'SBGRTYP3)
+			      (do_not_show 'TGRPTYP3) 
+			      (do_not_show 'ARBMETH3) 
+			      (do_not_show 'ARBCOOR3) 
+			      )
+			    )
+
+	; Offset Bin Parameters	
+;	 (MINOFFS3_rule ( = ( value 'MINOFF3) -1.0)
+;			(set_value 'MINOFF3 ( db_parmget_line "OFFMINz") ) )
+	 (MAXOFFS3_rule ( = ( value 'MAXOFF3) -1.0)
+			(set_value 'MAXOFF3 ( db_parmget_line "OFFMAXz") ) )
+	 (OFFBNSZ3_rule ( = ( value 'OFFBNSZ3) -1.0)
+		       (set_value 'OFFBNSZ3 ( db_parmget_line "OFFBINCz") ) )
+	 (OFFORD3_rule ( < (value 'MAXOFF3) (value 'MINOFF3))
+			(set_value 'MAXOFF3 (value 'MINOFF3)))
+     (OFFSETPARM30_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) )
+            (do_show 'IMGRTYP3) (do_not_show 'IMGRTYP3))
+	 (OFFSETPARM3_PAR_rule (and (= (value 'P_SHOWIM) 3) (or (= (value 'IMGRTYP3) 2 ) (= (value 'IMGRTYP3) 3) ) )
+			    (progn
+			      (do_show 'MINOFF3)
+			      (do_show 'MAXOFF3)
+			      (do_show 'OFFBNSZ3)
+			      )
+			    (progn
+			      (do_not_show 'MINOFF3)
+			      (do_not_show 'MAXOFF3)
+			      (do_not_show 'OFFBNSZ3)
+			      )
+			    )
+
+
+     ; Acquisition Footprint
+     (ACQUISITION3_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 3 ) )
+            (do_show 'ACQFOOT3) (do_not_show 'ACQFOOT3))
+
+
+
+	 ; Block NMO
+;	 (BLKNMO13_rule (and  (and (= (value 'ADVANCED) 1) (value 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 3) )
+;			(do_show 'BLKNMO3) (do_not_show 'BLKNMO3) )
+;	 (BLKNMO3_PAR_rule (and (showing 'BLKNMO3) (= (value 'BLKNMO3) 1) ) 
+;			    (progn 
+;			      (do_show 'BNMOTYP3) 
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOTYP3) 
+;			      )
+;			    )
+;	 (BNMOTYP3PARM_rule (and (and (= (value 'ADVANCED) 1) (and (= (value 'BLKNMO3) 1) (> (value 'BNMOTYP3) 1) ) ) ( = (value 'P_SHOWIM) 3 ) )
+;			    (progn 
+;			      (do_show 'BNMOSTP3)
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOSTP3)
+;			      )
+;			    )
+;
+
+
+
+	 ;  Begin Parameters for Image Set 4
+
+	 ; Name Parameters	
+	 (P_NAME4_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) )
+			(do_show 'P_NAME4) (do_not_show 'P_NAME4))
+
+	 ; Supergather Parameters
+	 (SUPERG4_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) ) 
+			(do_show 'SG_APPL4) (do_not_show 'SG_APPL4) )
+
+	 (SUPERG41_rule (and (value 'SG_APPL4) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) ) )
+			(progn
+			  (if (not (value 'KT2D)) (do_show 'SGINWD4))
+			  (do_show 'SGXLWD4)
+			  )
+			(progn
+			  (do_not_show 'SGINWD4) 
+			  (do_not_show 'SGXLWD4)
+			  )
+			)
+          (SUPERG42_rule (evenp (value 'SGINWD4))
+			  (set_value 'SGINWD4 (+ 1 (value 'SGINWD4)))
+			)
+          (SUPERG43_rule (evenp (value 'SGXLWD4))
+			  (set_value 'SGXLWD4 (+ 1 (value 'SGXLWD4)))
+			)
+
+	 ; Antialias Parameters	
+	 (ANTIALI4_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) ) 
+			(do_show 'AA_APPL4) (do_not_show 'AA_APPL4) )
+
+	 (ANTIALI41_rule (and (value 'AA_APPL4) (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) ) )
+			(progn
+                          (do_show 'AAIMAGE4)
+			  (if (or (value 'KT2D) (value 'AAIMAGE4)) (do_not_show 'IMAGEDX4) (do_show 'IMAGEDX4))
+			  (if (value 'AAIMAGE4) (do_not_show 'IMAGEDY4) (do_show 'IMAGEDY4))
+			  )
+			(progn
+                          (do_not_show 'AAIMAGE4)
+			  (do_not_show 'IMAGEDX4) 
+			  (do_not_show 'IMAGEDY4)
+			  )
+			)
+
+         ; Migration Direction Parameter
+	 (DIRECPAR04_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) )
+			(if (not (value 'KT2D)) (do_show 'DIRECTN4)) (do_not_show 'DIRECTN4))
+	 
+        ; massage APRTYP4 ?
+        (NOAP4_rule (and (< 1 (length (value 'APRTYP4))) (member 0 (value 'APRTYP4))) (progn
+		    (set_value 'APRTYP4 (remove 0 (value 'APRTYP4)))
+		    (set_selected_item 'APRTYP4 (cdr (selected_item 'APRTYP4 ) ) )
+		    ))
+
+
+         ; Aperture Parameters	
+	 (APERPAR04_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) )
+			(do_show 'APRTYP4) (do_not_show 'APRTYP4))
+	 
+         (NOSHOWAPRD4_rule (not (showing 'TBLAPD4))
+                          (progn
+				(do_not_show 'TBLILD4)
+                                (do_not_show 'TBLXLD4)
+                                (do_not_show 'MINAPD4)
+                                (do_not_show 'MAXAPD4)
+                          ))
+
+         ( ((value TBLAPD4) (value DIRECTN4)) TBLSHOWAPRD4_rule (and (showing 'TBLAPD4) (not (= (value 'TBLAPD4) 0)))
+                        (progn
+                                (do_not_show 'MINAPD4)
+                                (do_not_show 'MAXAPD4)
+				(if (and (not (value 'KT2D)) (not (= (value 'DIRECTN4) 1))) (do_show 'TBLILD4))
+				(if (not (= (value 'DIRECTN4) 2)) (do_show 'TBLXLD4))
+                        ))
+
+         (CONSTSHOWAPRD4_rule (and (showing 'TBLAPD4) (= (value 'TBLAPD4) 0))
+                        (progn
+                                (do_show 'MINAPD4)
+                                (do_show 'MAXAPD4)
+				(do_not_show 'TBLILD4)
+                                (do_not_show 'TBLXLD4)
+                        ))
+
+	 (APERTYP41PARM_rule (and (value 'P_SHOWIM) (or (value 'APRTYP4) (not (= (value 'P_SHOWIM) 4) ) ) )
+			    (progn 
+			      (do_not_show 'MXAPDP4)
+			      (do_not_show 'MXSTRM4) 
+			      (do_not_show 'APDTYP4)
+			      (do_not_show 'TBLAPD4)
+			      (do_not_show 'MUTETAB4)
+			      ) 
+     		    )
+
+	 (APERTYP42PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP4) (and (member 3 (value 'APRTYP4) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP4)
+			      (do_show 'TBLAPD4)
+			      ) 
+		    )
+
+	 (APERTYP43PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP4) (and (member 4 (value 'APRTYP4) ) ) ) )
+			    (progn 
+			      (do_show 'APDTYP4)
+			      (do_show 'TBLAPD4)
+			      ) 
+		    )
+
+	 (APERTYP44PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP4) (and (member 5 (value 'APRTYP4) ) ) ) )
+			    (progn 
+			      (do_show 'MXSTRM4) 
+			      ) 
+		    )
+
+	 (APERTYP45PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP4) (and (member 6 (value 'APRTYP4) ) ) ) )
+			    (progn 
+			      (do_show 'MXAPDP4)
+			      ) 
+		    )
+
+	 (APERTYP46PARM_rule (and (value 'P_SHOWIM) (and (showing 'APRTYP4) (and (member 7 (value 'APRTYP4) ) ) ) )
+			    (progn 
+			      (do_show 'MUTETAB4)
+			      ) 
+		    )
+
+	; Output Parameters	
+	 (FINLIN4_DB_rule (and (not (value 'KT2D)) ( = ( value 'FINLIN4) -1))
+			   (set_value 'FINLIN4 ( db_parmget_line "MINILINz") ) )
+	 (LINLIN4_DB_rule (and (not (value 'KT2D)) ( = ( value 'LINLIN4) -1))
+			   (set_value 'LINLIN4 ( db_parmget_line "MAXILINz") ) )
+	 (FXLIN4_DB_rule ( = ( value 'FXLIN4) -1.0)
+			    (if (value 'KT2D)
+				(set_value 'FXLIN4 ( db_parmget_line "MINCDPz") ) 
+				(set_value 'FXLIN4 ( db_parmget_line "MINXLINz") ) 
+                            ))
+	 (LXLIN4_DB_rule ( = ( value 'LXLIN4) -1.0)
+                            (if (value 'KT2D)
+				(set_value 'LXLIN4 ( db_parmget_line "MAXCDPz") ) 
+				(set_value 'LXLIN4 ( db_parmget_line "MAXXLINz") ) 
+			    ))
+
+	 (IMAGEDX4_DB_rule (and (not (value 'KT2D)) ( = ( value 'IMAGEDX4) -1.0))
+			    (set_value 'IMAGEDX4 (* ( db_parmget_line "DCDPXLNz") (value 'INLINC4) ) ) )
+	 (IMAGEDY4_DB_rule (= ( value 'IMAGEDY4) -1.0)
+			    (set_value 'IMAGEDY4 (* ( db_parmget_line "DCDPILNz") (value 'XLINC4) )  ) )
+
+
+
+	 (OUTPARM4_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4) )
+			    (progn
+			      ;(do_show 'ODT4)
+			      ;(do_show 'OTMIN4)
+			      ;(do_show 'OTMAX4)
+			      (if (not (value 'KT2D)) (do_show '(FINLIN4 LINLIN4 INLINC4) ))
+			      (do_show 'FXLIN4)
+			      (do_show 'LXLIN4)
+			      (do_show 'XLINC4)
+			      )
+			    (progn
+			      ;(do_not_show 'ODT4)
+			      ;(do_not_show 'OTMIN4)
+			      ;(do_not_show 'OTMAX4)
+			      (do_not_show 'FINLIN4)
+			      (do_not_show 'LINLIN4)
+			      (do_not_show 'INLINC4)
+			      (do_not_show 'FXLIN4)
+			      (do_not_show 'LXLIN4)
+			      (do_not_show 'XLINC4)
+			      )
+
+			    )
+
+
+	 ; Grid Parameters
+	 (GRDPRMS4_rule (and  (and (= (value 'ADVANCED) 1) (showing 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 4) )
+			(do_not_show 'GRDPRMS4)
+            (do_not_show 'GRDPRMS4)
+     )
+	 (GRDPRMS4_PAR_rule (and (showing 'GRDPRMS4) (= (value 'GRDPRMS4) 1) ) 
+			    (progn 
+			      (do_show 'SBGRTYP4) 
+			      (do_show 'TGRPTYP4) 
+			      (do_show 'ARBMETH4) 
+			      (do_show 'ARBCOOR4) 
+
+			      ) 
+			    (progn 
+			      (do_not_show 'SBGRTYP4)
+			      (do_not_show 'TGRPTYP4) 
+			      (do_not_show 'ARBMETH4) 
+			      (do_not_show 'ARBCOOR4) 
+			      )
+			    )
+
+	; Offset Bin Parameters	
+;	 (MINOFFS4_rule ( = ( value 'MINOFF4) -1.0)
+;			(set_value 'MINOFF4 ( db_parmget_line "OFFMINz") ) )
+	 (MAXOFFS4_rule ( = ( value 'MAXOFF4) -1.0)
+			(set_value 'MAXOFF4 ( db_parmget_line "OFFMAXz") ) )
+	 (OFFBNSZ4_rule ( = ( value 'OFFBNSZ4) -1.0)
+		       (set_value 'OFFBNSZ4 ( db_parmget_line "OFFBINCz") ) )
+	 (OFFORD4_rule ( < (value 'MAXOFF4) (value 'MINOFF4))
+			(set_value 'MAXOFF4 (value 'MINOFF4)))
+     (OFFSETPARM40_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) )
+            (do_show 'IMGRTYP4) (do_not_show 'IMGRTYP4))
+	 (OFFSETPARM4_PAR_rule (and (= (value 'P_SHOWIM) 4) (or (= (value 'IMGRTYP4) 2 ) (= (value 'IMGRTYP4) 3) ) )
+			    (progn
+			      (do_show 'MINOFF4)
+			      (do_show 'MAXOFF4)
+			      (do_show 'OFFBNSZ4)
+			      )
+			    (progn
+			      (do_not_show 'MINOFF4)
+			      (do_not_show 'MAXOFF4)
+			      (do_not_show 'OFFBNSZ4)
+			      )
+			    )
+
+     ; Acquisition Footprint
+     (ACQUISITION4_PAR_rule (and (showing 'P_SHOWIM) ( = (value 'P_SHOWIM) 4 ) )
+            (do_show 'ACQFOOT4) (do_not_show 'ACQFOOT4))
+
+
+	 ; Block NMO
+;	 (BLKNMO14_rule (and  (and (= (value 'ADVANCED) 1) (value 'P_SHOWIM) ) ( = (value 'P_SHOWIM) 4) )
+;			(do_show 'BLKNMO4) (do_not_show 'BLKNMO4) )
+;	 (BLKNMO4_PAR_rule (and (showing 'BLKNMO4) (= (value 'BLKNMO4) 1) ) 
+;			    (progn 
+;			      (do_show 'BNMOTYP4) 
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOTYP4) 
+;			      )
+;			    )
+;	 (BNMOTYP4PARM_rule (and (and (= (value 'ADVANCED) 1) (and (= (value 'BLKNMO4) 1) (> (value 'BNMOTYP4) 1) ) ) ( = (value 'P_SHOWIM) 4 ) )
+;			    (progn 
+;			      (do_show 'BNMOSTP4)
+;			      ) 
+;			    (progn 
+;			      (do_not_show 'BNMOSTP4)
+;			      )
+;			    )
+;
+
+
+	 ) ; end rules
+  ) ; end menu file

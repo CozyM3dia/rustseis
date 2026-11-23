@@ -1,0 +1,57 @@
+{
+  "menu_id": "agc",
+  "tool_name": "AGC",
+  "label": "Automatic Gain Control",
+  "parameter_count": 7,
+  "parameters": [
+    {
+      "name": "MODE_APP",
+      "prompt": "Application mode",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select AGC only, AGC and save scalars, or remove a previously saved AGC operation."
+    },
+    {
+      "name": "MODE_AMP",
+      "prompt": "Type of AGC scalar",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "AGC scalars can be computed using the MEAN, RMS, or MEDIAN of the samples in the sliding time gate."
+    },
+    {
+      "name": "AGCLEN",
+      "prompt": "AGC operator length",
+      "kind": "typein",
+      "default": "500.0",
+      "help": "Amplitude estimation operator length in milliseconds for sliding gate AGC."
+    },
+    {
+      "name": "MODE_WIN",
+      "prompt": "BASIS for scalar application",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "For normal operations CENTERED should be used.  TRAILING and LEADING will distort waveforms."
+    },
+    {
+      "name": "mode_option",
+      "prompt": "Exclude hard zeroes?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "'Hard zeroes' (0.0 values) may be excluded from scalar computations.  This avoids strange mute effects."
+    },
+    {
+      "name": "robust_option",
+      "prompt": "Robust Scaling?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to limit the AGC scaling to be within a factor of the median scalar."
+    },
+    {
+      "name": "ROBUST",
+      "prompt": "Maximum scaling factor",
+      "kind": "typein",
+      "default": "20.0",
+      "help": "Forces the AGC scale factor to be within this factor of the median scalar."
+    }
+  ]
+}

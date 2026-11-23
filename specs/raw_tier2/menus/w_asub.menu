@@ -1,0 +1,100 @@
+;; 1 IIID IVD DEV DEPTHC
+'(
+name: W_ASUB
+label: "SRME Adaptive Subtraction"
+value_tab: 45
+
+
+parameter: DATAORG
+text: "Input data organization"
+type: pop_choose:
+type_desc: (
+ ("DDD...NNN "     1 "Panel of data + panel of noise.")
+ ("DNDN...DN "     2 "Data and noise alternate in ensemble.")
+ ("NNN...DDD "     3 "Panel of noise + panel of data.")
+ ("NDND...ND "     4 "Noise and data alternate in ensemble.")
+            )
+value: 1
+mouse_text: "Specify how data and noise are ordered in the emsemble"
+plot_label: t
+
+
+parameter: OPTION
+text: "Output option"
+type: pop_choose:
+type_desc: (
+ ("Signal" 1 "Output the estimated signal.")
+ ("Noise"  2 "Output the filtered noise.")
+ ("Both"   3 "Output both the input signal and filtered noise.")
+            )
+value: 1
+mouse_text: "Specify the output desired."
+plot_label: t
+
+
+parameter: TWINDOW
+text: "Temporal window length (ms)"
+type: typein:
+type_desc: ( real: 5 20. nil )
+value: 240.
+mouse_text: "Length of the temporal design window (ms)."
+plot_label: t
+
+
+parameter: FLENGTH
+text: "Filter length (ms)"
+type: typein:
+type_desc: ( real: 5 1. nil )
+value: 8.
+mouse_text: "Length of the adaptive filter (ms)."
+plot_label: t
+
+
+parameter: SWINDOW
+text: "Spatial averaging size"
+type: typein:
+type_desc: ( real: 7 0. nil )
+value: 0.
+mouse_text: "Radius of circle (ft or m) over which to average in filter design (0 means no spatial averaging)."
+plot_label: t
+
+
+parameter: FCOFMAX
+text: "Maximum filter coefficient"
+type: typein:
+type_desc: ( real: 7 0. nil )
+value: 1.5
+mouse_text: "Specify maximum coeffient in filter (0 means no restriction)."
+plot_label: t
+
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', you must execute this program yourself using a debugger."
+
+
+exec_data: ("ST_W_ASUB"
+		("GENERAL"
+                        ("program"   implicit: "w_asub.exe" )
+                        ("DEBUG"     implicit: (if (value 'DEBUG) 2 0 ) )
+                        ("version"   implicit: "ProMAX $Id: w_asub.menu 43993 2009-02-26 17:51:37Z David Johnston $ $Revision: 43993 $ $Date: 2009-02-26 10:51:37 -0700 (Thu, 26 Feb 2009) $")
+;  variables after here are user parameters
+			("DATAORG" implicit: (value 'DATAORG))
+			("OPTION " implicit: (value 'OPTION))
+			("TWINDOW" implicit: (value 'TWINDOW))
+			("FLENGTH" implicit: (value 'FLENGTH))
+			("SWINDOW" implicit: (value 'SWINDOW))
+			("FCOFMAX" implicit: (value 'FCOFMAX))
+		 )
+	    ) 
+
+rules:  (
+(socket_debug_rule t
+                (if (= (printenv 'SOCKET_DEBUG) "t")
+                       (do_show 'DEBUG)
+                       (do_not_show 'DEBUG) )  )
+        )
+
+)

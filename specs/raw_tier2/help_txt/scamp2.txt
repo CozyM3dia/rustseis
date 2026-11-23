@@ -1,0 +1,933 @@
+Surface Consistent Amplitudes2064
+
+ProMAX® Reference
+
+Surface Consistent Amplitudes
+Surface Consistent Amplitudes estimates and adjusts the
+relative amplitude contributions of sources, receivers, offset
+bins, CDPs and channels, on a surface consistent basis.
+
+Theory
+The amplitude of any trace is a combination of a number of
+factors. These include the strength of the shot, the response
+and coupling of the receivers, the performance of the
+ampliﬁer channel, the offset of the traces, the density and
+velocity contrasts of the reﬂecting horizons, and other more
+ambiguous factors, such as ambient noise. While it is
+difﬁcult to separate these effects on a single trace, they can
+be estimated statistically from many traces. For example, the
+traces of a particularly weak shot will tend to show lower
+than normal amplitudes. All traces recorded at a certain
+ground station can be of higher amplitude because of better
+than average geophone coupling at that surface location. One
+or more channels may differ in response from the average.
+Typically CDP, Offset Bin and Channel are not surface
+consistent domains.
+This tool is a three-pass process: Input, Compute and Apply.
+The last two passes may be combined.
+Input mode
+This is the ﬁrst pass. It estimates the amplitude for each
+input trace over a speciﬁed time gate and writes the
+amplitude to the TRC database.
+Amplitude is estimated in a time gate. One and only one time
+gate per trace must be speciﬁed, but the gate may vary
+spatially along the line. If the time gate for a trace is less than
+a minimum threshold length, parameter Minimum gate
+width, the program resets the gate to the minimum length.
+The reset time gate is centered on the starting time of the
+original gate.
+The program can compute statistical amplitude estimates by
+the following methods:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2065
+
+ProMAX® Reference
+
+1. Use the mean of the absolute amplitude of all nonzero
+samples in the gate.
+2. Use the RMS of all nonzero samples in the gate.
+3. Use the median of a set of mean amplitudes computed for
+21 subgates of the instantaneous amplitude envelope
+trace. Here is what happens for this option:
+• Compute the instantaneous amplitude envelope trace
+using a Hilbert transform.
+• Divide the gate into 21 expanding subgates. Subgate 1
+contains the ﬁrst 1/21 samples of the gate, subgate 2
+the ﬁrst 2/21 samples, and so on.
+• Compute the mean of the amplitude envelope of all nonzero samples in each subgate.
+• Use the median of the 21 subgate amplitudes as the
+value for this trace. Only subgates containing nonzero
+values are used to derive the median.
+Compute only mode
+This is the second pass. It is a stand alone process and does
+not input or output traces. Instead, it reads the initial trace
+amplitudes from the TRC database, decomposes them into
+the desired components, and writes the component
+amplitudes to the SIN, SRF, OFB, CDP and CHN databases.
+The ﬁrst step in decomposition is to create initial amplitude
+estimates for each source, receiver, offset, CDP and channel.
+The program creates the initial estimates by combining the
+amplitudes of all traces that contribute to each component.
+The program can combine trace amplitudes by the following
+methods:
+1. Use the mean of all trace amplitudes within a range of
+minimum and maximum amplitudes.
+2. Use an alpha-trim mean of all trace amplitudes.
+The program uses a Gauss-Seidel iterative inversion method
+to decompose the initial amplitude estimates. This approach
+is very similar to the one used to calculate surface consistent
+static corrections. After the last iteration, the ﬁnal amplitude
+solutions are written to the database for quality control
+and/or subsequent application.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2066
+
+ProMAX® Reference
+
+Apply only mode
+This is the third pass. It applies amplitude adjustments to
+the input traces. You may apply amplitudes from any or all of
+the components. If you elect to apply gains from all ﬁve
+components, the program multiplies each trace sample by
+1.0 / (SRC_GAIN * RCVR_GAIN * OFFSET_GAIN * CDP_GAIN * CHAN_GAIN)
+
+If the amplitude for a component index is null, a gain of 1.0 is
+used for that component.
+Compute and Apply mode
+This combines the second and third passes.
+
+Usage
+Input prestack traces may be in any order. They should have
+true amplitude recovery applied to them.
+Input mode may be run many times with Yes to Add to
+existing trace amps to input portions of the trace volume as
+they become available and accumulate amplitudes in a single
+TRC AMP_COMP AMPLxxxx database attribute. Then
+Compute only mode decomposes all trace amplitudes into
+the desired components.
+Surface Consistent Amplitudes causes output trace
+amplitudes to be near unity, 1. If amplitudes closer to those
+of the input data are desired, use Trace Math after Surface
+Consistent Amplitudes to multiply by a scalar equal to the
+average amplitude of all the input traces. This average
+amplitude value can be obtained from Amplitude Scanning
+or by visual inspection of the TRC AMP_COMP AMPLxxxx
+database attribute.
+The following database entries are created:
+Database Entries
+Order
+
+Name
+
+Description
+
+TRC
+
+AMP_COMP
+
+AMPLxxxx
+
+Individual trace amplitude
+estimates
+
+SIN
+
+Other Docs
+
+Info Type
+
+AMP_COMP
+
+AMPLxxxx
+
+Source surface-consistent
+average amplitudes
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2067
+
+ProMAX® Reference
+
+Database Entries
+Order
+
+Info Type
+
+Name
+
+Description
+
+SRF
+
+AMP_COMP
+
+AMPLxxxx
+
+Receiver surface-consistent
+average amplitudes
+
+OFB
+
+AMP_COMP
+
+AMPLxxxx
+
+Offset Bin-consistent
+average amplitudes
+
+CDP
+
+AMP_COMP
+
+AMPLxxxx
+
+CDP-consistent smoothed
+average amplitudes
+
+CHN
+
+AMP_COMP
+
+AMPLxxxx
+
+Channel -consistent average
+amplitudes
+
+For the TRC attribute, xxxx in the name stands for the value
+of parameter 4-character ID for trace amps. For the other
+attributes, xxxx in the name stands for the value of
+parameter 4-character ID for component amps. The
+description of each database parameter includes the time
+and date created.
+The TRC attribute is created during Input mode. If the
+attribute already exists, the contents may be reinitialized to
+null or retained, depending upon the choice for parameter
+Add to existing trace amps. The other attributes are created
+during Compute only or Compute and Apply mode. If the
+attribute already exists, the contents are always reinitialized
+to null.
+Data set/Database Requirements
+Surface Consistent Amplitudes makes extensive use of the
+database to allocate memory and to look up relationships
+among the components. The following are data set and
+database requirements to run this process:
+• The data set must have geometry that matches the database.
+• The data set must have trace numbers that match the
+database.
+• The following attributes must be deﬁned in the database:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2068
+
+ProMAX® Reference
+
+If SHOT to Components of amplitude decomposition
+Order
+
+Info Type
+
+Description
+
+MAXCPSz
+
+LIN
+
+Name
+
+Maximum channels per shot
+
+TRC
+
+GEOMETRY
+
+SIN
+
+SIN Number
+
+TRC
+
+GEOMETRY
+
+SIN_LTBL
+
+SIN look-up
+
+SIN
+
+GEOMETRY
+
+NCHANS
+
+Calculated fold of shot
+
+SIN
+
+GEOMETRY
+
+SLOOKUP
+
+TRC lookup
+
+If RCVR to Components of amplitude decomposition
+Order
+
+Info Type
+
+Description
+
+MAXTPRz
+
+LIN
+
+Name
+
+Maximum traces per
+receiver ensemble
+
+TRC
+
+GEOMETRY
+
+SRF
+
+SRF Number
+
+TRC
+
+GEOMETRY
+
+SRF_LTBL
+
+SRF look-up
+
+SRF
+
+GEOMETRY
+
+FOLD
+
+Fold of Receiver
+
+SRF
+
+GEOMETRY
+
+SLOOKUP
+
+TRC lookup
+
+If OFFSET to Components of amplitude decomposition
+Order
+
+Info Type
+
+Name
+
+Description
+
+TRC
+
+GEOMETRY
+
+OFB
+
+Offset Bin Number
+
+TRC
+
+GEOMETRY
+
+OFB_LTBL
+
+Offset Bin look-up
+
+OFB
+
+GEOMETRY
+
+FOLD
+
+Fold of Offset Bin
+
+OFB
+
+GEOMETRY
+
+SLOOKUP
+
+TRC lookup
+
+If CDP to Components of amplitude decomposition
+Order
+
+Name
+
+Description
+
+LIN
+
+NTRCDPz
+
+Maximum CDP fold
+
+LIN
+
+Other Docs
+
+Info Type
+
+NILINESz
+
+Number of inlines (3D
+smoothing only)
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2069
+
+ProMAX® Reference
+
+If CDP to Components of amplitude decomposition
+Order
+
+Info Type
+
+Description
+
+NXLINESz
+
+LIN
+
+Name
+
+Number of crosslines (3D
+smoothing only)
+
+TRC
+
+GEOMETRY
+
+CDP
+
+CDP Number
+
+TRC
+
+GEOMETRY
+
+CDP_LTBL
+
+CDP look-up
+
+SRF
+
+GEOMETRY
+
+FOLD
+
+Fold of CDP
+
+SRF
+
+GEOMETRY
+
+SLOOKUP
+
+TRC lookup
+
+If CHAN to Components of amplitude decomposition
+Order
+
+Info Type
+
+Description
+
+NSINSz
+
+LIN
+
+Name
+
+Total number of SINs (used
+as maximum fold)
+
+TRC
+
+GEOMETRY
+
+CHN
+
+Channel Number
+
+TRC
+
+GEOMETRY
+
+CHN_LTBL
+
+CHN look-up
+
+CHN
+
+GEOMETRY
+
+FOLD
+
+Fold of Channel
+
+CHN
+
+GEOMETRY
+
+SLOOKUP
+
+TRC lookup
+
+Using OTHER, a user-deﬁned component
+You can use OTHER in addition to or as a replacement for
+the standard components. You can use any header word in
+the input trace headers with INTEGER format to deﬁne the
+OTHER component. You must choose which header word to
+use before Input mode because during Input mode the
+program creates database attributes that are needed to
+include OTHER in the decomposition.
+If, during Compute mode, you decide that you don’t want to
+use the OTHER component, simply drop it from
+Components of amplitude decomposition. However, if you
+decide that you want to use a different header word for
+OTHER, you must rerun Input mode to create a new set of
+database attributes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2070
+
+ProMAX® Reference
+
+Database Entries for OTHER
+Order
+
+Info Type
+
+Name
+
+Description
+
+TRC
+
+AMP_COMP
+
+OTHRxxxx
+
+OTHER value for each trace
+
+TRC
+
+AMP_COMP
+
+FOLDxxxx
+
+FOLD of OTHER values
+
+TRC
+
+AMP_COMP
+
+LOOKxxxx
+
+SLOOKUP of OTHER
+values
+
+TRC
+
+AMP_COMP
+
+LTBLxxxx
+
+LTBL of OTHER values
+
+TRC
+
+AMP_COMP
+
+AMPLxxxx
+
+OTHER-consistent average
+amplitudes
+
+The OTHRxxxx, FOLDxxxx, LOOKxxxx and LTBLxxxx
+attributes are created during Input mode. The xxxx in the
+name stands for the value of parameter 4-character ID for
+trace amps. If the attributes already exist, the contents may
+be reinitialized to null or retained, depending upon the choice
+for parameter Add to existing trace amps.
+The AMPLxxxx attribute is created during Compute mode.
+The xxxx in the name stands for the value of parameter 4character ID for component amps. If the attribute already
+exists, the contents are always reinitialized to null.
+The description of each attribute includes the name of the
+OTHER header word and the time and date created.
+
+Parameters
+Mode of operation
+Select the mode of operation from:
+• Input inputs traces, computes amplitude estimates, and
+writes trace amplitudes to the database.
+• Compute only computes surface-consistent component
+gains and writes them to the database.
+Note: In this mode the tool is stand alone and should be
+the only tool in the ﬂow.
+• Apply only applies previously computed component
+gains to the input traces.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2071
+
+ProMAX® Reference
+
+• Compute and apply computes surface-consistent component gains, writes them to the database, and applies
+them to the input traces.
+Input parameters
+These appear if Input to Mode of operation.
+Type of amplitude computations
+Select the type of amplitude estimation for each input trace
+from:
+• Absolute values of samples uses the mean of the absolute amplitude of all nonzero samples in the analysis
+gate.
+• RMS of samples uses the RMS of all nonzero samples in
+the analysis gate.
+• Complex trace amplitude analysis uses the median of
+a set of mean amplitudes computed for 21 subgates of
+the instantaneous amplitude envelope trace.
+OTHER will be part of decomposition?
+Select Yes if the decomposition will include OTHER, a userdeﬁned component. The program will write to the database
+the attributes needed to include the user-deﬁned component
+in the decomposition.
+See the section OTHER parameters for information on the
+parameters that appear if you select Yes.
+Analysis gate reference time
+Select from:
+• Time zero to have gate times referenced to time zero.
+• Water bottom to have gate times referenced to the
+water-bottom time. The value of trace header entry
+WB_TIME is added to gate start and end times. For
+example, if the start time from the menu or gate ﬁle is
+500 ms and the value of WB_TIME in the trace header is
+300 ms, the design gate starts at 800 ms.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2072
+
+ProMAX® Reference
+
+Get analysis time gate from the DATABASE?
+Select Yes to get an analysis time gate from the database.
+Select No to manually enter the analysis gate.
+SELECT time gate parameter FILE
+This appears if Yes to Get analysis time gate from the
+DATABASE. Select a Miscellaneous Time Gate (GAT) or Water
+Bottom Relative Time Gate (WBG) parameter ﬁle. The ﬁle
+must contain only one gate per location.
+SELECT Primary time gate header word
+This appears if No to Get analysis time gate from the
+DATABASE. Select a header word from the Headers menu as
+the Primary key for specifying time gate values.
+SELECT Secondary time gate header word
+This appears if No to Get analysis time gate from the
+DATABASE. Select a header word from the Headers menu as
+the Secondary key for specifying time gate values.
+SPECIFY time gate parameters
+This appears if No to Get analysis time gate from the
+DATABASE. Enter values for the primary key, the secondary
+key (if any) and the start and stop times of the analysis time
+gate. Enter one gate per location.
+Minimum gate width (ms)
+Enter the minimum width of any analysis time gate in ms. At
+some far offsets, there may not be sufﬁcient live samples
+within the gate to accurately estimate the amplitudes. If the
+minimum gate width is reached, the gate is expanded above
+and below the gate start time to this minimum width.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2073
+
+ProMAX® Reference
+
+Compute parameters
+These appear if Compute only or Compute and Apply to
+Mode of operation.
+Components of amplitude decomposition
+Select the components to use in trace amplitude
+decomposition.
+A multi-value menu appears with six possible components:
+SHOT, RCVR, OFFSET, CDP, CHAN and OTHER. Select
+your choices and click Accept. Click on Help to display a
+description of the functionality of this menu. Exit without
+performing any update by clicking on Abort.
+See the section OTHER parameters for information on the
+parameters that appear if you select OTHER to Components
+of amplitude decomposition.
+First component to decompose
+Second component to decompose
+Third component to decompose
+Fourth component to decompose
+Fifth component to decompose
+Sixth component to decompose
+These appear up to the number of Components of
+amplitude decomposition. Select the ﬁrst component to
+decompose, then the second, and so on.
+The order of decomposition is important. The traditional
+order has been SHOT, RCVR, OFFSET, CDP and CHAN.
+Number of amplitude partitioning iterations
+Enter the number of Gauss-Seidel amplitude partitioning
+iterations to do for the component separation. For most data,
+ﬁve iterations are enough.
+Number of CDPs for structural amplitude smoothing
+This appears if CDP to Components of amplitude
+decomposition. Enter the odd number of CDPs over which to
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2074
+
+ProMAX® Reference
+
+smooth CDP reﬂection amplitude estimates. Smoothing the
+CDP component removes the rapid variations which may not
+be valid for subsurface amplitude effects. Enter 1 for no
+smoothing.
+Initial ensemble statistics
+Select one of the following methods for computing initial
+ensemble amplitude estimates:
+• Mean with min/max exclude uses the mean of amplitudes within min and max values. This is the faster
+method.
+• Alpha-trim mean uses alpha-trim mean to compute initial ensemble amplitude estimates.
+Minimum amplitude for analysis
+Maximum amplitude for analysis
+These appear if Mean with min/max exclude to Initial
+ensemble statistics. Enter the minimum and maximum
+amplitudes to use when computing initial ensemble
+amplitude estimates. Any trace with amplitude outside this
+range is not used.
+Pick minimum and maximum amplitudes for analysis on a
+dbTools display of the TRC AMP_COMP AMPLxxxx database
+attribute.
+Alpha trim percent
+This appears if Alpha-trim mean to Initial ensemble
+statistics. Enter a percentage of trace amplitudes to reject
+when computing initial ensemble amplitude estimates. Enter
+0.0 for pure mean and 100.0 for pure median.
+Conserve memory?
+In Compute mode the program makes extensive use of the
+database to look up relationships among the components.
+Select No to read values from the database once and store
+them in memory. Select Yes to conserve memory by reading
+values from the database each time they are needed.
+Elapsed time for the job is usually much shorter when
+database values are stored in memory. Select Yes only when
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2075
+
+ProMAX® Reference
+
+they will not ﬁt in memory or when the job spends a
+signiﬁcant amount of time swapped out.
+Apply parameters
+Remove previously applied gains?
+This appears if Apply only to Mode of operation. Select No
+to apply gains as described in the Apply only mode section
+of Theory. Select Yes to remove previously applied gains by
+applying the inverse of the described scalar.
+Components to use in amplitude scaling
+This appears if Apply only or Compute and Apply to Mode
+of operation. Select the components to use in trace
+amplitude scaling.
+A multi-value menu appears with up to six possible
+components: SHOT, RCVR, OFFSET, CDP, CHAN and
+OTHER. Select your choices and click Accept. Click on Help
+to display a description of the functionality of this menu. Exit
+without performing any update by clicking on Abort.
+See the section OTHER parameters for information on the
+parameters that appear if you select OTHER to Components
+to use in amplitude scaling.
+Source gain database parameter
+This appears if Apply only to Mode of operation and Shot
+to Components to use in amplitude scaling. Select the
+database attribute containing the source gain to apply.
+Receiver gain database parameter
+This appears if Apply only to Mode of operation and
+Receiver to Components to use in amplitude scaling.
+Select the database attribute containing the receiver gain to
+apply.
+Offset bin gain database parameter
+This appears if Apply only to Mode of operation and Offset
+to Components to use in amplitude scaling. Select the
+database attribute containing the offset bin gain to apply.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2076
+
+ProMAX® Reference
+
+CDP gain database parameter
+This appears if Apply only to Mode of operation and CDP to
+Components to use in amplitude scaling. Select the
+database attribute containing the CDP gain to apply.
+Channel gain database parameter
+This appears if Apply only to Mode of operation and Chan
+to Components to use in amplitude scaling. Select the
+database attribute containing the channel gain to apply.
+OTHER gain database parameter
+This appears if Apply only to Mode of operation and
+OTHER to Components to use in amplitude scaling. Select
+the database attribute containing the user-deﬁned gain to
+apply.
+OTHER parameters
+These appear if Input to Mode of operation and Yes to
+OTHER will be part of decomposition, if Compute only or
+Compute and Apply to Mode of operation and OTHER to
+Components of amplitude decomposition, or if Apply only
+to Mode of operation and OTHER to Components to use in
+amplitude scaling.
+SELECT header word for OTHER component
+Select the header word to use as the OTHER component of
+spectral decomposition. The selected word must have
+INTEGER format.
+Minimum value for OTHER
+Maximum value for OTHER
+Enter the minimum and maximum values for the OTHER
+component header word. During Input mode, the job aborts
+if any input trace has a value outside this range. During
+Apply mode, the program uses an OTHER gain of 1 for any
+input trace that has a value outside this range.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2077
+
+ProMAX® Reference
+
+Increment for OTHER
+Enter the increment for the OTHER component header word
+values. If the increment is too large, the job does not abort,
+but amplitudes for adjoining OTHER values are lumped
+together.
+Maximum fold for OTHER
+Enter the maximum number of traces in an OTHER gather.
+During Input mode, the job aborts if the maximum fold is
+exceeded for any OTHER value. During Compute mode, if
+maximum fold is too large, then allocated memory is larger
+than needed.
+General parameters
+4-character ID for trace amps
+This appears if Input, Compute only or Compute and
+Apply to Mode of operation. Enter 4 characters (letters or
+numbers) for identifying the TRC AMP_COMP AMPLxxxx
+database attribute containing trace amplitudes that is
+created during input mode and read during compute mode.
+Add to existing trace amps?
+This appears if Input to Mode of operation. Select Yes to
+add to an existing TRC AMP_COMP AMPLxxxx database
+attribute. Select No to initialize all attribute values to null,
+destroying any existing values.
+4-character ID for component amps
+This appears if Compute only or Compute and Apply to
+Mode of operation. Enter 4 characters (letters or numbers)
+for identifying the (SIN, SRF, OFB, CDP and CHN)
+AMP_COMP AMPLxxxx database attributes containing
+component amplitudes that are created during compute
+mode.
+Separate IDs for the trace and component attributes enable
+the user to generate and compare different component
+solutions.
+If OTHER to Components of amplitude decomposition,
+then IDs for trace and component amplitudes cannot be
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2078
+
+ProMAX® Reference
+
+equal. Both input trace amplitudes and the OTHERcomponent solution are in the TRC order of the database. If
+the trace and component IDs were equal, the OTHERcomponent solution would overwrite the trace amplitudes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Surface Consistent Amplitudes2079
+
+Other Docs
+
+Search Page
+
+ProMAX® Reference
+
+Known Problems
+
+

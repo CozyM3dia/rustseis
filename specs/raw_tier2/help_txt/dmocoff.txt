@@ -1,0 +1,116 @@
+Common Offset DMO
+Common Offset DMO is a Kirchhoff time-domain common
+offset DMO.
+
+Theory
+The trace spacing within a typical common-offset ensemble is
+equivalent to the shotpoint spacing of your data. Aliasing
+effects may severely degrade the results of Common Offset
+DMO preferred on theses ensembles. Therefore, we strongly
+recommended to use Common Offset DMO Binning before
+Common Offset DMO. Common Offset DMO Binning allows
+you to deﬁne offset bins, generating common offset
+ensembles with a trace spacing equal to the nominal CMP
+spacing. Common Offset DMO Binning is also used to further
+reduce the number of common-offset ensembles, by using
+larger offset bin sizes.
+For more information about DMO, see the DMO Overview.
+
+Usage
+Common Offset DMO Binning creates the trace header word,
+DMOOFF. Sort input data with DMOOFF as the primary key,
+and CDP as the secondary key. Traces with similar offsets are
+processed within the same ensemble.
+CDP spacing within each offset gather is assumed to be
+regular. Distances needed by DMO are obtained by the CDP
+number and the CDP increment. Memory requirements are
+approximately:
+4 * (number time samples) * (DMOOFF/CDP INCREMENT)
+
+When the DMO impulse response is narrow, as with small
+offsets, DMO has no effect. For these cases data pass
+through the process unchanged.
+In cases of skidded shots or other irregular shooting
+geometry, traces may spill from one DMO bin into an
+adjacent bin, yielding two or more traces per CDP within a
+given DMO bin. Traces within the same DMO bin having
+identical CDP numbers are stacked together prior to DMO
+being applied to the common offset sections. The output
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset DMO1996
+
+ProMAX® Reference
+
+dataset will therefore have fewer traces than the input
+dataset. A warning message will be issued in the job output
+ﬁle.
+Note: When you bin a dataset, all the far offsets are placed
+into the last bin center. For example, if you have a dataset
+with offsets from 220-6380 and bin 220-1000(440), then the
+majority of the traces are placed into the last bin; in this
+example 660.
+
+Reference
+Deregowski, S. M., 1986, What is DMO?, First Break Vol 4, NO. 7
+
+Parameters
+CDP interval
+Enter the distance between common-midpoint bins. This
+parameter and the source-receiver offset determine the width
+of the DMO operator.
+Typical trace spacing
+Enter the typical distance between traces in a common-offset
+section, but never less than the CDP interval. For example, if
+traces for only the even CDPs are present in a common-offset
+section, then the typical trace spacing is twice the CDP
+interval. This parameter determines the highest spatial
+frequency (wavenumber) contained in the DMO operator. To
+avoid operator aliasing, the DMO operator will contain only
+wavenumbers less than 1/2 cycle per typical trace spacing.
+DMO velocity (ft., m/sec)
+Enter a constant velocity for DMO.
+Largest offset to apply DMO
+Enter the maximum offset within the database which is the
+largest offset allowed in DMO. The memory requirements
+increase with offset.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset DMO1997
+
+ProMAX® Reference
+
+Reapply trace mute after DMO
+Select Yes to reapply trace mutes after DMO to rezero the
+mute zones because DMO moves energy across CDPs.
+Rezero traces after DMO
+Select Yes to rekill traces after DMO because DMO can move
+energy onto previously dead traces.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Offset DMO1998
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

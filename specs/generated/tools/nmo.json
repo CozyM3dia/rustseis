@@ -1,0 +1,205 @@
+{
+  "menu_id": "nmo",
+  "tool_name": "NMO",
+  "label": "Normal Moveout Correction",
+  "parameter_count": 17,
+  "parameters": [
+    {
+      "name": "DIRECT",
+      "prompt": "Direction for NMO application",
+      "kind": "circular",
+      "default": "1",
+      "help": "Normally use FORWARD, but you can also remove (INVERSE) previously applied NMO.",
+      "choices": [
+        {
+          "label": "FORWARD",
+          "value": "1",
+          "help": "Apply NMO... this is the normal application mode."
+        },
+        {
+          "label": "INVERSE",
+          "value": "-1",
+          "help": "Back off (remove) previously applied NMO."
+        }
+      ]
+    },
+    {
+      "name": "STR_MUTE",
+      "prompt": "Stretch mute percentage",
+      "kind": "typein",
+      "default": "30.0",
+      "help": "Any sample stretched more than this percentage will be automatically muted (enter 0.0 to disable)."
+    },
+    {
+      "name": "DO_STAT",
+      "prompt": "Apply any remaining static during NMO?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If 'Yes', accumulated NA_STAT header word statics (such as the floating datum static) will be applied during NMO."
+    },
+    {
+      "name": "NMO_APLD",
+      "prompt": "Disable check for previously applied NMO?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Normally, you will not want to apply NMO twice, but some exceptions may exist."
+    },
+    {
+      "name": "IDIP_VEL",
+      "prompt": "Get 3D dip velocities?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' if applying 3D NMO dip velocity correction."
+    },
+    {
+      "name": "IBIN_CTR",
+      "prompt": "Apply bin center corrections?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "User may decide if the bin center corrections are to be applied as part of the 3D dip/velocity NMO."
+    },
+    {
+      "name": "IPARTIAL",
+      "prompt": "Apply partial NMO?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "You may correct the trace to something other than zero offset for processes that require apparent constant offset."
+    },
+    {
+      "name": "PART_HDR",
+      "prompt": "Header entry with desired non-zero offset",
+      "kind": "function",
+      "default": "OFB_CNTR",
+      "help": "Use MB1 to select a header entry from the headers menu that contains the desired non-zero offset."
+    },
+    {
+      "name": "LONGOFFS",
+      "prompt": "Long offset correction?",
+      "kind": "choose",
+      "default": "0",
+      "help": "Choose desired method for long-offset correction.",
+      "choices": [
+        {
+          "label": "NONE",
+          "value": "0",
+          "help": "Apply only two term NMO (normal application)."
+        },
+        {
+          "label": "ALCHALABI",
+          "value": "1",
+          "help": "Apply Al-Chalabi's third term (fastest)."
+        },
+        {
+          "label": "CASTLE",
+          "value": "2",
+          "help": "Apply Castle's shifted hyperbola (slow, least accurate)."
+        },
+        {
+          "label": "TSVANKIN",
+          "value": "3",
+          "help": "Apply Tsvankin and Thomsen's third term (slow, most accurate)."
+        }
+      ]
+    },
+    {
+      "name": "OVERLAY1",
+      "prompt": "Has menu been overlayed?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "After initial overlay processing this is toggled to prevent repetition"
+    },
+    {
+      "name": "LONGOFFS2",
+      "prompt": "Long offset correction?",
+      "kind": "choose",
+      "default": "0",
+      "help": "Choose desired method for long-offset correction.",
+      "choices": [
+        {
+          "label": "NONE",
+          "value": "0",
+          "help": "Apply only two term NMO (normal application)."
+        },
+        {
+          "label": "ALCHALABI",
+          "value": "1",
+          "help": "Apply Al-Chalabi's third term (fastest)."
+        },
+        {
+          "label": "CASTLE",
+          "value": "2",
+          "help": "Apply Castle's shifted hyperbola (slow, least accurate)."
+        },
+        {
+          "label": "HARLAN",
+          "value": "4",
+          "help": "Apply Harlan's anisotropic third term (slower, good accuracy)."
+        },
+        {
+          "label": "TSVANKIN",
+          "value": "3",
+          "help": "Apply Tsvankin and Thomsen's third term (slowest, most accurate)."
+        }
+      ]
+    },
+    {
+      "name": "ETASRC",
+      "prompt": "Constant or variable ETA anisotropy?",
+      "kind": "circular",
+      "default": "1",
+      "help": "",
+      "choices": [
+        {
+          "label": "Constant",
+          "value": "1",
+          "help": "Constant value for ETA"
+        },
+        {
+          "label": "Variable",
+          "value": "2",
+          "help": "ETA is retrieved from a table"
+        },
+        {
+          "label": "Constant",
+          "value": "1",
+          "help": "Constant value for ETA"
+        }
+      ]
+    },
+    {
+      "name": "ETA",
+      "prompt": "Anisotropy correction parameter ETA",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Value of zero means no anisotropy correction. Normally nonnegative and less than 0.1"
+    },
+    {
+      "name": "ETANAME",
+      "prompt": "ETANAME",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "vel_option",
+      "prompt": "Get velocities from the database?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Select 'Yes' if there is an appropriate NMO stacking velocity function in the database as a parameter file."
+    },
+    {
+      "name": "VELNAME",
+      "prompt": "SELECT Velocity parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a velocity function parameter file from the parameter file menu."
+    },
+    {
+      "name": "VELFIELD",
+      "prompt": "SPECIFY NMO velocity function(s)",
+      "kind": "edit",
+      "default": "XXX",
+      "help": "Use Mouse Button 1 to edit/define normal moveout velocity functions. (SEE EDITOR FOR EXAMPLES.)"
+    }
+  ]
+}

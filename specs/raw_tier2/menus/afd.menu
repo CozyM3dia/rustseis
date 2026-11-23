@@ -1,0 +1,346 @@
+; IIID IVD 1 BSI PROSPECTOR DEV DEPTHC BHSS
+'(
+  name: afd
+  label: "Finite Difference Modeling"
+  value_tab: 60
+
+  parameter: file_velocity
+  text: "Velocity field"
+  type: function:
+  type_desc: ( (parm_list "VID") parms)
+  value: "INVALID"
+  selected_item: "** No Velocity Field Selected **"
+  mouse_text: "Choose the velocity field for finite difference modeling."
+  plot_label: t
+
+  parameter: density
+  text: "Do you want to input a density field?"
+  type: boolean:
+  value: nil
+  mouse_text: "Use a density field to cause reflections without velocity variations."
+
+  parameter: file_density
+  text: "  Density field"
+  type: function:
+  type_desc: ( (parm_list "DEN") parms)
+  value: "INVALID"
+  selected_item: "** No Density Field Selected **"
+  mouse_text: "Choose the density field for finite difference modeling."
+  plot_label: t
+
+  parameter: tflag
+  text: "Generate synthetic data or produce movie snapshots?"
+  type: circular:
+  type_desc: (
+			  ("Synthetic data" "DATA" "Generate synthetic data." )
+			  ("Movie snapshots" "Movie"    "Generate movie snapshots."))
+  value: "Synthetic data"
+  mouse_text: "Use B1 to toggle between DATA or MOVIE gathers."
+
+  parameter: tslice
+  text: "   Time interval (ms) to take snap shots for movie"
+  type: typein:
+  type_desc: ( real: 7 1.e-5 nil )
+  value: 100.0
+  mouse_text: "Snap shot interval, in milliseconds.  The number of snap shots is the total time if the modeling run divided by the snap shot interval."
+
+  parameter: explode
+  text: "Is this a point source, or an exploding reflector run?"
+  type: circular:
+  type_desc: (
+			  ("Normal Point Source" "NORMAL"    "A normal point source is set off.")
+			  ("Exploding Reflector" "EXPLODE" "Exploding Reflector run for simulating a stacked section." ) 
+			  )
+  value: "Normal Point Source"
+  mouse_text: "Use B1 to toggle between 'Exploding Reflector' and 'Normal Point Source' gathers."
+
+  parameter: depth
+  text: "Depth of field for modeling"
+  type: typein:
+  type_desc: ( real: 6 1.e-5 nil )
+  value: 10000.
+  mouse_text: "Enter the depth of the modeling field. "
+
+  parameter: TRACELEN
+  text: "Length of time (ms) to run modeling per shot"
+  type: typein:
+  type_desc: ( real: 7 1.e-5 nil )
+  value: 3000.0
+  mouse_text: "Enter value in milliseconds.  This will also be the trace length if synthetic data is requested."
+
+  parameter: peak_freq
+  text: "Approximate peak frequency to be modeled"
+  type: typein:
+  type_desc: ( real: 5 1.e-5 nil )
+  value: 20.
+  mouse_text: "Run time is proportional to the cube of this value.  See help file for more information.  "
+  plot_label: t
+
+  parameter: waveType
+  text: "Type of Source wavelet "
+  type: pop_choose:
+  type_desc: (
+			  ("Zero Phase Ricker" "Ricker"    "Use the classical zero phase ricker wavelet.")
+			  ("Minimum Phase Ricker" "mpRicker"    "Use a minimum phase ricker wavelet.")
+			  ("Zero Phase Klauder" "Klauder"    "Use a zero phase Klauder wavelet which simulates a correlated sweep.")
+			  ("Minimum Phase Klauder" "mpKlauder"    "Use a minimum phase Klauder wavelet.")
+			  ("Zero Phase Ormsby" "Ormsby" "Use a zero phase Ormsby wavelet for the source." ) 
+			  ("Minimum Phase Ormsby" "mpOrmsby" "Use a minimum phase Ormsby wavelet for the source." ) 
+			  ("Gaussian" "Gaussian" "A gaussian is a band-limited (zero phase) impulse which can be later convolved with another wavelet.  This wavelet contains zero Hz." ) 
+			  )
+  value: "Gaussian"
+  mouse_text: "Choose the wavelet you would like for your source."
+
+  parameter: adjust_h
+  text: "Grid adjustment factor"
+  type: typein:
+  type_desc: ( real: 4 0.1 5.0 )
+  value: 1.0
+  mouse_text: "Decreasing this factor increases the number of grid points per wavelength.  Only the expert user should use values other than 1.0."
+
+  parameter: CDP_spacing
+  text: "CDP spacing, in feet or meters"
+  type: typein:
+  type_desc: ( real: 5 1.e-5 nil )
+  value: 20.
+  mouse_text: "This is the factor for converting the CDPs to horizontal units of feet or meters."
+  plot_label: t
+
+  parameter: buffer
+  text: "Number of CDPs to buffer the edges for the modeling field"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil )
+  value: 40.0
+  mouse_text: "Extend the modeling field beyond the extreme left and right source or receiver positions."
+
+  parameter: freesurf
+  text: "Reflecting or absorbing boundary condition at the surface?"
+  type: circular:
+  type_desc: (
+			  ("Reflecting" "Reflecting" "Reflecting Boundary Condition.  Multiples and ground roll are included." )
+			  ("Absorbing" "Absorbing"    "Absorbing Boundary Condition.  No multiples and less ground roll."))
+  value: "Reflecting Boundary Condition"
+  mouse_text: "An absorbing boundary will remove multiple reflections and reduce ground roll.  A reflecting   boundary condition is the natural state."
+  plot_label: t
+
+  parameter: pos1
+  text: "CDP of left edge of modeling field"
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 1.
+  mouse_text: "The left edge of the modeling field corresponds to what CDP?"
+
+  parameter: pos2
+  text: "CDP of right edge of modeling field"
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 201.0
+  mouse_text: "The right edge of the modeling field corresponds to what CDP?"
+
+  parameter: header_geom
+  text: "Take geometry from the headers of an input data set?"
+  type: boolean:
+  value: nil
+  mouse_text: "Source and receiver surface locations may be taken from an input data set.  The data in the traces will be replaced by synthetic data."
+
+  parameter: useElev
+  text: "  Use elevations from trace headers?"
+  type: boolean:
+  value: nil
+  mouse_text: "Specify YES to place shots and receivers at topography using headers REC_ELEV, SOU_ELEV, & DEPTH."
+
+  parameter: elevRef
+  text: "  Datum for top of velocity field"
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 1000.
+  mouse_text: "This datum represents zero depth of your velocity & density field.  "
+
+  parameter: ns
+  text: "  Number of shots "
+  type: typein:
+  type_desc: ( int: 5 1 nil )
+  value: 1
+  mouse_text: "How many shots do you wish to model?"
+
+  parameter: s0
+  text: "  CDP of the first shot"
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 101.
+  mouse_text: "What is the CDP of the first shot from left edge?"
+
+  parameter: ds
+  text: "  CDP increment between shots "
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 2.0
+  mouse_text: "What is the increment of the shots, in CDPs?"
+
+  parameter: zs
+  text: "  Depth of the first shot "
+  type: typein:
+  type_desc: ( real: 5 0.0 nil )
+  value: 0.0
+  mouse_text: "What is the depth of the first shot?"
+
+  parameter: noff
+  text: "  Number of receiver stations"
+  type: typein:
+  type_desc: ( int: 5 1 nil )
+  value: 100
+  mouse_text: "How many receiver stations do you wish to simulate?"
+
+  parameter: Relative
+  text: "  Receiver X locations absolute, or relative to the shot?"
+  type: circular:
+  type_desc: (
+			  ("Relative" "Relative"    "Relative receiver locations.")
+			  ("Absolute" "Absolute" "Absolute receiver locations." ) )
+  value: "Relative"
+  mouse_text: "Should receiver locations move along with the shots?"
+
+  parameter: ioff0
+  text: "  CDP of the first receiver"
+  type: typein:
+  type_desc: ( real: 6 nil nil )
+  value: 101.
+  mouse_text: "Receiver location in CDP coordinates?"
+
+  parameter: ioffb
+  text: "  Distance (in CDPs) between shot and first group "
+  type: typein:
+  type_desc: ( real: 6 nil nil )
+  value: -8.0
+  mouse_text: "Receiver location relative to shot in CDP units."
+
+  parameter: idoff
+  text: "  Receiver location increment (in CDPs)"
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 2.
+  mouse_text: "Distance between receivers in CDP location units."
+
+  parameter: VSPflag
+  text: "  Is the modeling for VSP/cross-hole data?"
+  type: boolean:
+  value: nil
+  mouse_text: "Enter YES to allow source and receiver locations to vary with depth."
+
+  parameter: dsz
+  text: "    Depth increment of source locations in feet or meters."
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 0.0
+  mouse_text: "Depth between source locations."
+
+  parameter: RelativeZ
+  text: "    Receiver depths absolute, or relative to the shot?"
+  type: circular:
+  type_desc: (
+			  ("Relative" "Relative"    "Relative receiver depths.")
+			  ("Absolute" "Absolute" "Absolute receiver depths." ) )
+  value: "Relative"
+  mouse_text: "Should receiver depths move along with the shots?"
+
+  parameter: ioff0z
+  text: "    Depth of first receiver in feet or meters."
+  type: typein:
+  type_desc: ( real: 5 0 nil )
+  value: 0.0
+  mouse_text: ""
+
+  parameter: idoffz
+  text: "    Receiver depth increment in feet or meters."
+  type: typein:
+  type_desc: ( real: 5 nil nil )
+  value: 0.0
+  mouse_text: "Depth between receivers."
+
+
+  :exec_data 
+  ( ("ACOUSTIC_FD"
+	 (
+	  (if (AND (value 'header_geom) (= (value 'explode) "NORMAL" ) ) "VOID" "SPECIAL")
+	  ("TOOLTYPE"     :implicit  "INPUT" )
+	  )  
+	 ("GENERAL"
+	  ("velocity"     :implicit 2 )
+	  ("file_velocity"   :implicit (value 'file_velocity))
+	  ("density"     :implicit ( if (value 'density) 2 1 ) )
+	  ("file_density"   :implicit (value 'file_density))
+	  ("val_density"   :implicit 1.0 )
+	  ("modulus"     :implicit 0 )
+	  ("impedance"     :implicit 0 )
+	  ("CDP_spacing"     :implicit (value 'CDP_spacing) )
+	  ("peak_freq"     :implicit (value 'peak_freq) )
+	  ("waveType"     :implicit (value 'waveType) )
+	  ("adjust_h"     :implicit (value 'adjust_h) )
+	  ("explode"     :implicit ( if (equal "EXPLODE" (value 'explode)) 1 0 ) )
+	  ("header_geom"     :implicit ( if (and (value 'header_geom) (equal "NORMAL" (value 'explode))) 1 0 ))		   	
+	  ("depth"   :implicit (value 'depth))
+	  ("buffer"   :implicit (value 'buffer))
+	  ("pos1"   :implicit (value 'pos1))
+	  ("pos2"      :implicit (value 'pos2))
+	  ("TRACELEN"     :implicit (value 'TRACELEN))
+	  ("freesurf"     :implicit ( if (equal "Reflecting" (value 'freesurf)) 1 0 ) )
+	  ("SHdisp"     :implicit 0  )
+	  ("alpha"     :implicit 10.5  )
+	  ("tslice"     :implicit ( if (equal "Movie" (value 'tflag)) (value 'tslice) 0.0 ) )
+	  ("ns"     :implicit (value 'ns))
+	  ("zs"     :implicit (value 'zs))
+	  ("s0"     :implicit (value 's0))
+	  ("ds"     :implicit (value 'ds))
+	  ("noff"     :implicit (value 'noff))
+	  ("relative"     :implicit ( if (equal "Relative" (value 'Relative)) 1 0 ) )
+	  ("relatZ"     :implicit ( if (equal "Relative" (value 'RelativeZ)) 1 0 ) )
+	  ("ioff0"     :implicit ( if (equal "Relative" (value 'Relative)) (value 'ioffb) (value 'ioff0)) )
+	  ("idoff"     :implicit (value 'idoff))
+	  ("VSPflag"     :implicit ( if (value 'VSPflag) 1 0 ) )
+	  ("dsz"     :implicit (value 'dsz))
+	  ("idoffz"     :implicit (value 'idoffz))
+	  ("ioff0z"     :implicit (value 'ioff0z))
+
+	  ("useElev"     :implicit ( if (value 'useElev) 1 0 ) )
+	  ("elevRef"     :implicit (value 'elevRef))
+	  )
+	 )
+	((if (= (value 'tflag) "DATA") "RESAMP" "VOID")
+	 ("GENERAL"
+	  ("version" :implicit "ProMAX $Id: afd.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+	  ("SAMPRATE"  :implicit (if (< (value 'peak_freq) 30.) 4.0 (if (< (value 'peak_freq) 60.) 2.0 
+																  (if (< (value 'peak_freq) 120.) 1.0 (/ 100. (value 'peak_freq))
+																	  ))))
+	  ("FREQ"      :implicit (* (value 'peak_freq) 3.6))
+	  )
+	 ) 	
+	)
+
+  :rules (
+		  (rule1 ( value 'density  ) (do_show 'file_density)  (do_not_show 'file_density))
+		  (rule2 (= "Movie" ( value 'tflag)  ) (do_show 'tslice)  (do_not_show 'tslice))
+		  (rule2b (OR (= "Movie" ( value 'tflag)) (= "EXPLODE" (value 'explode) )) (do_show 'pos1)  (do_not_show 'pos1))
+		  (rule2c (OR (= "Movie" ( value 'tflag)) (= "EXPLODE" (value 'explode)  )) (do_show 'pos2)  (do_not_show 'pos2))
+		  (rule3 ( AND (= "DATA" ( value 'tflag))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'ns)  (do_not_show 'ns))
+		  (rule4 ( AND (= "DATA" ( value 'tflag))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'idoff)  (do_not_show 'idoff))
+		  (rule5 ( AND (= "DATA" ( value 'tflag))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'noff)  (do_not_show 'noff))
+		  (rule6 ( AND (AND (= "DATA" ( value 'tflag)) (= "Absolute" (value 'Relative)))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'ioff0)  (do_not_show 'ioff0))
+		  (rule6b ( AND (AND (= "DATA" ( value 'tflag)) (= "Relative" (value 'Relative)))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'ioffb)  (do_not_show 'ioffb))
+		  (rule7 ( AND (= "DATA" ( value 'tflag))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'Relative)  (do_not_show 'Relative))
+		  (rule7 ( AND (AND (value 'VSPflag) (= "DATA" ( value 'tflag)))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'RelativeZ)  (do_not_show 'RelativeZ))
+		  (rule8 ( AND (AND (NOT (= 1 ( value 'ns))) (= "DATA" ( value 'tflag)))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'ds)  (do_not_show 'ds))
+		  (rule8b ( AND (= "DATA" ( value 'tflag))  ( AND (NOT (value 'header_geom))  (= "NORMAL" (value 'explode))) ) (do_show 'VSPflag)  (do_not_show 'VSPflag))
+		  (rule8c (OR (= "Movie" ( value 'tflag)) (= "EXPLODE" (value 'explode))) (do_not_show 'header_geom)  (do_show 'header_geom))
+		  (rule8d (OR (= "Movie" ( value 'tflag)) (= "EXPLODE" (value 'explode))) (do_not_show 'buffer)  (do_show 'buffer))
+		  (rule9 ( AND (value 'VSPflag) (NOT (= (value 'ns) 1))  ) (do_show 'dsz)  (do_not_show 'dsz))
+		  (rule10 (  AND (value 'VSPflag)  (NOT (= (value 'noff) 1))  ) (do_show 'idoffz)  (do_not_show 'idoffz))
+		  (rule11 (  value 'VSPflag  ) (do_show 'ioff0z)  (do_not_show 'ioff0z))
+		  (rule12b (= "EXPLODE" ( value 'explode))  (do_not_show 'waveType)  (do_show 'waveType))
+		  (rule13 (OR (= "EXPLODE" ( value 'explode)) ( value 'header_geom)) (do_not_show 's0)  (do_show 's0))
+		  (rule14 (OR (= "EXPLODE" ( value 'explode)) ( value 'header_geom)) (do_not_show 'zs)  (do_show 'zs))
+		  (rule14 (AND (= "NORMAL" ( value 'explode)) ( value 'header_geom)) (do_show 'useElev)  (dont_show 'useElev))
+		  (rule14 (AND (= "NORMAL" ( value 'explode)) (AND ( value 'header_geom) (value 'useElev))) (do_show 'elevRef)  (dont_show 'elevRef))
+		  )
+
+  )
+

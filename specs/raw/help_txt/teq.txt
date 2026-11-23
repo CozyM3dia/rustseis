@@ -1,0 +1,127 @@
+Trace Equalization2094
+
+ProMAX® Reference
+
+Trace Equalization
+Trace Equalization computes and applies a trace-to-trace
+amplitude balancing function.
+
+Theory
+This process uses a single time window gate for each trace
+that can spatially vary by a primary and a secondary key. The
+scalar in the window is computed on a Mean, RMS, or
+Maximum basis. This scalar is applied to the entire trace.
+New amplitude value = Old amplitude value / Scalar
+
+In this way, variations in amplitude between traces are
+reduced.
+The computed scalar, TE_SCALE, is saved in the trace
+header. The equalization scaling can be removed by using
+Trace Weighting and selecting Multiply by header word’s
+value as the Method for trace weighting, and identifying
+TE_SCALE as the header value to multiply sample values.
+
+Usage
+The time gate can be picked in Trace Display or entered
+relative to the water bottom time of the trace CDP. To use this
+feature, the CDP water bottom time must be in the WB_TIME
+header. If a water bottom relative gate is picked, actual gate
+times will be the sum of the time interpolated from the gate
+table (relative time) plus the time from the WB_TIME header
+for that trace. Water relative gate ﬁles have WBG rather than
+GAT as the ending.
+
+Parameters
+BASIS for scaling
+Select the value in the deﬁned time gate to determine the
+trace equalization scalar. The choices are:
+• Mean uses the average value in the deﬁned gate to determine the scalar.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Equalization2095
+
+ProMAX® Reference
+
+• RMS uses the root mean square value in the deﬁned
+gate to determine the scalar.
+• Max uses the maximum value in the deﬁned gate to
+determine the scalar.
+Time gate reference
+Select Time 0 or Water Bottom for the gate reference times.
+Water Bottom is only applicable to data with the WB_TIME
+header.
+Get TE gates from the DATABASE
+Select Yes to retrieve an existing trace equalization time gate
+ﬁle from the database. There can be more than one trace
+equalization time gate for this line. Select No to manually
+enter the values.
+SELECT time gate parameter ﬁle
+This appears if Yes to Get TE time gates from the database.
+Select a trace equalization time gate parameter ﬁle. If the gate
+time reference is water bottom, you must select from the
+choices of WBG ﬁles in the database.
+SELECT water relative time gate ﬁle
+Select a water relative trace equalization time gate parameter
+ﬁle from the parameter ﬁle menu.
+SELECT Primary time gate header word
+This appears if No to Get TE gates from the database.
+Select a header word as the Primary key for specifying the
+trace equalization time gates. You can select from the main
+list of header words or the alternate list.
+SELECT Secondary Time Gate Header Word
+This appears if No to Get TE gates from the database.
+Select a header word as the Secondary key for specifying the
+trace equalization time gates. This parameter is optional.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Equalization2096
+
+ProMAX® Reference
+
+SPECIFY TE Gate Parameters
+This appears if No to Get TE time gates from the database.
+Enter the locations of the trace equalization time gates.
+The time gate values are interpolated for each trace, ﬁrst by
+primary key and then by secondary key.
+A wild character * is supported for deﬁning entire trace time
+window. For example, the entry
+101:0-4000/
+
+is the same as
+101:*/
+
+where 4000 ms is equal to the trace length.If you speciﬁed
+Water Bottom for the time gate reference above, all times are
+relative to trace water bottom time from the WB_TIME
+header.
+Type of output
+Select output of scaled traces or constant scalar values as
+traces.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Equalization2097
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

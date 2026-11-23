@@ -1,0 +1,11 @@
+{
+  "name": "RustSeis_TAR_Decon_Parity",
+  "steps": [
+    { "tool": "segy_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy" } },
+    { "tool": "tar", "params": { "time_power": 0.0, "db_per_sec": 6.0 } },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_tar.sgy" } },
+    { "tool": "segy_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy" } },
+    { "tool": "decon", "params": { "operator_ms": 160.0, "prediction_lag_ms": 0.0, "white_noise_pct": 0.1 } },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_decon.sgy" } }
+  ]
+}

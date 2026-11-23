@@ -1,0 +1,3172 @@
+2D and 3D Marine Geometry Assignment1238
+
+ProMAX® Reference
+
+2D and 3D Marine Geometry Assignment
+This section lists the information associated with each
+spreadsheet in the marine geometry assignment process.
+Pattern and binning deﬁnition is discussed in detail. See the
+Spreadsheet Processes Overview for information about the
+Command function buttons and how to work in the
+spreadsheets. For an overview to geometry assignment, see
+Geometry Assignment Overview. Select your speciﬁc type of
+geometry assignment from:
+
+➲ 2D Marine Geometry Assignment
+➲ 3D Marine Geometry Assignment
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1239
+
+ProMAX® Reference
+
+2D Marine Geometry Spreadsheet
+This section lists and describes the parameters associated
+with each spreadsheet, as well as the parameters associated
+with Bin. You need to focus on three things:
+• entering all required ﬁeld geometry into the Sources and
+possibly Patterns spreadsheets
+• binning the data
+• ﬁnalizing the Database
+
+Entering All Required Field Geometry
+Select and complete the Setup, Auto-2D, Sources, and
+Patterns spreadsheets from the menu bar. You will then
+select Bin to bin your data and ﬁnalize the Database. Use
+TraceQC to quality control your data:
+
+See the Command Function section for information about the
+Command functions and working inside a geometry
+spreadsheets.
+Setup
+The Setup button opens the Geometry Setup Dialog box for
+specifying global conﬁguration and operation information of
+the application. After you complete the setup, the setup
+information appears in the appropriate columns of the
+different spreadsheets. See the Geometry Setup Dialog box
+for speciﬁc information.
+Depending on the method selected under Assign Midpoints
+By within the Geometry Setup window, you will need to select
+and complete the following spreadsheets:
+For Assign Midpoints By: Existing index number
+mappings in the TRC, use Auto-2D or complete the Sources
+spreadsheet. The TRC spreadsheet is ﬁlled in automatically.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1240
+
+ProMAX® Reference
+
+For Assign Midpoints By: Matching pattern number in the
+SIN and PAT spreadsheets, use Auto-2D or complete the
+Sources and Patterns spreadsheets. The TraceQC
+spreadsheet will be ﬁlled in automatically.
+Auto-2D
+The Auto-2D button opens the Auto Marine 2D Geometry
+dialog box for automatically generating information in the
+Sources and Patterns spreadsheets.
+Before you use Auto-2D, you should decide if it is
+appropriate for your geometry. Consider the following points:
+• If your geometry is fairly simple, use Auto-2D to automatically generate information in your Sources and Patterns spreadsheets.
+• If your line was shot in pieces, or if you have navigation
+X,Y coordinate information or deep water delays times
+that you want to use, skip the Auto-2D and begin with
+the Sources spreadsheet.
+Fill in the parameters in the Auto Marine 2D Geometry dialog
+box and press Ok to generate the source and pattern
+information. In the Sources spreadsheet, the following
+columns will be completed: Station, X, Y, and Strmr Azmth.
+In the Patterns spreadsheet, the following columns will be
+completed: Min Chan, Max/Gap Chan, Chan Inc, Grp Int,
+X Offset, and Y Offset.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1241
+
+ProMAX® Reference
+
+• Near Channel is the channel number closest to the vessel.
+• Far Channel is the channel number furthest from the
+vessel.
+• Chan Increment is the channel number increment. This
+number may be positive or negative.
+• Minimum Offset is the distance in ft. or m along
+streamer azimuth from the source location to Near
+Channel. See the 2D Marine Sign Convention diagram in
+the Patterns spreadsheet section for sign conventions.
+Streamer azimuth is the direction measured relative to
+North of the line extending from the stern of the vessel
+towards the streamer tail buoy. Source locations are
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1242
+
+ProMAX® Reference
+
+deﬁned by the X Coordinate of First Shot, Y Coordinate of ﬁrst shot, and Shot Interval.
+• Perpendicular Offset is the distance perpendicular to
+streamer azimuth from the source location to Near
+Channel. This value is in feet or meters. See the 2D
+Marine Sign Convention diagram in the Patterns spreadsheet section for sign conventions. Streamer azimuth is
+the direction measured relative to North of the line
+extending from the stern of the vessel towards the
+streamer tail buoy. Source locations are deﬁned by X
+Coordinate of First Shot, Y Coordinate of First Shot,
+and Shot Interval.
+• Group Interval is the receiver station interval on the
+streamer in ft. or m.
+• Number of Shots is the number of shots to generate in
+the Sources spreadsheet.
+• First Shot Station is the station number of the ﬁrst
+shot to generate.
+• Shot Station Number Increment is the source station
+numbering increment.
+• Boat Azimuth is the direction measured relative to
+North of a line extending from the X Coordinate of First
+Shot and Y Coordinate of First Shot in the direction of
+increasing shot station numbers. The streamer azimuth,
+Strmr Azmth in the Sources spreadsheet, will be set to
+the Boat Azimuth plus 180 degrees.
+• Shot Interval is the distance between shot stations in
+feet or meters.
+• X Coordinate of First Shot is the X coordinate of the
+ﬁrst shot station; it can be the X coordinate of either the
+center of the source array or the antennae on the boat. If
+the source location is the antennae, you can later deﬁne
+a source pattern in the Patterns spreadsheet to shift X
+coordinates to the center of the source array.
+• Y Coordinate of First Shot is the Y coordinate of the
+ﬁrst shot station; it can be the Y coordinate of either the
+center of the source array or the antennae on the boat. If
+the source location is the antennae, you can later deﬁne
+a source pattern in the Patterns spreadsheet to shift Y
+coordinates to the center of the source array.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1243
+
+ProMAX® Reference
+
+The Sources spreadsheet can be edited later to ﬁll in missing
+shots or to complete the following columns: Source, H2O
+Depth, Src Depth, FFID, Time, Date, Src Pattern, and
+Static. The Patterns spreadsheet can also be edited later to
+deﬁne a source pattern if source locations are antennae
+locations. The following columns would need to be completed
+in a new spreadsheet row: Src Pattern, X Offset, and Y
+Offset.
+Sources
+The Sources button opens the SIN Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing source
+(shot) information.
+The available columns will change according to the method
+selected under Assign Midpoints By within Setup.
+• For both assignment methods, the following columns
+will appear: Mark Block, Source, Station, X, Y, H2O
+Depth, Src Depth, FFID, Strmr Azimuth, Time, Date,
+Shot Fold*, and Static.
+• For Assign Midpoints By: Existing index number mappings in the TRC, the following additional column will
+appear: Src Pattern.
+The following list describes all possible SIN OPF spreadsheet
+columns.
+• Mark Block is assigned to the TRC GEOMETRY SIN
+database attribute in the Assign midpoints step in Bin.
+This column is also a spreadsheet row counter.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Source is a user deﬁned source numbering sequence.
+Source numbers can also be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Station is required for Assign midpoints step in Bin.
+The station number is associated with the shot as
+determined from the acquisition survey. The station
+numbers can be extracted from the trace headers of the
+input dataset using Extract Database Files.
+• X is required for Assign midpoints step in Bin.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1244
+
+ProMAX® Reference
+
+X coordinate of the source in feet or meters. This is
+obtained from the navigation data or can be extracted
+from dataset headers that contain X coordinates using
+Extract Database Files.
+This can be the X coordinate of either the center of the
+source array or the antennae on the boat. If the source
+location is the antennae, you can deﬁne a source pattern
+in the Patterns spreadsheet to shift X coordinates to the
+center of the source array. If coordinate information is
+not available, a set of X coordinates must be created.
+This can be accomplished using the Edit/Fill option in
+the Sources spreadsheet by assigning a starting X value
+and an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Sources spreadsheet.
+• Y is required for Assign midpoints step in Bin.
+Y coordinate of the source in feet or meters. This is
+obtained from the navigation data or can be extracted
+from dataset headers that contain Y coordinates using
+Extract Database Files.
+This can be the Y coordinate of either the center of the
+source array or the antennae on the boat. If the source
+location is the antennae, you can deﬁne a source pattern
+in the Patterns spreadsheet to shift Y coordinates to the
+center of the source array. If coordinate information is
+not available, a set of Y coordinates must be created.
+This can be accomplished using the Edit/Fill option in
+the Sources spreadsheet by assigning a starting Y value
+and an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Sources spreadsheet.
+• H20 Depth: is the water depth at the source location in
+ft. or m. Water depth can be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Src Depth is the depth of the source in ft. or m.
+• FFID is the ﬁeld ﬁle ID. This is usually the tape ﬁle number assigned to each shot at time of recording. Therefore,
+these numbers usually reﬂect the chronological order of
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1245
+
+ProMAX® Reference
+
+the shots. FFID is normally obtained from the ﬁeld
+observer’s notes. It can also be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Strmr Azmth is the direction measured relative to North
+of the line extending from the stern of the vessel towards
+the streamer tail buoy. Value entered should be the
+clockwise bearing in degrees from North (0 degrees).
+• Time is the time of shot. This value is normally obtained
+from the ﬁeld observer’s notes.
+• Date is the date of shot. This value is normally obtained
+from the ﬁeld observer’s notes.
+• Src Pattern is the source pattern number corresponding
+to values in the Src Pattern column in the Patterns
+spreadsheet. Source patterns are deﬁned in the Patterns
+spreadsheet.
+• Shot Fold* is the calculated fold of shot. Shot Fold is
+equal to the number of live channels for the given shot
+based on the information entered in the Patterns spreadsheet. The Shot Fold value is calculated during the
+Assign midpoints step in Bin by counting traces
+assigned to each shot.
+The * in the column name indicates that this column
+contains informational values that are automatically
+calculated. These values are for quality control only and
+cannot be edited.
+• Static is a user deﬁned static in ms. If pre-existing shot
+statics are going to be applied to a dataset, they can be
+entered in this column. For example, shot time delays
+due to time break errors during recording could be
+entered in this column. These statics can later be
+applied with Apply User Statics. If shot statics have
+already been applied to a dataset, the static values can
+be extracted from the trace headers of the input dataset
+using Extract Database Files.
+The following four columns are generated from the
+Setup/QC menu option in the Sources spreadsheet. A
+Quality Control Options dialog box will appear that
+allows you to select the type of QC columns to generate.
+The column entries are not editable and are not placed
+in the database, nor are header words created.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1246
+
+ProMAX® Reference
+
+• QC Dist* is the distance along nominal azimuth from the
+ﬁrst station location to the current station location.
+Nominal source azimuth can be speciﬁed in Setup. This
+column appears if Distance/Offset is selected from the
+Quality Control Options dialog box.
+• QC Offset* is the distance of the current station location
+perpendicular to nominal azimuth. Nominal source azimuth can be speciﬁed in Setup. This column appears if
+Distance/Offset is selected from the Quality Control
+Options dialog box.
+• QC Intv* is the station interval is computed from X and
+Y coordinates. A nominal source station interval must be
+speciﬁed in Setup. This column appears if Interval/Error is selected from the Quality Control Options
+dialog box.
+• QC Intv Err* is the difference between QC Intv* and the
+nominal source station interval. A nominal source station interval must be speciﬁed in Setup. This column
+appears if Interval/Error is selected from the Quality
+Control Options dialog box. Displaying the Error columns using the View/View Marked Only/XYGraph will
+help you discover anomalous values that may be diagnostic of a geometry error.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown.
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block
+
+TRC GEOMETRY SIN
+
+SIN
+
+Integer
+
+Source
+
+SIN GEOMETRY SOURCE
+
+SOURCE
+
+Integer
+
+Station
+
+SIN GEOMETRY STATION
+
+SOU_SLOC
+
+Integer
+
+X
+
+SIN GEOMETRY X_COORD
+
+SOU_X
+
+Floating Pt.
+
+Y
+
+SIN GEOMETRY Y_COORD
+
+SOU_Y
+
+Floating Pt.
+
+H2O Depth
+
+SIN GEOMETRY H2O_DEP
+
+SOU_H2OD
+
+Floating Pt.
+
+Src Depth
+
+SIN GEOMETRY DEPTH
+
+DEPTH
+
+Floating Pt.
+
+FFID
+
+SIN GEOMETRY FFID
+
+FFID
+
+Integer
+
+None
+
+Floating Pt.
+
+Strmr Azmth SIN GEOMETRY AZIMUTH
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1247
+
+ProMAX® Reference
+
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Time
+
+SIN GEOMETRY TIME
+
+None
+
+Integer
+
+Date
+
+SIN GEOMETRY DATE
+
+None
+
+Integer
+
+Src Pattern
+
+SIN GEOMETRY PATTERN
+
+None
+
+Integer
+
+Static
+
+SIN GEOMETRY USERSTAT None
+
+Floating Pt.
+
+Patterns
+The Patterns button opens the PAT Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing the
+deﬁnition of receiver patterns for all shots.
+The Patterns spreadsheet is not available if you have
+selected Assign Midpoints By: Existing index number
+mappings in the TRC within the Setup. For 2D marine
+geometry, only Assign Midpoints By: Matching pattern
+number in the SIN and PAT spreadsheets utilizes pattern
+deﬁnitions.
+Marine pattern deﬁnition differs substantially from the land
+pattern deﬁnition. First, there is only one receiver pattern
+allowed per survey. Second, source patterns can be deﬁned
+in addition to the receiver pattern. There can be any number
+of source patterns. All patterns are deﬁned relative to the X
+and Y coordinates in the Sources spreadsheet.
+The following diagram describes the sign conventions for
+pattern deﬁnition of 2D marine geometries:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1248
+
+ProMAX® Reference
+
+2D Marine Sign Convention
+
+N
+Negative Y Offsets
+Negative X Offsets
+
+The Streamer Azimuth is 90 Degrees
+Stern of Vessel to Tail Buoy
+
+Positive X Offsets
+
+Tail Buoy
+
+Positive Y Offsets
+
+Vessel Antenna
+
+The 2D marine receiver pattern requires entries in the Min
+Chan, Max/Gap Chan, Chan Inc, Grp Int, X Offset, and Y
+Offset columns. The receiver pattern does not have an entry
+in the Src Pattern column.
+The Min Chan, Max/Gap Chan, and Chan Inc columns
+specify the range of channel numbers to assign to a
+corresponding range of receiver stations. The relative
+positions for each channel are deﬁned by the Grp Int, X
+Offset, and Y Offset columns. These values are then used
+with the X and Y values in the Sources spreadsheet, as well
+as any source pattern deﬁnitions in the Patterns
+spreadsheet, to determine the absolute coordinates of each
+receiver for a given shot.
+Source patterns can be deﬁned by entering values in the Src
+Pattern, X Offset, and Y Offset columns. These column
+entries must be in separate spreadsheet rows from the
+receiver pattern row.
+The following list describes all possible PAT OPF spreadsheet
+columns.
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1249
+
+ProMAX® Reference
+
+• Mark Block is a spreadsheet row counter
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Min Chan is the channel number closest to the vessel.
+Min Chan can be greater than Max/Gap Chan if a negative Chan Inc is speciﬁed.
+• Max/Gap Chan is the channel number furthest from the
+vessel. Max/Gap Chan can be less than Min Chan if a
+negative Chan Inc is speciﬁed.
+• Chan Inc is the channel number increment to use
+between the Min Chan and Max/Gap Chan values. Chan
+Inc can be a positive or negative value.
+• Src Pattern is the source pattern number associated
+with X Offset and Y Offset values that deﬁne the source
+location relative to the X and Y values speciﬁed in the
+Sources spreadsheet. For example, if the X and Y values
+in the Sources spreadsheet deﬁne antennae position,
+and the source itself is 50 ft. starboard of the vessel and
+25 ft. behind it, then Src Pattern could be 1 with an
+associated Y Offset of -50 and an X Offset of 25.
+The Src Pattern entry and its associated X Offset and Y
+Offset values must be in separate spreadsheet rows from
+the receiver pattern row. Deﬁne as many source pattern
+numbers as are needed. These values should correspond
+to values in the Src Pattern column in the Sources
+spreadsheet.
+Source patterns are not required to complete geometry
+assignment. If no source pattern information exists,
+leave the Src Pattern column in both the Sources and
+Patterns spreadsheets blank. In this case, the X and Y
+column values in the Sources spreadsheet will be the
+coordinates of each source location.
+• Grp Int is the receiver station interval on the streamer in
+feet or meters. Channel positions are incremented by
+adding Grp Int to the position of Min Chan and to each
+subsequent channel through the channel speciﬁed by
+Max/Gap Chan.
+• X Offset, for receiver pattern, is the distance along the
+streamer azimuth from the source location deﬁned by X
+and Y in the Sources spreadsheet to Min Chan.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1250
+
+ProMAX® Reference
+
+For source patterns: Distance along the streamer
+azimuth from the source location deﬁned by X and Y in
+the Sources spreadsheet to the actual source position.
+For example, if X and Y in the Sources spreadsheet
+deﬁne antennae position, and the source itself is 50 ft.
+starboard of the vessel and 25 ft. behind it, then X Offset
+is 25. This value is used to generate the trace offset
+values in the TRC OPF. It will not change the X value in
+the Sources spreadsheet.
+This value is in feet or meters. See the 2D Marine Sign
+Convention diagram for sign conventions. Positive X
+offsets are towards the tail buoy position and negative X
+offsets are towards the bow of the vessel. Streamer
+azimuth is deﬁned in the Strmr Azmth column in the
+Sources spreadsheet.
+• Y Offset, for receiver pattern, is the distance perpendicular to the streamer azimuth from the source location
+deﬁned by X and Y in the Sources spreadsheet to Min
+Chan.
+For source pattern: Distance perpendicular to the
+streamer azimuth from the source location deﬁned by X
+and Y in the Sources spreadsheet to the actual source
+position. For example, if X and Y in the Sources
+spreadsheet deﬁne antennae position, and the source
+itself is 50 ft. starboard of the vessel and 25 ft. behind it,
+then Y Offset is -50. This value is used to generate the
+trace offset values in the TRC OPF. It will not change the
+Y value in the Sources spreadsheet.
+This value is in ft. or m. See the 2D Marine Sign
+Convention diagram for sign conventions. Positive Y
+offsets are to the right as you look along streamer
+azimuth, or in the direction of the tail buoy from the
+stern of the vessel. Negative Y values are to the left as
+you look along streamer azimuth. Streamer azimuth is
+deﬁned in the Strmr Azmth column in the Sources
+spreadsheet.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown:
+Column
+
+OPF Attributes
+
+Trace Header Data Format
+
+Mark Block
+
+None
+
+None
+
+Other Docs
+
+Search Page
+
+Integer
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1251
+
+ProMAX® Reference
+
+Column
+
+OPF Attributes
+
+Trace Header Data Format
+
+Min Chan
+
+PAT GEOMETRY CHANFROM None
+
+Integer
+
+Max/Gap Chan PAT GEOMETRY CHANTO
+
+None
+
+Integer
+
+Chan Inc
+
+PAT GEOMETRY CHANINC
+
+None
+
+Integer
+
+Src Pattern
+
+PAT GEOMETRY SRCID
+
+None
+
+Integer
+
+Grp Int
+
+PAT GEOMETRY GRP_INT
+
+None
+
+Integer
+
+X Offset
+
+PAT GEOMETRY OFFSET_X
+
+None
+
+Integer
+
+Y Offset
+
+PAT GEOMETRY OFFSET_Y
+
+None
+
+Integer
+
+Binning the Data
+Bin
+The Bin button opens the 2D Marine Binning window. This
+window allows you to calculate Receiver X and Y coordinates,
+to enter binning parameters for midpoints and offsets, to bin
+the midpoints and offsets, to generate QC displays of the
+binned data, and to ﬁnalize the database.
+You must complete the Binning Sequence from the 2D
+Marine Binning window. Step 2 has ﬁve choices in the pulldown menu. Select a step and click Ok to execute.
+Steps
+1
+2
+
+3
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1252
+
+ProMAX® Reference
+
+Binning Sequence
+1. Assign midpoints by calculates Rec X, Rec Y, Rec Depth,
+Offset, Azimuth, Channel, SIN, and SIN_LTBL in the TRC
+spreadsheet. It will also create the CHN Database order.
+The method that appears here for assigning midpoints is
+selected within the Geometry Setup window.
+If Assign Midpoints By: Existing index number
+mappings in the TRC was selected, then SIN, SRF, and
+CHN information will already exist in the TRC OPF
+spreadsheet and will not be altered.
+You must successfully execute Assign midpoints before
+you can bin the data. If execution of this step fails, you
+should view the job.output ﬁle to get clues for editing in
+the Source or Patterns spreadsheets.
+2. Binning calculates CDP, CDP_LTBL, OFB, and OFB_LTBL
+values in the TRC spreadsheet. It will also create the CDP
+and OFB Database orders.
+Select one of the following four methods for midpoint
+binning and complete the highlighted Binning Parameters:
+Defaulting the OFB parameters allows for quick CDP
+binning, but can result in less then optimal values in the
+OFB database. If you use the OFB database and
+corresponding header values in processing, select
+Midpoints, user deﬁned OFB parameters.
+• Midpoints, default OFB parameters grids the midpoints based upon their spatial locations.
+• Midpoints, user deﬁned OFB parameters
+• Using previously assigned CDP numbers, default OFB
+parameters uses previously assigned CDP numbers
+extracted from the trace headers.
+• Using previously assigned CDP numbers, user deﬁned
+OFB parameters
+Binning Receivers is an optional step. However, if you plan
+to use any surface consistent processes or WEMR, you
+must bin the receivers. If you select Receivers, complete
+the highlighted Binning Parameters.
+• Receivers calculates SRF and SRF_LTBL values in the
+TRC spreadsheet. It also creates the SRF Database
+order.
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1253
+
+ProMAX® Reference
+
+Binning Parameters
+The following parameters will highlight according to the
+Binning option you chose under Binning.
+• Source Station Tie to CDP Number is the source station in the Sources spreadsheet used to tie the CDP
+number entered in CDP Number Tie to Source Station.
+Enter 0 for the ﬁrst live CDP number to be one.
+• CDP Number Tie to Source Station is the CDP number
+to tie the above source station. Enter 0 for the ﬁrst live
+CDP number to be one.
+• Distance Between CDPs is the interval in ft. or m used
+to bin the midpoints. For typical CDP spacing, use one
+half of the nominal receiver spacing.
+The following offset binning parameters create the OFB
+(Offset Bin) Database order. This enables traces to be
+grouped together by offset range beginning at Min Offset
+Bin Center and continuing up through Max Offset Bin
+Center, incrementing by the Offset Bin Center
+Increment. The OFB OPF is necessary for Surface
+Consistent Amplitude Analysis and Surface
+Consistent Decon.
+The default is preset defaults, or the receiver interval
+from Setup and NChans from Patterns. If the receiver
+interval is not in Setup, the program uses 100 for the
+Offset Bin Increment, 50 for the Min Offset Bin Center,
+and 9950 for the Maximum offset Bin Center. If receiver
+interval is in Setup, the program uses the receiver
+interval for Offset Bin Increment, one half receiver
+interval for Min Offset Bin Center, and receiver interval
+times (the number of channels minus 1.5) for Maximum
+offset Bin Center. To use values different then these
+select user deﬁned OFB parameters and enter the new
+values.
+• Offset Bin Increment is the distance between centers of
+offset bins in ft. or m. Offset Bin size, other then ﬁrst
+and last, is equal to Offset Bin Increment.
+• Minimum Offset Bin Center is the ﬁrst offset bin center. Traces with offsets less than Min Offset Bin Center
+minus one half the Offset Bin Increment are assigned to
+the ﬁrst offset bin center. Even though offsets computed
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1254
+
+ProMAX® Reference
+
+for Marine 2D are negative, enter this value as a positive
+number.
+• Maximum Offset Bin Distance: is the last offset bin
+center. Traces with offsets between Max Offset Bin Center minus one half the Offset Bin Increment and greater
+are assigned to the last offset bin. Even though offsets
+computed for Marine 2D are negative, enter this value as
+a positive number.
+• Receiver Bin Width is the receiver station interval.
+If any of the following options are highlighted, toggle to
+the correct direction.
+• CDP numbers increase in shooting direction
+• CDP numbers decrease in shooting direction
+• Receiver Numbers Increase in shooting direction
+• Receiver Numbers Decrease in shooting direction
+
+Finalizing the Database
+3. Finalize Database must be used to ﬁnalize all the
+necessary Database lookup tables and to complete the
+building of the ProMAX® Database, once binning is
+completed.
+Note: If entire shots or receivers are deleted from a
+spreadsheet and you rerun Finalize Database, any
+attributes previously created outside the spreadsheet,
+such as ﬁrst break picks and statics, will not match the
+reﬁnalized database and should be recreated.
+TraceQC
+The TraceQC button opens the TRC Ordered Parameter File
+(OPF) spreadsheet. This spreadsheet is a window into the
+database TRC OPF which can actually contain more
+attributes than are shown by this spreadsheet. The database
+TRC OPF contains all trace speciﬁc attributes for this
+ProMAX® line. Some of the attributes are geometry related,
+while others are not. Only attributes pertaining to the your
+particular type of geometry are shown in the TRC
+spreadsheet. Most of the attributes in this spreadsheet are
+internally computed and are only for quality control viewing.
+Attributes which cannot be edited have an * in the column
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1255
+
+ProMAX® Reference
+
+name. For example, Rec X* cannot be edited, whereas Rec
+Depth can be edited.
+Columns in the TRC OPF spreadsheet are initialized by one
+or more of the following steps:
+• running Extract Database Files
+• successful completion of Assign Midpoints in Bin
+• successful completion of Bin Midpoints in Bin
+• importing UKOOA data using File/UKOOA Import
+• using File/LOOKUP Indexing
+The following list describes all TRC OPF spreadsheet
+columns.
+• Mark Block values represent sequential trace numbers
+for all ProMAX® datasets in this ProMAX® line. The
+Mark Block number maps all TRC OPF attributes associated with it to a single trace in a dataset. The geometry
+speciﬁc attributes are loaded into the trace headers
+when Inline Geometry Header Load is run. The
+remaining TRC OPF attributes may be loaded into the
+traces headers during subsequent processing.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Rec X* is the receiver station X coordinate. These values
+are generated by Assign Midpoints in Bin. Coordinates
+can also be imported from a UKOOA ﬁle or can be
+extracted from the trace headers of the input dataset
+using Extract Database Files.
+• Rec Y* is the receiver station Y coordinate. These values
+are generated by Assign Midpoints in Bin. Coordinates
+can also be imported from a UKOOA ﬁle or can be
+extracted from the trace headers of the input dataset
+using Extract Database Files.
+• Rec Depth is the depth below sea level of the receiver or
+cable in ft. or m. Receiver depths can be entered by
+hand, imported from a UKOOA ﬁle, or can be extracted
+from the trace headers of the input dataset using
+Extract Database Files.
+• Offset* is the source to receiver distance in ft. or m. It is
+computed from the database entries SIN GEOMETRY
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1256
+
+ProMAX® Reference
+
+X_COORD, SRF GEOMETRY X_COORD, SIN GEOMETRY Y_COORD, and SRF GEOMETRY Y_COORD. These
+database entries come from the X coordinate and Y coordinate columns in the SRF and SIN OPF spreadsheets.
+These values are generated by Assign Midpoints in Bin.
+• Azimuth* is the azimuth from the source to the receiver
+location. With the source location as the origin, the azimuth is computed as the clockwise rotation angle from
+the Y axis to a vector from the source location to the
+receiver location. It is computed from the database
+entries SIN GEOMETRY X_COORD, SRF GEOMETRY
+X_COORD, SIN GEOMETRY Y_COORD, and SRF GEOMETRY Y_COORD. These database entries come from the
+X coordinate and Y coordinate columns in the SRF and
+SIN OPF spreadsheets. These values are generated by
+Assign Midpoints in Bin.
+• Channel* is the recording channel number. The channel
+number is one of the main criteria used to match the
+input traces to the database when loading geometry into
+the trace headers with Inline Geom Header Load.
+• CHN_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• SIN*: is the source index number. This is a sequential
+record counter that ranges from one to the maximum
+number of shots. For correct geometry assignment, each
+shot must have a unique SIN. This value comes from the
+Mark Block value in the SIN OPF spreadsheet.
+• SIN_LTBL* is a numeric counter ranging from one to the
+maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• SRF* is a sequential record counter that ranges from one
+to the maximum number of receiver stations. This value
+comes from the Mark Block value in the SRF OPF
+spreadsheet.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1257
+
+ProMAX® Reference
+
+• SRF_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• CDP* is the CDP bin number of the trace. This value is
+computed in the Bin midpoints step in Bin from entries
+in the 3D Land Midpoint Binning window.
+• CDP_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• OFB* is the offset bin number of the trace. Positive and
+negative source-receiver offsets are binned as absolute
+offsets and a sequential bin number is assigned to each
+offset bin.
+• OFB_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• FB Pick is the ﬁrst break pick times in ms. While it is
+possible to manually enter these values in this spreadsheet, ﬁrst break picks are normally made by one of the
+ProMAX® ﬁrst break picking processes such as First
+Break Pick Macro* or NN First Break Picker. First
+break picks made with these processes can be saved in
+TRC GEOMETRY FB_PICK and can then be edited in this
+column.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block None
+
+TRACE_NO
+
+Integer
+
+Rec X
+
+REC_X
+
+None
+
+Other Docs
+
+TRC GEOMETRY REC_X
+
+Search Page
+
+Known Problems
+
+2D Marine Geometry Spreadsheet1258
+
+ProMAX® Reference
+
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Rec Y
+
+TRC GEOMETRY REC_Y
+
+REC_Y
+
+None
+
+Rec Depth
+
+TRC GEOMETRY REC_DEP
+
+REC_H20D
+
+None
+
+Offset
+
+TRC GEOMETRY OFFSET
+
+OFFSET
+
+Floating Pt.
+
+Azimuth
+
+TRC GEOMETRY AZIMUTH SR_AZIM
+
+Floating Pt
+
+Channel
+
+TRC GEOMETRY CHN
+
+Integer
+
+CHAN
+
+CHN_LTBL TRC GEOMETRY CHN_LTBL None
+
+Integer
+
+SIN
+
+Integer
+
+TRC GEOMETRY SIN
+
+SIN
+
+SIN_LTBL TRC GEOMETRY SIN_LTBL None
+
+Integer
+
+SRF
+
+Integer
+
+TRC GEOMETRY SRF
+
+REC_SLOC
+
+SRF_LTBL TRC GEOMETRY SRF_LTBL None
+
+Integer
+
+CDP
+
+CDP
+
+Integer
+
+CDP_LTBL TRC GEOMETRY CDP_LTBL None
+
+Integer
+
+OFB
+
+Integer
+
+TRC GEOMETRY CDP
+
+TRC GEOMETRY OFB
+
+OFB_NO
+
+OFB_LTBL TRC GEOMETRY OFB_LTBL None
+
+Integer
+
+FB Pick
+
+Integer
+
+Other Docs
+
+TRC GEOMETRY FB_PICK
+
+Search Page
+
+FB_PICK
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1259
+
+ProMAX® Reference
+
+3D Marine Geometry Spreadsheet
+This section lists and describes the parameters associated
+with each spreadsheet, as well as the parameters associated
+with Bin. You need to focus on three things:
+• entering all required ﬁeld geometry into the Sources, and
+possibly Patterns spreadsheets
+• binning the data
+• ﬁnalizing the Database
+
+Entering Required Field Geometry
+Select and complete the Setup, Sources, and Patterns
+spreadsheets from the menu bar. You will then select Bin to
+bin your data and ﬁnalize the Database. Use TraceQC to
+quality control your data:
+
+See the Command Function section for information about the
+Command functions and working inside a geometry
+spreadsheets.
+Setup
+The Setup button opens the Geometry Setup Dialog box for
+specifying global conﬁguration and operation information of
+the application. After you complete the setup, the setup
+information appears in the appropriate columns of the
+different spreadsheets. See the Geometry Setup Dialog box
+for speciﬁc information.
+Depending on the method selected under Assign Midpoints
+By within the Geometry Setup window, you will need to select
+and complete the following spreadsheets:
+For Assign Midpoints By: Existing index number
+mappings in the TRC, complete the Sources spreadsheet.
+The TRC spreadsheet is ﬁlled in automatically.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1260
+
+ProMAX® Reference
+
+For Assign Midpoints By: Matching pattern number in the
+SIN and PAT spreadsheets, complete the Sources and
+Patterns spreadsheets. The TRC OPF spreadsheet is ﬁlled in
+automatically.
+Sources
+The Sources button opens the SIN Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing source
+(shot) information.
+The following list describes all possible SIN OPF spreadsheet
+columns. The available columns will change according to the
+method selected under Assign Midpoints By within the
+Geometry Setup window.
+• Mark Block value is assigned to the TRC GEOMETRY
+SIN database attribute in the Assign midpoints step in
+Bin. This column is also a spreadsheet row counter.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Source is a user deﬁned source numbering sequence.
+Source numbers can also be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Line is a shot line number. This number is normally
+obtained from the ﬁeld observer’s notes. It can also be
+extracted from the trace headers of the input dataset
+using Extract Database Files.
+• Station is required for Assign midpoints step in Bin.
+Surface station number associated with the shot as
+determined from the acquisition survey. You can assign
+source station numbers that are tied directly to the
+receiver station numbers or you can assign a user
+deﬁned numbering scheme. The station numbers can
+also be extracted from the trace headers of the input
+dataset using Extract Database Files.
+• X is required for Assign midpoints step in Bin.
+X coordinate of the source in feet or meters. This is
+obtained from the survey notes or can be extracted from
+dataset headers that contain X coordinates using
+Extract Database Files. If coordinate information is not
+available, a set of X coordinates must be created. This
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1261
+
+ProMAX® Reference
+
+can be accomplished using the Edit/Fill option in the
+Sources spreadsheet by assigning a starting X value and
+an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Sources spreadsheet.
+• Y is required for Assign midpoints step in Bin.
+Y coordinate of the source in feet or meters. This is
+obtained from the survey notes or can be extracted from
+dataset headers that contain Y coordinates using
+Extract Database Files. If coordinate information is not
+available, a set of Y coordinates must be created. This
+can be accomplished using the Edit/Fill option in the
+Sources spreadsheet by assigning a starting Y value and
+an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Sources spreadsheet.
+• H20 Depth is the water depth at the source location in
+feet or meters. Water depth can be extracted from the
+trace headers of the input dataset using Extract Database Files.
+• Src Depth is the depth of the source in ft. or m.
+• FFID is the ﬁeld ﬁle ID. It is usually the tape ﬁle number
+assigned to each shot at time of recording. Therefore,
+these numbers usually reﬂect the chronological order of
+the shots. FFID is normally obtained from the ﬁeld
+observer’s notes. It can also be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Strmr Azmth is the direction measured relative to North
+of the line extending from the stern of the vessel towards
+the streamer tail buoy. Value entered should be the
+clockwise bearing in degrees from North (0 degrees).
+• Time is the time of shot. This value is normally obtained
+from the ﬁeld observer’s notes.
+• Date is the date of shot. This value is normally obtained
+from the ﬁeld observer’s notes.
+• Src Pattern is the source pattern number corresponding
+to values in the Src Pattern column in the Patterns
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1262
+
+ProMAX® Reference
+
+spreadsheet. Source patterns are deﬁned in the Patterns
+spreadsheet.
+• Shot Fold* is the calculated fold of shot. Shot Fold is
+equal to the number of live channels for the given shot
+based on the information entered for Num Chn and Pattern. The Shot Fold value is calculated during the Assign
+midpoints step in Bin by counting traces assigned to
+each shot.
+The * in the column name indicates that this column
+contains informational values that are automatically
+calculated. These values are for quality control only and
+cannot be edited.
+• Static is a user deﬁned static in ms. If pre-existing shot
+statics are going to be applied to a dataset, they can be
+entered in this column. For example, shot time delays
+due to time break errors during recording could be
+entered in this column. Similarly, shot refraction statics
+calculated with third party software can be entered here.
+These statics can later be applied with Apply User Statics. If shot statics have already been applied to a
+dataset, the static values can be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown.
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block
+
+TRC GEOMETRY SIN
+
+SIN
+
+Integer
+
+Source
+
+SIN GEOMETRY SOURCE
+
+SOURCE
+
+Integer
+
+Line
+
+SIN GEOMETRY S_LINE
+
+S_LINE
+
+Integer
+
+Station
+
+SIN GEOMETRY STATION
+
+SOU_SLOC
+
+Integer
+
+X
+
+SIN GEOMETRY X_COORD
+
+SOU_X
+
+Floating Pt.
+
+Y
+
+SIN GEOMETRY Y_COORD
+
+SOU_Y
+
+Floating Pt.
+
+H2O Depth
+
+SIN GEOMETRY H2O_DEP
+
+SOU_H2OD
+
+Floating Pt.
+
+Src Depth
+
+SIN GEOMETRY DEPTH
+
+DEPTH
+
+Floating Pt.
+
+FFID
+
+SIN GEOMETRY FFID
+
+FFID
+
+Integer
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1263
+
+Column
+
+OPF Attribute
+
+ProMAX® Reference
+
+Trace Header Data Format
+
+Strmr Azmth SIN GEOMETRY AZIMUTH
+
+None
+
+Floating Pt.
+
+Time
+
+SIN GEOMETRY TIME
+
+None
+
+Integer
+
+Date
+
+SIN GEOMETRY DATE
+
+None
+
+Integer
+
+Src Pattern
+
+SIN GEOMETRY PATTERN
+
+None
+
+Integer
+
+Static
+
+SIN GEOMETRY USERSTAT None
+
+Floating Pt.
+
+Patterns
+The Patterns button opens the PAT Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing the
+deﬁnition of receiver patterns for each shot. The Patterns
+spreadsheet is not available if you have selected Assign
+Midpoints By: Existing index number mappings in the
+TRC within Setup.
+The receiver pattern is applied to a given shot in the Sources
+spreadsheet according to the midpoint assignment mode in
+the Geometry Setup window. Pattern numbers in the Sources
+spreadsheet must correspond to pattern numbers in the
+Patterns spreadsheet and vice versa. For 3D marine
+geometry, there is one midpoint assignment mode which
+utilizes pattern deﬁnitions.
+• Assign Midpoints By: Matching pattern number in
+the SIN and PAT spreadsheets
+Patterns are assigned to shots by matching the number
+in the Pattern column in both the Sources and Patterns
+spreadsheets. For a given pattern number, a range of
+channel numbers map to a range of receiver stations.
+Marine pattern deﬁnition differs substantially from the land
+pattern deﬁnition. First, there is only one receiver pattern
+allowed per survey. All receiver pattern entries apply to the
+one pattern to use by all shots. Second, the Patterns
+spreadsheet allows for source pattern deﬁnitions in addition
+to the receiver pattern. There can be any number of source
+patterns. Patterns are deﬁned for the receiver locations on
+the streamer and the source locations relative to the X and Y
+coordinates for each shot in the Sources spreadsheet.
+The following diagram describes the sign conventions for
+pattern deﬁnition for 3D marine geometries:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1264
+
+ProMAX® Reference
+
+3D Marine Sign Conventions
+
+N
+Negative Y Offsets
+Negative X Offsets
+
+90 Degree Streamer Azimuth
+Stern of Vessel to Tail Buoy
+
+Positive X Offsets
+
+Tail Buoy
+
+Positive Y Offsets
+
+Vessel Antenna
+
+All pattern information is described in terms of the X Offset
+and Y Offset columns. The X and Y offsets are distances
+relative to the vessels position (X and Y columns in the
+Source spreadsheet) in the direction of the streamer azimuth
+(Strmr Azmth column in the Sources spreadsheet) at the
+time when a shot took place. The X offset is deﬁned as an
+offset distance in the direction of the streamer azimuth.
+Positive X values are towards the tail buoy position and
+negative X values are towards the bow of the vessel. The Y
+offset is deﬁned to be an offset distance perpendicular to the
+streamer azimuth. Positive Y values are to the right to the line
+deﬁned by the vessels position and the streamer azimuth as
+you look from the stern of the vessel towards the tail buoy
+(the port side of the vessel). Negative Y values are to the left
+(the starboard side of the vessel).
+The following columns appear within the marine Patterns
+spreadsheet: Min Chan, Max/Gap Chan, Chan Inc, Src
+Pattern, Grp Int, X Offset, and Y Offset. Channel numbers
+deﬁne a range of channel numbers to assign to a
+corresponding range of receiver stations. The Min Chan,
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1265
+
+ProMAX® Reference
+
+Max/Gap Chan, and Chan Inc columns speciﬁes the range of
+channels. The channel speciﬁed in the Min Chan column is
+hung at the X Offset and Y Offset position. Subsequent
+channels are positioned by adding the Grp Int entry for each
+channel up to and including the channel speciﬁed in the
+Max/Gap Chan column. Channels increment by Chan Inc
+from Min Chan to Max/Gap Chan. The relative positions for
+each channel is then used with the X and Y position of the
+vessel in the Sources spreadsheet to determine the absolute
+coordinates of each receiver for a given shot.
+Source patterns will have a pattern number entered in the
+Src Pattern column with entries describing the relative
+source location in the X Offset and Y Offset columns. For
+example, if the starboard source is 50 feet off the vessel and
+25 feet behind it, then the Y offset entry is -50 and the X
+offset is 25.
+Source patterns are not required. If there is no source
+pattern information for a shot, then leave the Src Pattern
+column in the Sources spreadsheet blank and the X and Y
+columns in the Sources spreadsheet to use for the source
+location.
+The receiver pattern is described by any records in the
+Patterns spreadsheet that do not have entries in the Src
+Pattern column. The receiver pattern requires entries in the
+Min Chan, Max/Gap Chan, Chan Inc, Grp Int, X Offset, and
+Y Offset.
+Note: The source pattern values are used to update the trace
+offset values. They do not affect the SOU_X and SOU_Y
+values obtained from the source spreadsheet.
+• Mark Block is a spreadsheet row counter.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Min Chan is the channel number closest to the vessel.
+• Max/Gap Chan is the channel number furthest from the
+vessel.
+• Chan Inc is the channel number increment to use
+between the Min Chan and Max/Gap Chan values.
+• Src Pattern is the source pattern number associated
+with X Offset and Y Offset values, which deﬁne the
+source location relative to the X and Y values speciﬁed in
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1266
+
+ProMAX® Reference
+
+the Sources spreadsheet. For example, if the X and Y
+values in the Sources spreadsheet deﬁne antennae position, and the source itself is 50 ft. starboard of the vessel
+and 25 ft. behind it, then Src Pattern could be 1 with an
+associated Y Offset of -50 and an X Offset of 25.
+The Src Pattern entry and its associated X Offset and Y
+Offset values must be in separate spreadsheet rows from
+the receiver pattern row. Deﬁne as many source pattern
+numbers as are needed. These values should correspond
+to values in the Src Pattern column in the Sources
+spreadsheet.
+Source patterns are not required to complete geometry
+assignment. If no source pattern information exists,
+leave the Src Pattern column in both the Sources and
+Patterns spreadsheets blank. In this case, the X and Y
+column values in the Sources spreadsheet will be the
+coordinates of each source location.
+• Grp Int is the receiver station interval on the streamer in
+feet or meters. Channel positions are incremented by
+adding Grp Int to the position of Min Chan and to each
+subsequent channel through the channel speciﬁed by
+Max/Gap Chan.
+• X Offset is the distance along the streamer azimuth is
+deﬁned differently for receiver or source patterns.
+For receiver pattern: Distance along the streamer
+azimuth from the source location deﬁned by X and Y in
+the Sources spreadsheet to Min Chan.
+For source patterns: Distance along the streamer
+azimuth from the source location deﬁned by X and Y in
+the Sources spreadsheet to the actual source position.
+For example, if X and Y in the Sources spreadsheet
+deﬁne antennae position, and the source itself is 50 ft.
+starboard of the vessel and 25 ft. behind it, then X Offset
+is 25. This value is used to generate the trace offset
+values in the TRC OPF. It will not change the X value in
+the Sources spreadsheet.
+This value is in ft. or m. See the 3D Marine Sign
+Convention diagram for sign conventions. Positive X
+offsets are towards the tail buoy position and negative X
+offsets are towards the bow of the vessel. Streamer
+azimuth is deﬁned in the Strmr Azmth column in the
+Sources spreadsheet.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1267
+
+ProMAX® Reference
+
+• Y Offset is the distance along the streamer azimuth is
+deﬁned differently for receiver or source patterns.
+For receiver pattern: Distance perpendicular to the
+streamer azimuth from the source location deﬁned by X
+and Y in the Sources spreadsheet to Min Chan.
+For source pattern: Distance perpendicular to the
+streamer azimuth from the source location deﬁned by X
+and Y in the Sources spreadsheet to the actual source
+position. For example, if X and Y in the Sources
+spreadsheet deﬁne antennae position, and the source
+itself is 50 ft. starboard of the vessel and 25 ft. behind it,
+then Y Offset is -50. This value is used to generate the
+trace offset values in the TRC OPF. It will not change the
+Y value in the Sources spreadsheet.
+This value is in feet or meters. See the 3D Marine Sign
+Convention diagram for sign conventions. Positive Y
+offsets are to the right as you look along streamer
+azimuth, or in the direction of the tail buoy from the
+stern of the vessel. Negative Y values are to the left as
+you look along streamer azimuth. Streamer azimuth is
+deﬁned in the Strmr Azmth column in the Sources
+spreadsheet.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown:
+Column
+
+OPF Attributes
+
+Trace Header Data Format
+
+Mark Block
+
+None
+
+None
+
+Integer
+
+Min Chan
+
+PAT GEOMETRY CHANFROM None
+
+Integer
+
+Max/Gap Chan PAT GEOMETRY CHANTO
+
+None
+
+Integer
+
+Chan Inc
+
+PAT GEOMETRY CHANINC
+
+None
+
+Integer
+
+Src Pattern
+
+PAT GEOMETRY SRCID
+
+None
+
+Integer
+
+Grp Int
+
+PAT GEOMETRY GRP_INT
+
+None
+
+Integer
+
+X Offset
+
+PAT GEOMETRY OFFSET_X
+
+None
+
+Integer
+
+Y Offset
+
+PAT GEOMETRY OFFSET_Y
+
+None
+
+Integer
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1268
+
+ProMAX® Reference
+
+Binning the Data
+Bin
+The Bin button opens the 3D Marine Binning and QC
+window. This window allows you to calculate CDP X and Y
+coordinates, to enter binning parameters for midpoints and
+offsets, to bin the midpoints and offsets, to generate QC
+displays of the binned data, and to ﬁnalize the database.
+You must complete steps 1, 3, and 5 from the 3D Binning
+and QC window. Step 2 and 4 are optional but suggested.
+Select a step and click Ok to execute:
+Steps
+1
+2
+3
+
+4
+
+5
+
+Binning Sequence
+1. Assign midpoints by displays the method you selected for
+assigning midpoints within Setup.
+If Assign Midpoints By: Matching pattern numbers in
+the SIN and PAT spreadsheet or Assign Midpoints By:
+Matching line and station numbers in the SIN and PAT
+spreadsheet was selected within Setup, this step will
+enter values in the following TRC OPF spreadsheet
+columns: CMP_X, CMP_Y, Offset, Azimuth, Channel,
+CHN_LTBL, SIN, SIN_LTBL, SRF, and SRF_LTBL. It will
+also create the CHN Database order.
+If Assign Midpoints By: Existing index number
+mappings in the TRC was selected within Setup, then
+SIN, SRF, and CHN information will already exist in the
+TRC OPF spreadsheet and will not be altered.
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1269
+
+ProMAX® Reference
+
+You must successfully execute Assign midpoints before
+you can bin the data. If execution of this step fails, you
+should view the job.output ﬁle to get clues on what needs
+to be edited in the Source, Receiver, or Patterns
+spreadsheets.
+2. Deﬁne binning grid generates a midpoint XYgraph to
+deﬁne and display the CDP bin grid. Deﬁned bin grids or
+spaces are used in the Bin midpoints step to generate the
+CDP Database order.
+Note: This step is optional, but visually helpful. You can
+deﬁne a binning grid in Bin midpoints or Bin Receivers. See
+the Bin Midpoint Parameters or Bin Receivers section for more
+details.
+Initial XYGraph window for 3D Bin Grid Deﬁnition
+
+Using your data, select Display/ Midpoint/Control
+Points/Add Display of: Black. Once displayed click on
+Grid/Display. The default 10 by 10 grid will be displayed.
+The following example shows a fully deﬁned 3D Binning grid.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1270
+
+ProMAX® Reference
+
+3D Binning Grid display in XYGraph.
+Icon Bar
+
+Menu Bar
+
+Midpoints: Black
+Grid: Blue
+
+Data Display
+Once you have a Binning Grid display, the following Menu
+Bar and Icon Bar options appear.
+Menu Bar
+File Menu
+• Hardcopy prints a hardcopy of your 3D binning grid definition to the printer or plotter. The printer or plotter
+should be deﬁned in your
+$PROMAX_HOME/etc/conﬁg_ﬁle.
+• Exit exits the application. The exit button generates a
+warning menu telling you to save opened grids or delimit
+ﬁles. If you need to save a grid or delimit ﬁle, go to the
+Grid menu, select Save or Save To and ﬁll out the menu.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1271
+
+ProMAX® Reference
+
+If you do not need to save anything, hit the Conﬁrm button.
+Display Menu
+The display menu contains cascaded pulldown menus for
+selecting graph type and associated attributes. Once you
+have chosen the category and graph type, you can select the
+attributes you want to plot for that display category. For
+example, you can display a color contour of source elevation
+by selecting Display/Source/Color Contour/Elevation.
+You can display the following attributes in a control point
+graph, color contour graph, and line contour graph.
+• Midpoint displays the midpoints by X coordinate and Y
+coordinate for the current geometry.
+• Source displays the source stations by X coordinate and
+Y coordinate for the current geometry.
+• Receivers Bins displays the receiver bins by X,Y coordinate for current geometry. You may only use this option
+if you have previously binned your receivers using the
+Bin receivers option in the 3D Binning and QC menu.
+• Traces displays receiver stations based upon the X,Y
+coordinate information in the TRC Spreadsheet.
+• Recs & Sources displays both the source and receiver
+stations by X coordinate and Y coordinate for the current
+geometry.
+• Fold displays the bin centers for a selected bin space
+and color or contour the points based upon the fold of
+each bin. You need to deﬁne a bin space before this
+option becomes available.
+You can display multiple data types together, but cursor
+tracking information is available for only one data type at a
+time. By default, the cursor tracking information is activated
+for the last data type plotted. However, you can override this
+by clicking on an attribute and selecting Views/Transparent
+or View/Opaque.
+Views Menu
+• Opaque displays opaque color contours. Since only one
+Opaque display can be seen at a time, use the Opaque
+button to select a display as the current opaque display.
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1272
+
+ProMAX® Reference
+
+Cursor tracking information will be available for the
+attribute selected.
+• Transparent represents all the displays that are not
+color contours. Select a current data type to receive cursor tracing information.
+• Remove removes a selected displayed data type from the
+display.
+Delimit Menu
+The delimit menu allows you to view a portion of a 3D survey
+or decimate the binning grid. This is very useful for large data
+volumes when many data points exist.
+Note: The last active delimit space, when you exited an
+XYgraph session, will still be used the next time you activate
+XYgraph, even if you are running from a new ProMAX® user
+interface. In this case, to view your whole survey, use the
+delimit display option and then the delimit remove option.
+• Open allows you to select a previously deﬁned delimit
+space and display the binning grid.
+• Display displays the last delimit space that was opened
+in the current XYgraph session and create a pick icon to
+modify display. If no delimit space was opened, this
+option will display the entire 3D survey’s bin space.
+• Parameterize displays the Delimit Parameters dialog
+box. You can enter the delimit name, aerial extent, and
+decimation increment. For example, if the decimation
+increment is 5 and you are displaying CMPs and shots,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1273
+
+ProMAX® Reference
+
+every ﬁfth CMP and shot within the delimit space will be
+displayed.
+
+• Extract zooms display to delimit region.
+• Clear clears the delimit region for either sources, receivers, or common midpoints. For example, if you clear a
+delimit region for sources and you have sources displayed, you will see your sources displayed for the entire
+survey.
+Once you have selected and displayed a delimit space, the
+following options become available:
+• Remove removes the delimit of datapoints. Reopen or
+redeﬁne your delimit space to perform additional delimit
+operations.
+• Save saves the current delimit space to disk.
+• Save To saves the current delimit space to another
+delimit space name. Select Save To; a dialog box
+appears. Enter or select the name in the text ﬁeld.
+• Reset resets the axis to cover the whole 3D survey area.
+Data will only be displayed in the delimited region.
+• Hide removes the delimit grid from the display area. The
+delimit region is still the only region with data displayed
+on when displaying more attributes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1274
+
+ProMAX® Reference
+
+Grid Menu
+• Open allows you to select a previously deﬁned bin space
+and display the binning grid.
+• Display displays the default 10 by10 cell grid. This grid
+can be modiﬁed.
+Once you have selected and displayed a binning grid, the
+following options become available:
+• Parameterize displays the Grid Parameters dialog box.
+Enter the grid azimuth (clockwise from north), cell sizes,
+number of cells along the azimuth, number of cells perpendicular to the azimuth, and the grid origin coordinates. See Examples B and C in the Bin midpoints
+section for a schematic of the relationship between origin, azimuth, inline, and crossline.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1275
+
+ProMAX® Reference
+
+Grid Parameters dialog box.
+
+Cancel button
+OK button
+• Drawing toggles the grid display from a bin grid with
+midpoints centered inside each grid cell to a bin grid
+with midpoints centered at grid cell corners, and vice
+versa. This essentially places crosshairs at the center of
+each grid cell. This is useful for checking how close the
+midpoints are to the bin centers.
+Note: Be sure to toggle the grid display back to a bin grid
+with midpoints centered inside each grid cell before
+saving the bin space.
+• Save saves the current bin space to disk. If this is a new
+bin space, the Save To dialog box will appear to allow
+you to enter a bin space name.
+• Save To saves the current bin space to a previously created bin space or a to new bin space name. After you
+select the Save To button, the Save To selection dialog
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1276
+
+ProMAX® Reference
+
+box appears. Select a bin space to save the deﬁnition to,
+or type a new name in the Selection text ﬁeld.
+• Hide removes the binning grid from the display area.
+Icon Bar
+When XYgraph ﬁrst appears, only the Zoom and Alternate
+Domains command icons appear. When you display an
+attribute, the Tracker Display and Report icons appear. The
+Pick icon appears if a delimit space is selected. Once a bin
+space has been selected, the Rotate, Move, Size Grid Cells,
+Add/Del Grid Cells, and Spider icons appear. For most cases,
+only one command icon may be selected at any time. Each
+command icon is described below:
+• Tracker Display controls the information in the mouse
+help line.
+MB1 tracks the X and Y coordinate of the cursor
+position.
+MB2 displays current cursor position (same as MB1).
+MB3 displays X and Y coordinate of the attribute in the
+top view which is nearest to the cursor. This may be slow
+for large datasets.
+• Zoom displays the area in zoom mode.
+MB1 drags and drops to zoom. Click MB1 to unzoom.
+MB2 toggles between last zoomed display and current
+display.
+MB3 rescales view to an aspect ratio closer to 1:1.
+• Alternate Domains shows the association between
+database domains. For example, if you display Sources
+and then Receivers, you will see the sources associated
+with a given receiver or vice versa depending on the following mouse button options.
+Note: With large datasets, this option may be slow.
+MB1 highlights the association between the primary
+domain at your cursor location and all related secondary
+domain values. In our example, Receivers are the
+primary domain, since we selected it as the domain to
+display last, and Sources are the secondary domain. In
+this case, MB1 will highlight all the sources that ﬁred
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1277
+
+ProMAX® Reference
+
+into the receiver that is nearest to your cursor location.
+MB2 highlights the association between the secondary
+domain at your cursor location and all related primary
+domain values. In our example, Receivers are the
+primary domain, since we selected it as the domain to
+display last, and Sources are the secondary domain. In
+this case, MB2 will highlight all the receivers that were
+active for the source that is nearest to your cursor
+location.
+MB3 drags and drops the cursor to display the distance
+between your starting point and the current cursor
+location, the azimuth of your vector, and coordinate
+information. Press Shift-MB3, drag your cursor, and
+then release Shift-MB3 to rotate your survey so the
+vector you created by dragging your cursor is vertical.
+Press Control-MB3 to return the survey to its original
+orientation.
+• Highlight trace contributors highlights the traces
+(receivers) that contributed to a particular source.
+MB1/Shift MB1 highlights/unhighlights the cable
+position when the shot nearest your cursor was ﬁred.
+MB2/Shift MB2 highlights/unhighlights the cable
+positions of the shot line nearest your cursor location.
+• Report sets up communication with the Geometry
+Assignment spreadsheets.
+
+• Pick adjusts delimit space for the active delimit area.
+MB1 adds a delimit point.
+MB2 removes the delimit point closest to your cursor
+location.
+• Rotate rotates the binning grid about a selected point.
+MB1 rotates the binning grid. After using MB2 to set the
+point of rotation, press MB1 and drag to rotate survey.
+MB2 selects the point of rotation. Do this before using
+MB1 to rotate the binning grid.
+MB3 removes the point of rotation.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1278
+
+ProMAX® Reference
+
+• Move moves the grid by holding and dragging the button.
+
+• Size Grid Cells modiﬁes the inline or crossline cell size
+of a grid.
+MB1 expands the cells in the inline or crossline direction
+Hold MB1 and drag the cursor expands the side of your
+grid closest to the cursor location.
+MB2 expands or contracts your cells. Click and drag
+MB2 to move the grids’ edge nearest your cursor location
+to your cursor location.
+MB3 contracts the cells in the inline or crossline
+direction, depending on the direction you move the
+cursor while holding MB1 down.
+• Add/Del Grid Cells modiﬁes the number of cells in a
+grid.
+MB1 adds a row of cells to the grid edge closest to your
+cursor location.
+MB2 increases or decrease the number of cells. Click
+and drag MB2 to move the grids’ edge nearest your
+cursor location to your cursor location.
+MB3 deletes a row of cells from the grid edge closest to
+your cursor location.
+• Spider displays different types of spider plots of selected
+bins.
+MB1 displays a spider plot of the bin closest to the
+cursor location consisting of line segments drawn from
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1279
+
+ProMAX® Reference
+
+the bin center to the midpoint locations within the bin.
+
+MB2 displays the same type of bin spider plot as
+previously displayed by updating the last bin window
+generated with the new bin location.
+MB3 displays a source receiver spider plot of the bin
+closest to the current cursor location. This spider
+indicates delta X and Y values for the source receiver
+pairs.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1280
+
+ProMAX® Reference
+
+Click MB3 multiple times, to select multiple bins to
+generate spider plots for each bin. The spider plot will be
+updated to reﬂect any changes in bin size and
+orientation when the grid position or rotation is
+modiﬁed. The performance of these operations is
+dependent upon the number of spider plots currently
+active.
+Once you have completed work in the Deﬁne binning grid
+step under Available Binning Options, you can continue
+with the Bin midpoints step.
+3. Binning
+The binning step has two binning type options: Bin
+midpoints and Bin Receivers. Bin Receivers is an
+optional step. However, you must bin midpoints.
+Bin Midpoints opens the 3D Marine Midpoint Binning
+dialog box that is used to bin the CDPs by applying a bin
+space to the data. You can ﬁll out the CDP binning
+parameters by hand or you can load the CDP binning
+parameters created in the Deﬁne binning grid step. You
+can enter the offset bin deﬁnition, minimum CDP, inline,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1281
+
+ProMAX® Reference
+
+and crossline numbers. You can also use the Calc Dim
+button to automatically calculate a bin space for midpoint
+and offset binning. See the rest of this section for details.
+CDP bin spaces are sets of parameters that deﬁne binning
+grids for CDPs and associated indexing parameters, such
+as CDP, inline, and crossline numbers. Multiple bin
+spaces can be deﬁned for a ProMAX® line. The bin center
+and fold information for each bin space that is applied to
+the trace data is stored in a separate binary ﬁle in the
+ProMAX® line directory. The bin centers and fold
+information are accessible from the QC Bin data fold
+displays. These displays make it possible to compare
+binning results.
+Applying a bin space calculates the CDP number for each
+trace and generates values in the following TRC OPF
+spreadsheet columns: CDP, CDP_LTBL, ILN, XLN, and
+OFB.
+Bin spaces are most easily deﬁned graphically within
+XYgraph in the Deﬁne binning grid step. However,
+binning parameters can be entered by hand or with Calc
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1282
+
+ProMAX® Reference
+
+Dim within the 3D Marine Midpoint Binning dialog box.
+
+If you are entering binning parameters by hand, you must
+enter an appropriate X and Y grid origin and an
+appropriate azimuth relative to the Y axis in order to
+establish the CDP, inline, and crossline numbering
+scheme. The X an Y grid origin refer to the coordinates at
+the bin center. The following diagrams are graphical
+representations of some the binning parameters. Example
+A shows the inline, crossline, and CDP numbering
+convention for the case where inlines are parallel to the X
+axis.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1283
+
+ProMAX® Reference
+
+Example A: Inlines parallel to grid X axis
+Inline 1
+Inline 2
+Crossline M
+CDP M
+
+North (0 degrees)
+
+e
+
+M
+
+Crossline M
+CDP M*2
+
+Inline P
+Crossline M
+CDP M*P
+
+In
+
+lin
+
+e
+
+P
+
+C
+r
+C oss
+ro
+s s lin e
+lin
+e2
+1
+
+C
+ro
+s
+
+sl
+
+in
+
+In
+In line
+lin
+e1
+2
+
+Inline P
+Crossline 1
+CDP M*(P-1)+1
+
+Origin (X,Y): Inline 1
+Crossline 1
+CDP 1
+Θ = Azimuth along Y axis of grid
+
+Inline 2
+Crossline 1
+CDP M+1
+
+At the origin, the default values of Inline = 1, Crossline = 1, and CDP = 1 are used.
+These values can be entered in the 3D Marine Midpoint Binning dialog box and
+will increment as shown in the diagram.
+
+The following binning parameters are used for Figure A:
+• Azimuth along Y axis of grid is the angle between true
+North (00) and the bin grid Y direction.
+• Grid bin X dimension is the distance between
+crosslines. (For Inlines parallel to grid X axis).
+• Grid bin Y dimension is the distance between inlines.
+(For Inlines parallel to grid X axis).
+• X origin and Y origin of 3D grid is the true map coordinates of the beginning of the ﬁrst inline and crossline.
+• Max X dimension of grid is the number of crosslines
+(M) * Grid bin X dimension. (For Inlines parallel to grid X
+axis).
+• Max Y dimension of grid is the number of inlines (P) *
+Grid bin Y dimension. (For Inlines parallel to grid X axis).
+Example B shows the origin and orientation of inlines and
+crosslines when different angles are entered for Azimuth
+along Y axis of grid for the case where inlines are parallel
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1284
+
+ProMAX® Reference
+
+to the X axis.
+Example B: Inlines parallel to grid X axis
+
+A
+
+Orientation diagram
+
+6o
+Origin
+
+Cro
+ssl
+ine
+
+Origin of 3D grid Azimuth along
+Y axis of grid
+
+North
+
+Inlin
+
+e
+
+C
+Θ = 6°
+
+Origin
+ne
+
+96o
+
+Cro
+
+ssli
+
+Inli
+
+B
+
+276o
+
+ine
+
+D
+
+ne
+
+186o
+
+Survey
+Layout
+
+ne
+
+A
+
+Inli
+
+Origin
+D
+
+ssli
+
+Inli
+
+Cro
+
+ne
+
+Cro
+
+ssl
+
+C
+
+B
+
+ne
+
+Origin
+“Inline” as annotated on the Orientation diagram is parallel to the inline direction.The same holds true for “Crossline”.
+
+Example C shows the origin and orientation of inlines and
+crosslines when different angles are entered for Azimuth
+along Y axis of grid for the case where inlines are parallel
+to the Y axis.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1285
+
+ProMAX® Reference
+
+Example C: Inlines parallel to grid Y axis
+
+A
+
+Orientation diagram
+North
+
+Inlin
+e
+
+Origin of 3D grid Azimuth along
+Y axis of grid
+6o
+
+B
+
+Origin Cros
+slin
+e
+Θ = 6°
+
+96o
+
+Cro
+ssl
+ine
+
+Origin
+B
+
+Survey
+Layout
+
+ine Origin
+
+D
+
+ne
+
+Cro
+
+Inli
+
+ssl
+
+ine
+
+Inlin
+
+e
+276o
+
+ne
+
+ssl
+
+186o
+
+D
+
+Inli
+
+A
+
+Cro
+
+C
+
+C
+
+Origin
+“Inline” as annotated on the Orientation diagram is parallel to the inline direction.The same holds true for “Crossline”.
+
+The following parameters are included in the 3D Marine
+Midpoint Binning menu:
+• Azimuth along Y axis of grid is the direction of the Y
+axis of the bin space, measured clockwise from North.
+• Grid bin X dimension is the dimension of a bin cell in
+the direction of the X axis.
+• Grid bin Y dimension is the dimension of a bin cell in
+the direction of the Y axis.
+• X origin of 3D grid is the X coordinate for the grid origin. Inline, crossline, and CDP numbering will start at
+the origin.
+• Y origin of 3D grid is the Y coordinate for the grid origin. Inline, crossline, and CDP numbering will start at
+the origin.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1286
+
+ProMAX® Reference
+
+• Max X dimension of grid is the distance from the grid
+origin to the maximum grid X deﬁning the bin space
+grid. This distance is bin edge to bin edge which is one
+CDP interval more than bin center to bin center.
+• Max Y dimension of grid is the distance from the grid
+origin to the maximum grid Y deﬁning the bin space grid.
+This distance is bin edge to bin edge which is one CDP
+interval more than bin center to bin center.
+• Bin space name is up to 80 characters for the bin space
+name. You can also use the Load button, located at the
+bottom of the 3D Marine Midpoint Binning dialog box, to
+load a previously deﬁned bin space.
+• Min CDP number is the beginning CDP number
+assigned to the bin located at the grid origin. CDPs
+increment by one from the origin along the inline direction and increase in the same direction for successive
+inlines. The inline direction may be parallel to either the
+X or Y axis of the grid and is set in the Inlines parallel
+to grid axis parameter at the bottom of the 3D Marine
+Midpoint Binning dialog box.
+• Min inline number is the beginning inline number to
+assign to the bin located at the grid origin. Inline numbers increment by one in the direction perpendicular to
+the axis selected in the Inlines parallel to grid axis
+parameter at the bottom of the 3D Marine Midpoint Binning dialog box.
+• Min crossline number is the beginning crossline number to assign to the bin located at the grid origin.
+Crossline numbers increment by one in the direction of
+the axis selected in the Inlines parallel to grid axis
+parameter at the bottom of the 3D Marine Midpoint Binning dialog box.
+The following three parameters create the OFB Database
+order. You may ﬁnd this information useful for quality control
+purposes. The OFB OPF is necessary for Surface Consistent
+Amplitude Analysis and Surface Consistent Decon.
+• Min offset bin center is the value assigned to the ﬁrst
+offset bin center. All traces with offsets less than this
+value minus half of the offset bin increment are excluded
+from the binning.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1287
+
+ProMAX® Reference
+
+• Max offset bin center is the value assigned to the last
+offset bin center. All traces with offsets greater than this
+value plus half of the offset bin increment are excluded
+from the binning.
+• Offset bin increment is the distance between bin centers for offset bins.
+• Src-Rec azimuth to bin is the source-receiver azimuth
+in degrees, measured clockwise from north. This value
+limits the traces used for binning. When used with SrcRec azimuth tolerance, this parameter will only bin
+traces with a source-receiver azimuth falling within the
+range of deﬁne azimuths, plus or minus the tolerance
+value. The opposite azimuth (+180 degrees) plus or
+minus the tolerance is also binned.
+• Src-Rec azimuth tolerance (+/- degrees) is the tolerance in degrees to use with Src-Rec azimuth to bin.
+• Inlines parallel to grid X axis is the inline direction
+parallel to the X axis of the binning grid. The X axis is
+the axis which is perpendicular to the Azimuth along Y
+axis of grid. The inlines will be perpendicular to the Azimuth along Y axis of grid parameter. CDP numbers
+increment by one in the inline direction.
+• Inlines parallel to grid Y axis is the inline direction to
+be parallel to the Y axis of the binning grid. The inlines
+will be parallel to the Azimuth along Y axis of grid
+parameter. CDP numbers increment by one in the inline
+direction.
+The following entries describe the buttons at the bottom of
+the 3D Marine Midpoint Binning dialog box.
+• Calc Dim automatically calculates a bin space grid for
+all trace midpoint locations. This is the fastest way to
+create a binning grid. This option requires the Azimuth
+along Y axis of grid, Grid bin X dimension, and Grid
+bin Y dimension parameters be ﬁlled in. The origin and
+maximum X and Y dimensions of the grid are calculated
+and entered into the dialog parameter ﬁelds.
+• Load loads a previously deﬁned bin space to Apply. If
+you load a bin space previously created with the Deﬁne
+binning grid option, the binning parameters from the
+top of the menu to the Bin space name will automatically
+be ﬁlled out.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1288
+
+ProMAX® Reference
+
+• Delete deletes a previously deﬁned bin space. All supporting ﬁles for the deleted bin space are removed from
+disk.
+• Save saves the currently displayed bin space to disk.
+• Apply saves the currently deﬁned bin space to disk and
+perform midpoint binning. This step enters values in the
+following TRC OPF spreadsheet columns: CDP,
+CDP_LTBL, ILN, XLN, and OFB. The centers and fold for
+each bin are saved as a binary ﬁle in your ProMAX® line
+directory. These can be compared later with other bin
+spaces.
+Note: For large surveys, the Apply step may take a long
+time. As an alternative, you can use the ProMAX®
+process CDP Binning* to apply a deﬁned bin space to
+the data in batch mode.
+• Cancel closes the dialog box.
+• Help displays help about 3D Marine Midpoint Binning.
+Bin receivers opens the 3D Marine Receiver Binning
+dialog box that is used to create, manage, and apply bin
+spaces to the receiver data. Accesses previously deﬁned
+bin spaces deﬁned in Deﬁne Binning Grid.
+To generate the SRF OPF, apply a bin space to the receiver
+locations. Enter an origin point and an azimuth, clockwise
+from north, along the Y axis, to deﬁne a bin space. The
+ﬁrst SRF location is the origin. SRF locations increment by
+one in the direction of the Y axis. Bin spaces are most
+easily deﬁned graphically within XYGraph, however, they
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1289
+
+ProMAX® Reference
+
+can be entered by hand within this binning dialog.
+
+Example D shows the inline, crossline, and SRF
+numbering convention for the deﬁned orientation.
+Example D
+
+Grid Bin Y
+dimension
+
+SRF P+1
+
+X f gr
+um o
+im ion
+ax ns
+M me
+di
+
+Grid Bin X
+dimension
+
+di Ma
+m xim
+en u
+si m
+on Y
+of
+gr
+id
+
+North
+
+SRF N+1
+Θ = Azimuth along y axis of grid
+
+id
+
+Origin (X,Y): SRF1
+SRF 2
+
+SRF P
+SRF N
+
+The following parameters are included in the 3D Marine
+Receiver Binning menu:
+• Azimuth along Y axis of grid is the direction of the Y
+axis of the bin space, measured clockwise from North.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1290
+
+ProMAX® Reference
+
+• Grid bin X dimension is the dimension of a bin cell in
+the direction of the X axis.
+• Grid bin Y dimension is the dimension of a bin cell in
+the direction of the Y axis.
+• X origin of 3D grid is the X coordinate for the grid origin. Inline, crossline, and CDP numbering will start at
+the origin.
+• Y origin of 3D grid is the Y coordinate for the grid origin. Inline, crossline, and CDP numbering will start at
+the origin.
+• Max X dimension of grid is the distance from the grid
+origin to the maximum grid X deﬁning the bin space
+grid. This distance is bin edge to bin edge which is one
+CDP interval more than bin center to bin center.
+• Max Y dimension of grid is the distance from the grid
+origin to the maximum grid Y deﬁning the bin space grid.
+This distance is bin edge to bin edge which is one CDP
+interval more than bin center to bin center.
+• Bin space name is an up to 80 character bin space
+name. You can also use the Load button, located at the
+bottom of the 3D Marine Midpoint Binning dialog box, to
+load a previously deﬁned bin space.
+The following entries describe the buttons at the bottom of
+the 3D Marine Receiver Binning dialog box.
+• Calc Dim automatically calculates a bin space grid for
+all trace midpoint locations. This is the fastest way to
+create a binning grid. This option requires the Azimuth
+along Y axis of grid, Grid bin X dimension, and Grid
+bin Y dimension parameters be ﬁlled in. The origin and
+maximum X and Y dimensions of the grid are calculated
+and entered into the dialog parameter ﬁelds.
+• Load loads a previously deﬁned bin space to Apply. If
+you load a bin space previously created with the Deﬁne
+binning grid option, the binning parameters from the
+top of the menu to the Bin space name will automatically
+be ﬁlled out.
+• Delete deletes a previously deﬁned bin space. All supporting ﬁles for the deleted bin space are removed from
+disk.
+• Save saves the currently displayed bin space to disk.
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1291
+
+ProMAX® Reference
+
+• Apply saves the currently deﬁned bin space to disk and
+perform midpoint binning. This step enters values in the
+following TRC OPF spreadsheet columns: CDP,
+CDP_LTBL, ILN, XLN, and OFB. The centers and fold for
+each bin are saved as a binary ﬁle in your ProMAX® line
+directory. These can be compared later with other bin
+spaces.
+Note: For large surveys, the Apply step may take a long
+time. As an alternative, you can use the ProMAX®
+process CDP Binning* to apply a deﬁned bin space to
+the data in batch mode.
+• Cancel closes the dialog box.
+• Help displays help about 3D Marine Midpoint Binning.
+4. QC Bin data quality checks binned data by using various
+displays.
+• Coordinate Space Fold displays the bin centers in an X
+and Y coordinate space. The bin centers are colored
+based upon the bin fold.
+• Line Space Fold displays a color contour plot of bin fold
+versus inline and crossline numbers. This is a useful
+diagram for checking your inline and crossline orientations. See Examples A, B, and C.
+• Spider displays the spider plots for all of the bins within
+the bin space in a X and Y coordinate space. Spider displays consist of line segments drawn from the bin center
+to the individual CMP locations and colored by source to
+receiver offset.
+Note: This plot may take a while to draw if you have a
+large 3D survey, since it is plotting information about
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1292
+
+ProMAX® Reference
+
+individual traces.
+
+• Mid-Points displays the midpoints versus CDP_X and
+CDP_Y and color the midpoints based on their source to
+receiver offset.
+Note: This plot may take a while to draw if you have a
+large 3D survey, since it is plotting information about
+individual traces.
+• QC Bin Space allows you to select a bin space to use in
+the QC displays.
+
+Finalizing the Database
+5. Finalize Database must be used once binning has
+completed to create all the necessary lookup tables and to
+complete the building of the ProMAX® Database.
+Finalizing the Database generates values in the following
+TRC OPF spreadsheet columns: ILN_LTBL, XLN_LTBL,
+OFB_LTBL and CHN_LTBL. This completes the geometry
+related entries in the TRC Database order. This step also
+builds the CDP, ILN, XLN, and OFB Database orders.
+Note: If entire shots or receivers are deleted from a
+spreadsheet and you rerun Finalize Database, any
+attributes previously created outside the spreadsheet,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1293
+
+ProMAX® Reference
+
+such as ﬁrst break picks and statics, will not match the
+reﬁnalized database and should be recreated.
+TraceQC
+The TraceQC button opens the TRC Ordered Parameter File
+(OPF) spreadsheet. This spreadsheet is a window into the
+database TRC OPF which can actually contain more
+attributes than are shown by this spreadsheet. The database
+TRC OPF contains all trace speciﬁc attributes for this
+ProMAX® line. Some of the attributes are geometry related,
+while others are not. Only attributes pertaining to the your
+particular type of geometry are shown in the TRC
+spreadsheet. Most of the attributes in this spreadsheet are
+internally computed and are only for quality control viewing.
+Attributes which cannot be edited have an * in the column
+name. For example, CMP X* cannot be edited, whereas FB
+Pick can be edited.
+Columns in the TRC OPF spreadsheet are initialized by one
+or more of the following steps:
+• running Extract Database Files
+• successful completion of Assign Midpoints in Bin
+• successful completion of Bin Midpoints in Bin
+• importing UKOOA data using File/UKOOA Import
+• using File/LOOKUP Indexing
+The following list describes all TRC OPF spreadsheet
+columns:
+• Mark Block values represent sequential trace numbers
+for all ProMAX® datasets in this ProMAX® line. The
+Mark Block number maps all TRC OPF attributes associated with it to a single trace in a dataset. The geometry
+speciﬁc attributes are loaded into the trace headers
+when Inline Geometry Header Load is run. The
+remaining TRC OPF attributes may be loaded into the
+traces headers during subsequent processing.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Rec X* is the receiver station X coordinate. These values
+are generated by Assign Midpoints in Bin. Coordinates
+can also be imported from a UKOOA ﬁle or can be
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1294
+
+ProMAX® Reference
+
+extracted from the trace headers of the input dataset
+using Extract Database Files.
+• Rec Y* is the receiver station Y coordinate. These values
+are generated by Assign Midpoints in Bin. Coordinates
+can also be imported from a UKOOA ﬁle or can be
+extracted from the trace headers of the input dataset
+using Extract Database Files.
+• Rec Depth is the depth below sea level of the receiver or
+cable in ft. or m. Receiver depths can be entered by
+hand, imported from a UKOOA ﬁle, or can be extracted
+from the trace headers of the input dataset using
+Extract Database Files.
+• Offset* is the source to receiver distance. It is computed
+from the database entries SIN GEOMETRY X_COORD,
+SRF GEOMETRY X_COORD, SIN GEOMETRY
+Y_COORD, and SRF GEOMETRY Y_COORD. These database entries come from the X coordinate and Y coordinate columns in the SRF and SIN OPF spreadsheets.
+• Azimuth* is the azimuth from the source to the receiver
+location. With the source location as the origin, the azimuth is computed as the clockwise rotation angle from
+the Y axis to a vector from the source location to the
+receiver location. It is computed from the database
+entries SIN GEOMETRY X_COORD, SRF GEOMETRY
+X_COORD, SIN GEOMETRY Y_COORD, and SRF GEOMETRY Y_COORD. These database entries come from the
+X coordinate and Y coordinate columns in the SRF and
+SIN OPF spreadsheets.
+• Channel* is the recording channel number. The channel
+number is one of the main criteria used to match the
+input traces to the database when loading geometry into
+the trace headers with Inline Geom Header Load.
+• CHN_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• SIN* is the source index number. This is a sequential
+record counter that ranges from one to the maximum
+number of shots. For correct geometry assignment, each
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1295
+
+ProMAX® Reference
+
+shot must have a unique SIN. This value comes from the
+Mark Block value in the SIN OPF spreadsheet.
+• SIN_LTBL* is a numeric counter ranging from one to the
+maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• SRF* is a sequential record counter ranging from one to
+the maximum number of receiver stations. This value
+comes from the Mark Block value in the SRF OPF
+spreadsheet.
+• SRF_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• CDP* is the CDP bin number of the trace. This value is
+computed in the Bin midpoints step in Bin from entries
+in the 3D Marine Midpoint Binning window.
+• CDP_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• ILN* is the 3D inline number. This value is computed in
+the Bin midpoints step in Bin from entries in the 3D
+Marine Midpoint Binning window.
+• ILN_LTBL* is a numeric counter ranging from one to the
+maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• XLN* is the 3D crossline number. This value is computed in the Bin midpoints step in Bin from entries in
+the 3D Marine Midpoint Binning window.
+• XLIN_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+Other Docs
+
+Search Page
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1296
+
+ProMAX® Reference
+
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• OFB* is the offset bin number of the trace. Positive and
+negative source-receiver offsets are binned as absolute
+offsets and a sequential bin number is assigned to each
+offset bin. These values are computed in the Bin midpoints step in Bin from entries in the 3D Marine Midpoint Binning window.
+• OFB_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• FB Pick is the ﬁrst break pick times in ms. While it is
+possible to manually enter these values in the spreadsheet, ﬁrst break picks are normally made by one of the
+ﬁrst break picking processes such as First Break Pick
+Macro* or NN First Break Picker. First break picks
+made with these processes can be saved in TRC GEOMETRY FB_PICK and can then be edited in this column.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown:
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block None
+
+TRACE_NO
+
+Integer
+
+Rec X
+
+TRC GEOMETRY REC_X
+
+REC_X
+
+Floating Pt.
+
+Rec Y
+
+TRC GEOMETRY REC_Y
+
+REC_Y
+
+Floating Pt.
+
+Rec Depth
+
+TRC GEOMETRY REC_DEP
+
+REC_H20D
+
+Floating Pt.
+
+Offset
+
+TRC GEOMETRY OFFSET
+
+OFFSET
+
+Floating Pt.
+
+Azimuth
+
+TRC GEOMETRY AZIMUTH
+
+SR_AZIM
+
+Floating Pt.
+
+Channel
+
+TRC GEOMETRY CHN
+
+CHAN
+
+Integer
+
+CHN_LTBL TRC GEOMETRY CHN_LTBL None
+
+Integer
+
+SIN
+
+Integer
+
+Other Docs
+
+TRC GEOMETRY SIN
+
+Search Page
+
+SIN
+
+Known Problems
+
+3D Marine Geometry Spreadsheet1297
+
+ProMAX® Reference
+
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+SIN_LTBL
+
+TRC GEOMETRY SIN_LTBL
+
+None
+
+Integer
+
+SRF
+
+TRC GEOMETRY SRF
+
+REC_SLOC
+
+Integer
+
+SRF_LTBL TRC GEOMETRY SRF_LTBL None
+
+Integer
+
+CDP
+
+CDP
+
+Integer
+
+CDP_LTBL TRC GEOMETRY CDP_LTBL None
+
+Integer
+
+ILN
+
+TRC GEOMETRY INL
+
+ILINE_NO
+
+Integer
+
+ILN_LTBL
+
+TRC GEOMETRY INL_LTBL
+
+None
+
+Integer
+
+XLN
+
+TRC GEOMETRY XNL
+
+XLINE_NO
+
+Integer
+
+TRC GEOMETRY CDP
+
+XLIN_LTBL TRC GEOMETRY XLIN_LTBL None
+
+Integer
+
+OFB
+
+Integer
+
+TRC GEOMETRY OFB
+
+OFB_NO
+
+OFB_LTBL TRC GEOMETRY OFB_LTBL None
+
+Integer
+
+FB Pick
+
+Floating Pt.
+
+Other Docs
+
+TRC GEOMETRY FB_PICK
+
+Search Page
+
+FB_PICK
+
+Known Problems
+
+

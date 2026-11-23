@@ -1,0 +1,1511 @@
+Prestack Kirchhoff 2D Curved Ray Time Mig.515
+
+ProMAX® Reference
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.
+Prestack Kirchhoff 2D Curved Ray Time Migration
+performs a time migration, including curved-ray
+adjustments, of prestack seismic data acquired over an area.
+Especially in areas of irregular bin fold coverage, it provides
+an alternative to DMO plus common-offset F-K migration
+with an optional stack and F-K demigration.
+
+Theory
+This prestack imaging process sums input traces within a
+user-controlled aperture to form output image traces. The
+summation uses NMO-like curves (with additional weighting)
+calculated from a vertically and laterally-variant RMS velocity
+ﬁeld in time, VRMS(x,y,t). Generally, time migration is used for
+smoothly varying velocity ﬁelds and moderately complex
+structure. For typical Gulf of Mexico compactional gradients
+of up to 0.5 sec1, this provides a very good approximation for
+dips up to 55o and preserves more steeply-dipping energy for
+subsequent residual moveout and anisotropic stacking
+analysis.
+In migration, each subsurface image location of interest is
+treated as a diffracting point of unknown amplitude. With an
+assumption of small perturbations, reﬂections behave
+linearly and a continuous reﬂector is well approximated as a
+tightly spaced sequence of point diffractors. Kirchhoff
+migration estimates these diffracting amplitudes by
+correlating (with some appropriate scaling and ﬁltering) the
+input data with an analytically-calculated estimate of the
+diffraction that would appear if that particular subsurface
+image point contained a diffractor of unit strength. Such
+estimates are good when most of the reﬂected or diffracted
+energy for a given image point is captured on a well-sampled
+grid back at the surface. When these assumptions break
+down, imaging can signiﬁcantly degrade by both aliasing
+(coarse sampling) and acquisition footprint (missing
+and/or irregular sampling) artifacts. Additionally, too small
+of a migration aperture (used to reduce noise and improve
+turnaround) can discard needed reﬂected energy and further
+degrade image quality.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.516
+
+ProMAX® Reference
+
+Usage
+The parameters break into the following four categories:
+• Resource usage only; these have no geophysical impact
+Number of CPUs
+Maximum Image Output
+Run Type
+Checkpoint the migration?
+Restart from Checkpoint?
+Maximum Preprocessed Traces
+Maximum Image Traces
+Maximum Number of Cache Blocks
+• Geophysical quality
+Table with RMS Velocity parameters
+All Preprocessing Parameters
+• Output image; consider these for job distribution
+All Show Image Set parameters
+• Combined resource usage and geophysical quality
+Apply Antialias
+Migration Direction
+Aperture Limit Type parameters
+Image Gather Type parameters
+Acquisition Footprint
+Resource Usage only parameters
+Estimating Resource
+To estimate disk space needed, use the following estimates:
+Total Disk Space = Velocity + Σ (Image Sets [+ Mutes])
+Each of these terms is, in turn, one or more 3D grids. The
+(maximum) size of such a grid, is, in bytes,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.517
+
+ProMAX® Reference
+
+4 * N1 * N2 *N3
+where N1, N2, and N3 are the dimensions of the grid rounded
+up to a multiple of 8. For dimensions use:
+Velocity:
+N1=NT, the number of output samples
+N2=Number of Inlines in the input geometry
+N3=Number of Crosslines in the input geometry
+Image Set:
+N1=NT
+N2=Number of Inlines in the Image Set deﬁnition
+N3=Number of Crosslines in the Image Set deﬁnition
+Mute:
+N1=NT/24
+N2=Number of Inlines in the Image Set deﬁnition
+N3=Number of Crosslines in the Image Set deﬁnition
+Finally, before summing the total disk space, multiply each
+image set size by the product of the number of offset bins
+and the number of velocity bins requested for the set and
+double that if checkpointing is enabled.
+The Total Disk Space is less if one of the compression
+options is used. If 16 bit compression is enabled, divide by 2.
+If 8 bit compression is used, divide by 4. RMS distortionlimited compression will, in general, provide even more
+compression than 8 bit compression.
+You should be aware of the potential need for extended
+scratch space. Refer to Extended Scratch Space in the
+System Administration manual for a complete description of
+the extended scratch space setup and requirements.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.518
+
+ProMAX® Reference
+
+Checkpoint and restart
+Checkpoint and restart are important features of this
+migration process not only for resource protection during a
+long job but also to facilitate effective imaging quality control
+and parameter updates.
+Always run production work with checkpointing. The
+overhead is very small compared to the time savings of
+restarting a job after a failure. Particularly in a distributed
+environment, where a node may crash or lose contact with
+the network, checkpointing is a crucial fallback. Each node
+keeps track of the header of the last trace it migrated before
+saving its current image to a set of backup ﬁles. While this
+does require extra disk space, it allows you to restart the job
+with the Restart from Checkpoint ﬂag turned on. With the
+ﬂag on, the data already migrated is read in much less time
+than a restart from the beginning. On restart, the already
+migrated data is processed at about 5 Mb/sec as each node
+checks data headers to ﬁnd its restart point, while
+remigrating proceeds at about 0.2Mb/sec.
+This migration can run in parallel on a multiple CPU sharedmemory platform, permitting faster job throughput.
+Monitoring long jobs
+Snapshot migration at each checkpoint allows you to
+quality control a long job. When you select Yes, you can feed
+the traces in DSEQNO=1 into Disk Data Output. This saves
+the ﬁnal migration output. Follow this IF block with a second
+IF block and select a line (as an example, line 75) to feed into
+Trace Display. As each new snapshot is generated, Trace
+Display receives a newer copy of line 75. You can then
+monitor the image quality as the migration proceeds.
+However, Trace Display stalls the job if a second snapshot is
+generated before you click Forward. When you are satisﬁed
+that the migration is proceeding correctly, click
+Exit/Continue to allow Trace Display to step aside without
+interfering with the migration.
+Example
+While not practical in large production runs, snapshots can
+be useful during testing to check progress of data
+contribution to the output image. The following images are of
+part of an inline (AGC applied), 4 hours apart, as data
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.519
+
+ProMAX® Reference
+
+accumulates into the output image. As backup copies are
+made during each checkpoint, the current image is written to
+the output ﬁle, incrementing the header PSTMSNAP. There is
+some overhead incurred in writing to output and the output
+dataset is multiplied in size by the number of snapshots
+made.
+
+Part of an inline (AGC applied); each panel is 4 hours apart
+
+Sizing Output Cache
+This process is a one-pass procedure, requiring each input
+trace to make all possible contributions to all relevant output
+images when it is read. There is a trade off between output
+image space cache vs. input trace data cache. When possible,
+it is best to size the output image area(s) to ﬁt in memory.
+This is accomplished in one or both of the following ways:
+• Increase the Maximum Number of Cache Blocks
+parameter. Each cache block holds 2 kilobytes of data.
+By using the disk space usage formulas for uncompressed data given in the previous section and dividing
+by 2048, you can determine the number of cache blocks
+needed to hold the entire image set in memory. When
+using compression, the actual size of a cache block is
+less than 2 kilobytes, allowing you to increase the setting
+by a factor of 2 or more.
+• Break large jobs into smaller jobs. For example, compute
+one quarter of the image set offset range per job. This
+yields two beneﬁts: it allows you to get past 2 gigabyte
+memory limits by running multiple jobs, and it provides
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.520
+
+ProMAX® Reference
+
+multiple caches, reducing cache contention. Similarly,
+you can break up a full-offset output run into multiple
+pieces, say every fourth inline, and merge them back
+together in postprocessing.
+If you cannot ﬁt the entire image set into cache by one or
+both of the above methods, reduce the I/O load and elapsed
+runtime, by increasing Maximum Preprocessing Traces
+parameter. Each doubling of this number cuts the I/O by a
+factor of 2. The amount of memory required for these
+preprocessed input traces is given by the formula:
+Memory = 4 * MaxPrep * NT * Nbands
+where:
+MaxPrep=Max. Prep. Traces menu setting
+NT=Number of samples per trace
+Nbands =Number of Alias Bands menu setting(1 if no antialiasing)
+Geophysical Quality parameters
+Input data should not have any sort of gain applied to it. For
+more requirenments see Preprocessing parameters.
+Output image parameters
+The Image Set Parameters, along with Trace length, deﬁne
+the output image dimensions. All contributing input data are
+migrated into the volume. That is, the output image deﬁnition
+does not delimit the input data. Compute time is proportional
+to image size, allowing some overhead for reading and
+rejecting noncontributing data. For example, running a single
+job on 64 cluster nodes to produce a 1200 x1500 trace
+output volume is only slightly faster than running four 16node jobs, each reading the entire dataset and imaging 300
+x1500 traces. In planning a migration, balance the risk of
+running a single job on a large number of nodes (with the
+possibility of having to restart from checkpoint if a single
+node fails) against the overhead of breaking an output image
+into smaller blocks and running several jobs on fewer nodes.
+An image is internally distributed by passing every Nth
+output location to the Nth node. You get a more constant
+utilization of the CPUs with shot or even offset plane ordered
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.521
+
+ProMAX® Reference
+
+input compared to swath division. With swath division, some
+nodes sit idle until they read data contributing to their
+portion of the image.
+Image gathers
+You can output image gathers at all selected surface
+locations for analysis of imaging velocity. These migrationmoveout-corrected composite gathers are assembled from
+independently-migrated offset volumes. If the velocity ﬁeld is
+accurate, all traces in an image gather should be well aligned.
+Using Image Gathers to Identify Stretch Mute on Aperture
+The following ﬁgures show part of an inline through the SEG
+Salt synthetic, migrated with 10%, 20%, 40% and 1000%
+stretch mute. Pairs of offset and image gathers at the
+indicated crosslines, migrated with the same range of percent
+stretch values, show the use of image gathers to identify the
+impact of stretch mute on aperture. (Moveout is not perfect
+because a smooth velocity ﬁeld was intentionally used. No
+mute was applied to the gathers before stacking.)
+
+10%
+
+Other Docs
+
+20%
+
+Search Page
+
+40%
+
+1000%
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.522
+
+ProMAX® Reference
+
+Flatter events (ﬁrst gather set below) are not moved far in
+migration, so a narrow aperture is adequate.
+10%
+
+20%
+
+40%
+
+1000% 10%
+
+20%
+
+40%
+
+1000
+
+The ﬁrst 4 gathers are the Offset gathers followed by 4 image gathers
+
+The second set show steeply dipping and/or high velocity
+contrast horizons require a slightly wider aperture. Notice
+that the event at 800 ms does not appear on the 10 and 20%
+gathers. On the 40% image gathers it appears at longer image
+offset. This indicates a longer source-image point-receiver
+distance while smeared across all offsets on the standard
+offset gather.
+
+The third set shows a similar horizon at 1600ms, as well as
+several shallower steep events that originate closer to the
+image point.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.523
+
+ProMAX® Reference
+
+Deﬁning Offsets for Image Gathers
+The binning parameters deﬁne the offsets of the image
+gathers, as well as the maximum offset of data to be included
+in the migration. The SeisSpace menu contains a comment
+line, indicating how the parameters will be interpreted. Each
+trace is a sum of all migrated traces within that offset bin, so
+migrating to16-fold or 64-fold offset or image gathers, then
+stacking, should produce identical results as selecting Full
+Offset Image Traces to Image Gather Types. The additional
+runtime required to create gathers is 5-20%, depending on
+output fold. More signiﬁcantly, memory, scratch, and output
+disk space requirements are fold times those required for an
+output stack. Migrating a complete volume to very high fold
+gathers (>30) is not recommended, as it provides no more
+detailed information and requires signiﬁcantly more scratch
+and output disk space. Compression becomes an important
+consideration if the image size for each node is close to its
+available cache space.
+Image velocity scans
+You can output image velocity scans at all selected surface
+locations for subsequent inspection and analysis of imaging
+velocity and anisotropy parameters. For a full-offset image
+run, this is a migration equivalent to CVS Stacks. The
+velocity scan can also be applied when generating image
+gathers as well.
+Sparse subset limiting
+Sparse subset limiting of the image area allows you to
+compute and output images on a coarse subset of the image
+area, for example every 10th inline or crossline. It can be
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.524
+
+ProMAX® Reference
+
+used to select coarsely-spaced migration velocity image
+gather output locations.
+Combined resource usage and geophysical quality parameters
+By default, antialiasing increases the amount of memory
+needed for preprocessed traces by a factor of 10. See
+Determining When to Apply Antialiasing to decide if you need
+antialiasing during initial parameter testing.
+Cache and disk access in this migration have been carefully
+designed to make the performance degrade gracefully, rather
+than in sizable discrete jumps, if the image set does not ﬁt
+entirely in cache.
+In addition to increasing performance by reducing memory
+and disk, several parameters directly affect the amount of
+computation and speed, at run time.
+• Doubling the Block Moveout Step reduces CPU usage
+by almost a factor of two.
+As emphasized above, a smaller aperture means that
+any given sample will contribute to fewer image trace
+samples thus less computation and less total I/O. If you
+need to image steep dip, be careful about reducing the
+aperture too much. In general, the default stretch mute
+aperture is a logical ﬁrst guess at a practical aperture,
+but it is quite possible to gain an order of magnitude
+improvement by imposing Maximum Image Distance
+cutoffs.
+• For purposes of quality output, the antialiasing option is
+implemented using an approach that is one of the more
+expensive algorithms from the reference literature. You
+are well advised to assess whether you really need antialiasing during initial parameter testing.
+Operator Antialiasing
+Operator Antialiasing is a process whereby the ﬂanks of the
+migration summation operator are selectively ﬁltered to
+reduce or eliminate aliasing artifacts due to spatial sampling.
+Zero-offset migration of a horizontal bed provides a simple
+insight into this process.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.525
+
+ProMAX® Reference
+
+Alias Image
+
+True Image
+
+Discretely-sampled
+Reﬂection
+
+In the above diagram, the curved lines represent the
+summation path of a hyperbolic migration operator. The thick
+dotted horizontal line is a sampled ﬂat bed reﬂection arrival.
+The imaging operation sums along hyperbolic paths (with
+some weights) and places the output at corresponding the
+hyperbola apex. We see that:
+• lower summation curve sums several adjacent coherent
+samples together to produce a sample of the true image
+overlying the input reﬂection.
+• upper summation curve happens to intersect the reﬂection in a couple of separated points, producing a fainter
+alias of the reﬂector displaced above the true image.
+Such phantoms build up a ringy precursor to the true
+reﬂector image.
+To antialias these operators, theory says to make their
+sloping ﬂanks fatter in order to capture both peaks and
+troughs of the reﬂection wavelet as the summation operator
+crosscuts the event. The operator then sums destructively
+across multiple adjacent samples, attenuating or eliminating
+the alias image.When enabled, the antialias option does this,
+judiciously lowering frequency content where needed to
+suppress aliasing. By default, antialiasing is not enabled
+because it is often unnecessary for initial parameter analysis
+runs and can add signiﬁcantly to run time.
+Determining when to apply antialiasing
+Applying antialiasing is expensive and the runtime very
+parameter dependent. The process refers to the edges of the
+migration operator and not to insufﬁciently dense acquisition
+geometry. Test to determine if your data requires
+antialiasing, and expect a runtime increase of 50-150%.
+The ﬁgure below shows a comparison of 3 spikes, migrated
+ﬁrst without and then with antialiasing. The operator is truly
+aliased, so antialiasing minimizes the blockiness of the upper
+edges.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.526
+
+ProMAX® Reference
+
+If not really needed, antialiasing will effectively apply a lowpass ﬁlter. The next ﬁgures show the ﬁrst second of data,
+again migrated without and with antialiasing, along with
+their power spectra. The migration operator was not
+originally aliased, so antialiasing just produced a mixedlooking, lower frequency shallow section. In many cases,
+applying correct aperture limits avoid the need to antialias
+the migration operator. Very steep dips or sharp velocity
+contrasts in the shallow section with certain acquisition
+geometries would require antialiasing
+
+Without Antialias
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.527
+
+ProMAX® Reference
+
+With Antialias
+
+Aperture
+Aperture is the most important factor affecting
+performance. Full 3D Kirchhoff migration throughput is
+proportional to the number of traces in its summation
+aperture which is in turn proportional to the square of the
+aperture radius. Thus, reducing the Image Location
+Distance aperture by a factor of two, yields a nearly four-fold
+speed increase. It is therefore quite beneﬁcial to include this
+setting in initial coarse grid parameter test, reducing it as
+much as possible without sacriﬁcing the quality of the
+migration output.
+Compression
+This process offers compression of internal and selected
+output ﬁles. However, this offers both advantages and
+disadvantages. On the plus side:
+• Compression saves signiﬁcant disk space
+• Reduces I/O time
+• Increases program throughput
+On the minus side:
+• compression is lossy. That is, it does not retain every bit
+of data accuracy
+• Your judgement is needed for selecting the RMS distortion setting to balance compression against image ﬁdelity.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.528
+
+ProMAX® Reference
+
+Because some experimentation is necessary to determine
+acceptable levels of distortion, the default is not to enable
+compression in order to retain as many bits of accuracy as
+possible. However, because of its signiﬁcant beneﬁts in
+saving space and run time, you are strongly urged to use it,
+especially for large migrations.
+Block Moveout
+Block Moveout calculates the exact NMO at every Nth sample
+deﬁned in Block Moveout Step. NMO times between those
+times are linearly extrapolated using the input trace
+sampling interval for Uniform Block Moveout Sampling or
+1/Nth of the actual time interval to the next NMO calculation
+point for Stretched Block Moveout Sampling. Using the
+default step size of 8 samples decreases runtime by 2-5 times
+compared to computing NMO times at every trace sample,
+but can decrease the accuracy. Moveout window boundaries
+can be ﬁltered out with a postmigration Bandpass Filter.
+
+Exact
+Interpolated
+
+Block NMO step
+
+Exact
+
+Exact
+
+I - Image point
+
+Examples of Block Moveout types
+The following images show stacks of gathers generated with
+No Block Moveout, Uniform and Stretched Block
+Moveout, all at 40% stretch. The horizontal striping in the
+Uniform version is more obvious in the next images, where
+the Uniform and Stretch BMO stacks have been subtracted
+from the stack without BMO. The RMS amplitudes of the
+differences shown are 25% and 5%, respectively. They are
+much more severe on this synthetic than they would be on
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.529
+
+ProMAX® Reference
+
+real data with a range of amplitudes and noise. Selected
+gathers are shown in the bottom image. Runtime using
+Uniform BMO is about 60% of that with no Block Moveout.
+Stretch BMO saves about 40%.
+
+No Block Moveout, Uniform Block Moveout, Stretched Block Moveout
+
+Difference of Uniform and Stretch BMO subtracted from Stack without BMO
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.530
+
+ProMAX® Reference
+
+Two sets of gathers showing No, Uniform, and stretch Block Moveout
+
+How Block Moveout Determines Migration Velocities
+Examples of the differences between Uniform percentage
+velocities, Uniform percentage slowness and Uniform
+percentage sloth:
+Assume a constant velocity model of 2000 m/s, a minimum
+velocity percentage of 80, a maximum velocity percentage of
+120 and the number of velocity scans is 3:
+Uniform percentage velocities
+The migration determines what velocities to migrate in the
+following way:
+1. Find percentages:
+80% of 2000m/s = 1600, 120% of 2000 m/s = 2400
+
+2. Find the difference between velocity range:
+2400-1600 = 800
+
+3. Find increment between scans:
+800/(number of scans-1) = 800/(3-1) = 400
+
+4. Determine the velocities to migrate with:
+1600 m/s (80% of 2000 m/s)
+2000 m/s (1600 + 400)
+2400 (1600 +400+400)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.531
+
+ProMAX® Reference
+
+Uniform percentage slowness
+The migration determines what velocities to migrate in the
+following way:
+1. Find percentages:
+80% of 2000m/s = 1600, 120% of 2000 m/s = 2400
+
+2. Invert the velocities:
+1/1600=6.25e-4, 1/2400=4.17e-4
+
+3. Find the difference between the 1/velocity range:
+6.25e-4 - 4.17e-4 = 2.08e-4
+
+4. Find increment between scans:
+2.08e-4/(number of scans-1) = 2.08e-4/(3-1) = 1.04e-4
+
+5. Determine all of the 1/velocities:
+1/1600 = 6.25e-4
+6.25e-4 - 1.04e-4 = 5.21e-4
+5.21e-4 - 1.04e-4 = 4.17e-4
+
+6. Invert the 1/velocities from previous step. These are the
+velocities used in the migration:
+(1/6.25e-4) = 1600 m/s
+(1/5.21e-4) = 1920 m/s
+(1/4.17e-4) = 2400 m/s
+
+Uniform percentage sloth
+The migration determines what velocities to migrate in the
+following way:
+1. Find percentages:
+80% of 2000m/s = 1600, 120% of 2000 m/s = 2400
+
+2. Invert and square the velocities:
+1/(1600**2)=3.91e-7, 1/(2400**2)=1.74e-7
+
+3. Find the difference between the 1/velocity range:
+3.91e-7 - 1.74e-7 = 2.17e-7
+
+4. Find increment between scans:
+2.17e-7/(number of scans-1) = 2.17e-7/(3-1) = 1.09e-7
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.532
+
+ProMAX® Reference
+
+5. Determine all of the 1/(velocities**2):
+1/(1600**2) = 3.91e-7
+3.91e-7 - 1.04e-7 = 2.82e-7
+2.82e-7 - 1.04e-7 = 1.74e-7
+
+6. Take the square root and invert the 1/(velocities**2) from
+the previous step. These are the velocities used in the
+migration:
+(1/3.91e-7**1/2) = 1600 m/s
+(1/2.82e-7 **1/2) = 1883 m/s
+(1/1.74e-7 **1/2) = 2400 m/s
+
+Processing Requirements
+The following is required for input data and velocity ﬁeld for
+proper migration:
+• Input data traces should have valid source and receiver
+coordinates.
+• Input data should be corrected to ﬁnal ﬂat datum. For
+best results, ensure that SOU_STAT and REC_STAT
+statics are present in the input headers. They are used
+in the migration to adjust traveltimes in order to account
+for actual source and receiver elevations and/or depths.
+• Input velocity ﬁeld must be supplied with the same
+datum as the input data. Velocity Manipulation can be
+used for converting between various datums.
+• Input should be Shot or CDP ordered. However input
+can be sorted in any order. Common offset order can
+reduce performance.
+• Input data cannot be NMO or DMO-corrected. Such
+gathers result in an improper migration.
+• Input data cannot have any gain applied to it. If scaling
+such as a T**n scaling or conventional True Amplitude
+Recovery (dB/sec correction) has been applied, an
+inverse scaling can be applied in the migration.
+• If binning in the database is correct, that is if the X-Y
+coordinates in your trace headers are consistent with the
+inline-crossline geometry for the line and its velocity
+table(s), you can migrate in your current area:line.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.533
+
+ProMAX® Reference
+
+Headers Used and Created
+The location of the source and receiver of each trace is taken
+from the header words SOU_X, SOU_Y, REC_X and REC_Y.
+Its offset is read from the AOFFSET header word.
+The header words ILINE_NO, XLINE_NO, CDP_X, CDP_Y,
+OFFSET, and AOFFSET are set to appropriate values after
+migration. SOU_STAT, REC_STAT and TOT_STAT are
+replaced by zeros if present in the input trace headers. Each
+image set requested is assigned a sequential number in a
+new IMSETN header ﬁeld. The header entry DS_SEQNO is
+created if needed for optional checkpoint snapshots. The
+NMO_APLD header entry is created if not already there and
+ﬂagged to facilitate subsequent processing. In addition, new
+header entries FOLDCOMP and PANL_VEL are created,
+depending upon what migration outputs are requested.
+These migrated headers allow you to copy the supergathers
+to a new ProMAX line and extract geometry from the them.
+With this option, you can process and analyze the migrated
+gathers while taking full advantage of the database.
+
+Workﬂows
+The following is a typical land workﬂow:
+Stratiﬁed Earth Effective Eta*
+Disk Data Input
+Database/Header Transfer
+Header Statics
+Apply Fractional Statics
+Prestack Kirchhoff 3D Time Mig.
+Disk Data Output
+
+Two stage approach
+Landmark suggests a two-staged approach to preparing and
+using this process because it is expensive to run.
+Stage 1
+Select a sparse subgrid of the output area, such as every
+10th inline and crossline, to use for generating sourcereceiver offset-binned gathers. These gathers allow you to
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.534
+
+ProMAX® Reference
+
+assess event ﬂattening, such as the quality of the input
+velocity ﬁeld, and to pick mutes. Either in conjunction with
+or alternatively, you can generate gathers over a range of
+velocity scaling percentages to see where to tweak the velocity
+for improving event alignment.
+You can also use the crossline-only migration option in
+conjunction with source-receiver offset binning to generate
+2D prestack pseudo-inlines for use with 2D analysis tools.
+The crossline migration often signiﬁcantly reduces out-ofplane effects, making the 2D treatment appropriate for
+migration velocity model building and analysis.
+Stage 2
+Use the migration to generate densely-sampled output
+image(s) with the updated velocity and gather mutes from
+stage one. Landmark recommends to compute the optional
+migration fold traces in this phase. This stage is generally
+done without offset-binning, unless migrated AVO analysis
+gathers are desired.
+To migrate AVO gather, use External Mute for the aperture
+type in conjunction with the Maximum Image Output Time
+to limit the computations to a window around a speciﬁed
+target zone. The migration fold traces are important in this
+setting for assessing and renormalizing amplitudes prior to
+subsequent AVO analysis.
+Fold Compensation Workﬂows
+Using Migration Fold Compensation produces two traces
+for every output location. The ﬁrst trace is the Fold
+Compensation trace (Header word FOLDCOMP = 1). The
+second trace is the migrated trace for the CDP:offset location.
+This trace is the same as an output trace without Fold
+Compensation (Header word foldcomp = 0). Run the following
+ﬂow to look at the data with the fold compensation applied:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.535
+
+ProMAX® Reference
+
+To apply the Fold Compensation after migration
+Disk Data Input
+Prestack Kirchhoff 3D Time Mig.
+Fold Compensation - Yes
+Disk Data Output -> Mig Data 1
+Disk Data Input <- Mig Data 1
+Trace Math
+Mode: Trace/Trace
+Type: Multiply Traces
+Disk Data Output -> Mig Data 1 with Fold Comp.
+
+References
+Al-Dajani, A.F., Tsvankin, I. and Toksöz, N., 1998, Nonhyperbolic reﬂection moveout for azimuthally anisotropic media: 68th Annual Internat. Mtg., Soc. Expl.
+Geophys., Expanded Abstracts, Session:ST2.3.
+Biondi, B., 1998, Kirchhoff imaging beyond aliasing: Stanford Exploration Project
+Report 97, 13–34.
+Black, James L. and Egan, Mark S., 1988, True-amplitude DMO in 3-D: 58th
+Annual Internat. Mtg., Soc. Expl. Geophys., Expanded Abstracts, 88, Session:S17.3.
+Chang, H., VanDyke, J., Solano, M., McMechan, G.A. and Epili, D., 3-D prestack
+Kirchhoff depth migration: From prototype to production in a massively parallel
+environment: Geophysics, 63, no. 2, 546–556.
+Duquet, B., Marfurt, K.J., Dellinger, J., 1998, Efﬁcient estimates of subsurface illumination for Kirchhoff prestack depth migration: 68th Annual Internat. Mtg., Soc.
+Expl. Geophys., Expanded Abstracts, Session: SP2.4.
+Gray, S.H., 1998, Speed and accuracy of seismic migration methods: NSF Mathematical Geophysics Summer School, Stanford University, August 3–21,
+http://sepwww.stanford.edu/etc/sam_gray/sam_gray.pdf.
+Hale, D., 1991, A nonaliased integral method for dip moveout: Geophysics, 56, no.
+6, 795–805.
+Harlan, W.S., 1995, Flexible seismic traveltime tomography applied to diving
+waves: Stanford Exploration Project Report, 89, 145–166.
+Lumley, David E., Claerbout, Jon F. and Bevc, Dimitri, 1994, Anti-aliased Kirchhoff
+3-D migration: 64th Annual Internat. Mtg., Soc. Expl. Geophys., Expanded
+Abstracts, 94, 1282–1285.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.536
+
+ProMAX® Reference
+
+Meinardus, H., Nieto, C., Chaveste, A., and Castañeda, J., 2000, Efﬁcient, targetoriented 3-D prestack depth migration in two steps: The Leading Edge, 19(2),
+138–144.
+Vermeer, G., 1990, Seismic waveﬁeld sampling: a wave number approach to
+acquisition fundamentals: Society of Exploration Geophysicists, Tulsa, 120 p.
+Wu, Y., 1998, Migration response and trace weighting for 3-D irregular seismic
+surveys: 68th Annual Internat. Mtg., Soc. Expl. Geophys., Expanded Abstracts,
+1558, Session: ST4.8.
+
+Parameters
+Number of CPUs
+Enter the maximum number of CPUs to use simultaneously.
+If not speciﬁed, the program uses about half the number of
+available CPUs on the machine.
+This is the number of shared-memory threads on a single
+compute node/server. This process makes good use of
+multiple CPUs on a Linux cluster node or on a UNIX server.
+Specifying 2 CPUs for a distributed job on 2-CPU cluster
+nodes performs computation with smaller I/O requirements
+rather than submitting to twice as many nodes with only 1
+CPU/node or running two joblets per node.
+For SeisSpace, the runtime difference in choosing 2 threads
+per job in the menu or from the submit GUI is minimal but
+resource usage is somewhat different. If you specify 2 CPUs
+in the menu, be sure not to select a node twice during job
+submission.
+Table with RMS Velocity parameters
+Select a ProMAX 3D VEL - vertically and laterally-variant,
+RMS velocity ﬁeld in time, VRMS (x,y,t). Landmark suggests
+using your best stacking velocity.
+Table with ETA parameters
+Select an RMS-eta table for wide-angle curved ray
+adjustments. Typical eta values range from 0 (no
+adjustments) to 0.1 or so.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.537
+
+ProMAX® Reference
+
+CDP interval (ft. or m)
+Enter the CDP interval that is consistent with the headers.
+This can be feet or meters.
+Maximum Image Output Time (ms)
+Enter the maximum output time in ms. The default, 0,
+outputs the maximum time of the input data. For example,
+an 8 second record outputs an 8 second image. However, if
+you only need 6 seconds of output image, input the full trace
+length and enter 6 on output and save substantially on
+runtime.
+Runtime increases with maximum output time. That is, an
+output trace length of 2.5 sec. requires 65% the runtime of a
+5 sec. output; a 4 sec output runs 85%.
+Image Sets Selected
+Select up to four image sets to deﬁne. An image set can be
+thought of as the output of the migration. All of the image
+sets are output in one pass of the data to the same ﬁle. They
+can be separated by selecting on the header word, IMSETN.
+Show Image Set
+Select the image set to deﬁne. The image set name changes
+when the Replace Set Name parameter is changed.
+Selecting multiple image sets allows testing of aperture,
+antialias, and footprint parameters in a single pass through
+the data. As each trace enters the migration, it is evaluated
+for contribution to each image set. It is then migrated and
+summed into output. Sort on header IMSETN to compare
+results of tests. Multiple image sets, such as stacks and
+gathers, are less practical in production runs. It is often more
+efﬁcient to create entire lines of migrated gathers, stacking
+afterwards rather than creating stack and gather image sets
+simultaneously.
+Image Set Parameters
+Minimum Output CDP
+Enter the ﬁrst output CDP for this image set.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.538
+
+ProMAX® Reference
+
+Maximum Output CDP
+Enter the last output CDP for this image set.
+CDP Output Sampling Interval
+Enter the CDP output increment for this image set.
+Minimum Output Time (ms)
+Enter the minimum output time in ms for this image set.
+Maximum Output Time (ms)
+Enter the maximum output time in ms for this image set.
+Enter 0.0 for the maximum output time of the this dataset.
+Output Sampling Rate (ms)
+Enter the output sampling rate for this image set. Enter 0.0
+for the sample rate of this dataset.
+Output Supergathers?
+Select Yes to output a rectangle of image traces around each
+location in the grid. The trace header SG_CDP is set to the
+CDP number of the center of each supergather rectangle.
+For very poor data, generating supergathers might improve
+subsequent velocity analysis. In most cases, migrating entire
+velocity lines to gathers allows more ﬂexibility because you
+can create inline supergathers, repick velocities, and then
+restack the full line for comparison with the stack using the
+original velocity.
+CDPs to combine
+This appears if Yes to Output Supergathers. Enter the
+number of CDPs to combine in a supergather. This value
+must be an odd number. Overlapping supergathers are
+allowed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.539
+
+ProMAX® Reference
+
+Antialias Parameters
+Apply Antialias?
+Select Yes to apply antialiasing. Filters are applied to the
+data to eliminate possible spatial and temporal aliasing. See
+Advanced Parameters for additional ﬁne tuning parameters.
+Select No to not apply antialiasing.
+The default values for antialiasing spacing ensure
+interpretability of the resulting 3D volume, regardless of the
+coarseness of the trace spacing. To output a subset of the
+inlines (gathers) for velocity analysis, set the antialias back to
+normal inline spacing.
+Nominal CDP Antialiasing Spacing
+This appears if Yes to Apply Antialias. Enter the distance in
+ft./m between CDPs. A smaller value than the default can
+increase frequency content at the expense of increased
+aliasing of the event.
+Aperture Parameters
+Aperture Limit Type
+Select one or more of the following aperture limiting
+techniques. Aperture limits control what data is migrated and
+summed into your output.
+• Not Aperture Limited performs no aperture limiting.
+This is not a realistic option for either runtime or data
+quality considerations.
+• Image Location Distance deﬁnes a radial distance from
+the output location. within which both the source and
+receiver must fall in order to contribute. Since this is not
+a time-varying parameter, it is most useful in conjunction with Stretch Mute or External Mute.
+• Stretch Mute is the maximum trace stretch, calculated
+from the interpolated velocity, to allow in the migration
+aperture. It is not a cosmetic, post-migration mute, but
+a true aperture limit. Test with image gathers to see
+where the aperture limit affects dipping events and those
+migrated from far away. This is the default.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.540
+
+ProMAX® Reference
+
+• Maximum Dip applies an aperture limit based on a
+straight ray approximation of dip, which tends to underestimate true dip. Use in conjunction with other limits.
+• External Mute as an aperture control, is not easy to
+visualize since it must be picked on standard offset gathers. These tend to not readily show aperture effects.
+However, this option can be used to import an upper
+surface above which no image is computed. In conjunction with Maximum Image Output Time, a target-oriented reservoir image can be produced with signiﬁcant
+runtime savings.
+Distance Limit Measure
+This appear if Image Location Distance to Aperture Limit
+Type. Choose whether you want to only migrate trace with
+Both source and receiver, Either source and receiver, or
+Midpoint within the aperture deﬁned below.
+Use time variable distance table(s)?
+This appear if Image Location Distance to Aperture Limit
+Type. Choose whether you want to use time-offset tables to
+deﬁne an aperture that is time (and space) variant. Time
+variant tables may be used to deﬁne either an approximately
+Elliptical or a Rectangular cross-section.
+Minimum Aperture Distance
+Maximum Aperture Distance
+These appear if Image Location Distance to Aperture Limit
+Type and not using time variable tables. Enter the Minimum
+Aperture Distance and Maximum Aperture Distance of traces
+to include.
+Note: In general, you should only set the Maximum Aperture
+Distance, leaving the minimum as zero.
+Maximum Stretch Mute
+This appears if Stretch Mute to Aperture Limit Type. Enter
+the maximum trace stretch to allow in the migration
+aperture. The default is 50.0%, allowing for a stretch factor of
+1.5. However, the default of 50% is too large in most cases.
+because runtime increases dramatically with stretch percent.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.541
+
+ProMAX® Reference
+
+A very small stretch mute percentage, that is less than 10%,
+has the effect of enhancing steeply dipping energy in the
+output image. A stretch mute in the 10-20% range often gives
+good results.
+Maximum Dip Limit
+This appears if Maximum Dip to Aperture Limit Type.
+Enter the maximum dip limit. The default value is 90˚.
+10o
+
+20o
+
+No dip
+
+Line through the SEG Salt Synthetic migrated with 10º, 25º and no dip limits.
+
+Setting the Dip aperture limit too low causes true steep dips
+to under migrate. However, it can signiﬁcantly attenuate
+operator effects due to noise where dips are less steep.
+Mute Input Type
+Select the type of mute you will apply to this image set:
+• Mutes from database uses mutes from a database
+• Manual Mutes allows you to manually input mutes.
+Table with Mute Parameters
+This appears if External Mute to Aperture Limit Type.
+Select a standard ProMAX, offset vs. time, top mute table
+from the menu.
+Image Gather Type
+Select one of the following gather types. Offset gathers help
+reﬁne velocities and mute before stacking or can be used for
+AVO. Image gathers provide aperture and operator
+information to better select parameters for migration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.542
+
+ProMAX® Reference
+
+• Full offset Image Traces stacks on the ﬂy. In other
+words, outputs a one trace gather containing one
+migrated trace at each image location combining all offsets of all input traces within the migration aperture.
+This is the default.
+• Sou-Rec Offset Limited Gathers outputs standard time
+migrated gathers. Each gather contains multiple
+migrated traces with each trace combining traces within
+the migration aperture from speciﬁc offset ranges.
+• Sou-Img_Loc-Rec Offset Limited Gathers outputs
+image gathers. That is, a set contains multiple migrated
+traces with each trace combining traces within the
+migration aperture from speciﬁc source-to-image location-to-receiver distance ranges. This gather type provides more sensitivity for velocity QC because it is not
+limited to the maximum offset on the recording cable.
+Binning Parameters
+Absolute Offset of First Bin Center
+This appears if one of the Limited options to Image Gather
+Type. Enter the center offset of the minimum offset bin to
+output. All traces with AOFFSET header values up to, but not
+including, this offset plus half the Bin Size for Offset Gather
+contribute to the ﬁrst offset image trace in an output gather.
+The corresponding output trace header contains this center
+offset for the bin in the OFFSET and AOFFSET header ﬁelds.
+Maximum Migrated Gather Offset
+This appears if one of the Limited options to Image Gather
+Type. Enter the maximum offset to process. Offset bins of
+size given by the Bin Size for Offset Gather are deﬁned up
+to this maximum offset.
+Bin Size for Offset
+This appears if one of the Limited options to Image Gather
+Type. Enter the offset bin interval contributing to each
+output trace in a migrated gather.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.543
+
+ProMAX® Reference
+
+Acquisition Footprint
+Select the acquisition footprint type for keeping track of the
+number of times each output sample has a sample migrated
+onto it. The reciprocal of this migration fold is taken to create
+a fold compensation trace. Where the fold is zero, the fold
+compensation trace contains a 1.
+• No Footprint Compensation performs no acquisition
+footprint compensation. This is the default.
+• Migration Fold Compensation calculates a separate
+fold compensation trace, FOLDCOMP=1, for each output
+data trace. These fold compensation traces can be used
+to QC migration contribution and compensate for CDP
+fold variations. To apply the calculated compensation,
+use Trace Math to multiply pairs of data and fold traces.
+Expect about a 30% increase in runtime to calculate the
+fold traces, as well as double the scratch, and output
+dataset disk requirements.
+Acquisition footprint is used in most stratigraphic settings or
+in areas with moderate variations in CDP coverage due to
+cable drift or in typical land shooting.
+Replace Set Name
+Enter up to a 15 characters description of this image set.
+This option is particularly useful when running multiple
+image sets.
+Two image sets are being migrated, one that only outputs inline 20 and one
+that outputs crossline 100. If the ﬁrst image set name is replaced with the set
+name Inline 20 and second is replaced with Crossline 100, it becomes much
+clearer what is being migrated that the original names of Set 1 and Set 2.
+
+This name makes parameter association in the menu easier,
+but has no other use.
+Run Type
+Select the migration run to use from the following options:
+• Normal (safe) aborts if ﬁles remain in scratch from a
+ﬂow with the same name. Files remain after either a successful or failed run to ensure that output datasets were
+created successfully. If these ﬁles are found, the job terminates and gives you a chance to: Rerun the migration with Restart option turned on and restart from
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.544
+
+ProMAX® Reference
+
+the checkpoint ﬁle, Re-run the migration in Normal
+(overwrite) mode, and then run the migration in Normal
+(safe) mode.
+• Normal (overwrite) removes scratch ﬁles from any preceding runs of the same name before starting over. This
+is good if ﬁles still exist from a job that bombed and you
+do not care about the results from that earlier job
+• Cleanup removes scratch ﬁles from a run of the same
+name.
+Checkpoint the Migration?
+Select Yes to periodically save the migration. This option is
+extremely important for a distributed environment. For more
+information about checkpointing see Checkpoint and Restart.
+Select No to not checkpoint the process.
+Hours Between Checkpoint?
+Enter the number of hours between checkpoints. This is the
+amount of time between snapshots of the migration.
+Snapshot migration at each checkpoint?
+Select Yes to send a copy of the checkpointed image data to
+the output trace stream each time job is checkpointed. The
+trace header DS_SEQNO is set to 1 for the ﬁrst snapshot and
+increments by 1 for each new snapshot. Select No if you do
+not want to snapshot the partially-migrated images at each
+checkpoint.
+Restart from checkpoint?
+Select Yes to restart the migration from an existing
+checkpoint ﬁle. Select No if you do not want to restart from
+an existing checkpoint ﬁle.
+Advanced Parameters
+Toggle between show and hide to see or hide the advanced
+feature parameters.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.545
+
+ProMAX® Reference
+
+Velocity Parameters
+Scan Velocity Type
+Select the velocity scan type. This parameter deﬁnes how a
+range of constant scale factors are applied to the input
+migration velocities to produce multiple output traces at each
+image location. The following options are:
+• No Scan does not perform velocity scanning. This is the
+default.
+• Uniform percentage velocity scales migration velocities
+by uniformly-spaced percentages.
+• Uniform percentage slowness scales migration slowness, that is reciprocal velocities, by uniformly-spaced
+percentages. This option gives more velocity scans in the
+lower velocities where more velocity resolution is needed.
+• Uniform percentage sloth (Migration sloth), scales
+reciprocal velocity-squared by uniformly-spaced percentages. This option gives more velocity scans (than even
+the uniform percentage slowness) in the lower velocities
+where more velocity resolution is needed.
+Velocity Scan Start (%)
+Enter the initial percentage velocity for velocity scanning.
+Velocity Scan End (5)
+Enter the ﬁnal percentage velocity for velocity scanning.
+Number of velocity scans
+Enter the number if velocity scans to output. The default
+outputs a gather at each CDP.
+Note: Creating velocity scans can be useful in areas of very
+poor data However, runtimes are multiplied by the number of
+velocity scans. Assuming small percentage ranges, similar
+results can be produced with PSTM offset gathers in Velocity
+Analysis Precompute However, that workﬂow is more
+tedious to build.
+The program creates traces with a the header word
+PANL_VEL containing the velocity percentage used to image
+that trace. This header word is used to pick a composite
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.546
+
+ProMAX® Reference
+
+velocity percentage ﬁeld using Screen Display. For PSTM
+velocity scans, sort on the header VELSCAN before picking
+percentages.
+Antialias parameters
+Input data are broken into several frequency band packets
+and antialias ﬁltered based on the frequency content in each
+packet and the inline/crossline spacing. By breaking the data
+into frequency packets and antialiasing each packet
+individually, high frequencies are kept as much as possible at
+the expense of larger memory requirements.
+Number of Alias Bands
+Enter the number of alias bands. Input data is linearly
+broken up to the maximum frequency into this number of
+alias bands before antialiasing ﬁlters are applied. More bands
+yields to a more accurate answer at the cost of run time. You
+can enter up to 10 bands. This is the default. The more
+bands, the better the results, but run time will likely increase
+due to memory tradeoffs required to store the extra bands.
+Maximum Frequency
+Enter the maximum frequency to apply antialias ﬁlters. The
+default 0 is the Nyquist frequency of the input data.
+Preprocessing parameters
+These parameters offer common geophysical operations.
+Amplitude/Phase Compensation Correction
+Select the correction from the following options:
+• 2D Correction applies a half differentiation to the input.
+Use this when running inline or crossline migration only.
+You should also use this when imaging a narrow swath
+of data.
+• No Correction disables the correction for this migration
+step. Select this if you have already applied specialized
+phase processing of the input data that included the
+necessary Kirchhoff 3D differentiator.
+Note: Amplitudes produced by each option should not be
+expected to be of comparable magnitude.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.547
+
+ProMAX® Reference
+
+Effects of the three amplitude/phase options (3D, 2D, and No) on migrated spikes
+
+Noisy Trace RMS Threshold value
+Enter the maximum RMS threshold value for rejecting noisy
+input traces. Entering 0 defaults to no RMS threshold check.
+A trace is considered too spiky to be included in the
+migration when the maximum amplitude of the trace exceeds
+the trace RMS amplitude multiplied by this factor.
+Time-Power gain removal constant
+Enter a time-power removal constant to remove a previously
+applied time power(T**n gain) where n is the entered value.
+Enter 0 for no correction scaling applied; this value must be
+greater than -10.
+dB/sec gain removal constant
+Enter a dB/sec gain removal constant to remove a previously
+applied dB/sec gain 10**(nT/20) where T is time in seconds
+and n is the entered value. Enter 0 for no correction scaling
+applied. Use 6.0 if True Amplitude Recovery defaults were
+previously applied. Must be greater than -120 dB/sec.
+Compression parameters
+These parameters deﬁne the type of data compression used
+for the scratch ﬁles created during the migration. They are
+automatically removed at completion.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.548
+
+ProMAX® Reference
+
+Compression type
+Select the compression type from the following options:
+• No Compression retains as much amplitude and structural accuracy as possible at the cost of using the most
+disk storage space. This is the default.
+• 16 Bit internal compresses each 32 bit ﬂoating point
+number into a 16 bit quantity for storage on disk.
+• 8 Bit internal rescales and compresses each 32 bit
+ﬂoating point number into a 8 bit quantity for storage on
+disk.
+• RMS distortion controls the amount of compression by
+a speciﬁed RMS distortion. This option generally provides the most compression.
+Maximum RMS Distortion
+This appears if RMS distortion to Compression type. Enter
+the allowable distortion in dB. Bigger numbers compress the
+data more, but run the risk of losing information. The default
+is -36 dB.
+Example: An RMS distortion value of -24dB, allowing decompression errors of
+about 1 part in 256, will compress the scratch ﬁles more than a value of -36
+dB, which forces decompression accuracy to1 part in 4096.
+
+By default, scratch ﬁles and the portion of the image loaded
+into memory as cache are full 32 bit. If the image processed
+by each node is larger than the available cache, turning on
+compression can allow the image to ﬁt into memory. This is
+an important performance consideration, since swapping
+portions of the image from memory to disk can be very slow.
+Migration on some machines with small L2 Cache (<512Kb of
+special fast memory) can also beneﬁt from compression, as it
+allows a larger active portion of the image to be in the fastest
+memory. There is a very small runtime penalty for enabling
+RMS distortion; it is easily recovered in improved CPU
+utilization. Differences in output images are minimal but
+should be tested.
+Block Moveout parameters
+Block Moveout saves runtime by interpolating moveout at a
+user-deﬁned interval, instead of each sample.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.549
+
+ProMAX® Reference
+
+Block Moveout type (Image set number)
+Select the block moveout type from the following options:
+• No Block Moveout does not apply block moveout, that
+is, NMO is calculated at every sample. This gives the
+most accurate answer, but takes 2-5 times longer to run.
+• Uniform Block Moveout Sampling is the fastest option.
+NMO calculated at every N samples and linearly extrapolated up to the next calculation point.
+• Stretched Block Moveout Sampling calculates NMO at
+every N samples, and interpolates using stretch estimation and the local velocity function between calculation
+points. This is the default and provides a balance
+between speed and accuracy.
+Block Moveout Step (Image set number)
+This appears if Uniform Block Moveout Sampling or
+Stretched Block Moveout Sampling is selected as the Block
+Moveout type. The larger the number, the faster the
+migration, but with less accurate results. Entering 1 is
+equivalent to not using Block Moveout. The default is 8.
+However, 8 is too large if the velocity is highly variable. Test
+and look at both gathers and stacks over different velocity
+trends in the survey.
+Maximum Preprocessed Traces
+Select the number of input traces to accumulate before
+beginning to migrate. The default of 256 is good for most
+cases. If the image per node is small, increasing to 512 or
+1024 can improve CPU utilization, since more time is spent
+processing between I/O steps.
+For migrations where the output is small, values such as
+5000 increases CPU scalability, and also increases memory
+usage. For migrations with a large output, such as those
+where the image sets will not ﬁt completely into memory,
+increase the Maximum Number of Cache Blocks and break
+a large job into multiple smaller jobs. That is, breaking the
+offset range for image gathers into three or four pieces and
+merging the results in a postprocessing step.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Prestack Kirchhoff 2D Curved Ray Time Mig.550
+
+ProMAX® Reference
+
+Maximum Image Traces
+Enter the number of traces in a sliding window over the
+image sets. Increasing this parameter requires more memory
+resources. In general, increasing this parameter beyond its
+default value of 16 has little impact on performance. The
+maximum is 64.
+Minimum Aperture Window Length (ms)
+For additional speed, very short trace aperture windows may
+be dropped in the migration. The default is 0.0, keeping all
+data, the upper limit is 250.0.
+Inter-process Trace Buffer Size
+This appears in SeisSpace. Enter the size of trace sets
+passed from node to node until all nodes see all data. For a
+cluster with low internal bandwidth, setting this buffer too
+large could cause bottlenecks as nodes wait for traces to pass
+to them from busier nodes. The default of 96 is appropriate in
+most cases.
+Maximum Number of Cache Blocks
+Enter the maximum number of cache blocks to reduce
+program I/O. A large number of possibly-compressed cache
+blocks are held in memory.
+To get the best performance, the image being processed by each node
+should ﬁt in memory. Each uncompressed cache block is 2 kilobytes.
+Therefore, for most clusters (2Gb RAM/node is currently common), a
+value of 750,000 holds a 1.5Gb piece of the image in memory, leaving
+sufﬁcient Ram for system and other processes. Generally 500,000 is a
+good default value. If you have a large output image or few processing
+nodes over which to divide that image, check the size calculations printed
+to the output listing during initialization phase to see if your cache is
+forced to page from memory to disk. If you can allocate more memory,
+redeﬁne your output image or enable compression and make the image ﬁt
+in memory, runtime and CPU utilization can be substantially improved.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

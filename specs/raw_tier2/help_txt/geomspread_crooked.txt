@@ -1,0 +1,1771 @@
+Crooked Line Geometry Spreadsheet1358
+
+ProMAX® Reference
+
+Crooked Line Geometry Spreadsheet
+Crooked Line geometry assignment gives a truer picture of
+the subsurface than other geometry packages because it
+takes into account the angular relationships between the
+shots and their receivers
+This section lists and describes the parameters associated
+with each spreadsheet, as well as the parameters associated
+with Bin. You need to focus on three things:
+• entering all required ﬁeld geometry into the Setup,
+Receivers, Sources, and Patterns spreadsheets
+• binning your data
+• ﬁnalizing the Database
+
+Entering All Required Field Geometry
+You will need to select and complete the Setup, Receivers,
+Sources, and Patterns spreadsheets from the menu bar. You
+will then select Bin to bin your data and ﬁnalize the
+Database. Use TraceQC to quality control your data:
+
+In Crooked Line Geometry Assignment you complete all
+spreadsheets as you would for a 2D Land Geometry
+assignment. In the binning interface, after assigning
+midpoints, select Deﬁne crooked binning grid. A series of
+windows appear for you to deﬁne the crooked line binning
+grid. The following sequence gives a general overview of how
+the OPF database is created using crooked line:
+• Midpoints representing the scatter of live shots and
+receivers are calculated.
+• Segments are tracked through the midpoints.
+• Bins are hung along these segments.
+• Bin and ﬁnalize the database as you would for a 2D Land
+Geometry Assignment.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1359
+
+ProMAX® Reference
+
+See the Command Functions section for information about
+the Command functions and working inside a geometry
+spreadsheets.
+Setup
+The Setup button opens the Geometry Setup Dialog box for
+specifying global conﬁguration and operation information of
+the application. After you complete the setup, the setup
+information appears in the appropriate columns of the
+different spreadsheets. See the Geometry Setup Dialog box
+for speciﬁc information.
+Depending on the method selected under Assign Midpoints
+By within the Geometry Setup window, you will need to select
+and complete the following spreadsheets:
+• For Assign Midpoints By: Existing index number mappings in the TRC, complete the Receivers and Sources
+spreadsheets.
+• For Assign Midpoints By: Matching pattern numbers
+using ﬁrst live chan and station, complete the Receivers, Sources, and Patterns spreadsheets. The TraceQC
+spreadsheet will be ﬁlled in automatically.
+• For Assign Midpoints By: Matching pattern number
+using pattern station shift, complete the Receivers,
+Sources, and Patterns spreadsheets. The TraceQC
+spreadsheet will be ﬁlled in automatically.
+Receivers
+The Receivers button opens the SRF Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing receiver
+information.
+The following list describes all possible SRF OPF spreadsheet
+columns. The available columns will change according to the
+method selected under Assign Midpoints By within Setup.
+• Mark Block value is assigned to the TRC GEOMETRY
+SRF database attribute in the Assign midpoints step in
+Bin. This column is also a spreadsheet row counter.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Station is required for Assign midpoints step in Bin.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1360
+
+ProMAX® Reference
+
+Surface station number associated with the receiver as
+determined from the acquisition survey. You can assign
+numbers from the ﬁeld observer’s notes or from a user
+deﬁned numbering scheme. The station numbers can
+also be extracted from the trace headers of the input
+dataset using Extract Database Files.
+• X is required for Assign midpoints step in Bin.
+X coordinate of the receiver in feet or meters. This is
+obtained from the survey notes or can be extracted from
+dataset headers that contain X coordinates using
+Extract Database Files. If coordinate information is not
+available, a set of X coordinates must be created. This
+can be accomplished using the Edit/Fill option in the
+Receivers spreadsheet by assigning a starting X value
+and an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Receivers spreadsheet.
+• Y is required for Assign midpoints step in Bin.
+Y coordinate of the receiver in feet or meters. This is
+obtained from the survey notes or can be extracted from
+dataset headers that contain Y coordinates using
+Extract Database Files. If coordinate information is not
+available, a set of Y coordinates must be created. This
+can be accomplished using the Edit/Fill option in the
+Receivers spreadsheet by assigning a starting Y value
+and an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Receivers spreadsheet.
+• Elev is the elevation of receiver in ft. or m. This is normally obtained from the survey notes. Elevation can also
+be extracted from the trace headers of the input dataset
+using Extract Database Files. If some of the stations
+have not been surveyed, their values can be interpolated
+between stations with surveyed values using the
+Edit/Interp option in the Receivers spreadsheet.
+• Static is a user deﬁned static in ms. If existing receiver
+statics are going to be applied to a dataset, they can be
+entered in this column. For example, receiver refraction
+statics calculated with third party software can be
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1361
+
+ProMAX® Reference
+
+entered here. These statics can later be applied with
+Apply User Statics. If receiver statics have already been
+applied to a dataset, the static values can be extracted
+from the trace headers of the input dataset using
+Extract Database Files.
+The following table shows which Ordered Parameter File
+(OPF) attribute is created from each spreadsheet column. Its
+associated trace header and data format is also shown:
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block TRC GEOMETRY SRF
+
+REC_SLOC
+
+Integer
+
+Station
+
+SRF GEOMETRY STATION
+
+SRF_SLOC
+
+Integer
+
+X
+
+SRF GEOMETRY X_COORD REC_X
+
+Floating
+
+Y
+
+SRF GEOMETRY Y_COORD REC_Y
+
+Floating
+
+Elev
+
+SRF GEOMETRY ELEV
+
+Floating
+
+Static
+
+SRF GEOMETRY USERSTAT None
+
+REC_ELEV
+
+Floating
+
+Note: If you multiply your location numbers by 10, be sure to
+divide your station numbers in the SRF spreadsheet by 10.
+When the headers are extracted in Extract Database Files,
+the source stations and the receiver locations are brought in
+as they are; however, remember, if you multiplied your
+receiver locations by 10, that is how they are brought in.
+Sources
+The Sources button opens the SIN Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing source
+(shot) information.
+The available columns in the Sources spreadsheet will
+change according to the method selected under Assign
+Midpoints By within the Geometry Setup window.
+• For all assignment methods, the following columns will
+appear: Mark Block, Source, Station, X, Y, Z, FFID,
+Offset, Skid, Uphole, Hole Depth, Shot Fold*, and
+Static.
+• For Assign Midpoints By: Matching pattern numbers
+using ﬁrst live chan and station, the following additional
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1362
+
+ProMAX® Reference
+
+columns will appear: Pattern, Num Chn, 1st Live Sta,
+1st Live Chn, Gap Chan Dlt, and Gap Size Dlt.
+• For Assign Midpoints By: Matching pattern number
+using pattern station shift, the following additional columns will appear: Pattern, Num Chn, Pat Shift, Gap
+Chan Dlt, and Gap Size Dlt.
+Gap Deﬁnition Methods
+In ProMAX® Crooked Line, Gap Chan Dlt and Gap Size Dlt
+columns have been added to the Sources spreadsheet for
+deﬁning a gap for a shot location. A gap is created in the ﬁeld
+by not recording into a given number of receiver stations
+immediately preceding and following the shot (or source
+array) location. This reduces the surface wave noise that
+would likely contaminate and overdrive the geophones at
+these receiver stations. With the addition of the Gap Chan Dlt
+and Gap Size Dlt columns, you have two methods for deﬁning
+a gap in a receiver pattern:
+Method 1 - Static Gap Deﬁnition: Deﬁne a gap by the jump
+in the receiver station numbers within the pattern deﬁnition
+entered in the Patterns spreadsheet. A new pattern deﬁnition
+is required whenever the gap changes size or changes
+location within the same range of channel numbers. This
+method is only available if Matching pattern numbers using
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1363
+
+ProMAX® Reference
+
+ﬁrst live chan and station is selected The following diagram
+shows how to enter a static gap deﬁnition:
+Static Gap Size and Gap Chan
+Deﬁnition
+
+Sources Spreadsheet: No Gap Chan/Gap Size =0
+
+Stn 101
+
+Stn 161
+
+Stn 164
+
+Stn 223
+
+Ch 1
+
+Ch 60
+
+Ch 61
+
+Chn 120
+
+Shot
+
+Patterns Spreadsheet
+Pat
+
+Chan
+From
+
+Chan
+To
+
+Chan
+Inc
+
+Rcvr
+From
+
+Rcvr
+To
+
+Rcvr
+Inc
+
+1
+
+1
+
+60
+
+1
+
+101
+
+161
+
+1
+
+1
+
+61
+
+120
+
+1
+
+164
+
+223
+
+1
+
+Method 2 - Dynamic Gap Deﬁnition: Add a gap to an
+existing pattern deﬁnition via the Gap Chan Dlt and Gap
+Size Dlt columns in the Sources spreadsheet. This allows
+gaps to easily roll through a receiver spread from shot to
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1364
+
+ProMAX® Reference
+
+shot. The following diagram shows how to enter a dynamic
+gap deﬁnition:
+Dynamic Gap Size and Gap Chan
+Deﬁnition
+
+Sources Spreadsheet: Gap Chan=60/Gap Size =3
+
+Stn 101
+
+Stn 161
+
+Stn 164
+
+Stn 223
+
+Ch 1
+
+Ch 60
+
+Ch 61
+
+Chn 120
+
+Shot
+
+Patterns Spreadsheet
+Pat
+
+Chan
+From
+
+Chan
+To
+
+Chan
+Inc
+
+Rcvr
+From
+
+Rcvr
+To
+
+Rcvr
+Inc
+
+1
+
+1
+
+120
+
+1
+
+101
+
+220
+
+1
+
+Given channel numbers 1-120 and receiver stations 101-220
+in the Patterns spreadsheet, and a Gap Chan Dlt of 60 and
+Gap Size Dlt of 3 in the Sources spreadsheet, channel 60 will
+be assigned receiver station 161 and channel 61 will be
+assigned receiver station 164.
+This method is available if either Matching pattern numbers
+using ﬁrst live chan and station or Matching pattern
+number using pattern station shift is selected under
+Assign Midpoints By within Setup.
+Note: If a pattern has been deﬁned with a static gap
+deﬁnition between channels 60 and 61 (Method 1), and a
+dynamic gap deﬁnition is added to this pattern (Method 2),
+then the total gap size will be the static gap width plus the
+dynamic gap width as deﬁned by Gap Size in the Sources
+spreadsheet.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1365
+
+ProMAX® Reference
+
+The following list describes all possible SIN OPF spreadsheet
+columns.
+• Mark Block value is assigned to the TRC GEOMETRY
+SIN database attribute in the Assign midpoints step in
+Bin. This column is also a spreadsheet row counter.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Source is a user deﬁned source numbering sequence.
+Source numbers can also be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Station is required for Assign midpoints step in Bin.
+Surface station number associated with the shot as
+determined from the acquisition survey. You can assign
+source station numbers that are tied directly to the
+receiver station numbers or you can assign a user
+deﬁned numbering scheme. The station numbers can
+also be extracted from the trace headers of the input
+dataset using Extract Database Files.
+• X is required for Assign midpoints step in Bin.
+X coordinate of the source in feet or meters. This is
+obtained from the survey notes or can be extracted from
+dataset headers that contain X coordinates using
+Extract Database Files. If coordinate information is not
+available, a set of X coordinates must be created. This
+can be accomplished using the Edit/Fill option in the
+Sources spreadsheet by assigning a starting X value and
+an appropriate increment.
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Sources spreadsheet.
+• Y is required for Assign midpoints step in Bin.
+Y coordinate of the source in feet or meters. This is
+obtained from the survey notes or can be extracted from
+dataset headers that contain Y coordinates using
+Extract Database Files. If coordinate information is not
+available, a set of Y coordinates must be created. This
+can be accomplished using the Edit/Fill option in the
+Sources spreadsheet by assigning a starting Y value and
+an appropriate increment.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1366
+
+ProMAX® Reference
+
+Values will be precise to 7 digits. Position of the decimal
+point is controlled using the Setup/Format option in
+the Sources spreadsheet.
+• Z is the elevation of source in feet or meters. This is normally obtained from the survey notes. Elevation can also
+be extracted from the trace headers of the input dataset
+using Extract Database Files. If some of the stations
+have not been surveyed, their values can be interpolated
+between stations with surveyed values using the
+Edit/Interp option in the Sources spreadsheet.
+• FFID is the ﬁeld ﬁle ID. This is usually the tape ﬁle number assigned to each shot at time of recording. Therefore,
+these numbers usually reﬂect the chronological order of
+the shots. FFID is normally obtained from the ﬁeld
+observer’s notes. It can also be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+• Offset is the distance in ft. or m that a shot is located
+from its given X,Y coordinates in a direction perpendicular to source azimuth. Source azimuth is the clockwise
+bearing in degrees from North of the line formed by looking from the current shot X,Y coordinates toward the
+direction of increasing station numbers. A negative offset
+would place the shot to the left of the line when looking
+in the direction of source azimuth. A positive offset
+would place the shot to the right of the line when looking
+in the direction of source azimuth. Offset is normally
+obtained from the ﬁeld observer’s notes. If shot offsets
+are already included in the X and Y coordinates, this column should be left blank.
+Offset Illustration
+(-) Negative Offset
+
+Shot (x,y)
+
+Source Azimuth
+(Direction of Increasing
+Station Numbers)
+(+) Positive Offset
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1367
+
+ProMAX® Reference
+
+• Skid is the distance in ft. or m that a shot is located from
+its given X,Y coordinates in a direction parallel to source
+azimuth. Source azimuth is the clockwise bearing in
+degrees from North of the line formed by looking from
+the current shot X,Y coordinates toward the direction of
+increasing station numbers. A positive skid would move
+the shot in the direction of source azimuth, that is,
+toward higher station numbers. A negative skid would
+move the shot in the direction 180 degrees from source
+azimuth, that is, toward lower station numbers. Skid is
+normally obtained from the ﬁeld observer’s notes. If shot
+skids are already included in the X and Y coordinates,
+this column should be left blank.
+Skid Illustration
+
+Shot (x,y)
+(-) Negative Skid
+Toward lower stations
+
+Source Azimuth
+(Direction of Increas
+Station Numbers)
+
+(+) Positive Skid
+Toward higher stations
+
+Note: When entering source location for 2D data, it is
+required that all source locations be within the range of
+speciﬁed receiver locations to properly establish
+geometry. Remember this when specifying skids at the
+beginning and end of lines. Be sure to pad the necessary
+receiver locations to accommodate source locations
+outside of the deﬁned receiver stations.
+• Uphole is the uphole time in ms. For shots placed below
+the surface, this is normally the time for the ﬁrst wave
+from that shot to reach the surface at the given shot
+location. Time should be given as positive ms. This is
+normally obtained from the ﬁeld observer’s notes. It can
+also be extracted from the trace headers of the input
+dataset using Extract Database Files.
+• Hole Depth is the depth of the shot hole in ft. or m. This
+is normally obtained from the ﬁeld observer’s notes. It
+can also be extracted from the trace headers of the input
+dataset using Extract Database Files.
+• Pattern is required for Assign midpoints step in Bin.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1368
+
+ProMAX® Reference
+
+The number placed in the Pattern column of the
+Patterns spreadsheet that identiﬁes the correct receiver
+pattern for this shot. This number relates the
+accompanying receiver pattern speciﬁcations in the
+Patterns spreadsheet to this shot location. In many
+cases, only one pattern speciﬁcation will be needed to
+describe receiver patterns for all shot locations. If so, ﬁll
+this column with the single pattern number assigned to
+that pattern speciﬁcation in the Patterns spreadsheet.
+• Num Chn is required for Assign midpoints step in Bin.
+The number of live channels at each shot location. This
+is normally equal to the channel range deﬁned by the
+designated Pattern in the Patterns spreadsheet. The
+Num Chn column may be left blank to allow all available
+channels of the pattern to be used or a different value
+may be entered to limit the number of channels for a
+given shot.
+• Shot Fold* is the calculated fold of shot. Shot Fold is
+equal to the number of live channels for the given shot
+based on the information entered for Num Chn and Pattern. The Shot Fold value is calculated during the Assign
+midpoints step in Bin by counting traces assigned to
+each shot.
+The * in the column name indicates that this column
+contains informational values that are automatically
+calculated. These values are for quality control only and
+cannot be edited.
+• Pat Shift is the shift of receiver stations from the speciﬁed pattern deﬁnition. The receiver station values for the
+pattern speciﬁed in the Pattern column of the Sources
+spreadsheet will have the Pat Shift value added to them.
+Pat Shift values can be positive, negative, or zero. A Pat
+Shift of 0 does not move the receivers from the receiver
+stations speciﬁed for that pattern in the Patterns spreadsheet. Positive or negative values allow for the pattern to
+be rolled on or off of the range of receiver stations
+deﬁned in the Receivers spreadsheet. Receiver stations
+not deﬁned in the Receivers spreadsheet will be listed for
+each shot in the job.output ﬁle during the Assign midpoints step in Bin.
+• 1st Live Sta is the ﬁrst live station. The receiver station
+associated with the channel deﬁned in the accompanying 1st Live Chn column.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1369
+
+ProMAX® Reference
+
+• 1st Live Chn is the ﬁrst live channel. The lowest channel number which was actively recorded during the associated shot.
+• Gap Chan Dlt is a low numbered live channel before the
+shot gap. See Gap Deﬁnition Methods at the beginning of
+the Sources section.
+• Gap Size Dlt is the width of the gap in receiver stations.
+See Gap Deﬁnition Methods at the beginning of the
+Sources section.
+• Static is a user deﬁned static in ms. If pre-existing shot
+statics are going to be applied to a dataset, they can be
+entered in this column. For example, shot time delays
+due to time break errors during recording could be
+entered in this column. Similarly, shot refraction statics
+calculated with third party software can be entered here.
+These statics can later be applied with Apply User Statics. If shot statics have already been applied to a
+dataset, the static values can be extracted from the trace
+headers of the input dataset using Extract Database
+Files.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown:
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block
+
+TRC GEOMETRY SIN
+
+SIN
+
+Integer
+
+Source
+
+SIN GEOMETRY SOURCE
+
+SOURCE
+
+Integer
+
+Station
+
+SIN GEOMETRY STATION
+
+SOU_SLOC
+
+Integer
+
+X
+
+SIN GEOMETRY X_COORD
+
+SOU_X
+
+Floating Pt.
+
+Y
+
+SIN GEOMETRY Y_COORD
+
+SOU_Y
+
+Floating Pt.
+
+Z
+
+SIN GEOMETRY ELEV
+
+SOU_ELEV
+
+Floating Pt.
+
+FFID
+
+SIN GEOMETRY FFID
+
+FFID
+
+Integer
+
+Offset
+
+SIN GEOMETRY OFFSET
+
+None
+
+Floating Pt.
+
+Skid
+
+SIN GEOMETRY SKID
+
+None
+
+Floating Pt.
+
+Uphole
+
+SIN GEOMETRY UPHOLE
+
+UPHOLE
+
+Floating Pt.
+
+Hole Depth
+
+SIN GEOMETRY DEPTH
+
+DEPTH
+
+Floating Pt.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1370
+
+ProMAX® Reference
+
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Pattern
+
+SIN GEOMETRY PATTERN
+
+None
+
+Integer
+
+Num Chn
+
+SIN GEOMETRY NCHANS
+
+NCHANS
+
+Integer
+
+1st Live Sta
+
+SIN GEOMETRY STATION1
+
+None
+
+None
+
+None
+
+None
+
+Gap Chan Dlt SIN GEOMETRY GAPCHAN None
+
+None
+
+Gap Size Dlt SIN GEOMETRY GAPSIZE
+
+None
+
+1st Live Chn SIN GEOMETRY CHAN1
+
+Static
+
+None
+
+SIN GEOMETRY USERSTAT None
+
+Floating Pt.
+
+Patterns
+The Patterns button opens the PAT Ordered Parameter File
+(OPF) spreadsheet for entering, importing, or editing the
+deﬁnition of receiver patterns for each shot. The Patterns
+spreadsheet is not available if you have selected Assign
+Midpoints By: Existing index number mappings in the
+TRC within Setup.
+The receiver pattern is applied to a given shot in the Sources
+spreadsheet according to the selected midpoint assignment
+mode in the Geometry Setup window. Regardless of the
+midpoint assignment mode chosen, pattern numbers in the
+Sources spreadsheet must correspond to pattern numbers in
+the Patterns spreadsheet and vice versa.
+The two pattern assignment modes for Crooked Line
+geometry are:
+• Assign Midpoints By: Matching pattern numbers
+using ﬁrst live chan and station
+The pattern is hung from 1st Live Chn and 1st Live Sta
+speciﬁed in the Sources spreadsheet. Live receivers for a
+shot are then calculated from the relative difference
+between stations in the pattern and their corresponding
+channel numbers.
+• Assign Midpoints By: Matching pattern numbers
+using pattern station shift
+The pattern is shifted from its deﬁned location in the
+Patterns spreadsheet by the Pat Shift column in the
+Sources spreadsheet for each shot. This allows for the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1371
+
+ProMAX® Reference
+
+pattern to be rolled on or off of the deﬁned receiver
+stations in the Receivers spreadsheet. The range of
+receivers not located during geometry assignment is
+listed in the output for each shot.
+Clicking on the Patterns button for the ﬁrst time opens a
+Recording System Channels dialog box, in addition to the
+Patterns spreadsheet, if no information has previously been
+entered into the Patterns spreadsheet, Enter the requested
+information prior to running the Assign midpoints step in
+Bin. If these values need to be edited, this dialog box can be
+accessed again by using the Edit/NChans option in the
+Patterns spreadsheet.
+The following list describes all possible PAT OPF spreadsheet
+columns. The available columns will change according to the
+method selected under Assign Midpoints By within the
+Geometry Setup window.
+Mark Block is a spreadsheet row counter.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• Pattern is the pattern number. This value is matched to
+the value placed in the Pattern column of the Sources
+spreadsheet. The accompanying channel to receiver relationship is assigned to all shots having this pattern
+number.
+• Min Chan is the channel number associated with the
+Rcvr MinChan value for this row.
+• Max/Gap Chan is the channel number associated with
+the Rcvr MaxChan value for this row.
+• Chan Inc is the channel increment to use between the
+Min Chan and Max/Gap Chan values for this row.
+• Rcvr MinChan is the receiver station associated with the
+Min Chan value for this row. Rcvr MinChan can be
+greater than Rcvr MaxChan if a negative Rcvr Inc is
+speciﬁed.
+• Rcvr MaxChan is the receiver station associated with
+the Max/Gap Chan value for this row. Rcvr MaxChan
+can be less than Rcvr From if a negative Rcvr Inc is speciﬁed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1372
+
+ProMAX® Reference
+
+• Rcvr Inc is the receiver station increment to use
+between the Rcvr From and Rcvr To values for this row.
+Rcvr Inc can be a positive or negative value.
+• Error* is this column is used to identify problems in the
+channel to receiver relationships. It will ﬂag offending
+rows with ********** when you attempt to exit the Patterns spreadsheet. Errors must be corrected before proceeding with the Assign midpoints step in Bin.
+The * in the column name indicates that this column
+contains informational values that are automatically
+calculated. These values are for quality control only and
+cannot be edited.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown:
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+Mark Block
+
+None
+
+None
+
+Integer
+
+Pattern
+
+PAT GEOMETRY PATTERN
+
+None
+
+Integer
+
+Min Chan
+
+PAT GEOMETRY CHANFROM None
+
+Integer
+
+Max/Gap Chan PAT GEOMETRY CHANTO
+
+None
+
+Integer
+
+Chan Inc
+
+None
+
+Integer
+
+Rcvr MinChan PAT GEOMETRY RCVRFROM None
+
+Integer
+
+Rcvr MaxChan PAT GEOMETRY RCVRTO
+
+None
+
+Integer
+
+Rcvr Inc
+
+PAT GEOMETRY RCVRINC
+
+None
+
+Integer
+
+Error*
+
+PAT GEOMETRY ERRCODE
+
+None
+
+Integer
+
+PAT GEOMETRY CHANINC
+
+Binning the Data
+Bin
+The Bin button opens the Crooked Line Binning and QC
+window. This window allows you to calculate CDP X and Y
+coordinates, to enter binning parameters for midpoints and
+offsets, to bin the midpoints and offsets, to generate QC
+displays of the binned data, and to ﬁnalize the database. You
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1373
+
+ProMAX® Reference
+
+must complete all four steps from the Crooked Line Binning
+and QC window. Select a step and click Ok to execute:
+Steps
+1
+2
+3
+4
+
+Crooked Line Binning Sequence
+1. Assign midpoints by displays the method selected within
+Setup for assigning midpoints.
+This step calculates CMP X, CMP Y, Offset, Azimuth,
+Channel, CHN_LTBL, SIN, SIN_LTBL, SRF, and SRF_LTBL
+information in the TRC spreadsheet. It will also create the
+CHN Database order.
+If Assign Midpoints By: Existing index number
+mappings in the TRC was selected within Setup, then
+SIN, SRF, and CHN information will already exist in the
+TRC OPF spreadsheet and will not be altered.
+You must successfully execute Assign midpoints before
+you can bin the data. If execution of this step fails, you
+should view the job.output ﬁle to get clues on what needs
+to be edited in the Source, Receiver, or Patterns
+spreadsheets.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1374
+
+ProMAX® Reference
+
+2. Deﬁne crooked binning grid deﬁnes the crooked line
+binning grid.
+This section describes the Track window and tools associated
+with deﬁne crooked binning grid. When you select Deﬁne
+crooked binning grid the following screen appears:
+Initial XYGraph screen
+
+In Crooked Line Geometry Assignment, there are two options
+for deﬁning the track and binning the data: Simple and Full.
+Simple is the default option and provides all the necessary
+tools to deﬁne the track and bin the data for most crooked
+lines. However, this option uses a subset of the tools found in
+the Full option. This option modiﬁes the behavior and
+defaults of crooked line to simplify the processes of deﬁning
+the track and generating the bins.
+Full is used if the line is severely crooked or requires detailed
+modiﬁcations to the track and/or bins. A full sweep of tools
+are available for this option.
+Within the Initial XYGraph screen, select File/Crooked then
+Full or Simple. If Full appears, then your current mode is
+Simple. Likewise, if Simple appears, then your mode is Full.
+You can toggle between the two modes at any time during an
+edit session.
+For the following example, select Display/ Midpoints/
+Control points/ Src-Rec Offset. White or black could be
+used as well for better visibility of the track. After the
+midpoints are displayed, select Track from the menu bar.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1375
+
+ProMAX® Reference
+
+Midpoints colored by Src-Rec Offset.
+
+When you have displayed the midpoints and select Track, the
+following Menu Bar and Icon Bar appears.
+Track Menu Bar
+• Open displays a previously saved Track and the track
+icons.
+• Display displays the Track icons.
+• Parameterize displays the Track Parameters Dialog box
+for selecting track parameters. This option is usually
+selected ﬁrst.
+• Clear removes the current track from the display.
+After selecting one of the above, three new choices become
+available under the Track menu.
+• Save saves the current work on the track.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1376
+
+ProMAX® Reference
+
+• Save to saves the track to another name.
+• Hide hides the existing track and track icons.
+Track Parameters Dialog Box:
+
+Select a tracking attribute. It can be the same or different
+from the displayed attribute. Enter the minimum and
+maximum range of the attribute. Displaying the attribute and
+Color Bar might help in determining this range. If you are
+generating a mean track or smoothing, enter the number of
+points to average, the step up between averages, and toggle
+Output the endpoints to Yes. Outputting the endpoints will
+extend the track only to the min and max value within the
+ﬁrst and last set of averaged points.
+Toggle Sort Input Points to Yes to generate a smooth track
+where the input sort order is conﬂicting. However, use this
+option with care if the target track is crooked. It may force an
+unexpected order upon the contributors. If the output track
+contains unexpected jumps, it is probably worth toggling this
+switch to see if it improves the situation.
+When completed, click on the Green Light icon. All Track
+icons appear.
+Note: There are two types of icons. Command Icons which
+generate immediate results when selected. These are listed
+ﬁrst in the display. Next are the mouse button icons which
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1377
+
+ProMAX® Reference
+
+control the movement and mouse button selections in the
+main window.
+Track Icons
+• Tracker Control Command reports information related
+to the mouse position in the mouse help line.
+MB1 turns off information.
+MB2 reports current position.
+MB3 reports nearest sample in the top view. With large
+datasets this may be slow.
+The choice is applied to the top view, when the top view
+is turned off the next view in the stacking order is given
+the chance to report. To stop all reporting, each view
+must be disabled with MB1.
+• Layout Track Command offers two options for initializing the Track.
+MB1 initializes all midpoints with attribute values
+between the min and max.
+MB2 applies a running average to the coordinates of
+midpoints with attribute values falling between the min
+and max. The number of points to average and the step
+up between averages are taken from the Track
+Parameter dialog box.
+These options can generate many control points. To
+reduce the number, select parameters with more
+constrained min and max values or a larger step up
+between averages.
+• Smooth Segment Command smooths a selected segment by one of the following smoothing operations:
+MB1 smooths by Minimum Absolute Deviation. This type
+of straight line ﬁt is more robust than least mean square
+approaches.
+MB2 smooths by Bi-Cubic spline. This method smooths
+evenly distributed samples within a segment. You can
+remove stray points and reapply for a smoother segment.
+MB3 smooths by Arithmetic mean; it applies the Points
+to average and Step up between points parameters
+from the Track Parameters Dialog Box. This option is
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1378
+
+ProMAX® Reference
+
+synonymous to MB2 of the Layout Track Command, but
+is applied to the selected segment only.
+• Segment and Bin Sort Command reorders the segments in a track or the bins in the selected segment. In
+general, it is important to sort the segments to ensure
+sequential numbering of the bins from one end of the
+line to the other.
+MB1 reorders segments in a track.
+MB2 reorders bins in the selected segment.
+The initial order is dependent upon the order of creation
+and editing. If the plot of CDP vs. X or Y exhibits sudden
+jumps, use this command to reorder of the segments.
+• Zoom tool views a subset of the data, zooming to a ﬁner
+degree of control.
+MB1 zooms by click and drag. To abort a zoom once
+started, move the mouse out of the window and release
+MB1. To un-zoom, click quickly once in the zoomed
+region.
+MB2 toggles between the zoom displays.
+MB3 rescales the display by computing a window size
+equal to the X and Y scales. The rescale option will fail if
+there is not enough screen space. Rezoom by adjusting
+the amount of X or Y distance.
+• Alternate Domain tool shows the relationship between
+two plotted domains related in the shot line geometry.
+The plotted domains must be the primary and secondary
+plots in the view list.
+MB1 displays the primary to secondary plot, such as
+receivers contributing to each shot. Click to initialize
+then drag to each point of interest.
+MB2 displays the secondary to primary plot, such as
+shots contributing to each receiver. Click to initialize
+then drag to each point of interest.
+MB3 displays distance and azimuth between two
+arbitrary points. Click at starting point then drag to end
+point.
+The plot rotation capabilities also available on this
+button are not recommended for editing the Track and
+Bin.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1379
+
+ProMAX® Reference
+
+• Report tool picks a shot, receiver or midpoint (whichever plot is primary) and highlights the entry corresponding to the point within its equivalent spreadsheet.
+The spreadsheet must be displayed.
+• Segment split and merge tool splits and merge segments by one of the following methods:
+MB1 selects the segment.
+Shift MB1 deselects the segment.
+MB2 splits the segment. If a split fails, it may be because
+the nearest point to the mouse is a segment end point.
+Watch for this particularly after ﬁtting a straight line to a
+segment. To enable the split, add a new point then retry.
+MB3 merges segments. If the end points are coincident
+only a single point is output, otherwise both endpoints
+are incorporated into the body of the merged segment.
+This may produce erratic behavior when creating bins. If
+this occurs use the Align tool to make the points
+coincident.
+• Segment move and rotate moves or rotates segments
+by one of the following methods:
+MB1 selects segment.
+Shift MB1 deselects segments.
+MB2 moves a segment.
+MB3 rotates a segment.
+• Segment point manipulation adds, deletes, or moves a
+point within a segment.
+MB1 adds a point to a segment.
+Shift MB1 adds a point to nearest end of a segment.
+MB2 deletes a point from a segment.
+MB3 moves a point within a segment.
+Shift MB3 moves the nearest point to the end of the
+segment.
+• Align aligns either segments and bins.
+MB1 aligns segments.
+MB2 aligns bins.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1380
+
+ProMAX® Reference
+
+For the following ﬁgure, click the Layout Track icon with
+MB1: Percent:
+Raw track of a 4000 to 4100 Src-Rec Offset envelope.
+
+The midpoints falling within the offset range have been
+picked. We can see the tendency in this example to split the
+track into three segments.
+The track is split into three segments using Zoom to help
+accurately select the split point, and Segment split and
+merge to actually divide the segment(s). The following ﬁgure
+is a zoom of the middle segment:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1381
+
+ProMAX® Reference
+
+Detail of a crooked line segment
+
+A straight line will be ﬁtted to the points in each segment by
+clicking the Smooth Segment icon. No matter how carefully
+you select segments, misties occur. The following ﬁgure
+shows a mistie in two smoothed segments.
+
+Click the Segment Move and Rotate icon to rotate the lower
+segment. Click the Alignment icon to force segments
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1382
+
+ProMAX® Reference
+
+together. Bins are automatically ﬁtted around a knee. The
+following ﬁgure shows the result:
+
+Click on Segment Split and Merge to merge these segments
+into one. Save the track layout. Select Bin from the menu
+bar.
+Bin Menu Bar
+• Open opens a previously saved Bin Space.
+• Display displays the bin menu and icons.
+• Parametrize displays the Bin Parameters Dialog box for
+selecting and editing the Bin Space.
+• Clear removes the current track from the display.
+After selecting one of the above, three new choices become
+available.
+• Save saves the ﬁnal Bin Space.
+• Save to saves the Bin Space to an existing name.
+• Hide hides the existing Bins and Bin Icons.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1383
+
+ProMAX® Reference
+
+Bin Parameters dialog box
+
+Enter the bin length and width. When completed click on the
+Green Light icon. All Bin icons appear.
+Bin Icons
+• Bin Layout creates the Bin layout.
+MB1: Step creates even spacing down the track without
+regard for knees in the track. Step functions can
+generate overlapping bins depending upon the severity of
+any bend or the width and length of bins.
+MB2: Follow uses all segments, and bins do not overlap.
+This options is like Step except if a speciﬁc segment is
+not selected, bins are spoked round any knees in the
+track.
+MB3: Corner attempts to project perpendiculars from
+the track to parallels half a bin width either side of the
+track. This option is like Follow except in handling bin
+overlap. If the perpendicular does not intercept the
+parallel, the end of the parallel is used.
+Generally, use Follow or Corner to bin all the segments
+together. Step Layout is provided for creating multiple
+CDP tracks.
+Note: Step is not recommended if many segments are
+merged into a single segment.
+The following ﬁgure shows the result of clicking the Bin
+Layout icon with MB1: Step. This is the same data as
+described under the Deﬁne binning grid parameters
+section.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1384
+
+ProMAX® Reference
+
+Bin Layout: Step
+
+The width of the bins is too narrow to include all midpoints
+and bin edges overlap at the bend. Use the various Bin icons
+to move the bin vertices at the bend, in order to include all
+midpoints. The following ﬁgure shows edited bins at the
+bend:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1385
+
+ProMAX® Reference
+
+The following two ﬁgures show the other two bin layout
+options.
+Bin Layout: Follow
+
+Bin Layout: Corner
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1386
+
+ProMAX® Reference
+
+• Bin and Bin edge editing creates and manipulates bins.
+MB1 adds a bin.
+Shift MB1 adds a point to the bin boundary.
+MB2 deletes a bin.
+Shift MB2 deletes a point from the bin boundary.
+MB3 moves a point in the bins boundary.
+• Bin movement manipulates bin functions.
+MB moves Bin.
+MB2 rotates Bin.
+MB3 duplicates Bin.
+• Segments Bins manipulation stretches, moves, or
+rotates the bins.
+MB1 stretches the bins.
+Note: Before you use this option, save the bins so that
+you can undo its effects.
+MB2 moves the bins.
+MB3 rotates the bins.
+• Bin outline highlighting/ Spider plot highlights a bin;
+creates and edits spider plots.
+MB1 creates Bin spider.
+MB2 changes location of last spider.
+MB3 creates new shot-receiver spider
+The following ﬁgures show Bin spider displays:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1387
+
+ProMAX® Reference
+
+Bin Spider
+
+Shot-Receiver Spider
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1388
+
+ProMAX® Reference
+
+3. Bin midpoints opens the Crooked Line Midpoint Binning
+dialog box that is used to bin the CDPs by applying a bin
+space to the data.
+Binning Parameters
+• Bin Space opens the Bin Space Selection dialog box for
+selecting an existing bin space.
+• Beginning bin number is the CDP number of the ﬁrst
+bin. The ﬁrst bin position is determined by the CDP
+numbers increase from ﬁrst/last trace.
+The following offset binning parameters create the OFB
+(Offset Bin) Database order. This enables traces to be
+grouped together by offset range, beginning at Min Offset
+Bin Center and continuing up through Max Offset Bin
+Center, incrementing by the Offset Bin Center
+Increment. The OFB OPF is necessary for Surface
+Consistent Amplitude Analysis and Surface Consistent
+Decon. You can use the defaults or add new values.
+• Offset bin increment is the distance between centers of
+offset bins in ft. or m. Offset Bin size, other then ﬁrst
+and last, is equal to Offset Bin Increment.
+• Minimum offset bin center is the ﬁrst offset bin center.
+Traces with offsets less than Min Offset Bin Center up to
+Min Offset Bin Center plus one half the Offset Bin Increment are assigned to the ﬁrst offset bin.
+• Maximum offset bin center is the maximum offset bin
+center. Traces with offsets between Max Offset Bin Center minus one half the Offset Bin Increment and greater
+are assigned to the last offset bin.
+• CDP number increase from ﬁrst/last trace
+
+Finalizing the Database
+4. Finalize Database must be used to create all the
+necessary lookup tables and to complete the building of
+the ProMAX® Database, once binning has completed.
+Finalizing the Database generates values in the following
+TRC OPF spreadsheet columns: OFB_LTBL and
+CHN_LTBL. This completes the geometry related entries in
+the TRC Database order. This step also builds the CDP
+and OFB Database orders.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1389
+
+ProMAX® Reference
+
+TraceQC
+The TraceQC button opens the TRC OPF spreadsheet. This
+spreadsheet is a window into the database TRC OPF which
+can actually contain more attributes than are shown by this
+spreadsheet. The database TRC OPF contains all trace
+speciﬁc attributes for this line. Some of the attributes are
+geometry related, while others are not. Only attributes
+pertaining to the your particular type of geometry are shown
+in the TRC spreadsheet. Most of the attributes in this
+spreadsheet are internally computed and are only for quality
+control viewing. Attributes which cannot be edited have an *
+in the column name. For example, CMP X* cannot be edited,
+whereas FB Pick can be edited.
+Columns in the TRC OPF spreadsheet are initialized by one
+or more of the following steps:
+• running Extract Database Files
+• completing Assign Midpoints in Bin
+• completing Bin Midpoints in Bin
+• importing UKOOA data using File/UKOOA Import
+• using File/LOOKUP Indexing
+The following list describes all TRC OPF spreadsheet
+columns.
+• Mark Block represents sequential trace numbers for all
+ProMAX® datasets in this line. The Mark Block number
+maps all TRC OPF attributes associated with it to a single trace in a dataset. The geometry speciﬁc attributes
+are loaded into the trace headers when Inline Geometry
+Header Load is run. The remaining TRC OPF attributes
+can be loaded into the traces headers during subsequent
+processing.
+See Column and Row Selection for mouse button
+function descriptions and editing techniques.
+• CMP X* is computed from the database entries SRF
+GEOMETRY X_COORD and SIN GEOMETRY X_COORD.
+These database entries come from the X coordinate column in the SRF and SIN OPF spreadsheets.
+• CMP Y* is computed from the database entries SRF
+GEOMETRY Y_COORD and SIN GEOMETRY Y_COORD.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1390
+
+ProMAX® Reference
+
+These database entries come from the Y coordinate column in the SRF and SIN OPF spreadsheets.
+• Offset* is the source to receiver distance. It is computed
+from the database entries SIN GEOMETRY X_COORD,
+SRF GEOMETRY X_COORD, SIN GEOMETRY
+Y_COORD, and SRF GEOMETRY Y_COORD. These database entries come from the X coordinate and Y coordinate columns in the SRF and SIN OPF spreadsheets.
+• Azimuth* is the azimuth from the source to the receiver
+location. With the source location as the origin, the azimuth is computed as the clockwise rotation angle from
+the Y axis to a vector from the source location to the
+receiver location. It is computed from the database
+entries SIN GEOMETRY X_COORD, SRF GEOMETRY
+X_COORD, SIN GEOMETRY Y_COORD, and SRF GEOMETRY Y_COORD. These database entries come from the
+X coordinate and Y coordinate columns in the SRF and
+SIN OPF spreadsheets.
+• Channel* is the recording channel number. The channel
+number is one of the main criteria used to match the
+input traces to the database when loading geometry into
+the trace headers with Inline Geom Header Load.
+• CHN_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• SIN* is the source index number. It is a sequential
+record counter ranging from one to the maximum number of shots. For correct geometry assignment, each shot
+must have a unique SIN. This value comes from the
+Mark Block value in the SIN OPF spreadsheet.
+• SIN_LTBL* is a numeric counter ranging from one to the
+maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• SRF* is a sequential record counter ranging from one to
+the maximum number of receiver stations. It comes from
+the Mark Block value in the SRF OPF spreadsheet.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1391
+
+ProMAX® Reference
+
+• SRF_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• CDP* is the CDP bin number of the trace. This value is
+computed in the Bin midpoints step in Bin from entries
+in the Crooked Line Midpoint Binning window.
+• CDP_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• OFB* is the offset bin number of the trace. Positive and
+negative source-receiver offsets are binned as absolute
+offsets and a sequential bin number is assigned to each
+offset bin. These values are computed in the Bin midpoints step in Bin from entries in the Crooked Line Midpoint Binning window.
+• OFB_LTBL* is a numeric counter ranging from one to
+the maximum number of Mark Blocks in the TRC OPF
+spreadsheet. It is computed and used internally to relate
+one attribute value to another. This allows for fast database access during processing. This entry should be
+ignored for geometry assignment and quality control.
+• FB Pick is the ﬁrst break pick time in ms. While it is
+possible to manually enter these values in this spreadsheet, ﬁrst break picks are normally made by one of the
+ProMAX® ﬁrst break picking processes such as First
+Break Pick Macro* or NN First Break Picker. First
+break picks made with these processes can be saved in
+TRC GEOMETRY FB_PICK and can then be edited in this
+column.
+The following table shows which OPF attribute is created
+from each spreadsheet column. Its associated trace header
+and data format is also shown:
+Column
+
+OPF Attribute
+
+Mark Block None
+
+Other Docs
+
+Trace Header Data Format
+TRACE_NO
+
+Search Page
+
+Integer
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1392
+
+ProMAX® Reference
+
+Column
+
+OPF Attribute
+
+Trace Header Data Format
+
+CMP X
+
+TRC GEOMETRY CDP_X
+
+CDP_X
+
+Floating Pt.
+
+CMP Y
+
+TRC GEOMETRY CDP_Y
+
+CDP_Y
+
+Floating Pt.
+
+Offset
+
+TRC GEOMETRY OFFSET
+
+OFFSET
+
+Floating Pt.
+
+Azimuth
+
+TRC GEOMETRY AZIMUTH SR_AZIM
+
+Floating Pt.
+
+Channel
+
+TRC GEOMETRY CHN
+
+Integer
+
+CHAN
+
+CHN_LTBL TRC GEOMETRY CHN_LTBL None
+
+Integer
+
+SIN
+
+Integer
+
+TRC GEOMETRY SIN
+
+SIN
+
+SIN_LTBL TRC GEOMETRY SIN_LTBL None
+
+Integer
+
+SRF
+
+Integer
+
+TRC GEOMETRY SRF
+
+REC_SLOC
+
+SRF_LTBL TRC GEOMETRY SRF_LTBL None
+
+Integer
+
+CDP
+
+CDP
+
+Integer
+
+CDP_LTBL TRC GEOMETRY CDP_LTBL None
+
+Integer
+
+OFB
+
+Integer
+
+TRC GEOMETRY CDP
+
+TRC GEOMETRY OFB
+
+OFB_NO
+
+OFB_LTBL TRC GEOMETRY OFB_LTBL None
+
+Integer
+
+FB Pick
+
+Floating Pt.
+
+Other Docs
+
+TRC GEOMETRY FB_PICK
+
+Search Page
+
+FB_PICK
+
+Known Problems
+
+Crooked Line Geometry Spreadsheet1393
+
+Other Docs
+
+Search Page
+
+ProMAX® Reference
+
+Known Problems
+
+

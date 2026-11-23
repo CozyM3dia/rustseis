@@ -1,0 +1,32 @@
+{
+  "menu_id": "debias",
+  "tool_name": "DEBIAS",
+  "label": "Trace dc Removal",
+  "parameter_count": 1,
+  "parameters": [
+    {
+      "name": "CEN_OPT",
+      "prompt": "Type of central value",
+      "kind": "circular",
+      "default": null,
+      "help": "Select the type of central value you wish to use to correct the 'bias' of your traces.",
+      "choices": [
+        {
+          "label": "Mean",
+          "value": "1",
+          "help": "Use the mean as the central value."
+        },
+        {
+          "label": "(Min+Max)/2",
+          "value": "2",
+          "help": "Use the mean of the min and max as the central value."
+        },
+        {
+          "label": "version",
+          "value": "implicit:",
+          "help": "ProMAX $Id: debias.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $"
+        }
+      ]
+    }
+  ]
+}

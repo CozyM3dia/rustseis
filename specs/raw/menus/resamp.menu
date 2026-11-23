@@ -1,0 +1,73 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: RESAMP
+label: "Resample/Desample"
+value_tab: 52
+
+parameter: SAMPRATE
+text: "Output sample rate"
+type: typein:
+type_desc: (real: 8 1.0e-6 nil )
+value: 4.0
+mouse_text: "Desired output sample rate in milliseconds.  This may be larger or smaller than the input sample rate."
+plot_label: t
+
+parameter: ALIAS
+text: "Apply Anti-Alias filter?"
+type: boolean:
+value: t
+mouse_text: "Specify whether to apply an anti-alias filter before the data is resampled. If the sampling interval is decreasing, the filter will not be applied."
+plot_label: t
+
+parameter: FIDELITY
+text: "     Use a high-fidelity Anti-Alias filter?"
+type: boolean:
+value: t
+mouse_text: "Specify whether to use a high-fidelity filter 'YES' or a low-fidelity filter 'NO'."
+plot_label: t
+
+parameter: PHASE
+text: "     Use a zero phase Anti-Alias filter?"
+type: boolean:
+value: t
+mouse_text: "Specify whether to use a zero phase filter 'YES' or a minimum phase filter 'NO'."
+plot_label: t
+
+parameter: TIMEDLAY
+text: "     Remove minimum-phase filter time delay?"
+type: boolean:
+value: nil
+mouse_text: "Specify 'YES' to remove the bulk time delay of the minimum phase filter."
+plot_label: t
+
+parameter: REMUTE
+text: "Re-apply trace mute after resample?"
+type: boolean:
+value: t
+mouse_text: "Trace mutes (such as first break suppression mutes) may be re-applied after filtering."
+ 
+
+exec_data: ("RESAMP"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: resamp.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("SAMPRATE"  implicit: (value 'SAMPRATE))
+			("ALIAS"     implicit: (if (value 'ALIAS) 1 0))
+			("PHASE"     implicit: (if (value 'PHASE) 0 1))
+			("FIDELITY"  implicit: (if (value 'FIDELITY) 0 1))
+			("TIMEDLAY"  implicit: (if (value 'TIMEDLAY) 1 0))
+                        ("REMUTE"    implicit: (if (value 'REMUTE) 1 0 ))
+                )
+
+	    )	
+rules: (
+ (rule1 (value 'ALIAS )
+		( do_show 'PHASE )
+		( do_not_show 'PHASE ) )
+ (rule2 (value 'ALIAS )
+		( do_show 'FIDELITY )
+		( do_not_show 'FIDELITY ) )
+(rule1 ( and (value 'ALIAS ) (not (value 'PHASE)))
+		( do_show 'TIMEDLAY )
+		( do_not_show 'TIMEDLAY ) )
+      )
+)

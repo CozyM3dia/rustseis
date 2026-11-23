@@ -1,0 +1,71 @@
+;; 1 IIID IVD DEV DEPTHC
+'(
+name: W_SRMEC_V3
+label: "SRME"
+value_tab: 50
+
+parameter: SFLIP
+text: "Flip shot direction?"
+type: boolean: 
+value: nil 
+mouse_text: "Select 'Yes' or 'No'."
+plot_label: t
+
+parameter: CFLIP
+text: "Flip channel direction?"
+type: boolean: 
+value: nil 
+mouse_text: "Select 'Yes' or 'No'."
+plot_label: t
+
+parameter: LENTAP
+text: "Length of spatial taper (traces)"
+type: typein:
+type_desc:  ( int: 9 1 nil)
+value: 20
+mouse_text: "Spatial taper length (# traces)."
+
+parameter: SR_RATIO
+text: "Shot/Receiver Spacing Ratio"
+type: pop_choose:
+type_desc: (
+        ("1:1" 11 "Shot/Receiver Spacing Ratio is 1:1")
+        ("2:1" 21 "Shot/Receiver Spacing Ratio is 2:1")
+        ("3:1" 31 "Shot/Receiver Spacing Ratio is 3:1")
+        ("3:2" 32 "Shot/Receiver Spacing Ratio is 3:2")
+        ("4:1" 41 "Shot/Receiver Spacing Ratio is 4:1")
+)
+value: 1
+mouse_text: "Select the appropriate shot/receiver spacing ratio."
+plot_label: t
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', you must execute this program yourself using a debugger."
+
+exec_data:
+	("ST_W_SRMEC_V3"
+		("GENERAL"
+			("program"   implicit: "w_srmec_v3.exe" )
+			("DEBUG"     implicit: (if (value 'DEBUG) 2 0 ) )
+			("version"   implicit: "ProMAX $Id: w_srmec_v3.menu 43993 2009-02-26 17:51:37Z David Johnston $ $Revision: 43993 $ $Date: 2009-02-26 10:51:37 -0700 (Thu, 26 Feb 2009) $")
+;  variables after here are user parameters
+			("SFLIP"     implicit: ( if (value 'SFLIP) 1 0 ) )
+			("CFLIP"     implicit: ( if (value 'CFLIP) 1 0 ) )
+			("LENTAP"    implicit: (value 'LENTAP))
+			("SR_RATIO"  implicit: (value 'SR_RATIO))
+		)
+	)
+
+rules: 	(
+
+(socket_debug_rule t
+		(if (= (printenv 'SOCKET_DEBUG) "t")
+			(do_show 'DEBUG)
+			(do_not_show 'DEBUG) )  )
+
+	)
+
+)

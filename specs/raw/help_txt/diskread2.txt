@@ -1,0 +1,315 @@
+Disk Data Input330
+
+ProMAX® Reference
+
+Disk Data Input
+Disk Data Input reads seismic datasets, either by reading
+the entire dataset sequentially, or by randomly accessing
+traces to provide a requested sort order.
+Disk Data Input Broadcast is a special version of Disk Data
+Input that can be added to SeisSpace®/ProMAX® hybrid
+ﬂows that are run in parallel. Disk Data Input Braodcast
+allows each joblet to read the entire dataset.
+
+Theory
+One dataset can be read into a ﬂow by Disk Data Input, but
+any number of additional datasets can be read into the same
+ﬂow by using Disk Data Insert or Tape Data Insert,
+provided that all of the datasets have common attributes
+such as sample interval, data type, and domain. This feature
+is particularly useful for comparing stacks, using the screen
+swap feature in Trace Display. Also, data can be inserted in
+proper sort order, allowing datasets to be merged in a ﬂow.
+For more information about the structure of seismic
+datasets, please refer to the chapter called ProMAX®
+Seismic Datasets.
+
+Usage
+Disk Data Input can be used more than once in a processing
+stream, but each instance of Disk Data Input results in a
+separate and distinct ﬂow. For example, the stream:
+Disk Data Input
+Disk Data Insert
+F-X Decon
+FK migration
+Disk Data Output
+Disk Data Input
+Trace Display
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input331
+
+ProMAX® Reference
+
+would result in two distinct jobs being run, with the second
+job being dependent on successful completion of the ﬁrst.
+The ability to sort on input generally replaces the need for the
+use of Inline Sort. In most cases the database is used to
+expedite the sorting process, so that reading through the
+trace headers before sorting is unnecessary.
+In the following few paragraphs the use of the legal
+characters is discussed, using the example of CDPs being
+retrieved from disk.
+Legal characters in the input string include the following:
+-,()[].:*/
+as well as digits 0 through 9.
+The - character is used to indicate a minus sign for a negative
+number, or to indicate a range of numbers. For example,
+1 - 100
+
+indicates a range of CDPs between 1 and 100.
+Example: 1- -100
+
+indicates a range of CDPs between 1 and negative 100.
+The character , is used to indicate the continuation of a list of
+numbers. For example,
+1,2,4,5
+
+indicates individual CDPs 1, 2, 4, and 5.
+The meaning of the ( ) characters indicates either an
+increment of some value, or a repetition of a speciﬁc value.
+The rule for use of the ( ) syntax is that when a range of
+numbers precedes the ( ), the value inside ( ) is interpreted as
+an interval. When there is only one value preceding the ( ),
+then the value within the ( ) is interpreted as the number of
+times to retrieve the key value. For example,
+1-20(4)
+
+indicates an increment since (4) follows a range of values,.
+CDPs 1, 5, 9, 13 and 17 would be selected. In the example
+3(4)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input332
+
+ProMAX® Reference
+
+3 is copied 4 times since (4) follows a single value. The input
+trace list would be CDPs 3, 3, 3, 3. The entry
+1(2), 4-10(2)
+
+will retrieve CDP 1 twice, and then retrieve CDPs 4, 6, 8, 10.
+The [ ] characters are used to retrieve groups of sequential
+traces starting at some initial value. This syntax is useful for
+building supergathers of traces. For example,
+4[3]
+
+selects 3 sequential traces, CDP 4, 5, 6.
+1-40(10)[3]
+
+ﬁrst selects every 10th input, and then expands the list to
+create groups of 3 traces at those seed points. The resulting
+list would be CDPs 1, 2, 3,11, 12, 13, 21, 22, 23, 31, 32, 33.
+The . symbol is simply a decimal point used for non-integer
+values.
+The : symbol separates the levels of sort values, such as,
+primary key from secondary key from tertiary keys. You must
+enter a sort order value for each trace header selected as a
+sort key. For example,
+1-100 : 0.0-2500.0
+
+Assuming the secondary sort in the above example is offset,
+the : symbol in the above string separates the CDP
+speciﬁcations from the offset speciﬁcations. The CDPs and
+Offsets are considered two separate levels of the sort, with
+the CDP being the highest level of the sort.
+A wild character * can be used as a default for all values of
+the selected sort header. In actuality, the * character implies
+a range from -999999.0 to 999999.0., in ascending order.
+The slash / is used to separate groups of header entry values.
+For example,
+10-14(2) / 15-21(3)
+
+would select CDPs 10, 12, 14, 15, 18, 21.
+When a multiple sort keys are used, the / character should
+be used to separate complete groups of sort values. For
+example
+1-100: 61-120 / 101-200: 1-60
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input333
+
+ProMAX® Reference
+
+speciﬁes a primary and secondary key for each set of values,
+with the / character used to separate these speciﬁcations.
+
+Parameters
+Read data from other lines/surveys?
+Select No to read datasets from the current line. Select Yes to
+read another area and line, with a list of datasets from that
+line.
+Since data from a different line cannot be assumed to match
+the database of the current line, it will always be ﬂagged as
+not matching the database, and trace numbers are ﬂagged as
+invalid.
+Select dataset
+If No to Read data from other lines/surveys, select a
+dataset in the Datasets window. You will be returned to the
+parameter menu with your dataset selection showing in the
+parameter entry window.
+If Yes to Read data from other lines/surveys, choose
+another area, line, and then dataset from a series of popup
+lists. No other actions, such as reviewing basic information
+about the datasets, is possible.
+While in the Datasets window, you can review basic
+information about a dataset by clicking with MB2 anywhere
+on the dataset name. A window appears showing dates
+created and last modiﬁed, domain, sort, CDP and shot
+ranges, and ﬁle sizes. Both disk and tape datasets appear
+within the datasets menu, and can be identiﬁed as such by
+the Media information.
+Propagate Input File History
+Select Yes to propagate the input ﬁle history to the output
+ﬁle’s history. Select No to exclude the history of this dataset
+to the output ﬁles.
+Trace read option
+Select a choice for reading traces into the ﬂow. The choices
+are:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input334
+
+ProMAX® Reference
+
+• Get All reads all traces in the dataset in their current
+sequential order. The current order can be determined
+by clicking MB2 on the dataset name. Typical sort orders
+are FFID, SOURCE, or CDP.
+• Sort sorts input traces according to a requested sort
+order.
+Interactive Data Access?
+Select Yes to use Interactive Data Access (IDA) to
+dynamically change the trace sort. IDA must be turned on in
+Disk Data Input.
+Select primary trace header entry
+This appears if Sort to Trace read option. Select a header
+from the Headers menu. Non-standard header entries can be
+selected by clicking on User Deﬁned and manually typing the
+correct name into the popup box.
+Note: The trace header SEQ_DISK, trace sequence number
+from disk, is created by Disk Data Input. It cannot be used as
+an input sort key until data has been read with DDI, written
+to disk with DDO, and then reread with DDI.
+Select secondary trace header entry
+This appears if Sort to Trace read option. Select an optional
+secondary sort key. The default is to use no additional
+speciﬁed sorting.
+Select tertiary trace header entry
+This appears if a secondary trace header entry is selected.
+Select an optional tertiary sort key. The default is to use no
+additional speciﬁed sorting.
+Sort order for dataset
+This appears if Sort to Trace read option. Enter the values,
+corresponding to the primary, secondary, and tertiary
+headers.
+Presort in memory or on disk?
+This appears if Sort to Trace read option. Select how to
+presort traces:
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input335
+
+ProMAX® Reference
+
+• Memory presorts traces in memory. This option is faster
+but can exhaust memory resources.
+• Disk presorts traces on disk. This option is slower but
+does not consume memory. Sorting large number of
+traces, more than a few million, uses considerable memory. The presort on disk requires sufﬁcient scratch disk
+space.
+Read the data multiple times?
+Select Yes to read the data more than one time, regardless of
+whether you are sorting or reading an entire dataset. If Yes,
+this process will do the complete read from beginning to end
+before going to the next iteration. Each time the data is read
+from beginning to end the trace header entry DISKITER is
+incremented, and ﬂows can be branched by keying on the
+DISKITER header.
+Note: If Disk Data Input is instructed to read the data
+multiple times, any instances of Disk Data Insert or Tape
+Data Insert will also read the data multiple times. All of the
+disk or tape input tools will read all of their data before the
+next iteration begins.
+Number of iterations
+This appears if Yes to Read the data multiple times. Enter
+the number of times to read the data.
+Process trace headers only?
+Select Yes to only process trace headers. When processing
+trace headers only, you are not allowed to write this dataset
+out as a new dataset, since it will not have trace data to go
+along with the headers. You can use the Overwrite option in
+Disk Data Output to save the header modiﬁcations to the
+input dataset.
+Note: Disk Data Insert does not have this option. If yes is
+selected here, Disk Data Insert will be headers only as well
+Override input data’s sample interval?
+Select Yes to override the sample interval. Select No, the
+default, if your dataset’s sample interval is correct.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input336
+
+ProMAX® Reference
+
+Correct sample interval
+This appears if Yes to Override input data’s sample
+interval. Enter the correct sample interval, in ms.
+
+Common error messages
+“The parameter list ended before the last group was
+properly ﬁlled.”
+This error occurs when the number of header words on which
+to sort does not match the number of levels speciﬁed in Sort
+order for dataset. For example, you might have selected
+primary and secondary header words to sort on, but the Sort
+order for dataset list only speciﬁed a primary sort value.
+Conversely, you may have fewer header word speciﬁcations
+than are implied in Sort order for dataset.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Input337
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

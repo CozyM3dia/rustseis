@@ -1,0 +1,569 @@
+F-K Analysis1087
+
+ProMAX® Reference
+
+F-K Analysis
+F-K Analysis works with F-K Filter to design and quality
+control the application of the F-K ﬁlters to seismic data.
+
+Theory
+In this process, you will select the ﬁlter parameters. F-K
+Filter will then apply this ﬁlter to an entire or partial dataset
+in batch mode. F-K Analysis is only limited to the design and
+parameter testing of arbitrary polygon ﬁlters.
+F-K analysis displays data in T-X (conventional time-space)
+domain, F-K (frequency-wavenumber) domain, F-X
+(frequency-space) domain, and T-K (time-wavenumber)
+domain. The display may be conﬁgured to show all four of
+these domains, T-X and F-K together, or the individual
+domains of T-X and F-K by themselves.
+For a discussion about the difference between conventional
+F-K ﬁltering and the ProMAX® F-K ﬁlter method, see F-K
+Filter.
+
+Usage
+A velocity tool shows a line through the cursor and indicates
+the velocity of this line at the bottom of the display. If the line
+is selected in the T-X domain, a line of this same velocity is
+shown in the F-K domain display, and visa-versa. The
+velocity of a line from the origin to the cursor position is
+shown even when the velocity tool is not activated.
+Data in all four domains may be displayed in variable
+area/wiggle trace, color pixels, or variable density gray scale
+modes. When the program is started, the T-X panel will be in
+variable area/wiggle trace mode with a linear amplitude
+scale. The other domains will be displayed as color pixels and
+either a dB (logarithmic) or linear amplitude scale can be
+selected from the menu for these displays.
+Filters are designed by drawing a polygon on the F-K domain
+display. The polygon may not self-intersect or overlap itself.
+There is no limit on the number of points used to deﬁne a
+polygon. If two regions must be edited, a single polygon
+should be used which connects the two regions with a
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1088
+
+ProMAX® Reference
+
+corridor of negligible width. It may be easier to deﬁne a single
+polygon around events which are aliased (wrap around knyquist) if k=0 is plotted on the left side of the screen.
+After a polygon has been deﬁned, the impulse response and
+the ﬁltered input data for the corresponding ﬁlter may be
+examined. The ﬁlter is computed from the polygon
+analytically as a T-X domain ﬁlter. The T-X ﬁlter is designed
+for a speciﬁc size (samples in time and traces in offset), and
+may be windowed using elliptical Hanning tapers. The
+smaller the T-X ﬁlter, the less attenuation and smoother the
+response of the resulting F-K ﬁlter. The larger the ﬁlter used,
+the more execution time will be required.
+Stronger tapering is recommended for smaller ﬁlters. That is,
+if a ﬁlter is designed with a time length of 100 ms and a
+spatial extent of 10 traces, the end samples of the ﬁlter will
+be relatively large. Tapering with a percent ﬂat of 50 to 80
+percent may be required for an acceptable response.
+The polygon parameters for the ﬁlters are written to the
+database using the table name supplied in the menu. If an
+old table is input, it will be updated with any new polygons or
+old polygons which have changed. Any new polygon table will
+overwrite an old table of the same name. Polygon table names
+must be supplied to the menu before execution of this
+program.
+Note: If the T-X display puts the near trace at the far relative
+offset, use offset as the secondary trace header on Disk Data
+Input and specify the correct order for the offsets.
+You must be aware that data input to F-K Filter must have
+the same sort applied for it to be processed in the same
+manner as with F-K Analysis. That is, if the data are sorted
+by offset on input to F-K Analysis and parameters are chosen
+for ﬁlters to be applied to the data, then the data must also
+be sorted by offset for input to F-K Filter or else the output
+will be unpredictable.
+Note to GeoQuest users: Seismic traces imported from a
+GeoQuest database are sorted by LINE_NO and FRN_TRNO
+(Foreign Trace Number), but may or may not have CDP
+numbers in their headers. This tool needs to have CDP
+numbers in the trace headers. If CDPs are not in the headers,
+use Trace Header Math to set CDP numbers equal to
+FRN_TRNO. CDPs will now equal the trace number displayed
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1089
+
+ProMAX® Reference
+
+on a GeoQuest section. You can later assign proper CDP
+numbers within GeoQuest if necessary.
+While you are using F-K Analysis, you may need to access
+the traces of your dataset. For example, to change the trace
+sort list or create a subset of selected traces in your dataset.
+You can dynamically change the trace sort by using the
+Interactive Data Access tool. However, this tool must be
+turned on in Disk Data Input.
+
+References
+Bracewell, R. N., 1965, “The Fourier Transform and its Applications, 268-71, New
+York, McGraw-Hill.
+Claerbout, J. F., 1976, Fundamentals of geophysical data processing, McGrawHill Book Co.
+Robinson, E. A., and Treitel, S., 1980, Geophysical signal analysis: Prentice- Hall,
+Inc.
+Yilmaz, O., 1987, Seismic data processing, 62-79, Society of Exploration Geophysicists.
+
+Parameters
+Panel width in traces
+Enter the number of traces to process at one time. Enter the
+number of traces per ensemble for prestack data.
+Starting time for analysis
+Enter the start time in ms to use in the analysis.
+Ending time for analysis
+Enter the end time in ms to use in the analysis. Enter 0 to
+use the maximum input data length.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1090
+
+ProMAX® Reference
+
+Distance between input traces
+Enter 0.0 to automatically calculate the trace spacing
+provided input ensembles are shot, receiver, or CDP ordered,
+and a database exists. The trace spacing is calculated by:
+[[current fold/shot fold] x shot interval] for CDP and receiver
+ordered ensembles
+the receiver interval for shot ordered ensembles
+the CDP interval for stack data
+
+Otherwise, enter the actual trace spacing.
+Starting display conﬁguration
+Select the starting display conﬁguration from one of four
+options:
+• TX-TK-FX-FK displays four panels of TX, TK, FX, and
+FK.
+• TX-FK displays two panels of TX and FK.
+• TX-Only displays a single panel of TX data.
+• FK-Only displays a single panel of FK data.
+Any subsequent displays are displayed with the same
+conﬁguration the ﬁrst time they are selected. The display
+conﬁguration can be changed during program execution.
+Each of the three displays: Input Data, Impulse Response,
+and Filtered Output can have a different conﬁguration.
+Position of zero wavenumber in display
+Select the position of zero wavenumber (k=0) at either the
+Center or the Left side of the display. This applies to the T-K
+and F-K displays. This value may not be changed
+interactively during program execution.
+Position of zero frequency in display
+Select the position of zero frequency (f=0) at either the Top or
+Bottom of the display. This applies to the F-X and F-K
+displays. This value may not be changed interactively during
+program execution.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1091
+
+ProMAX® Reference
+
+Plot FK, TK, FX panels in dB or Linear
+Select to plot FK, TK, FX panels in either:
+• DBScale plots using a logarithmic dB scale.
+• Linear plots using a linear amplitude scale.
+The TX domain data is always plotted with a linear scale. This
+value may not be changed interactively during program
+execution.
+Initial TX gain setting (percentile)
+Enter the percentage of the input amplitudes to set TX gain.
+Enter 100 to not clip the maximum amplitude of the input
+data. Enter 99 to clip one percent of the amplitudes. Usually
+99 or 98 will give a well-balanced display with 1 or 2 percent
+of the amplitudes clipped.
+Initial FK maximum gain setting (db)
+Enter the upper limit for color scale in the FK display panel.
+Specify a dB gain value (an amplitude of 1 is 0 dB) if the plot
+mode is dB or a maximum amplitude value if the plot mode is
+linear. This value can be changed interactively during
+program execution, but the minimum value cannot. Set the
+same value on several executions of F-K Analysis, to compare
+FK displays using the same color scales.
+Initial FK minimum gain setting (db)
+Enter the lower limit for color scale in the FK display panel.
+Specify a dB gain value (an amplitude of 1 is 0 dB) if the plot
+mode is dB or a minimum amplitude value if the plot mode is
+linear. This value may not be changed interactively during
+program execution.
+Enter 0 for both the maximum gain and minimum gain to set
+the maximum gain to the maximum of the data, and the
+minimum gain will be 100 dB less than the maximum or the
+minimum value of the data, whichever is greater.
+Percent ﬂat for trace ramping
+Enter a percent to taper the edge traces prior to K-space
+transform to minimize the FFT edge effects. The program will
+attempt to remove the effect of this ramp after the F-K
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1092
+
+ProMAX® Reference
+
+ﬁltering and inverse transform. Enter 100.0 to not apply
+trace ramping. Enter 90.0 to ramp on each end of the data,
+equivalent to 5% of the X-space value. High amplitudes may
+result along the last traces on output since the ramping is
+removed after ﬁltering.
+Percent ﬂat for time ramping
+Enter a percent to taper the ends of each trace before the
+frequency transform to minimize the FFT edge effects. The
+program will attempt to remove the effect of this ramp after
+the F-K ﬁltering and inverse transform. Enter 100.0 to not
+apply time ramping. Enter 90.0 to ramp on each end of the
+data, equivalent to 5% of the maximum time value. High
+amplitudes may result along the ﬁrst and last time samples
+on output since the ramping is removed after ﬁltering.
+Select mute polygon table
+Select a mute polygon table from the parameter ﬁle menu.
+Leave Invalid if no table exists. You can add a new table, if
+table output is desired.
+A new polygon table will contain polygon speciﬁcations for
+those ensembles which had polygons deﬁned on them. Each
+of these polygons will deﬁne a new ﬁlter for F-K Filter. F-K
+Filter will linearly interpolate the ﬁlters deﬁned by these
+polygons.
+If an old polygon is read in, only the polygons which exactly
+correspond to ensembles displayed in this execution of F-K
+Analysis may be edited. Ensembles must match the type and
+number exactly.
+Mode of F-K ﬁlter operation
+Select the mode of F-K ﬁlter operation from:
+• Reject rejects the polygonal region selected for an F-K
+ﬁlter and passes the rest of the F-K plane.
+• Accept passes this region and rejects the rest of the F-K
+plane.
+Percent ﬂat for F-K ﬁlter windowing
+Enter the percent ﬂat windowing to apply to the F-K ﬁlter
+before transformation to T-X domain. Enter 0 to give an
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1093
+
+ProMAX® Reference
+
+elliptical Hanning taper from the center of the ﬁlter to the
+edge of the ﬁlter in time and offset. Enter 100.0 to not apply
+tapering of the ﬁlter. Enter 80.0 to give a Hanning taper to 10
+percent of the size of the ﬁlter around all edges. Tapering the
+edges of the ﬁlter will give a smoother response, but less
+absolute attenuation. This parameter can be changed
+interactively during program execution. However, only a
+single value can be input to F-K Filter for all ﬁlters.
+Time length of F-K ﬁlter (ms)
+Enter the time extent of the F-K ﬁlter in ms. The greater the
+amount of time used, the greater the attenuation possible for
+the ﬁlter, but the run time increases correspondingly. Smaller
+ﬁlters may have fewer artifacts and run faster, but will not
+give as much attenuation. The range of values for this
+parameter is from 0 to the maximum time of the input data.
+This parameter can be changed interactively during program
+execution. However, only a single value can be input to F-K
+Filter for all ﬁlters.
+Spatial extent of F-K ﬁlter (traces)
+Enter the spatial extent of the F-K ﬁlter in traces. The greater
+the number of time samples used, the greater the attenuation
+possible for the ﬁlter, but run time increases correspondingly.
+Smaller ﬁlters may have fewer artifacts and run faster, but
+will not give as much attenuation. The range of values for this
+parameter is from 1 to the number of traces of input data.
+This parameter can be changed interactively during program
+execution. However, only a single value may be input to F-K
+Filter for all ﬁlters.
+Interactive Display
+F-K Analysis will initially show a display similar to the one
+below, if TX-TK-FX-FK conﬁguration has been selected. The
+TX display will be in the upper left, TK display in the upper
+right, FX display in the lower left, and FK display in the lower
+right.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1094
+
+ProMAX® Reference
+
+FK Analysis Display Window
+Icon Bar
+
+Menu Bar
+
+TX
+
+TK
+
+FX
+
+FK
+
+Click on a menu item and icon above and jump to the explanation.➲
+Program operation is controlled by pulldown menus listed
+across the top of the display, a Next Screen icon used to load
+the next ensemble or panel of traces, and three tools on the
+left side of the display. The primary sort key and its value for
+the ﬁrst displayed trace are shown in the upper left corner of
+the display.
+Menu Bar
+The primary user controls are as follows:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1095
+
+ProMAX® Reference
+
+File
+The ﬁle menu has several sub-options:
+• Hardcopy prints the display to either a printer or a plotter.
+• Save Polygons saves any polygonal edit parameters to
+the database.
+• Next Screen: Loads the data from the next ensemble or
+panel of stacked traces. This works the same as the
+icon.
+• Previous Screen moves backward on groups of data.
+This option is only active if IDA is enabled in the Disk
+Data Input feeding the ISA. This works the same as the
+icon.
+• Rewind moves back to the ﬁrst data available from the
+current sort list provided by IDA. This option is only
+active if IDA is enabled in the Disk Data Input feeding
+the ISA. This works the same as the
+icon.
+• Exit/Continue Flow stops the execution of this tool, but
+continues the ﬂow which contains this tool.
+• Exit/Stop Flow stops the execution and ﬂow of this tool.
+If any other interactive socket tools are part of this ﬂow,
+their graphics will remain on screen until you close
+them.
+Controls
+The controls menu contains the controls for display
+parameters of each of the data domains being displayed, as
+well as the colormap editor.
+• TX Display will popup a dialog box, which is used to
+change the display type from wiggle trace to variable
+density, the colormap and interpolation options for variable density displays, the bias and excursion for wiggle
+trace displays, and the gain setting for either variable
+density or wiggle trace displays.
+The TX display will start in variable-area/wiggle trace
+mode, but can be changed to variable density. The gain
+of the TX display of the input data may be set in the
+menu. The TX display of the output data will have the
+same reference amplitude as the input data. The TX
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1096
+
+ProMAX® Reference
+
+display of the impulse response of the ﬁlter is set so that
+the maximum amplitude of the ﬁlter will not be clipped.
+• TK Display, FX Display, and FK Display controls are
+set in much the same manner. These displays start in
+variable density color mode, but all parameters can be
+changed as with the TX display.
+• Edit Colormap initiates a colormap editor in another
+window. This is used to implement a previously deﬁned
+colormap or change the color scales used in the variable
+density displays.
+Conﬁguration
+The conﬁguration menu controls the data that is shown in
+the window. Four options are available:
+• TX-TK-FX-FK displays all four-domains.
+• TX-FK displays two-domains of TX and FK.
+• TX-only displays the TX domain.
+• FK-only displays the FK domain.
+Filter Response
+The response of the ﬁlter is viewed as the impulse response,
+the ﬁltered output, or both. Parameters used in the ﬁlter
+design can be changed. Remember that only a single set of
+ﬁlter parameters can be applied in the F-K Filter program,
+although the polygonal speciﬁcations of the ﬁlter may
+change.
+• Parameters pops up a dialog box to change the following
+four ﬁlter design parameters:
+Filter Mode: Pass/Reject.
+Percent ﬂat for windowing: Enter 100% to not window
+the ﬁlter, 0% to window the ﬁlter using Hanning taper
+from the center of the ﬁlter, 50% to apply a Hanning
+taper starting halfway between the center and the edge
+of the ﬁlter.
+Time length in ms, which may range from 0 to the
+maximum time of the data. The value will be rounded
+down to an odd sample number.
+Spatial width in traces, which may range from 1 trace
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1097
+
+ProMAX® Reference
+
+to the number of input traces per ensemble or panel. The
+value will be rounded down to an odd number.
+Ok applies the parameter changes, ﬁltering any ﬁlter
+response displays with a newly designed ﬁlter. The dialog
+box is removed.
+Apply applies the parameter changes, ﬁltering any ﬁlter
+response displays with a newly designed ﬁlter. The dialog
+box is left for more parameter changes.
+• Impulse Response creates another panel showing the
+impulse response of the ﬁlter using the same conﬁguration as the input data. Gain is set on the maximum
+amplitude of the ﬁlter (the center point). This updates
+the ﬁlter response which is required after changing the
+polygonal ﬁlter parameters.
+• Filtered Output creates another panel showing the
+response of the ﬁlter convolved with the input data using
+the same display conﬁguration as the input data. Gain is
+set to the same level as the input data. This updates the
+ﬁlter response which is required after changing the
+polygonal ﬁlter parameters.
+Help
+Clicking on Help pops up a menu with two choices:
+• Mouse displays a submenu with the following choices:
+Coordinates enables coordinate display.
+Buttons enables button help.
+General enables general help.
+All enables mouse help.
+None enables all mouse help.
+• Documentation brings up this helpﬁle.
+Icon Bar
+The following commands are invoked using the icons on the
+left hand side of the screen.
+• Forward shows the next screen full of data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1098
+
+ProMAX® Reference
+
+• Back single steps backward to previous screens. If there
+is no previous data available, this icon is grayed out.
+
+• Rewind steps backward to the ﬁrst screen full of data. If
+there is no previous data available, this icon is grayed
+out.
+
+• Zoom Tool zooms any of the display panels. Click the
+zoom tool and it will turn black. Then click MB1 at one
+corner of the desired area and drag the zoom box across
+the area to be zoomed. A single click of the mouse in the
+panel will un-zoom the display.
+• Annotation Tool allows you to add, change, and delete
+text annotation in the trace and header plot areas. The
+pointer changes to a circle when it is over text annotation. You can move an annotation by clicking and dragging MB1, or add new annotation by clicking MB1 when
+the pointer is not over an existing annotation. When the
+pointer is over an existing annotation, click MB2 to
+delete the text or MB3 to edit the text or change its color.
+Note: There are two separate F-K panel displays; one is
+used for the TX-and-FK display and the other is used in
+all other conﬁgurations. When text is added to either FK
+panel, it is not automatically added the other FK panel.
+You will need to reset the annotation in the blank FK
+panel.
+• Velocity Tool interrogates the velocity in either the TX
+or FK display panel with the mouse. A line is drawn from
+the origin to the mouse position and the velocity is
+shown in the mouse coordinates help line below the display. The origin of the line may not be changed for the
+FK display. The origin can be moved for the TX display
+by clicking with MB1 on the desired location. When
+interrogating velocity in one panel (TX or FK) the corresponding velocity line will be drawn in the other panel as
+well.
+• Picking Tool activates polygon picking to deﬁne FK ﬁlters. A single polygon may be picked, but through the
+use of narrow corridors, with effectively 0 width, multiple
+separate zones can be edited. After activating the tool,
+MB1 adds a point to a polygon, MB2 deletes a point, and
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1099
+
+ProMAX® Reference
+
+MB3 moves points. Polygons cannot cross each other. If
+they do cross, a warning message is issued when
+attempting to design a ﬁlter or write the polygon to a
+table.
+If an old polygon table is input, and polygons are stored in
+this table at the same primary key locations as input to this
+program, the polygons appear on the FK domain display. If
+these polygons are edited, they replace the polygons in the
+table when the table is saved. If additional data are input at
+locations not speciﬁed in the original input table, these
+points are added to the table.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Analysis1100
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

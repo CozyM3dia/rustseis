@@ -1,0 +1,100 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC BHSS
+'(
+ name: LFAF
+label: "Surface Wave Noise Attenuation"
+value_tab: 33
+
+parameter: VEL
+text: "Velocity"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 0.0
+mouse_text: "Enter the apparent velocity of the noise wave to attenuate."
+
+parameter: DX
+text: "Trace spacing"
+type: typein:
+type_desc: ( real: 4 0.0 nil )
+value: 25.0
+mouse_text: "Enter the data trace spacing. Enter 0.0 to get trace spacing from the data."
+
+parameter: F2
+text: "Low frequency (Hz)"
+type: typein:
+type_desc: ( real: 4 0.0 nil )
+value: 0.0
+mouse_text: "Enter the lowest frequency of the noise to attenuate."
+
+parameter: F3
+text: "High frequency (Hz)"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 20.0
+mouse_text: "Enter the highest frequency of the noise to attenuate."
+
+parameter: FTAPER3
+text: "Blend width (Hz)"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 5.0
+mouse_text: "Enter the width of the zone in which to perform blending at high frequencies."
+
+parameter: maxmix_option
+text: "Set trace mix limit?"
+type: boolean:
+value: nil
+mouse_text: "Select this option to set a limit on the number of traces to mix, regardless of frequency."
+
+parameter: MAXMIX
+text: "Maximum number of traces to mix"
+type: typein:
+type_desc: ( int: 5  3 nil )
+value: 101
+mouse_text: "Enter the maximum number (odd) of traces to mix, regardless of frequency."
+
+parameter: PANLSIZE
+text: "Panel size"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 500
+mouse_text: "Enter number of traces per panel. Should be >= Max trace mix."
+                                                                                
+parameter: PANLEDGE
+text: "Panel edge"
+type: typein:
+type_desc: ( int: 5 0 nil )
+value: 50
+mouse_text: "Enter number of traces in panel edge. Should be >= 1/2 Max trace mix. Must be < 1/2 Panel size."
+                                                                                
+parameter: PANL_MIX
+text: "Panel mix"
+type: typein:
+type_desc: ( int: 5 0 nil )
+value: 30
+mouse_text: "Enter number of traces to mix across panels. Must be <= Panel edge."
+                                                                                
+exec_data: ("LFAF"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: lfaf.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("PANLSIZE" implicit: (value 'PANLSIZE))
+			("PANLEDGE" implicit: (value 'PANLEDGE))
+			("PANL_MIX" implicit: (value 'PANL_MIX))
+			("PCNT_PAD" implicit: 100)
+			("VEL"      implicit: (value 'VEL))
+			("DX"       implicit: (value 'DX))
+			("F2"       implicit: (value 'F2))
+			("F3"       implicit: (value 'F3))
+			("FTAPER3"  implicit: (value 'FTAPER3))
+			("MAX_OPT"  implicit: (if (value 'maxmix_option) 1 0 ))
+			("MAXMIX"   implicit: (if (value 'maxmix_option) (value 'MAXMIX) 0 ))
+		)
+	   )
+
+rules: (
+        (maxmix  (value 'maxmix_option)
+	(do_show 'MAXMIX)
+	(dont_show 'MAXMIX))
+        (maxmixodd ( if ( evenp (value 'MAXMIX) )
+                        (set_value 'MAXMIX ( + (value 'MAXMIX) 1 ))))
+)
+)

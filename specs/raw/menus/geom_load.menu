@@ -1,0 +1,135 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+'(
+ name: GEOM_LOAD
+label: "Inline Geom Header Load"
+value_tab: 45
+
+parameter: DO_STATS
+text: "Compute and apply statics to sea level?"
+type: boolean:
+value: t
+mouse_text: "Select 'Yes' to compute the source-receiver static to sea level and apply it."
+plot_label: t
+
+parameter:  W_VEL
+text: "  Water velocity"
+type: typein:
+type_desc: ( real: 7 0.001 nil )
+value: 0.001
+mouse_text: "What is the water velocity (ft or m per sec) used for static correction to sea level."
+plot_label: t
+
+parameter: CHEADER1
+text: "Primary header to match database"
+type: pop_choose:
+type_desc: (
+   ("FFID"     "FFID    " "Match FFID from trace header to SIN database.")
+   ("SOU_SLOC" "SOU_SLOC" "Match SOU_SLOC from trace header to SIN database.")
+   ("SIN"      "SIN     " "Match SIN from trace header to SIN database.")
+   ("SOURCE"   "SOURCE  " "Match SOURCE from trace header to SIN database.")
+   ("S_LINE"   "S_LINE  " "Match sail/swath line from trace header to SIN database.")
+   ("DAY_SHOT" "DAY_SHOT" "Match day of shot from trace header to SIN database.")
+   ("TIM_SHOT" "TIM_SHOT" "Match time of shot from trace header to SIN database.")
+   )
+mouse_text: "Choose one of the primary headers to match the SIN database."
+plot_label: t
+
+parameter: CHEADER2
+text: "Secondary header to match database"
+type: pop_choose:
+type_desc: (
+   ("None"     "NONE    " "No secondary header match is required.")
+   ("S_LINE"   "S_LINE  " "Match sail/swath line from trace header to SIN database.")
+   ("FFID"     "FFID    " "Match FFID from trace header to SIN database.")
+   ("SOU_SLOC" "SOU_SLOC" "Match SOU_SLOC from trace header to SIN database.")
+   ("SOURCE"   "SOURCE  " "Match SOURCE from trace header to SIN database.")
+   ("DAY_SHOT" "DAY_SHOT" "Match day of shot from trace header to SIN database.")
+   ("TIM_SHOT" "TIM_SHOT" "Match time of shot from trace header to SIN database.")
+   )
+mouse_text: "Choose one of the secondary headers to match the SIN database."
+plot_label: t
+
+parameter:  SHIFT
+text: "  Time shift"
+type: typein:
+type_desc: ( int: 7 nil nil )
+value: 0
+mouse_text: "What time shift (in seconds) should be applied to the header in order to match the database entry?"
+plot_label: t
+
+parameter:  TOLER
+text: "  Time tolerance"
+type: typein:
+type_desc: ( int: 7 0 nil )
+value: 0
+mouse_text: "What tolerance (in seconds) is allowable for matching the headers and database entry for time of shot?"
+plot_label: t
+
+parameter: IUSE_TRC
+text: "Match by valid trace number?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to use valid trace numbers from the header to match the database.  They must have been assigned previously."
+plot_label: t
+
+parameter: KILL_CDP
+text: "Drop traces with NULL CDP headers?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to discard traces which have a NULL CDP header.  (ex. traces that fell outside a bin space definition.)"
+plot_label: t
+
+parameter: KILL_SRF
+text: "Drop traces with NULL receiver headers?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to discard traces which have a NULL REC_SLOC header. (ex. traces that did not have an assigned receiver position.)"
+plot_label: t
+
+parameter: IVERBOSE
+text: "Verbose diagnostics?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to list shot and channel of every trace that had a null header loaded."
+
+exec_data: ("GEOM_LOAD"
+		("GENERAL"
+ 		        ("version" implicit: "ProMAX $Id: geom_load.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("DO_STATS"  implicit: (if (value 'DO_STATS) 1 0 ))
+			("W_VEL   "  implicit: (value 'W_VEL))
+			("IUSE_TRC"  implicit: (if (value 'IUSE_TRC) 1 0 ))
+			("KILL_CDP"  implicit: (if (value 'KILL_CDP) 1 0 ))
+			("KILL_SRF"  implicit: (if (value 'KILL_SRF) 1 0 ))
+			("IVERBOSE"  implicit: (if (value 'IVERBOSE) 1 0 ))
+			("CHEADER1"  implicit: (value 'CHEADER1))
+			("CHEADER2"  implicit: (value 'CHEADER2))
+			("SHIFT   "  implicit: (value 'SHIFT))
+			("TOLER   "  implicit: (value 'TOLER))
+		)
+	   )
+
+rules:(
+       (marine ( = ( db_parmget_line "IMARINEz") 1 )
+                   (do_show '(DO_STATS W_VEL) )
+                   ( progn
+                     (set_value 'DO_STATS nil)
+                     (do_not_show '(DO_STATS W_VEL) )
+                   )
+               )
+       (trc_valid  (value 'IUSE_TRC) (do_not_show '(CHEADER1 CHEADER2) ) (do_show '(CHEADER1 CHEADER2) ) )
+       (sin_header  (or (value 'IUSE_TRC) (= (value 'CHEADER1) "SIN     ") )
+		    (do_not_show 'CHEADER2 ) (do_show 'CHEADER2 ) )
+       (units (and ( = ( value 'W_VEL) 0.001 ) ( = ( db_parmget_line "IUNITSz") 1 ) ) 
+	      (set_value 'W_VEL 4860.0 ) )
+       (units2 (and ( = ( value 'W_VEL) 0.001 ) ( = ( db_parmget_line "IUNITSz") 3 ) )
+		(set_value 'W_VEL 1480.0 ) )
+       (show_time (or ( = (value 'CHEADER1) "TIM_SHOT") ( = (value 'CHEADER2) "TIM_SHOT"))
+		  (do_show '(SHIFT TOLER))
+		  (do_not_show '(SHIFT TOLER)))
+       (do_stats ( value 'DO_STATS) (do_show 'W_VEL ) (do_not_show 'W_VEL ) )
+
+;       	(check (print(or ( = (value 'CHEADER1) "TIM_SHOT") ( = (value 'CHEADER2) "TIM_SHOT"))))
+
+       )
+)
+

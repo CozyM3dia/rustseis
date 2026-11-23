@@ -1,0 +1,174 @@
+; 1
+'(
+ name: STOF_TRIM
+label: "Time Varying Trim Statics"
+value_tab: 56
+
+parameter: w_int
+text:  "Window interval"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 200.0
+mouse_text: "At what time interval should a different trim statics be computed for a trace."
+
+parameter: w_length
+text:  "Window half length"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 400.0
+mouse_text: "What is the half width of the window at each time interval?"
+
+parameter: tmax
+text:  "Maximum trim static"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 30.0
+mouse_text: "Maximum trim static value"
+
+parameter:  livePercent
+text:  "Minimum live samples in gate (in percent)"
+type: typein:
+type_desc: ( real: 4 0.0 100.0 )
+value: 70.0
+mouse_text: "Windows with fewer live samples than this value will not be used in statics computations."
+
+parameter: macroBins
+text: "Use macro bins?"
+type: boolean:
+value: t
+mouse_text: "Specify YES to create macro bins across CDP gathers."
+
+parameter: allsmash
+text:  "Number of CDPs in a macro bin"
+type: typein:
+type_desc: ( int: 4 1 nil )
+value: 5
+mouse_text: "This should be an odd integer which represents the total number of CDPs in a macro bin."
+
+;parameter: noffsets
+;text: "Number of macro bins"
+;type: typein:
+;type_desc: ( int: 7 0 nil )
+;value: 0
+;mouse_text: "Traces will be summed into this many macro bins."
+
+parameter: header
+text: "Secondary header word for macro bins"
+type: function:
+type_desc: (header_list headers)
+value: "AOFFSET "
+selected_item: "Absolute value of offset       "
+mouse_text: "Traces from neighboring CDP gathers are stacked based on this header.  This should generally be offset or absolute value of offset. "
+
+parameter: fOffset
+text: "Center of first bin"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 0.0
+mouse_text: "Specify center of any bin.  The other bin centers will be an integral number of bin spacings from this value."
+
+parameter: dOffset
+text: "Bin spacing"
+type: typein:
+type_desc: ( real: 7 0.0001 nil )
+value: 25.0
+mouse_text: "Specify the bin center spacing.  The number of bins will be automatically computed."
+
+;parameter: slowOption
+;text: "Is this very noisy data?"
+;type: boolean:
+;value: nil
+;mouse_text: "For very noisy data, you can specify YES to use an improved, but slower algorithm."
+
+parameter: program
+text: "File to execute:"
+type: typein:
+type_desc: (string: 30)
+value: "simpleHVA.exe"
+mouse_text: ""
+
+parameter: DEBUG
+text: "Debug mode?"
+type: typein:
+type_desc: ( int: 1 0 3 )
+value: 0
+mouse_text: ""
+
+
+
+exec_data: 	(
+	("ST_TRIM_STAT"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: timeTrimStat.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+		   	("program"   implicit: (value 'program) )
+		   	("DEBUG"   implicit: (value 'DEBUG) )
+
+			("useHors"     implicit: 0 )
+			("apply"     implicit: 1 )
+			("read"     implicit: 0 )
+			("write"     implicit: 0 )
+			("macroBins"     implicit: (if (value 'macroBins) 1 0 ) )
+;			("fastOption"     implicit: (if (value 'slowOption) 0 1 ) )
+			("fastOption"     implicit: 1 )
+			("header"     implicit: (if (value 'macroBins) (value 'header) "SEQNO") )
+			("w_int"     implicit: (value 'w_int))
+			("w_length"     implicit: (value 'w_length))
+			("allsmash"     implicit: (if (value 'macroBins) (value 'allsmash) 1) )
+;			("noffsets"     implicit: (value 'noffsets))
+			("fOffset"     implicit: (value 'fOffset))
+			("dOffset"     implicit: (value 'dOffset))
+			("tmax"     	implicit: (value 'tmax))
+			("livePercent"     	implicit: (value 'livePercent))
+
+		)
+	   )
+
+	)
+
+rules: (
+
+  ( rule (value 'macroBins)  (progn
+				(do_show 'header)
+				(do_show 'allsmash)
+;				(do_show 'noffsets)
+				(do_show 'fOffset)
+				(do_show 'dOffset) )
+  			     (progn
+				(dont_show 'header)
+				(dont_show 'allsmash)
+;				(dont_show 'noffsets)
+				(dont_show 'fOffset)
+				(dont_show 'dOffset) )
+							)
+
+   (((value header)) rule t  (set_text 'dOffset (string_concatinate (value 'header) " bin spacing")))
+
+   (((value header)) rule t  (set_text 'fOffset (string_concatinate "Center of an " (value 'header) " bin")))
+
+;     (rule (and (= (value 'noffsets) 0) (db_parmget_line "NOFBINSz") )
+;             (set_value 'noffsets (db_parmget_line "NOFBINSz")))
+
+     (rule (and (= (value 'dOffset) 0.0) (db_parmget_line "OFFBINCz") )
+             (set_value 'dOffset (* 2.0 (db_parmget_line "OFFBINCz"))))
+
+;  This rule says that the DEBUG parameter should be shown only if
+;  the environment variable SOCKET_DEBUG is set to "t"
+ (socket_debug_rule t
+        (if (= (printenv 'SOCKET_DEBUG) "t")
+                (do_show 'DEBUG)
+                (do_not_show 'DEBUG) )  )
+
+ (socket_debug_rule t
+        (if (= (printenv 'SOCKET_DEBUG) "t")
+                (do_show 'program)
+                (do_not_show 'program) )  )
+
+
+)
+
+)
+
+
+
+
+

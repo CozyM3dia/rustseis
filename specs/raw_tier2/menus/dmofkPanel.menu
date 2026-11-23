@@ -1,0 +1,229 @@
+; IIID IVD 1 DEV FIELD DEPTHC
+'(
+ name: DMOFK
+label: "Common Offset F-K DMO"
+value_tab: 40
+
+
+parameter: dcdp
+text: "CDP interval"
+type: typein:
+type_desc:  ( real: 7 0.001 nil)
+value: -1
+mouse_text: "CDP spacing in ft or m (consistent with headers)."
+plot_label: t
+
+parameter: dtrace
+text: "Typical common-offset trace spacing"
+type: typein:
+type_desc:  ( real: 7 0.001 nil)
+value: -1
+mouse_text: "Typical trace spacing in the input/output common-offset gathers, in ft or m (consistent with headers)."
+plot_label: t
+
+parameter: NUMCDP
+text: "Maximum number of CDP's in dataset"
+type: typein:
+type_desc:  ( int: 5 1 nil)
+value: -1
+mouse_text: "Enter the maximum number of CDP's in any of the common offset panels."
+plot_label: t
+
+parameter: maxOffset
+text: "Maximum offset in data"
+type: typein:
+type_desc:  ( real: 7 0.001 nil)
+value: -1
+mouse_text: "What will be the maximum offset of the common offset sections passed through this module."
+
+parameter: offset
+text: "Header entry to use for offsets"
+type: function:
+type_desc:  (header_list headers)
+value: "DMOOFF  "
+selected_item: "Offset bin for DMO"
+
+mouse_text: "OFFSET can be used for data with extremely regular geometry."
+plot_label: t
+
+parameter: fmax
+text: "Maximum frequency (in Hz)"
+type: typein:
+type_desc:  ( real: 7 0.001 nil )
+value: 80.0
+mouse_text: "A value less than Nyquist will speed up computations, but frequencies above this maximum may be aliased during DMO."
+plot_label: t
+
+parameter: dipFilter
+text: "Perform dip filtering?"
+type: boolean:
+value: t
+mouse_text: "Reduces low frequency artifacts at shallow times by removing evanescent energy."
+plot_label: t
+
+parameter: vel_b
+text: "Get RMS velocities from database?"
+type: boolean:
+value: t
+mouse_text: "This DMO uses RMS velocities.  Do you want to get these velocities from the database?"
+plot_label: t
+
+parameter: velf
+text: "  Select RMS velocity file"
+type: function:
+type_desc:  ((parm_list "VEL") parms)
+value: "no entry"
+selected_item: "No velocity file has been selected!"
+mouse_text: "Use Mouse Button 1 to select an file in depth from the RMS velocity database."
+plot_label: t
+
+parameter: vels
+text: "RMS velocities for DMO"
+type: edit:
+type_desc: (20 80 5 " FORMAT: T1-V1,T2-V2,...,Tn-Vn
+ EXAMPLE:  0-1500,1000-2000,2000-2200,3000-2500,4000-3100
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+ value: "XXX"
+mouse_text: "Use Mouse Button 1 to edit RMS velocities for DMO. (See editor for examples.)"
+plot_label: t
+
+
+parameter: sdmo
+text: "DMO stretch factor"
+type: typein:
+type_desc:  ( real: 4 0.01 1.6 )
+value: 1.0
+mouse_text: "Recommended:  1.0 for constant velocity, 0.6 for typical (young sediments) increase in velocity with depth."
+plot_label: t
+
+parameter: maxMemory
+text: "Maximum memory to use (in Mbytes)"
+type: typein:
+type_desc:  ( real: 7 0.0 nil )
+value: 16.0
+mouse_text: "Maximum memory for module to use in Megabytes.  Module will use less if possible."
+plot_label: t
+
+parameter: remute_b
+text: "Re-apply trace mutes?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', trace mutes in effect before migration will be re-applied after migration.  If 'No', mutes will be adjusted as necessary."
+
+parameter: rekill_b
+text: "Re-kill dead traces?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', traces that were dead (all zeros) before migration will be killed after migration.  If 'No', dead traces will become live."
+
+exec_data:  (
+; combine cdp groupings into an ensemble
+      ("ENS_DEFINE"
+		("GENERAL"
+			("PRIM_KEY" implicit: "CDP     ")
+			("CMODE"    implicit: "CHANGE")
+			("MAXTR"    implicit: 100)
+			("CTASK"    implicit:  "DEFINE" )
+		)
+           )
+; We are using Ensemble combine to stack traces in an ensemble with duplicate CDP's
+     ("ENS_COMBINE"
+		("GENERAL"
+			("STACKOPT" implicit: 1 )
+			("MAXTR"    implicit: 1 )
+			("THDROPT"  implicit: 1 )
+			("SORDER"   implicit: 0 )
+			("PRIM_KEY" implicit: "CDP     " )
+			("PKEY_OPT" implicit: 1 )
+			("CORD_OPT" implicit: 0 )
+			("SCND_KEY" implicit: "CDP     " )
+			("SKEY_BIN" implicit: 1.0  )
+			("NCOMBINE" implicit: 1 )
+			("WARNFLAG" implicit: 1 )
+		)
+	   )
+; combine cdp groupings into an ensemble
+     ("ENS_DEFINE"
+		("GENERAL"
+			("PRIM_KEY" implicit: (value 'offset))
+			("CMODE"    implicit: "CHANGE")
+			("MAXTR"    implicit: (value 'NUMCDP))
+			("CTASK"    implicit:  "DEFINE" )
+		)
+           )
+    ("PAD_TRACES"
+		("GENERAL"
+			("header" implicit: "CDP     " )
+			("defineBounds" implicit: 0 )
+			("dval" implicit: 1.0 )
+			("removeTraces" implicit: 1 )
+			("maxdtrMult" implicit: 0.0 )
+		)
+	    )	
+    ("DMOFK_PANEL"
+	("GENERAL"
+                ("version" implicit: "ProMAX $Id: dmofkPanel.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+		("dcdp" implicit: (value 'dcdp))
+		("dtrace" implicit: (value 'dtrace) )
+		("offset" implicit: (value 'offset))
+		("fmax" implicit: (value 'fmax))
+		("dipFilter" implicit: (if (value 'dipFilter) 1 0) )
+		("vels" implicit: (value 'vels))
+		("velf" implicit: (value 'velf))
+		("vel_b" implicit: (if (value 'vel_b) 1 0 ) )
+		("sdmo" implicit: (value 'sdmo))
+		("remute" implicit: (if (value 'remute_b) 1 0))
+		("rekill" implicit: (if (value 'rekill_b) 1 0))
+		("maxMemory"   implicit: (value 'maxMemory))
+		("maxOffset"   implicit: (value 'maxOffset))
+	)
+)
+    ("RMPAD_TRACES"
+		("GENERAL"
+		)
+	    )	
+	((if (value 'remute_b) "MUTE" "VOID")
+		("GENERAL"
+			("REMUTE"   implicit: 2)
+		)
+	    )
+)
+
+rules: (
+	(ifx_default_rule (= (value 'maxOffset) -1 )
+		(set_value 'maxOffset (db_parmget_line "OFFMAXz")))
+	(cdp_interval_default_rule  (AND ( = (value 'dcdp) -1) (db_parmget_line "DCDPILNz"))
+		(set_value 'dcdp (db_parmget_line "DCDPILNz")))
+	(cdp_interval_default_rule2  (AND ( = (value 'dtrace) -1) (db_parmget_line "DCDPILNz"))
+		(set_value 'dtrace (db_parmget_line "DCDPILNz")))
+
+	(rule1 (showing 'vels) (do_not_show 'velf) (do_show 'velf))
+	(rule2 (value 'vel_b) (do_not_show 'vels) (do_show 'vels))
+
+	(vels_default_rule1 (and 
+		(equal (value 'vels) "XXX")
+		(= (db_parmget_line "IUNITSz") 1))
+		(set_value 'vels 
+"0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000"))
+	(vels_default_rule2 (equal (value 'vels) "XXX")
+		(set_value 'vels
+"0-1500,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000"))
+ (numcdp  ( = (value 'NUMCDP) -1 )  (set_value 'NUMCDP  (db_parmget_line "NUMCDPz"))) 
+
+)
+
+)
+
+
+
+
+	

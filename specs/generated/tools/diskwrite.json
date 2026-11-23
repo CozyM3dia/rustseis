@@ -1,0 +1,43 @@
+{
+  "menu_id": "diskwrite",
+  "tool_name": "DISKWRITE",
+  "label": "Disk Data Output",
+  "parameter_count": 5,
+  "parameters": [
+    {
+      "name": "DESCRIPT",
+      "prompt": "Output Dataset Filename",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use MB1 to select/add the dataset file description for the output dataset you wish to create. (Up to 35 chars.)"
+    },
+    {
+      "name": "STATUS",
+      "prompt": "New, or Existing, File?",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Create a new file, write over an existing file with a new version of the 'same' data, or add new data to the end."
+    },
+    {
+      "name": "TMAX",
+      "prompt": "Record length to output",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "The trace length in milliseconds to output. The default of 0.0 means to output all available data samples."
+    },
+    {
+      "name": "COMPRESS",
+      "prompt": "Trace sample format",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select a format for trace samples.  Samples in memory are always represented as floating point number."
+    },
+    {
+      "name": "ALTSTORE",
+      "prompt": "Skip primary disk storage?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you wish to use secondary disk storage to store the data (rather than filling the primary storage area)?"
+    }
+  ]
+}

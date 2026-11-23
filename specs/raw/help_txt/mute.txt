@@ -1,0 +1,182 @@
+Trace Muting2014
+
+ProMAX® Reference
+
+Trace Muting
+Trace Muting gives you three options for muting input data.
+
+Theory
+All data samples muted are set to zero. A mute ramp is also
+provided to smooth the transition from live data to muted
+data samples. Ramping is done to prevent undesirable side
+effects from the mute process, especially in the application of
+ﬁlters. For a top mute, the data is set to zero up to the
+speciﬁed mute time. Then, a multiplier which increases with
+time over the ramp length is applied to the data, until the
+multiplier reaches a value of 1.0 at the end of the ramp. For a
+bottom mute, the data is scaled by a factor of 1.0 at (mute
+time - ramp length), and then is tapered down until it reaches
+zero amplitude at the mute time.
+Mutes are normally entered interactively and accessed in the
+database, but may also be speciﬁed using the editor.
+
+Usage
+The options are top, surgical, or bottom trace muting. While
+only one type of mute can be speciﬁed per call to this process,
+many mutes may appear in one ﬂow. This process may also
+be used to reapply previous mutes and ramps which are
+stored in the trace headers.
+Top and bottom mute speciﬁcations may be extrapolated
+beyond the give control points. Surgical mutes are not
+normally extrapolated, but are applied as speciﬁed. However,
+when a surgical mute is retrieved from the database, it is
+possible that the secondary key values picked for the upper
+limit differ from those picked for the lower limit. Therefore, an
+extrapolation is done because a surgical mute must have an
+upper limit and a lower limit at every trace to be muted.
+Mutes may be picked in Trace Display, or entered, relative to
+the water bottom time of the trace CDP. To use this feature,
+the CDP water bottom time must be in the header named
+WB_TIME. If water bottom relative mutes are picked, actual
+mute times will be the sum of the time interpolated from the
+mute table (relative time) plus the time from the WB_TIME
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Muting2015
+
+ProMAX® Reference
+
+header for that trace. Water relative mute ﬁles will have WBM
+ending rather than the MUT ending.
+
+Parameters
+Re-apply previous mutes
+Select an option to reapply mutes speciﬁed by the trace
+header words, TLIVE_S, TFULL_S, TFULL_E, and TLIVE_E:
+• No does not reapply previous mutes or specify new mute
+parameters. Note: This does not bring back data which
+had been previously muted if you use a shallower mute
+for top mute or deeper mute for bottom mute.
+• Re-mute zeroes zones which were previously muted. The
+zone from 0 to TLIVE_S and the zone from TLIVE_E to
+the end of the trace will be zeroed. The trace amplitude
+will be full between TLIVE_S and TLIVE_E, that is, no
+taper is applied.
+• Re-ramp zeroes the zones as in the Re-mute option and
+reapply linear ramps between TLIVE_S and TFULL_S,
+and between TFULL_E and TLIVE_E.
+• Re-set changes the mute header values TLIVE_S and
+TFULL_S to the ﬁrst non-zero amplitude on the input
+trace, and headers TFULL_E and TLIVE_E to the last
+non-zero amplitude on the input trace. This option is to
+allow the setting of mute times when the data has been
+read in from tape and the mute times were not available.
+If the Re-mute, Re-ramp or Re-set options are selected, no
+other parameters will appear. These options are intended to
+allow the capability of re-muting data if it was not applied in
+processes, such as Bandpass Filter or F-K Filter.
+Mute time reference
+Select TIME 0 or Water Bottom for the mute reference times.
+Water Bottom is only applicable to data with the WB_TIME
+header.
+TYPE of mute
+Select from the available muting option types. The mute type
+selected determines how the input times and locations are
+used to mute the traces. The different mute types are:
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Muting2016
+
+ProMAX® Reference
+
+• Top mutes energy from time zero to speciﬁed times.
+Mutes will be interpolated between speciﬁed location.
+• Surgical mutes a slice of the data between speciﬁed
+times. The slice must be enclosed.
+• Bottom mutes energy from speciﬁed times to the bottom
+of the data. Mutes will be interpolated between locations.
+Starting ramp
+This appears if Top to Type of mute. Enter the time in ms
+over which to ramp on amplitudes at the start of the top
+mute.
+Ending ramp
+This appears if Bottom to Type of mute. Enter the time in
+ms over which to ramp off amplitudes at the end of the
+bottom mute.
+Extrapolate mute times
+This appears if Top or Bottom to Type of mute. Select Yes to
+extrapolate the mute times, using the same dip rate, from
+your last pick to the last shot. If you picked mutes
+interactively on a normal shot record, shots with longer than
+normal offsets will be muted. Select No if you do not want to
+extrapolate mute times past the speciﬁed control locations;
+the last picked mute time will be used to the last shot.
+Surgical mute ramp
+This appears if Surgical to Type of mute. Enter the time in
+ms over which to ramp on and off amplitudes for surgical
+mutes.
+Mute Application
+This appears if Surgical to Type of mute. Select where to
+apply the mute from the following choices:
+• Interpolate over primary and secondary keys interpolates mute time over primary and secondary key.
+• Interpolate over secondary key interpolates mute
+times over secondary key only.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Muting2017
+
+ProMAX® Reference
+
+• Apply only where speciﬁed applies mutes only to
+traces at speciﬁed primary and secondary locations.
+Get mute ﬁle from the database?
+Select Yes if you have interactively created trace mute ﬁles to
+retrieve from the database. There may be more than one list
+of trace mutes in the database for this line. If the mute time
+reference is water bottom, you must select from the choices
+of WBM ﬁles in the database.
+Select mute parameter ﬁle
+This appears if Yes to Get mute ﬁle from the database.
+Select a trace mute parameter ﬁle from the parameter ﬁle
+menu.
+Select Primary mute header word
+This appears if No to Get mute ﬁle from the database.
+Select a header word as the primary key for specifying the
+trace mute times. You may select from the main list of header
+words or the alternate list.
+Select Secondary mute header word
+This appears if No to Get mute ﬁle from the database.
+Select a header word as the secondary key for specifying the
+trace mute times. This parameter is optional.
+Specify mute parameters
+This appears if No to Get mute ﬁle from the database.
+Access the text editor and deﬁne the locations of trace mute
+times gates. The editor will have the format:
+Primary Mute Location Value: Secondary Mute Location Value: Mute time/
+EXAMPLE: 1:-5280:1000 / 1:0:300 / 1:5280:1000 /
+
+If you speciﬁed Water Bottom for the time gate reference
+above, all mute times are relative to trace water bottom time
+from the WB_TIME header.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

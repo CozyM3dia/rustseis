@@ -1,0 +1,733 @@
+{
+  "count": 91,
+  "headers": [
+    {
+      "name": "SOURCE",
+      "description": "Live source number (usr-defined)",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B1"
+    },
+    {
+      "name": "CDP",
+      "description": "CDP bin number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B7"
+    },
+    {
+      "name": "REC_SLOC",
+      "description": "Receiver index number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B4"
+    },
+    {
+      "name": "OFFSET",
+      "description": "Signed source-receiver offset",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B9"
+    },
+    {
+      "name": "CHAN",
+      "description": "Recording channel number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B11"
+    },
+    {
+      "name": "FB_PICK",
+      "description": "First break pick time",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B18"
+    },
+    {
+      "name": "AOFFSET",
+      "description": "Absolute value of offset",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B10"
+    },
+    {
+      "name": "SEQNO",
+      "description": "Sequence number in ensemble",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E26"
+    },
+    {
+      "name": "FFID",
+      "description": "Field file ID number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B2"
+    },
+    {
+      "name": "SIN",
+      "description": "Source index number (internal)*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B3"
+    },
+    {
+      "name": "SOU_SLOC",
+      "description": "External source location number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B5"
+    },
+    {
+      "name": "SOU_X",
+      "description": "Source X coordinate",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E3"
+    },
+    {
+      "name": "SOU_Y",
+      "description": "Source Y coordinate",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E4"
+    },
+    {
+      "name": "SOU_ELEV",
+      "description": "Source elevation",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E5"
+    },
+    {
+      "name": "NCHANS",
+      "description": "Number of channels of source",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": ""
+    },
+    {
+      "name": "REC_X",
+      "description": "Receiver X coordinate",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E7"
+    },
+    {
+      "name": "REC_Y",
+      "description": "Receiver Y coordinate",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E8"
+    },
+    {
+      "name": "REC_ELEV",
+      "description": "Receiver elevation",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E9"
+    },
+    {
+      "name": "REC_NFLD",
+      "description": "Receiver fold",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E12"
+    },
+    {
+      "name": "CDP_SLOC",
+      "description": "External CDP location number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B23"
+    },
+    {
+      "name": "CDP_X",
+      "description": "X coordinate of CDP",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E13"
+    },
+    {
+      "name": "CDP_Y",
+      "description": "Y coordinate of CDP",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E14"
+    },
+    {
+      "name": "CDP_ELEV",
+      "description": "Elevation of CDP",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E15"
+    },
+    {
+      "name": "CDP_NFLD",
+      "description": "Number of traces in CDP bin",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": ""
+    },
+    {
+      "name": "TOT_STAT",
+      "description": "Total static for this trace*",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "NA_STAT",
+      "description": "Portion of static not applied*",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "SKEWSTAT",
+      "description": "Multiplex skew static",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "REC_STAT",
+      "description": "Total static for receiver",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "SOU_STAT",
+      "description": "Total static for source",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "END_ENS",
+      "description": "End-of-ensemble flag*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": ""
+    },
+    {
+      "name": "EOJ",
+      "description": "End of job flag*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": ""
+    },
+    {
+      "name": "TRACENO",
+      "description": "Trace number in seismic line*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E18"
+    },
+    {
+      "name": "TRC_TYPE",
+      "description": "Trace type (data, aux, etc.)",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E19"
+    },
+    {
+      "name": "TLIVE_S",
+      "description": "Start time of live samples",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "TFULL_S",
+      "description": "Start time of full samples",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "TFULL_E",
+      "description": "End time of full samples",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "TLIVE_E",
+      "description": "End time of live samples",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "LEN_SURG",
+      "description": "Length of surgical mute taper",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "AMP_NORM",
+      "description": "Amplitude normalization factor",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E20"
+    },
+    {
+      "name": "TR_FOLD",
+      "description": "Actual trace fold",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B19"
+    },
+    {
+      "name": "DEPTH",
+      "description": "Source depth",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E21"
+    },
+    {
+      "name": "UPHOLE",
+      "description": "Source uphole time",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E22"
+    },
+    {
+      "name": "SR_AZIM",
+      "description": "Source to receiver azimuth",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "PAD_TRC",
+      "description": "Artificially padded trace",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": ""
+    },
+    {
+      "name": "GEO_COMP",
+      "description": "Geophone component (x,y,z)",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E1"
+    },
+    {
+      "name": "RCDP",
+      "description": "Real/alias CDP bin number",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "REC_H2OD",
+      "description": "Water depth at receiver",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "SOU_H2OD",
+      "description": "Water depth at source",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "NMO_STAT",
+      "description": "NMO datum static (don't apply)",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E16"
+    },
+    {
+      "name": "FNL_STAT",
+      "description": "Static to move to final datum",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E17"
+    },
+    {
+      "name": "SEQ_DISK",
+      "description": "Trace sequence number from disk",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E27"
+    },
+    {
+      "name": "REPEAT",
+      "description": "REPEATED data copy number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B12"
+    },
+    {
+      "name": "FK_WAVEN",
+      "description": "Wavenumber of F-K domain \"trace\"",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E23"
+    },
+    {
+      "name": "FK_WAVEL",
+      "description": "Wavelength of F-K domain \"trace\"",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E24"
+    },
+    {
+      "name": "FT_FREQ",
+      "description": "Frequency of F-T domain \"trace\"",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E25"
+    },
+    {
+      "name": "CS_STAT",
+      "description": "Corr. autostatics source static",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B13"
+    },
+    {
+      "name": "CR_STAT",
+      "description": "Corr. autostatics recvr static",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B14"
+    },
+    {
+      "name": "PS_STAT",
+      "description": "Power autostatics source static",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B15"
+    },
+    {
+      "name": "PR_STAT",
+      "description": "Power autostatics recvr static",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B16"
+    },
+    {
+      "name": "TRIMSTAT",
+      "description": "Trim static",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B17"
+    },
+    {
+      "name": "LSEG_END",
+      "description": "Line segment end*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E3"
+    },
+    {
+      "name": "LSEG_SEQ",
+      "description": "Line segment sequence number*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E4"
+    },
+    {
+      "name": "DMOOFF",
+      "description": "Offset bin for DMO",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B20"
+    },
+    {
+      "name": "R_LINE",
+      "description": "Receiver line number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E10"
+    },
+    {
+      "name": "REC_DEP",
+      "description": "Receiver depth below surface",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E11"
+    },
+    {
+      "name": "SOU_COMP",
+      "description": "Source component (x,y,z)",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E2"
+    },
+    {
+      "name": "DS_SEQNO",
+      "description": "Input dataset sequence number*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E28"
+    },
+    {
+      "name": "N_DATUM",
+      "description": "Elevation of floating datum",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "OFB_CNTR",
+      "description": "Offset bin center",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E30"
+    },
+    {
+      "name": "OFB_NO",
+      "description": "Offset bin number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E29"
+    },
+    {
+      "name": "LINE_NO",
+      "description": "Line number (hashed line name)*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E32"
+    },
+    {
+      "name": "FRN_TRNO",
+      "description": "Foreign trace-number-within line",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E33"
+    },
+    {
+      "name": "ILINE_NO",
+      "description": "3D inline number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B21"
+    },
+    {
+      "name": "XLINE_NO",
+      "description": "3D crossline number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B22"
+    },
+    {
+      "name": "DISKITER",
+      "description": "Disk Data Input iteration*",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E31"
+    },
+    {
+      "name": "SRF_SLOC",
+      "description": "External receiver location no.",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B6"
+    },
+    {
+      "name": "S_LINE",
+      "description": "Swath or sail line number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E6"
+    },
+    {
+      "name": "RILINE_N",
+      "description": "Real/alias 3d inline number",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "RXLINE_N",
+      "description": "Real/alias 3d crossline number",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": ""
+    },
+    {
+      "name": "WB_TIME",
+      "description": "Water bottom time at mid-point",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B24"
+    },
+    {
+      "name": "AVO_ATTR",
+      "description": "AVO Attribute number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "E34"
+    },
+    {
+      "name": "SG_CDP",
+      "description": "Supergather Bin Number",
+      "length": 1,
+      "promax_format": "INT4pz",
+      "rust_type": "i32",
+      "ui_priority": "B8"
+    },
+    {
+      "name": "SLC_TIME",
+      "description": "Time of time slice",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "B25"
+    },
+    {
+      "name": "ANG_VALU",
+      "description": "AVO Angle of incidence",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E35"
+    },
+    {
+      "name": "TZERO",
+      "description": "Time of zero of time series",
+      "length": 1,
+      "promax_format": "IREAL4pz",
+      "rust_type": "f32",
+      "ui_priority": "E36"
+    },
+    {
+      "name": "CDP_XD",
+      "description": "X coordinate of CDP (double)",
+      "length": 2,
+      "promax_format": "IREAL8pz",
+      "rust_type": "f64",
+      "ui_priority": ""
+    },
+    {
+      "name": "CDP_YD",
+      "description": "Y coordinate of CDP (double)",
+      "length": 2,
+      "promax_format": "IREAL8pz",
+      "rust_type": "f64",
+      "ui_priority": ""
+    },
+    {
+      "name": "REC_XD",
+      "description": "Receiver X coordinate (double)",
+      "length": 2,
+      "promax_format": "IREAL8pz",
+      "rust_type": "f64",
+      "ui_priority": ""
+    },
+    {
+      "name": "REC_YD",
+      "description": "Receiver Y coordinate (double)",
+      "length": 2,
+      "promax_format": "IREAL8pz",
+      "rust_type": "f64",
+      "ui_priority": ""
+    },
+    {
+      "name": "SOU_XD",
+      "description": "Source X coordinate (double)",
+      "length": 2,
+      "promax_format": "IREAL8pz",
+      "rust_type": "f64",
+      "ui_priority": ""
+    },
+    {
+      "name": "SOU_YD",
+      "description": "Source Y coordinate (double)",
+      "length": 2,
+      "promax_format": "IREAL8pz",
+      "rust_type": "f64",
+      "ui_priority": ""
+    }
+  ]
+}

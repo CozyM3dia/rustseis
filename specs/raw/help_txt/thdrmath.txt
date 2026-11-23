@@ -1,0 +1,311 @@
+Trace Header Math1544
+
+ProMAX® Reference
+
+Trace Header Math
+Trace Header Math modiﬁes and/or creates trace headers
+and changes data attributes
+
+Theory
+Trace Header Math has four modes of application:
+• Fixed Equation Mode
+• Sequence Renumber
+• Rotation and Translation
+• Change Data attributes
+The ﬁrst three modes modify and/or create trace headers and
+the fourth changes data attributes.
+
+Usage
+Fixed Equation Mode
+In ﬁxed equation mode, header entries are modiﬁed by a
+mathematical function using existing header entries and
+constants. More than one trace header can be manipulated
+per process.
+The manner in which a value is entered in the menu can
+determine the output format of a new trace header. For
+example, C = 0 is assumed to be an integer, whereas C = 0.0
+is assumed to be ﬂoating point.
+Caution: You cannot change the format of existing ProMAX®
+header words from integer to real, or real to integer.
+Legal characters for header entries
+A through Z, a through z, 0 through 9 _ (underscore). A
+header entry name cannot have more than 8 characters.
+The ﬁrst character of a header name must be alphabetic.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1545
+
+ProMAX® Reference
+
+Precedence Levels
+The precedence levels are ordered from lowest to highest and
+are as follows:
+•=
+• Binary +,• *,/
+• ** (raising to a power)
+• Real, Float, Int, Nint, Abs, Max, Min, Mod, Exp, Sqrt,
+Log, Log10, Sine, Cos, Tan, Sinh, Cosh, Tanh, Asin,
+Acos, Atan, Atan2
+• Unary +,• ( ), Literals, Variables
+Everything is left to right associative. Case of expressions
+does not matter.
+Functions
+The following math functions are used in writing equations:
+• REAL(X), FLOAT(X) returns the real value of argument X.
+• INT(X) returns the integer value of argument X.
+• NINT(X) returns the nearest integer value of argument X.
+• ABS(X) returns the absolute value of argument X.
+• URAND(X) returns a uniform random real number in
+[0,1). If X is nonzero, it is the starting seed for the random number generator, otherwise the time of day clock
+is used to initialize the generator.
+• MAX(X,Y) returns the algebraically larger value of X and
+Y.
+• MIN(X,Y) returns the algebraically smaller value of X and
+Y.
+• MOD(X,Y) returns the remainder of X/Y.
+• EXP(X) returns the value of e to the Xth power.
+• SQRT(X) returns the square root of X.
+• LOG(X) returns the natural logarithm of X.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1546
+
+ProMAX® Reference
+
+• LOG10(X) returns the base 10 logarithm of X.
+• SINE(X) returns the sine of X.
+• COS(X) returns the cosine of X.
+• TAN(X) returns the tangent of X.
+• SINH(X) returns the hyperbolic sine of X.
+• COSH(X) returns the hyperbolic cosine of X.
+• TANH(X) returns the hyperbolic tangent of X.
+• ASIN(X) returns the arcsine of X.
+• ACOS(X) returns the arccosine of X.
+• ATAN(X) returns the arctangent of X.
+• ATAN2(Y,X) returns the arctangent of Y/X.
+Note: All trigonometric functions operate in units of radians,
+not degrees. To convert degrees to radians, divide by
+57.29578 (180.0/Pi).
+The following are valid calls to functions:
+A = MOD(X,Y)
+
+The following are illegal calls to functions:
+A = MOD(X Y)
+A = MOD X,Y
+A = MOD X Y
+
+The usual format of a trace header math equation is:
+•C=A+B
+•C=A-B
+• C = A* B
+•C=A/B
+• C = A**B
+• C = REAL (CHAN)
+• C = -C
+• C = NINT(10.0 * (COS(B)**2.0+SINE(A)**2.0))
+• C = FLOAT(MAX (B,C)) + SQRT(A**2.0+B**2.0)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1547
+
+ProMAX® Reference
+
+• C = SQRT(C) + B**C + A
+Where A and B are either existing header entries or scalars. C
+is an existing header word, but its type (REAL4 or INTEGER4)
+must match its deﬁning expression. If C does not exist, it is
+created with the appropriate type, and its description is the
+deﬁning equation.
+Sequence Renumber Mode
+Header entries are sequenced using a starting value and an
+increment in sequence renumbering mode. This mode is used
+to renumber individual traces or entire ensembles. As with
+ﬁxed equation mode, the manner in which a value is entered
+in the menu can determine the output format of a new trace
+header.
+For a more complete discussion of trace header components
+used in the ProMAX® system, refer to Trace Header File in
+the Creating ProMAX® Datasets section of the ProMAX®
+Seismic Datasets chapter.
+
+Parameters
+Select mode
+Select mode choice from:
+• Fixed equation mode deﬁnes a ﬁxed equation. These
+header entries can be written over.
+Caution: Do not change the format of header words.
+• Sequence renumber mode renumbers any selected
+trace header.
+• Rotation and Translation rotates and translates x,y
+coordinate traces headers to a new coordinate system.
+• Change Data Attributes changes global data parameters. Global parameters rarely need changing. This
+option is provided for testing purposes. For example,
+converting time to depth twice in a process is prevented
+by the system, but for experimental purposes you can
+change the attributes and force the domain to be in time
+after the ﬁrst depth conversion.
+Caution: Forcing trace number and geometry ﬂags to be
+valid is very risky and should only be done if it is true.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1548
+
+ProMAX® Reference
+
+Deﬁne trace header equation(s)
+This appears if Fixed equation mode to Select mode. Enter
+one or more equations to overwrite old header words or create
+new ones. Separate multiple equations with semicolons. The
+following are examples of equation formats:
+NEW_ELEV = REC_ELEV + 100.0
+FFID = FFID - 900
+OFFSET = (CHAN-60.0)* 110.0
+AOFFSET = ABS(OFFSET)
+
+Renumber ensembles or traces?
+This appears if Sequence renumber mode to Select mode.
+Select to renumber:
+• Ensembles renumbers ensembles to the input order.
+The value is incremented when an end-of-ensemble ﬂag
+is reached.
+• Traces renumbers headers of traces within ensembles.
+Renumbering starts at the beginning of each ensemble.
+SELECT trace header word
+This appears if Sequence renumber mode to Select mode.
+Select a trace header from the Headers list. Select User
+deﬁned to create a new header entry.
+Starting value
+This appears if Sequence renumber mode to Select mode.
+Enter the starting value of the ﬁrst trace header. This value
+can be either an integer or ﬂoating point number.
+Increment value
+This appears if Sequence renumber mode to Select mode.
+Enter the increment for resequencing successive headers.
+This number must have the same format as the starting
+value.
+Reset the Starting value at header change
+This appears if Sequence renumber mode to Select mode.
+Select "Yes" if you want the current header renumber value to
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1549
+
+ProMAX® Reference
+
+reset to Starting value when a separate trace header
+changes. This is useful for operations such as sequentially
+renumbering shots within a shot line or sail line when
+building JavaSeis frameworks.
+SELECT reset renumbering trace header word
+This appears if Sequence renumber mode to Select mode.
+Select the trace header for which a change in value from the
+previous value causes the current header renumber value to
+reset to Starting vaue.
+Rotation angle
+This appears if Rotation and Translation to Select mode.
+Enter the clockwise rotation angle, in degrees, of the new
+coordinate relative to the original axes.
+X coordinate shift
+This appears if Rotation and Translation to Select mode.
+Enter the shift in X relative to the old origin. Enter 0.0 for no
+shift in the X position.
+Y coordinate shift
+This appears if Rotation and Translation to Select mode.
+Enter the shift in Y relative to the old origin. Enter 0.0 for no
+shift in the Y position.
+Trace number valid?
+This appears if Change Data Attributes to Select mode.
+Select the global runtime ﬂag for valid database. The choices
+are:
+• No change leaves the ﬂag as is.
+• Valid indicates that trace numbers are valid and can be
+used to reference the database.
+• Invalid indicates that trace numbers are not valid and
+can not be used to reference the database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1550
+
+ProMAX® Reference
+
+Geometry valid?
+This appears if Change Data Attributes to Select mode.
+Select the global runtime ﬂag for valid geometry. The choices
+are:
+• No change leaves the ﬂag as is.
+• Valid indicates that geometry loaded in the trace header
+matches the database.
+• Invalid indicates that geometry loaded in the trace
+header does not match the database.
+Domain of data
+This appears if Change Data Attributes to Select mode.
+Select domain of the data to be ﬂagged as:
+• No change leaves ﬂag as is.
+• T-X ﬂags normal time-space domain.
+• F-X ﬂags frequency-space domain.
+• F-T ﬂags frequency-time domain.
+• F-K ﬂags frequency-wavenumber domain.
+• Depth ﬂags depth- space domain.
+Data Type
+This appears if Change Data Attributes to Select mode.
+Select the data type to be ﬂagged as:
+• No change leaves ﬂag as is.
+• Normal unstacked ﬂags ormal unstacked data.
+• Normal stacked ﬂags normal stacked data.
+• Unstacked transformed ﬂags frequency domain data.
+• Stacked transformed ﬂags frequency domain data.
+Primary sort of data
+This appears if Change Data Attributes to Select mode.
+Select the primary data sort to be ﬂagged as:
+• CDP sort ﬂags CDP bin number sorted data.
+• SIN sort ﬂags shot index number sorted data.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Header Math1551
+
+ProMAX® Reference
+
+• RECSLOC sort ﬂags receiver surface station sorted data.
+• Offset sort ﬂags shot to receiver signed offset sorted
+data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

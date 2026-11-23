@@ -1,0 +1,735 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+'(
+ name: REFSTAT3D
+label: "Refraction Statics Calculation*"
+value_tab: 55
+
+
+parameter: FBPICK
+text: "Select first break times file"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a First Break Data file description from the TRC database."
+
+
+parameter: LAYERS
+text: "Number of layers"
+type: typein:
+type_desc: ( int: 2 1 5 )
+value: 1
+mouse_text: "Number of layers to model?"
+
+
+parameter: ID_RUN
+text: "Identification number"
+type: typein:
+type_desc: ( int: 1 0 9 )
+value: 1
+mouse_text: "Single digit ID number to label all output from the same run"
+
+
+parameter: MINFOLD
+text: "Minimum fold"
+type: typein:
+type_desc: ( int: 3 1 nil )
+value: 1
+mouse_text: "Minimum ensemble fold needed for delay time or velocity computation."
+
+
+parameter: SPR_OPT
+text: "Shooting Geometry"
+type: pop_choose:
+type_desc: (
+ ("3D"              0 "Survey is full 3D.")
+ ("2D end on"       0 "Survey was acquired 2D end-on.")
+ ("2D split spread" 1 "Survey was acquired 2D split spread.")
+        )
+mouse_text: "Select TYPE of acquisition geometry."
+plot_label: t
+
+
+
+parameter: V0_OPT
+text: "V0 options"
+type: pop_choose:
+type_desc: (  
+ ("Compute V0 from uphole data"       1 "v0 = souce depth / uphole time" )
+ ("Input V0 but use uphole times"     2 "User input V0 and tie source to surface with uphole time" )
+ ("Input V0 but compute uphole times" 3 "User input V0 but compute uphole time = source depth / V0")
+ )
+mouse_text: "Use MB1 to select a choice of V0 and uphole time options."
+plot_label: t
+
+
+
+
+parameter: V0_PARM
+text: "  Specify SIN vs V0"
+type: edit:
+type_desc: (30 80 5 " FORMAT: Groups of 'SIN:V0 /' values
+ EXAMPLE: 1:3500 / 42:3800 / 140:4400 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1:3000/42:3500/140:4000/"
+mouse_text: "Enter groups of SIN-V0 values. **SEE EXAMPLE!!!**"
+
+
+
+parameter: GETVOOFF
+text: "INPUT REFRACTOR OFFSET?"
+type: boolean:
+value: t
+mouse_text: "If YES, refractor offset is input and written to SIN database."
+
+
+
+parameter: OFF_OPT
+text: "  Refractor offset specification"
+type: pop_choose:
+type_desc: (
+ ("User typein" 1 "User types in SIN and refractor offset values (2d/3D.")
+ ("MUTE file"   2 "User has picked refractor offsets using MUTE file in ProMAX (2D/3D).")
+ ("OFFSET file" 3 "User created offset file with 3D Ref Statics Model* (3D).")
+ ("Compute offsets" 4 "Refractor offsets are computed.")
+        )
+mouse_text: "Select TYPE of refractor offset definition input."
+plot_label: t
+
+
+parameter: LAY_PARM
+text: "  Enter SIN and refractor offsets"
+type: edit:
+type_desc: (30 80 5 " FORMAT: Groups of 'SIN:OFF11-OFF12,OFF21-OFF22 /' values
+ EXAMPLE: 10:-1250--500,450-1300/20:-1200--450,350-1175/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "10:-1250--500,450-1275/"
+mouse_text: "Enter groups of SIN and layer OFFSET Start-OFFSET End values (negative to positive). **SEE EXAMPLE!!!**"
+
+parameter: LAYERNAM
+text: "  Select refractor OFFSET definition parameter file"
+type: function:
+type_desc: ((parm_list "MUT") parms)
+showp: nil
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a standard mute parameter file describing Refractor start and end offsets from the MUT parameter file menu."
+plot_label: t
+
+
+
+parameter: OFFSETS1
+text: "  Select offset parameter file"
+type: function:
+type_desc: ((parm_list "OFF") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select REFRACTOR 1 offset parameter file from the parameter file menu."
+
+
+
+parameter: OFFSETS2
+text: "  Select offset parameter file"
+type: function:
+type_desc: ((parm_list "OFF") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select REFRACTOR 2 offset parameter file from the parameter file menu."
+
+
+
+parameter: OFFSETS3
+text: "  Select offset parameter file"
+type: function:
+type_desc: ((parm_list "OFF") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select REFRACTOR 3 offset parameter file from the parameter file menu."
+
+
+
+parameter: NSEGMENT
+text: "  Number of segments"
+type: choose:
+type_desc: (  
+ ("2" 2 "Fit 2 line segments to first break times" )
+ ("3" 3 "Fit 3 line segments to first break times" )
+ )
+mouse_text: "Number of segments to fit to first break times of a receiver spread."
+
+
+
+parameter: DIR_WAVE
+text: "  Near source traces from direct wave?"
+type: boolean:
+value: t
+mouse_text: "If YES, Inspection of first break times has shown times from traces near sources are from direct wave."
+
+
+
+parameter: OFF_MIN
+text: "  Minimum offset"
+type: typein:
+type_desc: ( real: 6 0 nil )
+value: 100.
+mouse_text: "A shot record must have a trace with offset less than or equal this offset to qualify for refractor offset computation."
+
+
+parameter: OFF_MAX
+text: "  Maximum offset"
+type: typein:
+type_desc: ( real: 6 0 nil )
+value: 1000.
+mouse_text: "A shot record must have a trace with offset greater than or equal this offset to qualify for refractor offset computation."
+
+
+parameter: MAX_OFF
+text: "  Maximum offset used for analysis"
+type: typein:
+type_desc: ( real: 7 nil nil )
+value: 10000.
+mouse_text: "Any picks with offset beyond this value are not used for refractor offset analysis."
+
+
+
+
+parameter: SMTH_OFF
+text: "  Apply smoothing to computed offsets?"
+type: boolean:
+value: t
+mouse_text: "If YES, computed refractor offsets will be smoothed in the CDP domain."
+
+
+
+parameter: NOFFSMTH
+text: "    Length of smoother"
+type: typein:
+type_desc: ( int: 4 1 nil )
+value: 21
+mouse_text: "Length of computed offset smoother in (odd) CDPs."
+
+
+
+parameter: IAPLY_ST
+text: "  Apply statics to first break times?"
+type: boolean:
+value: nil
+mouse_text: "If YES, apply statics to first break times prior to refractor offset computation"
+
+
+
+parameter: S_STATIC
+text: "    Select SOURCE statics"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a SOURCE Statics file description (SDRM, SDLT, SGRM, or S_STATIC) from the SIN GEOMETRY database."
+
+
+
+parameter: R_STATIC
+text: "    Select RECEIVER statics"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a RECEIVER Statics file description (RDRM, RDLT, RGRM or R_STATIC) from the SRF GEOMETRY database."
+
+
+
+parameter: C_STATIC
+text: "    Select CDP statics"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a CDP Statics file description (C_STATIC) from the CDP GEOMETRY database."
+
+
+
+
+parameter: ICOMPVEL
+text: "COMPUTE REFRACTOR VELOCITIES?"
+type: boolean:
+value: t
+mouse_text: "If YES, initial Refractor velocity is computed from first break picks and layer offsets."
+
+
+
+parameter: VEL_NORM
+text: "  TYPE of INITIAL velocity computation"
+type: pop_choose:
+type_desc: (  
+ ("MEAN"     1 "Fit a MEAN (least squares) line to picks in each layer" )
+ ("MEDIAN"   2 "Fit an MEDIAN (L1 NORM) line to picks in each layer" )
+ )
+mouse_text: "Use MB1 to pop up a menu of choices of INITIAL refractor velocity computation."
+plot_label: t
+
+
+
+parameter: IVINITSM
+text: "  Smooth INITIAL velocities before output?"
+type: boolean:
+value: t
+mouse_text: "If YES, INITIAL refractor velocities will be smoothed prior to database output.(V0 is NOT smoothed)"
+
+
+parameter: INSMOOTH
+text: "  Length of INITIAL velocity smoother"
+type: typein:
+type_desc: ( int: 3 1 nil )
+value: 201
+mouse_text: "Length of INITIAL Velocity smoother in CDPs (must be ODD)."
+
+
+
+parameter: PICKEDIT
+text: "  Edit first break times (standard deviation)?"
+type: boolean:
+value: nil
+mouse_text: "If YES, kill First Break Times based on standard deviation analysis on source velocity computation"
+
+
+parameter: STDFACT
+text: "    Standard deviation factor"
+type: typein:
+type_desc: ( real: 7 0. 1000. )
+value: 8.
+mouse_text: "Any first break time that deviates this factor of standard deviations from predicted time will be killed ."
+ 
+
+parameter: AUTOEDIT
+text: "  Edit first break times (median velocity)?"
+type: boolean:
+value: nil
+mouse_text: "If YES, kill First Break Times based on refractor median velocity"
+
+
+parameter: PCNTDEV
+text: "  Percent deviation allowed"
+type: typein:
+type_desc: ( real: 7 0. 100. )
+value: 25.
+mouse_text: "Any SIN layer velocity is allowed to deviate by this percent from the layer median."
+
+
+parameter: ICOMPDEL
+text: "COMPUTE DELAY TIMES?"
+type: boolean:
+value: t
+mouse_text: "If YES, delay times are computed from first break picks and layer offsets."
+
+
+parameter: DEL_ALG
+text: "  TYPE of delay time ALGORITHM"
+type: pop_choose:
+type_desc: (  
+ ("Gauss-Seidel"   1 "Use Gauss-Seidel iteration to estimate Delay Times" )
+ ("DRM"            2 "Use DRM (domain averaging) to estimate Delay Times" )
+ )
+mouse_text: "Use MB1 to pop up a menu of choices of Delay Time computation algorithms."
+plot_label: t
+
+
+parameter: NITER
+text: "  Number of iterations"
+type: typein:
+type_desc: ( int: 2 1 nil )
+value: 5
+mouse_text: "Number of iterations? (at least 1, MORE ?)"
+
+
+parameter: DEL_NORM
+text: "  TYPE of GS computation statistics"
+type: pop_choose:
+type_desc: (  
+ ("MEAN"   1 "Use MEAN statistics to estimate Delay Times" )
+ ("MEDIAN" 2 "Use MEDIAN statistics to estimate Delay Times" )
+ )
+mouse_text: "Use MB1 to pop up a menu of choices of Delay Time computation statistics."
+plot_label: t
+
+
+parameter: VITER
+text: "  Iterate refractor velocity?"
+type: boolean:
+value: t
+mouse_text: "If YES, velocity will be iterated after Source and Receiver delay iterations, if NO, V1 is NOT iterated."
+
+
+parameter: V_SMOOTH
+text: "  Smooth velocity between iterations?"
+type: boolean:
+value: t
+mouse_text: "If YES, refractor velocity is smoothed after iterations, if NO, velocity is NOT smoothed."
+
+parameter: NSMOOTH
+text: "  Length of velocity smoother"
+type: typein:
+type_desc: ( int: 3 1 nil )
+value: 201
+mouse_text: "Length of Velocity smoother in CDPs (must be ODD)."
+
+
+parameter: ICOMPDEP
+text: "COMPUTE REFRACTOR DEPTH MODEL?"
+type: boolean:
+value: t
+mouse_text: "If YES, the refractor DEPTH MODEL is computed from delay times and refractor velocities."
+
+
+parameter: R1SMOOTH
+text: "  First refractor smoothing"
+type: pop_choose:
+type_desc: (
+ ("No smoothing"     0 "No smoothing will be done to weathering layer depth or first refractor elevation")
+ ("Smooth Depth"     1 "First layer is smoothed in DEPTH and V0 adjusted.")
+ ("Smooth Elevation" 2 "First refractor is smoothed in ELEVATION and v0 adjusted.")
+        )
+mouse_text: "Select TYPE of first refractor smoothing."
+plot_label: t
+
+
+parameter: NDSMOOTH
+text: "  Length of smoother"
+type: typein:
+type_desc: ( int: 3 3 nil )
+value: 51
+mouse_text: "Length of smoother in CDPs (must be ODD)."
+
+
+parameter: ICOMSTAT
+text: "COMPUTE SOURCE and RECEIVER STATICS?"
+type: boolean:
+value: t
+mouse_text: "If YES, source and receiver statics are computed and put into the database."
+
+
+parameter: EDATUM
+text: "  Final datum elevation"
+type: typein:
+type_desc: ( real: 7 nil nil )
+value: 0.
+mouse_text: "Enter the final datum elevation."
+
+
+parameter: VREP_OPT
+text: "  Replacement method"
+type: pop_choose:
+type_desc: (  
+ ("User specified"       1 "Constant value" )
+ ("Refractor Velocity"   2 "Use bottom refractor velocity" )
+ )
+mouse_text: "Use MB1 to select a choice of replacement velocity from bottom of model to final datum."
+plot_label: t
+
+
+parameter: VDATUM
+text: "  Replacement velocity"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 5000.
+mouse_text: "Enter the replacement velocity"
+
+
+parameter: ICOMPRES
+text: "COMPUTE RESIDUAL STATICS?"
+type: boolean:
+value: t
+mouse_text: "If YES, RESIDUAL source and receiver statics are computed and put into the database."
+
+
+parameter: NITERRES
+text: "  Number of iterations"
+type: typein:
+type_desc: ( int: 2 0 nil )
+value: 3
+mouse_text: "Number of DRM iterations? (0 means 1 DRM (domain average) estimate)"
+
+
+
+parameter: NSSMOOTH
+text: "  Length of surface elevation smoother"
+type: typein:
+type_desc: ( int: 3 3 nil )
+value: 51
+mouse_text: "Length of smoother in CDPs (must be ODD)."
+
+
+
+parameter: NSTAT_SM
+text: "  Length of low frequency filter"
+type: typein:
+type_desc: ( int: 3 1 nil )
+value: 51
+mouse_text: "Length of filter to remove low frequency residual trend in CDPs (must be ODD, 1 = no filtering)."
+
+
+
+parameter: EDATUMR
+text: "  Final datum elevation"
+type: typein:
+type_desc: ( real: 7 nil nil )
+value: 0.
+mouse_text: "Enter the final datum elevation."
+
+
+parameter: VREPOPTR
+text: "  Replacement method"
+type: pop_choose:
+type_desc: (  
+ ("User specified"       1 "Constant value" )
+ ("Refractor Velocity"   2 "Use bottom refractor velocity" )
+ )
+mouse_text: "Use MB1 to select a choice of replacement velocity from bottom of model to final datum."
+plot_label: t
+
+
+parameter: VDATUMR
+text: "  Replacement velocity"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 5000.
+mouse_text: "Enter the replacement velocity"
+
+
+exec_data: ("REFSTAT3D"
+		("SPECIAL"
+                        ("version" implicit: "ProMAX $Id: refstat3d.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("TOOLTYPE"     implicit: "STAND_ALONE")
+			("PATHNAME"     implicit: "refstat3d.exe")
+			("FBPICK"      implicit: (first (type_desc 'FBPICK)))
+			("ID_RUN"      implicit: (value 'ID_RUN))
+			("LAYERS"      implicit: (value 'LAYERS))
+			("GETVOOFF"    implicit: ( if (value 'GETVOOFF) 1 0 ))
+			("ICOMPVEL"    implicit: ( if (value 'ICOMPVEL) 1 0 ))
+			("ICOMPDEL"    implicit: ( if (value 'ICOMPDEL) 1 0 ))
+			("ICOMPDEP"    implicit: ( if (value 'ICOMPDEP) 1 0 ))
+			("ICOMSTAT"    implicit: ( if (value 'ICOMSTAT) 1 0 ))
+			("ICOMPRES"    implicit: ( if (value 'ICOMPRES) 1 0 ))
+			("V0_OPT"      implicit: (value 'V0_OPT) )
+			("VEL_NORM"    implicit: (value 'VEL_NORM) )
+			("DEL_NORM"    implicit: (value 'DEL_NORM) )
+			("DEL_ALG"     implicit: (value 'DEL_ALG) )
+			("IAPLY_ST"    implicit: ( if (value 'IAPLY_ST) 1 0 ))
+			("S_STATIC"    implicit: (first (type_desc 'S_STATIC)))
+			("R_STATIC"    implicit: (first (type_desc 'R_STATIC)))
+			("C_STATIC"    implicit: (first (type_desc 'C_STATIC)))
+			("IVINITSM"    implicit: ( if (value 'IVINITSM) 1 0 ))
+			("INSMOOTH"    implicit: (value 'INSMOOTH) )
+			("NDSMOOTH"    implicit: (value 'NDSMOOTH) )
+			("NSSMOOTH"    implicit: (value 'NSSMOOTH) )
+			("NITERRES"    implicit: (value 'NITERRES) )
+			("NSTAT_SM"    implicit: (value 'NSTAT_SM) )
+			("VITER"       implicit: ( if (value 'VITER) 1 0 ))
+			("V_SMOOTH"    implicit: ( if (value 'V_SMOOTH) 1 0 ))
+			("V0_PARM"     implicit: (value 'V0_PARM))
+                        ("OFF_OPT"     implicit: (value 'OFF_OPT))
+                	("LAYERNAM"    implicit: (value 'LAYERNAM))
+			("LAY_PARM"    implicit: (value 'LAY_PARM))
+			("OFFSETS1"     implicit: (value 'OFFSETS1))
+			("OFFSETS2"     implicit: (value 'OFFSETS2))
+			("OFFSETS3"     implicit: (value 'OFFSETS3))
+			("NSEGMENT"    implicit: (value 'NSEGMENT))
+			("DIR_WAVE"    implicit: ( if (value 'DIR_WAVE) 1 0 ))
+			("OFF_MIN"     implicit: (value 'OFF_MIN))
+			("OFF_MAX"     implicit: (value 'OFF_MAX))
+			("MAX_OFF"     implicit: (value 'MAX_OFF))
+                        ("SMTH_OFF"    implicit: ( if (value 'SMTH_OFF) 1 0 ))
+                        ("NOFFSMTH"    implicit: (value 'NOFFSMTH))
+                        ("VREP_OPT"    implicit: (value 'VREP_OPT))
+			("EDATUM"      implicit: (value 'EDATUM))
+			("VDATUM"      implicit: (value 'VDATUM))
+                        ("VREPOPTR"    implicit: (value 'VREPOPTR))
+			("EDATUMR"      implicit: (value 'EDATUMR))
+			("VDATUMR"     implicit: (value 'VDATUMR))
+			("NITER"       implicit: (value 'NITER))
+			("NSMOOTH"     implicit: (value 'NSMOOTH))
+			("MINFOLD"     implicit: (value 'MINFOLD))
+			("SPR_OPT"     implicit: (value 'SPR_OPT))
+			("PICKEDIT"    implicit: ( if (value 'PICKEDIT) 1 0 ))
+			("STDFACT"     implicit: (value 'STDFACT))
+			("AUTOEDIT"    implicit: ( if (value 'AUTOEDIT) 1 0 ))
+			("PCNTDEV"     implicit: (value 'PCNTDEV))
+			("R1SMOOTH"    implicit: (value 'R1SMOOTH))
+		)
+	   )
+
+
+rules: (
+
+  (rule1_call_dbparm ( value 'S_STATIC) (progn
+	        (set_value 'S_STATIC nil)
+	        (set_selected_item 'S_STATIC nil)
+	        (set_type_desc 'S_STATIC (list (choose_old_db_parm))))
+  )
+
+  (rule1_call_dbparm ( value 'R_STATIC) (progn
+	        (set_value 'R_STATIC nil)
+	        (set_selected_item 'R_STATIC nil)
+	        (set_type_desc 'R_STATIC (list (choose_old_db_parm))))
+  )
+  (rule1_call_dbparm ( value 'C_STATIC) (progn
+	        (set_value 'C_STATIC nil)
+	        (set_selected_item 'C_STATIC nil)
+	        (set_type_desc 'C_STATIC (list (choose_old_db_parm))))
+  )
+
+  (rule2 ( > (value 'V0_OPT) 1 )
+         (do_show 'V0_PARM) 
+         (do_not_show 'V0_PARM)
+  )
+  (rule1 (value 'GETVOOFF)
+         (do_show 'OFF_OPT)
+         (do_not_show 'OFF_OPT)
+  )
+  (rule3 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 1 ))
+         (do_show 'LAY_PARM)
+         (do_not_show 'LAY_PARM)
+  )
+  (rule4 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 2 ))
+         (do_show 'LAYERNAM)
+         (do_not_show 'LAYERNAM)
+  )
+  (rule5 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 3 ))
+         (do_show 'OFFSETS1)
+         (do_not_show 'OFFSETS1)
+  )
+  (rule5 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 3 )
+         ( > (value 'LAYERS) 1 ))
+         (do_show 'OFFSETS2)
+         (do_not_show 'OFFSETS2)
+  )
+  (rule5 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 3 )
+         ( > (value 'LAYERS) 2 ))
+         (do_show 'OFFSETS3)
+         (do_not_show 'OFFSETS3)
+  )
+
+  (rule5 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 4 ))
+         (do_show '(NSEGMENT DIR_WAVE OFF_MIN OFF_MAX MAX_OFF SMTH_OFF))
+         (do_not_show '(NSEGMENT DIR_WAVE OFF_MIN OFF_MAX MAX_OFF SMTH_OFF))
+  )
+  (rule4 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 4 ) )
+        (do_show 'IAPLY_ST)
+        (do_not_show 'IAPLY_ST)
+  )
+  (rule4 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 4 )
+               (value 'IAPLY_ST) )
+         (do_show '(S_STATIC R_STATIC C_STATIC) )
+         (do_not_show '(S_STATIC R_STATIC C_STATIC) )
+  )
+  (rule4 ( and (value 'GETVOOFF) ( = (value 'OFF_OPT) 4 )
+               (value 'SMTH_OFF) )
+         (do_show 'NOFFSMTH)
+         (do_not_show 'NOFFSMTH)
+  )
+  (rule2 ( or (value 'ICOMPVEL) (value 'ICOMPDEL) (value 'ICOMPRES) )
+         (do_show 'MINFOLD)
+         (do_not_show 'MINFOLD)
+  )
+  (rule2 ( or (value 'GETVOOFF) (value 'ICOMPVEL) (value 'ICOMPDEL)
+              (value 'ICOMPRES) )
+         (do_show 'SPR_OPT)
+         (do_not_show 'SPR_OPT)
+  )
+  (rule1_call_dbparm ( value 'FBPICK) (progn
+	(set_value 'FBPICK nil)
+	(set_selected_item 'FBPICK nil)
+	(set_type_desc 'FBPICK (list (choose_old_db_parm))))
+  )
+  (rule4 (value 'ICOMPVEL)
+        (do_show '(VEL_NORM IVINITSM AUTOEDIT))
+        (do_not_show '(VEL_NORM IVINITSM AUTOEDIT))
+  )
+  (rule5 ( and (value 'ICOMPVEL)(value 'AUTOEDIT) )
+        (do_show 'PCNTDEV)
+        (do_not_show 'PCNTDEV)
+  )
+  (rule_PE1 ( and (value 'ICOMPVEL)( = (value 'VEL_NORM) 2 ))
+        (do_show 'PICKEDIT)
+        (do_not_show 'PICKEDIT)
+  )
+  (rule_PE2 ( and (value 'ICOMPVEL)( = (value 'VEL_NORM) 2 )( value 'PICKEDIT ) )
+        (do_show 'STDFACT)
+        (do_not_show 'STDFACT)
+  )
+  (rule6 ( and (value 'ICOMPVEL)(value 'IVINITSM) )
+        (do_show 'INSMOOTH)
+        (do_not_show 'INSMOOTH)
+  )
+  (rule7 (value 'ICOMPDEL)
+         (do_show '(DEL_ALG NITER))
+         (do_not_show '(DEL_ALG NITER))
+  )
+  (rule8 ( and (value 'ICOMPDEL)( = (value 'DEL_ALG) 1 ) )
+        (do_show '(DEL_NORM VITER))
+        (do_not_show '(DEL_NORM VITER V_SMOOTH NSMOOTH)) )
+
+  (rule9 ( and (value 'ICOMPDEL)( = (value 'DEL_ALG) 1 )(value 'VITER) )
+        (do_show 'V_SMOOTH)
+        (do_not_show 'V_SMOOTH) )
+
+ (rule10 ( and (value 'ICOMPDEL)( = (value 'DEL_ALG) 1 )
+               (value 'VITER)(value 'V_SMOOTH) )
+        (do_show 'NSMOOTH)
+        (do_not_show 'NSMOOTH) )
+
+ (rule11 (value 'ICOMPDEP)
+        (do_show 'R1SMOOTH)
+        (do_not_show 'R1SMOOTH))
+
+ (rule11 ( and (value 'ICOMPDEP) ( > (value 'R1SMOOTH) 0 ) )
+        (do_show 'NDSMOOTH)
+        (do_not_show 'NDSMOOTH))
+
+ (rule12 (value 'ICOMSTAT)
+        (do_show '(EDATUM VREP_OPT))
+        (do_not_show '(EDATUM VREP_OPT)))
+
+ (rule13 ( and (value 'ICOMSTAT)( = (value 'VREP_OPT) 1 ) )
+        (do_show 'VDATUM)
+        (do_not_show 'VDATUM))
+
+ (rule12 (value 'ICOMPRES)
+        (do_show '(NITERRES NSSMOOTH NSTAT_SM))
+        (do_not_show '(NITERRES NSSMOOTH NSTAT_SM EDATUMR VDATUMR VREPOPTR)))
+
+ (rule12 ( and (value 'ICOMSTAT) (value 'ICOMPRES) )
+        (do_not_show '(EDATUMR VDATUMR VREPOPTR)))
+
+ (ruke33 ( and ( not (value 'ICOMSTAT)) (value 'ICOMPRES) )
+         (do_show '(EDATUMR VDATUMR VREPOPTR)))
+
+ (rule13 ( and ( not (value 'ICOMSTAT))(value 'ICOMPRES)
+               ( = (value 'VREPOPTR) 1 ) )
+        (do_show 'VDATUMR)
+        (do_not_show 'VDATUMR))
+
+ ( ndsmooth_odd_rule ( if ( evenp (value 'NDSMOOTH) )
+		          (set_value 'NDSMOOTH ( + (value 'NDSMOOTH) 1 ))))
+ ( nssmooth_odd_rule ( if ( evenp (value 'NSSMOOTH) )
+		          (set_value 'NSSMOOTH ( + (value 'NSSMOOTH) 1 ))))
+ ( nsmooth_odd_rule ( if ( evenp (value 'NSMOOTH) )
+		          (set_value 'NSMOOTH ( + (value 'NSMOOTH) 1 ))))
+ ( insmooth_odd_rule ( if ( evenp (value 'INSMOOTH) )
+		          (set_value 'INSMOOTH ( + (value 'INSMOOTH) 1 ))))
+ ( noffsmth_odd_rule ( if ( evenp (value 'NOFFSMTH) )
+		          (set_value 'NOFFSMTH ( + (value 'NOFFSMTH) 1 ))))
+
+
+       )
+)
+

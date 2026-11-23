@@ -1,0 +1,1064 @@
+SEG-D Input498
+
+ProMAX® Reference
+
+SEG-D Input
+SEG-D Input reads data from tapes conforming to the SEG-D
+standard.
+
+Theory
+This process can handle multiplexed (gapped or gapless) or
+demultiplexed SEG-D format tapes.
+Read the Seismograph Instrument Parameters section for
+information on transduction, coding, and skew corrections.
+
+Usage
+Output Trace Headers
+In addition to normal ProMAX® headers, SEG-D Input
+creates a number of SEGD-speciﬁc header words:
+• YER_SHOT holds the year of the shot
+• DAY_SHOT holds the Julian day of the year
+• TIM_SHOT is the time of day of the shot as HHMMSS
+• CHAN_SET is the channel set number of the trace
+• CABLE_NO is the marine streamer cable number
+• SEGDGAIN is the gain applied during SEG-D decoding
+• TAPE_T0 is the time of ﬁrst sample of the trace
+Debug Option
+The SEG-D Input process offers a debug option. When turned
+on, you can see the following information:
+• Binary format type; the number of bytes per sample
+• Number of channels recorded in a channel set
+• Start and end times for a channel set
+• Channel set trace header extensions (THE) value
+• Trace header (THE) value
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input499
+
+ProMAX® Reference
+
+• Trace header channel set number
+• Trace header channel number
+• Trace header FFID
+• Block size read from tape and the calculated trace length
+(in bytes)
+When diagnosing problems, it is important to match a trace
+header with its channel set to begin unraveling the problem.
+The calculated trace length is derived from the trace header
+length, channel set start and end times, sample rate and
+number of bytes per sample. It is important to know the
+calculated data length when decoding super blocked data.
+Trace data lengths can vary based upon the channel’s
+channel set descriptor and the information stored in the
+channel set (trace end time) can be inaccurate. For example:
+Channel Set Table Index: 2
+1) ST - Scan type. . . . . . . . . . . . . : 1
+2) CN - Channel set . . . . . . . . . . . .: 2
+3) TF - Channel set start time . . . . . . : 0
+4) TE - Channel set end time. . . . . . . .: 4095 <--------------Note: the units of the Channel set TF and TE values are in 2 ms
+increments (as described by SEGD standards)- 4095 is equivalent to
+8190 msec.
+Storage type
+
+: TAPE
+
+Original record ﬁeld ﬁle I.D. # :
+Year recorded
+
+988
+
+:
+
+98
+
+Recording system format code
+
+:
+
+SEGD REVISION
+
+:
+
+Length of data recorded
+
+:
+
+Number of samples recorded
+
+Other Docs
+
+Search Page
+
+8015
+200
+
+8192.000
+
+msec
+
+: 4096 (value obtained from general
+
+Known Problems
+
+SEG-D Input500
+
+ProMAX® Reference
+
+header)
+Trace Header
+1) F - Field ﬁle number . . . . . . . . .: 988
+2) ST - Scan type number . . . . . . . . . : 1
+3) CN - Channel set number. . . . . . . . .: 2 <------------4) TN - Trace number . . . . . . . . . . . : 1
+5) THE - Trace header extensions . . . . . .: 0 <- No extended trace
+headers
+6) TR - Trace edit . . . . . . . . . . . . : 0
+7) EFN - Extended ﬁle number . . . . . . .: 0
+*** SEGD DEBUG:
+Data recorded in super blocks.
+Length of block read
+
+:
+
+69632
+
+Calculated size of trace :
+
+10257
+
+Trace header size
+
+20
+
+:
+
+Number of traces in block:
+
+6
+
+In this example, the length of the trace should be 10260 but
+is calculated to be 10257. Therefore, decoding of the super
+block is thrown off. Even if the data are not superblocked,
+one or more output trace samples may be missing or corrupt
+in this case. The Auto adjust incorrect trace data length?
+option can usually detect and correct many of these
+problems.
+Other factors that throw off the decoding of the super block is
+the existence of extended trace headers. The ProMAX®
+processing system only honors extended trace headers when
+the THE value in the channel set matches the THE value in
+the trace header. Sometimes it is set in one place and not the
+other because of uninitialized data output in these header
+values (garbage). Other times, it is recorder-speciﬁc behavior
+and the value should be honored. For selected SERCEL
+instruments, SEG-D Input knows about and performs special
+interpretation of trace header extensions.
+The presence of extended trace headers affects your data
+decode in two ways.
+• In the presence of super blocks, the next trace header
+value is useless.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input501
+
+ProMAX® Reference
+
+• If single trace per block, the trace’s start time is padded
+by 32 times the number of extended trace headers/the
+number of bytes per sample.
+Again, the Auto adjust incorrect trace data length? option
+can often detect and correct for extra or missing trace header
+extensions.
+Correcting I/O Systems and MDS Data Problems
+The Specify Auxiliary Channel Type(s) and Specify Zero or
+Pad Channel Type(s) are used together to work around
+geometry assignment problems with I/O Systems and MDS
+recorded data.
+Geometry calculation is based upon a trace’s sequential
+position within a shot. The trace’s sequential number is
+based upon this calculation:
+ITR_IN_RECORD-IAUXCHAN+IPADCHAN. Where:
+• ITR_IN_RECORD is the trace’s physical position in the
+record.
+• IAUXCHAN is the current aux channel count within the
+record.
+• IPADCHAN is the current pad channel count within the
+record.
+These two parameters enable you to decide which channels
+are counted as AUX and or PAD. The IAUXCHAN and
+IPADCHAN values are only incremented when a channel type
+matches the value you enter in the menu.
+Work Example
+In a given case the geometry is off by 6 stations. The following
+steps show how to use these parameters.
+1. Turn on the SEG-D Debug Option and look at one record
+in job.output.
+In this record, one channel set has a channel type of 4,
+one channel type of 2, two channel types of 5, and four
+channels of type 6.
+2. Enter 4:5:6 to Specify Auxiliary Channel Type(s).
+However, the number of channels deﬁned by these groups
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input502
+
+ProMAX® Reference
+
+represents 8. We were off by 6 and now are off by 2 (the
+other way).
+3. Again, look at the channel sets in the job.output. In this
+case there are two channel set deﬁned with channel type
+of 3.
+4. Enter 3 to Specify Zero or Pad Channel Type(s).
+The original geometry was off by 6. Because AUX chans 4:5:6
+= 8 and PAD chans 3 = 2, the relationship of
+ITR_IN_RECORD-IAUXCHAN+IPADCHAN is now corrected.
+Bypass Adaptive Read
+Some input data has different block sizes, usually due to aux
+trace block being larger than trace block. The new adaptive
+read algorithm in this process ignores the value entered into
+Maximum data block size in bytes if the aux trace block are
+larger than the data block. This can cause a very slow read
+speed. To avoid this problem, you can set the CONFIG=BAR
+to disable this function. Your read speed should improve.
+
+Parameters
+Type of storage to use
+• Tape speciﬁes a real tape dataset.
+• Disk speciﬁes a disk ﬁle.
+Is the dataset in the catalog
+Select Yes if the dataset is in an active catalog.
+Select TAPE device(s)
+This appears for Tape to Type of storage to use and No to Is
+the dataset in the catalog. Select tapeN (N=ProMAX Device
+Name) from the list of tape devices.
+The Available Tape Catalogs
+This appears if Yes to Is the dataset in the catalog. Select a
+a tape catalog from the list of available catalogs.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input503
+
+ProMAX® Reference
+
+Enter/Select the tape ﬁle name
+This appears if Yes to Is the dataset in the catalog. Select or
+enter a tape ﬁle name from the menu.
+Select disk ﬁle type
+This appears if Disk to Type of storage to use. Select Disk
+Image, ProMAX Tape on Disk, RODE Tape on Disk or
+Lacey Tape on Disk.
+Note: For SEG-A, SEG-B and SEG-C Input, only the Tape on
+Disk options appear.
+Tape-on-disk encapsulation stores information about the
+original tape formatting, i.e. block lengths and ﬁle marks, so
+that the original tape data may be reconstituted from the
+information in the disk ﬁle.
+Tape on disk hostname
+This appears if Disk to Type of storage to use and anything
+option other than Disk Image is selected. Enter the name of
+the host on which the tape-on-disk ﬁle is to be read. A server
+is spawned on the host; often the local machine localhost is
+used. In some circumstances, say for security, the tape-ondisk ﬁle may only be visible on a remote machine. Refer to the
+ProMAX System Administration and the ProMAX Total Tape
+Solution guides for detailed information on setting up
+permissions.
+Tape on disk username
+This appears if Disk to Type of storage to use. Enter the
+name of the user on the selected read host. Usually this is the
+user running the ProMAX user interface, but can be different
+if rsh or ssh conﬁgurations allow for alternate login.
+Enter Disk ﬁle path name(s)
+This appears if Disk to Type of storage to use. Enter the
+disk ﬁlename, including the path. You do not need to enter
+the full path if the ﬁle is in the Line subdirectory. Provide the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input504
+
+ProMAX® Reference
+
+name of each individual ﬁle to be read, with one ﬁlename per
+line. For example:
+/data/ﬁle/001.seg
+/data/ﬁle/002.seg
+/data/ﬁle/003.seg
+
+Wildcard (*) is not allowed. Each ﬁlename must be explicitly
+provided.
+There is a limit of 204,000 characters. For example, if the
+pathname for each ﬁle is 50 characters long, you are limited
+to about 4080 ﬁles. You can workaround this limit by
+inputting ﬁlenames relative to the Line/Subproject directory
+or by creating a soft-link to make a much shorter pathname
+to your ﬁles.
+Browse for DISK ﬁle path name(s)
+Click on Browse to launch an interactive X-Windows dialogue
+box to select the disk ﬁle name. Note that for tape-on-disk
+ﬁles, the browser is launched on the remote system under
+the remote user name speciﬁed with X display pointing back
+to the screen running the ProMAX user interface. If nothing
+appears, you should check host and rsh/ ssh connectivity
+with that remote system and ensure that you allow (via the
+xhost command) the remote system to display on your
+desktop.
+Tape LABEL type
+This appears for Tape and Tape-on-Disk if No to Is the
+dataset in the catalog. Select the type of tape label from the
+following options:
+• None
+• ANSI
+• IBM
+Enter the tape ﬁle name for internal label
+This appears if ANSI or IBM to Tape LABEL type. Enter the
+tape ﬁle name.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input505
+
+ProMAX® Reference
+
+Specify MASK for external labels
+This appears if No to Is the dataset in the catalog. Enter
+the Volume Serial Number for the external tapes. For robotic
+devices, this ﬁeld is required. For other tape devices, this ﬁeld
+is optional. If you choose to use it, the tape mount message
+will contain the label of the next tape to mount.
+The mask is used in conjunction with the parameter below to
+build tape label names.
+For example, if the tape labels for a job are
+PB001, PB002, PB003
+
+The mask is
+PB000
+
+Specify MASK list for external labels
+This appears if No to Is the dataset in the catalog. Enter
+the Volume Serial Number lists for external tapes. For
+example, if the tape labels for a job are
+PB001, PB002, PB003
+
+The mask list will be
+1-3/
+
+Note: The mask list is limited to 6 characters. This parameter
+substitutes the list values for trailing zeros in the mask. For
+example, if the mask is B60ST0 and the list is 1, the program
+will drop the last zero and substitute 1, making the masklist
+B60ST1.
+If the ProMAX tape catalog, TopCat, is active and being used,
+an external, non-catalog, job automatically bypasses the
+catalog. However, for a labelled tape, the Volume Serial
+Number is checked against the catalog to ensure this tape is
+not an element of the catalog.
+Update LIN database at end of input?
+Select Yes, the default, to update the LIN database. Select No
+if you are loading data into an already populated ProMAX line
+and want to avoid changing values in its LIN database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input506
+
+ProMAX® Reference
+
+Override input data’s sample interval?
+Select Yes to supply this value manually instead of letting the
+program automatically determine it from the input data.
+Super block Warning : Adjusting the following two
+parameters will fool SEGD read into anticipating Super
+Blocked data if the numbers supplied are different from the
+values found in the general ﬁle header. Therefore they
+should be input only if the general ﬁle header is found to be
+missing or corrupt by SEGD read. To alter the length of
+traces sent to subsequent ProMAX processing please see
+"RECORD LENGTH to input" below.
+Correct sample interval
+Enter the input data’s sample rate in ms.
+Input data’s TRACE LENGTH
+The default value of 0.0 determines the length of each data
+trace from information in the input dataset. Supplying a
+nonzero number of milliseconds overrides the default.
+End of Super block warning.
+Starting sequential FILE number
+This appears for Tape to Type of storage to use. Enter the
+sequential ﬁeld record number you wish to start with on the
+tape. Default is 1, i.e. the ﬁrst ﬁle on tape.
+SEG-D tape format
+Select the SEG-D tape format from the following choices:
+• Demultiplexed, also referred to as trace sequential, corresponds to tape data formats such as 8015, 8048. In
+this format, traces are written as individual blocks on
+tape. Revision 2 of the SEG-D standard is always
+demultiplexed.
+• Multiplexed, also referred to as long block, corresponds
+to tape data formats such as 0015, 0048. In the format,
+trace samples are written in scans and all traces are
+contained within a single block on tape.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input507
+
+ProMAX® Reference
+
+Maximum data block size in bytes
+Enter the maximum data block size in bytes on the tape.
+Multiplexed data has two blocks per record: the header block
+and the data block. The data block holds the trace header
+and data sample information.
+Note: For values greater than 65536, you must have a long
+block driver conﬁgured for the tape device.
+Turn on SEG-D debug option?
+Select Yes to turn on the SEG-D debug option. When turned
+on, it shows a record’s general headers, channel sets, trace
+header and extended trace header information. See the Usage
+section for more information about the Debug Option. Use
+this option sparingly as it generates a lot of printout and can
+slow down data input by a factor of 10.
+Bypass Fatal Errors?
+Select Yes to ignore fatal errors caused by damaged records.
+In the past, a damaged record caused the ProMAX®
+processing system to exit with a fatal error when, for
+instance, the FORMAT TYPE could not be determined. This
+option will allow the systemX to skip to the next record and
+continue processing. For Disk Image data, this option is
+ignored.
+Override the Additional General Header Block count
+(GH)?
+Select Yes to correct a faulty count in the ﬁrst nibble of byte
+12 of general header block 1 of the SEG-D main header. In
+some rare instances this has been set wrong, most often is
+very old SEG-D data made at a time when these general
+header block bits were undeﬁned and used for some private
+purpose, causing the channel set information, which appears
+directly after the general header blocks, to read from the
+wrong locations in the main header leading to disastrous
+results.
+Number of additional general header blocks
+This appears if Yes to Override the Additional General
+Header Block count (GH)? Enter the number of additional
+32 byte general header blocks in the SEG-D main header that
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input508
+
+ProMAX® Reference
+
+follow the ﬁrst general header block. For SEG-D Rev 1 and 2,
+this number is at least 1.
+Extract geometry from extended trace headers?
+Select Yes to use the geometry information in the extended
+trace headers. At times the information in the extended trace
+headers is invalid and may not be useful. This option extracts
+geometry information from the extended SEG-D trace
+headers and assigns it to the internal ProMAX® trace
+headers.
+Extract extended geometry from extended trace headers?
+Select Yes to extract extended geometry from the extended
+trace header.
+Honor the Trace Header Extension value (THE)?
+Select Yes to honor the trace header THE value. The value
+stored in the THE location is used to calculate the start of
+data offset within a trace data block.
+|<-- start of data?-> Start of data (offset) = 20 + THE*32
+|<-- Trace header ->|<---------- SEGD trace data ----------->|
+|<---------------- SEGD trace --------------------------------->|
+
+The start of data offset is wrong:
+• If recorded in super block, the next trace header in block
+has bad values (very large or negative channel numbers).
+• If the data are recorded one trace per block, the start of
+data will be (time) shifted by: THE*32/(number of bytes
+per sample).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input509
+
+ProMAX® Reference
+
+Override the Trace Header Extension value (THE)?
+This appears if No to Honor the Trace Header Extension
+value (THE)? Select Yes to override faulty values in the
+channel set and trace header.
+Number of trace header extensions
+This appears if Yes to Override the Trace Header Block
+Extension value (TH)E? Enter the number of additional 32
+byte trace header extension blocks on each trace.
+Auto adjust incorrect trace length?
+For Disk Image input, which has no direct indication of trace
+or record boundaries, select Yes to automatically round the
+number of samples per trace calculated from each channel
+set down to the nearest even number. This is useful in the
+far too common situation where the channel set end time is
+recorded as the time of the sample just past the last one
+actually recorded.
+For Tape or Tape-on-Disk input, select Yes to dynamically
+adjust the calculated trace length in the presence of an
+incorrect channel set end time. When decoding super blocked
+data, SEG-D checks for a valid channel set number and
+expected channel number for the next trace in the super
+block. If an error condition is detected, such as the channel
+numbers are too big or negative, this option forces SEG-D to
+search down the trace buffer until the expected values are
+found. The calculated data length for channel set (in error) is
+corrected for the shot. This option also auto-adjusts for
+unﬂagged trace header extensions. Some Syntron systems
+write an extra 32 bytes in the SEG-D trace header, but fail to
+ﬂag its presence in either the channel set or the regular trace
+header.
+The ProMAX® system uses the calculated trace length for the
+channel set. This enables the accurate decode of varying data
+lengths within a shot, in particular, the auxiliary channels.
+Use this option with: Honor the Trace Header Extension
+value (THE)?
+Note: An incorrect trace header offset can also have the same
+effect. It is recommended to use the Turn on SEGD debug
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input510
+
+ProMAX® Reference
+
+option to determine what the issues are and enable the right
+corrections.
+Omit records of type
+Enter records to omit if your data was initialized with a value
+which signiﬁes a test record. For example, given the following
+general header information:
+F - Field ﬁle number (<9999). . . . . : 988
+Y - Format code . . . . . . . . . . . .: 8015
+K - General Constants. . . . . . . . . : 830000
+YR - Year (0-99) . . . . . . . . . . . .: 98
+GH - Additional General Header blocks . : 1
+DY - Julian Date (1-366) . . . . . . . .: 230
+H - Hour of day (0-23) UTC Time. . . . : 23
+MI - Minute of hour (0-59) . . . . . . .: 31
+SE - Second of the minute (0-59.) . . . : 58
+M - Manufacturer’s code . . . . . . . .: 22
+M - Manufacturer’s serial number . . . : 3020
+I - Base scan interval. . . . . . . . .: 32
+P - Polarity . . . . . . . . . . . . . : 0
+Z - Record type . . . . . . . . . . . .: 2 <---------------
+
+You determine that a record type of 2 is a test record. To omit
+this record type you would enter the 2. To omit a group of
+records, you would enter, for example, 2:3:4:5:6. The default,
+-1 disables this feature.
+Specify Seismic Data Channel Type(s)
+Enter the channel set value, that is channel type, for
+overriding the default seismic data channel type (1). For
+example, a record consists of AUX channels only of type:
+2,3,6,7. To interpret these channels as seismic data
+channels, enter 2:3:6:7.
+Note: In this example, we are using four different channel
+types from four different channel sets. With this example, you
+can expect to see duplicate channel numbers. Therefore, set
+Get Channel Number from trace headers to No and
+renumber based upon sequential input. And set Maximum
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input511
+
+ProMAX® Reference
+
+traces per record to a typical shot. The default maximum
+number of traces per shot is calculated from only one
+channel set and is of type 1.
+Specify Auxiliary Channel Type(s)
+Enter the channel type(s) to deﬁne auxiliary traces. Enter -1
+to disable this parameter. See Correcting I/O Systems and
+MDS Data Problems in the Usage section for information
+about using this parameter.
+Specify Zero or Pad Channel Type(s)
+Enter the channel type(s) to deﬁne zero or pad traces. Enter
+-1 to disable this parameter. See Correcting I/O Systems and
+MDS Data Problems in the Usage section for information
+about using this parameter.
+Number of errors in a row before aborting job
+Enter the number of errors in a row before aborting the job.
+Enter 0 to ignore all errors. Any value greater than 0 will
+output dead traces until this value is reached.
+Some older tapes will error out on every block. This is
+especially true on 800 bpi and 3200 dpi 9-track tapes which
+are not supported by several computer operating systems. As
+long as the tape drive can read these tapes the data buffer
+may be valid.
+SEG-D main header length (bytes)
+Enter the length of the main header in bytes. Enter 0 to
+calculate the header length as follows:
+header length = 32 * [GH + ST * (CS + SK) + 1 + EC + EX]
+GH = number of additional general header blocks (ﬁrst half of byte 12)
+ST = number of scan types per record (byte 28)
+CS = number of channel sets per scan type (byte 29)
+SK = skew ﬁelds per scan type (byte 30)
+EC = extended header length (byte 31)
+EX = external header length (byte 32)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input512
+
+ProMAX® Reference
+
+Typically, you will leave this value at the default of 0. If any of
+the above header values are incorrect, you must specify the
+main header length.
+Display ensemble information?
+Select Yes to display information about input ensembles.
+When an end of ensemble is reached, the program writes to
+the job.output ﬁle:
+The ensembles are CDP sorted:
+CDP = 123 SOURCE = 1 TRACES IN ENSEMBLE = 120
+The ensembles are SHOT sorted:
+FFID = 600 SOURCE = 1 TRACES IN ENSEMBLE = 120
+The ensembles are RECEIVER LOCATION sorted:
+RECEIVER = 200 SOURCE = 1 TRACES IN ENSEMBLE = 120
+
+SEG-D data format code?
+Select the format code of the data samples on tape. In the
+following list, the 80xx formats are demultiplexed data, and
+the 00xx formats are the corresponding multiplexed formats:
+• Get from header gets format code from general header.
+This is the default.
+• 8015, 0015 is 2.5-byte bin foreary exponent (demultiplexed, multiplexed)
+• 8022, 0022 is 1-byte quaternary exponent (demult.,
+mult.)
+• 8024, 0024 is 2-byte quaternary exponent (demult.,
+mult.)
+• 8036, 0036 is 3-byte 2’s complement integer (demult.,
+mult.)
+• 8038, 0038 is 4-byte 2’s complement integer (demult.,
+mult.)
+• 8042, 0042 is 1-byte hexadecimal exponent (demult.,
+mult.)
+• 8044, 0044 is 2-byte hexadecimal exponent (demult.,
+mult.)
+• 8048, 0048 is 4-byte hexadecimal exponent (demult.,
+mult.)
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input513
+
+ProMAX® Reference
+
+• 8058, 0058 is 4-byte IEEE ﬂoating point (demult, mult.)
+MAXIMUM traces per record
+Enter the maximum number of input traces or channels per
+record/shot. Enter 0, the default, to calculate the maximum
+channels from header values. You must include auxiliary
+channels in this number to read in the auxiliary channels.
+Input AUXILIARY traces?
+Select Yes to input the auxiliary traces. Select No to omit the
+auxiliary channels. If Yes, then include auxiliary channels in
+the maximum traces per record parameter.
+Auxiliary traces are assigned negative numbers. For
+multiplexed SEG-D, the timing word is treated as an
+auxiliary channel.
+RECORD LENGTH to input
+Enter the amount of data to input to subsequent ProMAX®
+processes in ms. Enter 0 to read all available data. The data
+length will be read from the header. Entering a value will
+override the value read from the tape header. The start time
+of each trace is recorded (in ms) in the ProMAX® header
+TAPE_T0. Inspect this header word for nonzero values before
+applying subsequent processes depending upon the ﬁrst
+sample of the trace appearing at time 0. Use Header Statics
+to adjust the trace start time using the TAPE_T0 header.
+If the number is less than the trace length on tape the output
+data is truncated. If any trace from tape is shorter than this
+length it will be padded with zeros to this length to satisfy the
+ProMAX® requirement that all traces in a dataset are the
+same length.
+SERCEL instrument type?
+Select additional required SEG-D information for Sercel
+instruments:
+• Not Sercel indicates that it is not a SERCEL instrument,
+or data is not from a SERCEL 356, 368, 388 or 408 seismograph. It can also be speciﬁed to disable special SERCEL-only header processing.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input514
+
+ProMAX® Reference
+
+• 358 Demux indicates that the SEG-D input is demultiplexed data from a SERCEL 358 seismograph. SERCEL
+358 instruments store the preampliﬁer gains in a nonstandard format in the channel set header. To convert
+the data to millivolt level, these gains must be used. The
+SERCEL 358 also records the shotpoint number in byte
+39 of the general header extension and this is transferred to header SOU_SLOC when this option is selected.
+• 368 indicates that the SEG-D data is from a SERCEL
+368 seismograph. SERCEL 368 seismographs store the
+preampliﬁer gains in byte 110 of the general header
+extension and byte 16 of the trace header when the data
+is correlated within the seismograph. To convert the data
+to millivolt level, these gains must be used. SERCEL 368
+seismographs also record shotpoint line and geophone
+positions in general header extension bytes 18-20 and
+bytes 21-23 and receiver station line numbers and stake
+numbers within the line in trace header bytes 17-18 and
+19-20. These are transferred into headers S_LINE,
+SOU_SLOC, R_LINE and SRF_SLOC respectively when
+this option is selected.
+• 388 indicates that the SEG-D data is from a SERCEL
+388 instrument. SERCEL 388 seismographs produce a
+SEG-D Revision 1 format dataset with optional ﬁeld processing. SEG-D Revision 1 geometry extensions to the
+general header and trace header are transferred into
+ProMAX® headers S_LINE, SOU_SLOC, R_LINE and
+SRF_SLOC on output.
+• 408 indicates that the SEG-D data is from a SERCEL
+408 instrument. SERCEL 408 seismographs use SEG-D
+trace header extensions to supply trace gain factors that,
+when nonzero, override the standard SEG-D MP conversion exponent. SEG-D Revision 1 geometry extensions to
+the general header and trace header are transferred into
+ProMAX® headers S_LINE, SOU_SLOC, R_LINE and
+SRF_SLOC on output. In addition, SEG-D Input also
+retrieves SOU_X, SOU_Y, SOU_ELEV, REC_X, REC_Y,
+and REC_ELEV information from the SERCEL 408
+extended trace headers.
+Apply preampliﬁer gain (2 ** MP factor)?
+Select Yes to apply the preampliﬁer gain to the trace data.
+For SERCEL seismographs, information in the extended
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input515
+
+ProMAX® Reference
+
+general and/or trace headers is used to compute the proper
+gain. For other instruments, the gain is obtained from the
+SEG-D standard MP exponent that occupies bytes 7 and 8 of
+the channel set descriptor. Most data should have the
+preamp gain applied, the exception being certain instrument
+test records. Whatever gain is applied is recorded in
+ProMAX® header word SEGDGAIN.
+pre-amp gain = 2 ** MP
+trace data = trace data(raw) * pre-amp gain
+
+Scan correction option (sample skew statics)?
+Select the scan correction option from the following choices:
+• Get from header reads the sample skew static values
+from the trace headers and puts them into the trace
+headers.
+• User speciﬁed allows you to specify the scan corrections
+in the next ﬁeld.
+• Do not apply ignores any sample skew static values in
+the input headers and sets the trace header SKEWSTAT
+to 0.
+Multiplex scan corrections are necessary because of the
+sequential sampling of the different recording channels.
+There is a resulting slight time offset between the samples of
+various channels. If selected, these shifts will be stored in the
+trace header SKEWSTAT which is automatically included in
+datum statics application.
+Specify multiplex scan corrections list
+This appears if User speciﬁed to Scan correction option.
+Enter the scan correction string for each channel.
+The static times must be entered in ms. Static times for
+channels not entered into the string are interpolated using
+the existing values.
+Get Channel Number from trace headers?
+Select Yes to get the channel number from the trace headers.
+Select No to number the channels sequentially within an
+ensemble. Auxiliary traces are assigned negative numbers.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input516
+
+ProMAX® Reference
+
+Input PRIMARY selection choice?
+Select the SEG-D or Promax header key on which the input
+primary trace list is based. The choices are:
+• Input All inputs all ﬁle numbers on this tape, or multitape input.
+• File No. selects input records based on SEG-D File
+Number.
+• Source Index No. selects input records based on the
+sequential source number within the tape.
+Specify PRIMARY input records list
+This appears if any option, except Input all, to Input
+primary selection choice. Enter the input records/traces.
+Since data from a tape/ﬁle is input sequentially, you should
+try to build the list based upon sequential location within a
+ﬁle. If the primary selection choice is decreasing within the
+tape/ﬁle then the list should be decreasing. For example:
+100-1/
+
+Input SECONDARY selection choice?
+Select a secondary selection choice. The choices are:
+• None uses no secondary sort key. All channels/traces
+are input.
+• Channel inputs a subset of the channels in a record.
+Specify CHANNEL input list
+This appears if Channel to Input Secondary selection
+choice. Enter the channels in the following format:
+Selection key value values range /
+1-120 / 1-60,62-120 / 1-240(2)
+
+The ﬁrst example reads in the ﬁrst 120 channels within a
+dataset. The second example reads in channels 1-60,
+inclusive, and 62-120, inclusive. The third example reads in
+every other channel beginning at channel 1 and ending at
+channel 240.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input517
+
+ProMAX® Reference
+
+Streamline CHANNEL selection?
+If Yes, SEG-D Input quickly forward spaces its input to the
+next record once it encounters channels beyond the selected
+range. The default is No, examining every trace in the record
+for possible inclusion. In multistreamer conﬁgurations, it is
+common to have channel numbers reoccur several times
+within a record, once per streamer.
+Remap SEGD main header values?
+Select Yes to input/override/remap SEG-D main header
+values. Select No to accept the default.
+Input/override main header entries
+This appears if Yes to Remap SEGD main header values.
+Enter ProMAX® header entries to input or override from the
+SEG-D main header, using a supplied format, increment, and
+position. Header entries are created if they do not exist.
+Format can be 2I, 4I, #B, #C, 4RIBM, 4RIEEE, 8RIEEE. An
+increment can be speciﬁed that is based upon channel set
+number. Position is anywhere inside the SEG-D main header.
+For example:
+cab_off,cable\shipboard offset,4RIBM,,,793/cab_num,cable number,1I,,32,865/ fﬁd,ﬁeld ﬁle id,4B,,,0.5/
+
+An override entry consists of six ﬁelds plus a / at the end of
+each entry. Each ﬁeld is separated by a comma. For example:
+wat_dep,cable water depth,4RIBM,1:2:3,32,204/
+wat_dep,cable water depth,4RIBM,ﬂex,10,204/
+
+Field 1: wat_dep is the name of the ProMAX® header word.
+This can be a new word deﬁned by you or an existing word as
+deﬁned in header.inc. This ﬁeld can be 1 to 8 characters.
+Field 2: cable water depth is the description of the
+ProMAX® header word. If you are overriding a current header
+word existing in header.inc, this ﬁeld may be left blank. This
+ﬁeld can be 1 to 32 characters.
+Field 3: 4RIBM is the format of the value in the SEG-D
+header. This ﬁeld can be a 1I (1 byte integer), 2I (2 byte
+integer), 4I (4 byte integer), #B (1-9 BCD digits), #C (1-9
+integers in character format), 4RIBM (4 byte IBM ﬂoating
+point), 4RIEEE (4 byte IEEE ﬂoating point), or 8RIEEE (8 byte
+IEEE double precision ﬂoating point). The BCD or character
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input518
+
+ProMAX® Reference
+
+digit ﬁeld is entered as a number*B, as in 9B for nine BCD
+digits or 9C for 9 characters. The character data that is in the
+ﬁle must be integers that were converted to character format.
+Field 4: 1:2:3 or ﬂex is the channel set manipulation ﬁeld. If
+the ﬁeld is blank, then all channel sets are selected. This ﬁeld
+can be 1 to 32 characters.
+When the ﬁeld contains channel set numbers (1:2:3:...), the
+starting byte position is incremented by the channel set
+number taken from the trace header times the byte
+increment (Field 5). The channel sets must be separated by a
+colon, :. As in the example, channel sets 1, 2, and 3 are
+selected. Only channels set listed in this ﬁeld will be used.
+Trace headers with a different channel set number will not
+load a valid override.
+byte position = start byte position + (channel set - 1) * increment
+
+When the ﬁeld contains ﬂex, the starting byte position is
+incremented by the total channels sets (byte 29 of general
+header) times the byte increment (ﬁeld 5). Use ﬂex when the
+size of the main header is changing due to a different number
+of total channel sets.
+byte position = start byte position + (total channel sets) * increment
+
+Field 5: 32 is the byte increment. Use this ﬁeld in
+conjunction with Field 4 to move around the main header. If a
+value is entered in this ﬁeld, the starting byte position, Field
+6 is incremented by this byte amount for each channel set or
+total channel sets. If ﬁeld is left blank, the increment is 0.
+This ﬁeld can be 1 to 8 characters.
+When BCD digits are input, the increment can be less than a
+byte. There are two BCD digits per byte. For example, if the
+entry is
+wat_dep,cable water depth,5B,,2.5,0.5/
+
+the value for channel set one occupies BCD digits 1-5. The
+value for channel set two occupies BCD digits 6-10.
+Field 6: 204 is the starting byte position within the SEG-D
+header to extract the override value. This ﬁeld can be 1 to 8
+characters. When BCD digits are being input, the position
+can be less than a byte. To begin a BCD digit at the ﬁrst
+nibble (4 bits) of a byte you must subtract .5. The ﬁrst nibble
+of byte 2 is 1.5, the ﬁrst nibble of byte 100 is 99.5. The
+second nibble of byte 100 is 100.
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input519
+
+ProMAX® Reference
+
+Remap SEGD trace header values?
+Select Yes to input/override/remap SEG-D trace header
+values. Select No to accept the default.
+Input/override trace header entries
+This appears if Yes to Remap SEGD trace header values.
+Enter ProMAX® header entries to input or override from the
+SEG-D trace header, using user-supplied format, and
+position. Header entries are created if they do not exist.
+Format can be 2I, 4I, #B, #C, 4RIBM, 4RIEEE, 8RIEEE.
+Position is anywhere inside the SEG-D trace header. For
+example:
+chan,channel number,2B,,,3.5/
+
+See the override entry explanation above for override details.
+Field 4, the channel set number and Field 5, the channel set
+byte increment are not used.
+Input Global XY reference coordinates?
+Select Yes to input the global x,y reference coordinates. The
+global x,y reference parameters are stored with the dataset.
+The reference parameters are subtracted from the input X
+and Y source and receiver coordinates.
+ProMAX® coordinate = ProMAX® coordinate - reference
+
+Global X reference coordinate
+This appears if Yes to Input global XY reference
+coordinates. Enter the global X reference coordinate. If you
+use the remapping feature and override the trace header
+words, SOU_X and/or REC_X, then the X reference
+coordinate will be subtracted from the remapped value.
+Global Y reference coordinate
+This appears if Yes to Input global XY reference
+coordinates. Enter the global Y reference coordinate. If you
+use the remapping feature and override the trace header
+words, SOU_Y and/or REC_Y, then the Y reference
+coordinate will be subtracted from the remapped value.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input520
+
+ProMAX® Reference
+
+Save trace IFP values for NGAIN Instrument Test?
+Select Yes to save the trace sample IFP values to a ﬁle. The
+ﬁle is required to run the Ngain Instrument Test. This
+cannot be used with formats x036, x038, x048, or x058.
+Enter NGAIN disk ﬁle path name
+This appears if Yes to Save trace IFP values for NGAIN
+instrument test. Enter the disk ﬁle path name to save the
+IFP values for the Ngain Instrument Test. The full path is not
+necessary if the ﬁle is in the database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+SEG-D Input521
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

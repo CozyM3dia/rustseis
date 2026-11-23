@@ -1,0 +1,43 @@
+Trace dc Removal51
+
+ProMAX® Reference
+
+Trace dc Removal
+Trace dc Removal removes dc bias or offset from the input
+traces.
+
+Theory
+The two possible ways for the program to calculate the level of
+the dc component in the trace are:
+• The arithmetic mean of the samples.
+• The mean of the minimum and maximum sample to
+determine dc level.
+Previously applied mutes are automatically reapplied after
+the dc bias has been removed.
+
+Parameters
+Type of central value
+Select the method to compute the dc level. The possible
+choices are:
+• Mean uses the mean as the central value. This is the
+more usual approach, and should be zero on a trace with
+no bias
+• (Min+Max)/2 uses the mean of the minimum and maximum as the central value.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace dc Removal52
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

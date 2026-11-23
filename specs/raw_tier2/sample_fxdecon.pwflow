@@ -1,0 +1,629 @@
+<parset name="man20-2d fxy decon on 1 line.0">
+  <par name="flowType" type="string"> PWFlow </par>
+  <parset name="flowParameters">
+    <parset name="etc">
+      <par name="date" type="string"> "Thu Jan 21 12:02:17 MST 2010" </par>
+      <par name="show" type="boolean"> true </par>
+      <par name="TmplView" type="boolean"> false </par>
+    </parset>
+    <parset name="Submit">
+      <par name="nExecsPerNode" type="int"> 1 </par>
+      <par name="Hosts" type="string"> localhost </par>
+      <par name="Queue" type="string"> "" </par>
+      <par name="envp" type="string"/>
+      <par name="nQueueNodes" type="int"> 0 </par>
+      <par name="QueueID" type="string"> "" </par>
+      <par name="submitTo" type="string"> Hosts </par>
+      <par name="Cluster" type="string"> "" </par>
+    </parset>
+    <parset name="AREALINE">
+      <par name="AREA" type="string"> "testarea        " </par>
+      <par name="DEVICERV" type="string"> "        " </par>
+      <par name="FLOWNAME" type="string"> "man20-2d fxy decon on 1 line" </par>
+      <par name="LINE" type="string"> "2manhattan-sys  " </par>
+      <par name="FLOW" type="string"> "man20-2dfxydec  " </par>
+      <par name="NOWAIT" type="int"> 1 </par>
+      <par name="SEQSTART" type="int"> 0 </par>
+      <par name="PRODUCT" type="int"> 80 </par>
+    </parset>
+    <parset name="EXEC">
+      <parset name="PROCDESC">
+        <par name="product" type="string"> PROWESS </par>
+        <par name="collapse" type="boolean"> false </par>
+        <par name="label" type="string"> com.lgc.prodesk.flowbuilder.menu.ExecutiveProc </par>
+        <par name="name" type="string"> com.lgc.prodesk.flowbuilder.menu.ExecutiveProc </par>
+        <par name="toolType" type="string"> NORMAL </par>
+        <par name="type" type="string"> Java </par>
+      </parset>
+      <parset name="menuParameters">
+        <par name="CHAINED" type="boolean"> true </par>
+        <par name="PRECURSORS" type="string"> man11-3dand4ds </par>
+        <par name="RECOMENDED_NUM_JOBLETS" type="int"> 1 </par>
+        <par name="OVERRIDE_XMX_VALUE" type="boolean"> false </par>
+        <par name="JAVA_XMX_VALUE" type="long"> 2048 </par>
+      </parset>
+      <parset name="parameterAttributes">
+      </parset>
+    </parset>
+  </parset>
+  <parset name="modules">
+    <parset name="com.lgc.prowess.tool.input.SmartInputTool #1">
+      <par name="ToolName" type="string"> com.lgc.prowess.tool.input.SmartInputTool </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="name" type="string"> com.lgc.prowess.tool.input.SmartInputProc </par>
+          <par name="product" type="string"> PROWESS </par>
+          <par name="label" type="string"> "JavaSeis Data Input" </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="toolType" type="string"> INPUT </par>
+        </parset>
+        <parset name="menuParameters">
+          <par name="DATA_SOURCE" type="string"> DATA_SELECTOR </par>
+          <par name="FILEPATH" type="string"> NONE </par>
+          <par name="OW_DATA" type="string"> NONE </par>
+          <par name="GEOPROBE_DATA" type="string"> NONE </par>
+          <par name="JAVASEIS_TABLE" type="string"> NONE </par>
+          <par name="refresh" type="string"> Refresh </par>
+          <par name="INPUT_LIMIT" type="int"> 2 </par>
+          <par name="JAVASEIS_SORT_NAME" type="string"> &lt;NONE> </par>
+          <par name="KEY_COLLECTION" type="string"> 25 </par>
+          <par name="READ_HEADERS_ONLY" type="boolean"> false </par>
+          <par name="IGNORE_MISSING_DATA" type="boolean"> true </par>
+          <par name="SECONDARY_SORT_HDR" type="string"> NONE </par>
+          <par name="TERTIARY_SORT_HDR" type="string"> NONE </par>
+          <par name="CREATE_SUPERGATHERS" type="boolean"> false </par>
+          <par name="INLINE_EXPANSION" type="int"> 3 </par>
+          <par name="CROSSLINE_EXPANSION" type="int"> 3 </par>
+          <par name="CHANGE_TO_SUPERGATHER_FRAMEWORK" type="boolean"> true </par>
+          <par name="USE_INPUT_REDUCER" type="boolean"> false </par>
+          <par name="INPUT_REDUCER_NAME" type="string"> NONE </par>
+          <par name="NUMBER_ITERATIONS" type="int"> 1 </par>
+          <par name="READALL_ON_EVERY_NODE" type="boolean"> false </par>
+          <par name="decomp_advisory" type="string"> "Block by Frame" </par>
+          <par name="INPUT_STRATEGY" type="int"> 1 </par>
+          <par name="DISTRIBUTION_AXIS" type="int"> 0 </par>
+          <par name="Valid Joblets" type="string"> Compute... </par>
+          <par name="NENS" type="string"> unknown </par>
+          <par name="NTRENS" type="string"> unknown </par>
+          <par name="NSAMPTR" type="string"> unknown </par>
+          <par name="SAMP_RATE" type="string"> unknown </par>
+          <par name="CDP_RANGE" type="string"> unknown </par>
+          <par name="SIN_RANGE" type="string"> unknown </par>
+          <par name="DATA_TYPE" type="string"> STACK </par>
+          <par name="TRACE_FORMAT" type="string"> COMPRESSED_INT16 </par>
+          <par name="AXIS_OPTION" type="string"> Logical </par>
+          <par name="HYPERCUBE_RANGE" type="string"> unknown </par>
+          <par name="VOLUME_RANGE" type="string"> unknown </par>
+          <par name="FRAME_RANGE" type="string"> "1-42 (1) : 42" </par>
+          <par name="TRACE_RANGE" type="string"> "1-79 (1) : 79" </par>
+          <par name="SAMPLE_RANGE" type="string"> "0.0-2000.0 (4.0) : 501" </par>
+          <par name="NTRACES_FRAMEWORK" type="string"> 3,318 </par>
+          <parset name="DATA_SELECTOR">
+            <par name="SOURCE" type="string"> DATA_SELECTOR </par>
+            <par name="RELATIVE_PATH" type="string"> stack-3d-in-xl.js </par>
+          </parset>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <par name="DATA_SOURCE" type="string"> DATA_SELECTOR </par>
+          <par name="FILEPATH" type="string"> NONE </par>
+          <par name="OW_DATA" type="string"> NONE </par>
+          <par name="GEOPROBE_DATA" type="string"> NONE </par>
+          <par name="JAVASEIS_TABLE" type="string"> NONE </par>
+          <par name="refresh" type="string"> Refresh </par>
+          <par name="INPUT_LIMIT" type="int"> 2 </par>
+          <par name="JAVASEIS_SORT_NAME" type="string"> &lt;NONE> </par>
+          <par name="KEY_COLLECTION" type="string"> 25 </par>
+          <par name="READ_HEADERS_ONLY" type="boolean"> false </par>
+          <par name="IGNORE_MISSING_DATA" type="boolean"> true </par>
+          <par name="SECONDARY_SORT_HDR" type="string"> NONE </par>
+          <par name="TERTIARY_SORT_HDR" type="string"> NONE </par>
+          <par name="CREATE_SUPERGATHERS" type="boolean"> false </par>
+          <par name="INLINE_EXPANSION" type="int"> 3 </par>
+          <par name="CROSSLINE_EXPANSION" type="int"> 3 </par>
+          <par name="CHANGE_TO_SUPERGATHER_FRAMEWORK" type="boolean"> true </par>
+          <par name="USE_INPUT_REDUCER" type="boolean"> false </par>
+          <par name="INPUT_REDUCER_NAME" type="string"> NONE </par>
+          <par name="NUMBER_ITERATIONS" type="int"> 1 </par>
+          <par name="READALL_ON_EVERY_NODE" type="boolean"> false </par>
+          <par name="decomp_advisory" type="string"> "Block by Frame" </par>
+          <par name="INPUT_STRATEGY" type="int"> 1 </par>
+          <par name="DISTRIBUTION_AXIS" type="int"> 0 </par>
+          <par name="Valid Joblets" type="string"> Compute... </par>
+          <parset name="DATA_SELECTOR">
+            <par name="SOURCE" type="string"> DATA_SELECTOR </par>
+            <par name="RELATIVE_PATH" type="string"> stack-3d-in-xl.js </par>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="REPEAT #1">
+      <par name="ToolName" type="string"> REPEAT </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> "Reproduce Traces" </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> false </par>
+          <par name="name" type="string"> repeat </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^Reproduce Traces^\n:enablep T\n:name REPEAT\n:value_tab 40\n:plot_label NIL\n:rules NIL\n:exec_data (^REPEAT^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^MODE^ :implicit (VALUE (QUOTE MODE))) (^NCOPIES^ :implicit (VALUE (QUOTE NCOPIES))))):parameter MODE\n:text ^Trace grouping to reproduce^\n:type :pop_choose\n:type_desc ((^Ensembles ^ 1 ^Reproduce ensembles of traces (shots, gathers, etc.).^) (^Traces^ 2 ^Reproduce individual traces (also stacked traces).^) (^All Data^ 4 ^Reproduce all data in the flow.^))\n:selected_item (^Ensembles ^ 1 ^Reproduce ensembles of traces (shots, gathers, etc.).^)\n:value 1\n:mouse_text ^You can repeat (reproduce) individual traces, ensembles of traces, or all of the data.^\n:parameter NCOPIES\n:text ^Total number of datasets^\n:type :typein\n:type_desc (:int 3 1 999)\n:value 2\n:mouse_text ^Total number of datasets passed on for further processing (equal to: \'number of copies + 1\' to account for input dataset).^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="REPEAT #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="MODE" type="long"> 1 </par>
+              <par name="NCOPIES" type="long"> 2 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="FLOW_IF #1">
+      <par name="ToolName" type="string"> FLOW_IF </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> IF </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> true </par>
+          <par name="name" type="string"> flow_if </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^IF^\n:enablep T\n:name FLOW_IF\n:value_tab 40\n:plot_label NIL\n:rules NIL\n:exec_data (^FLOW_IF^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^MERGE^ :implicit 1) (^MODE^ :implicit (VALUE (QUOTE MODE))) (^PRIM_KEY^ :implicit (VALUE (QUOTE PRIM_KEY))) (^SCND_KEY^ :implicit (VALUE (QUOTE SCND_KEY))) (^LIST^ :implicit (VALUE (QUOTE LIST))))):parameter MODE\n:text ^Trace selection MODE^\n:type :circular\n:type_desc ((^Include^ 0 ^INCLUDE the traces in the list.^) (^Exclude^ 1 ^EXCLUDE the traces in the list.^))\n:selected_item (^Include^ 0 ^INCLUDE the traces in the list.^)\n:value 0\n:mouse_text ^The traces in the list can be either INCLUDED or EXCLUDED from the following processes.^\n:parameter PRIM_KEY\n:text ^SELECT Primary trace header word^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^REPEATED data copy number^\n:value ^REPEAT  ^\n:mouse_text ^Use MB1 to select a header word from the headers menu as the PRIMARY key for specifying the inc./exc. trace list.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter SCND_KEY\n:text ^SELECT Secondary trace header word^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^No trace header entry selected^\n:value ^NONE    ^\n:mouse_text ^Use MB1 to select a header word from the headers menu as the SECONDARY key for specifying the inc./exc. trc list.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter LIST\n:text ^SPECIFY trace list^\n:type :edit\n:type_desc (25 80 5 ^ FORMAT: Primary header word value(s):Secondary header word value(s)/\n EXAMPLES: 1 / 1-3:40,65 / 4-10:1-120(3) / 5-99(10):2-120(3),3,6,9 /\n HELP: EMACS Editor Widget (scroll with down/up arrow keys)\n CURSOR MOVEMENT: Use the arrow keys:->,&lt;-,etc.;Point the mouse cursor,click B1\n CM: Ctrl-A\t\tMove the cursor to the BEGINNING of the current line\n CM: Ctrl-E\t\tMove the cursor to the END of the current line\n EDITING: All keyboard entry is in \'insert\' mode\n E:  Backspace, Delete keys\tDelete one character to the LEFT of the cursor\n E:  Ctrl-D\t\t\tDelete one character to the RIGHT of the cursor\n E:  Ctrl-K\t\tKILL to the end of the line (from the cursor)\n E:  Ctrl-Y\t\tYANK back the contents of the kill buffer; \'Cut and \n\t\t\t  paste\'; (Can move the cursor first) ^ 3)\n:value ^1^\n:mouse_text ^Use MB1 to specify the copy number from \'Repeat\', or to define the list of traces, you wish to include/exclude.^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="FLOW_IF #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="MERGE" type="long"> 1 </par>
+              <par name="MODE" type="long"> 0 </par>
+              <par name="PRIM_KEY" type="string"> "REPEAT  " </par>
+              <par name="SCND_KEY" type="string"> "NONE    " </par>
+              <par name="LIST" type="string"> 1 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="FLOW_ELSEIF #1">
+      <par name="ToolName" type="string"> FLOW_ELSEIF </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> ELSEIF </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> true </par>
+          <par name="name" type="string"> flow_elseif </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^ELSEIF^\n:enablep T\n:name FLOW_ELSEIF\n:value_tab 40\n:plot_label NIL\n:rules NIL\n:exec_data (^FLOW_ELSEIF^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^MODE^ :implicit (VALUE (QUOTE MODE))) (^PRIM_KEY^ :implicit (VALUE (QUOTE PRIM_KEY))) (^SCND_KEY^ :implicit (VALUE (QUOTE SCND_KEY))) (^LIST^ :implicit (VALUE (QUOTE LIST))))):parameter MODE\n:text ^Trace selection MODE^\n:type :circular\n:type_desc ((^Include^ 0 ^INCLUDE the traces in the list.^) (^Exclude^ 1 ^EXCLUDE the traces in the list.^))\n:selected_item (^Include^ 0 ^INCLUDE the traces in the list.^)\n:value 0\n:mouse_text ^The traces in the list can be either INCLUDED or EXCLUDED from the following processes.^\n:parameter PRIM_KEY\n:text ^SELECT Primary trace header word^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^REPEATED data copy number^\n:value ^REPEAT  ^\n:mouse_text ^Use MB1 to select a header word from the headers menu as the PRIMARY key for specifying the inc./exc. trace list.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter SCND_KEY\n:text ^SELECT Secondary trace header word^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^No trace header entry selected^\n:value ^NONE    ^\n:mouse_text ^Use MB1 to select a header word from the headers menu as the SECONDARY key for specifying the inc./exc. trc list.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter LIST\n:text ^SPECIFY trace list^\n:type :edit\n:type_desc (25 80 5 ^ FORMAT: Primary header word value(s):Secondary header word value(s)/\n EXAMPLES: 2 / 1-3:40,65 / 4-10:1-120(3) / 5-99(10):2-120(3),3,6,9 / \n HELP: EMACS Editor Widget (scroll with down/up arrow keys)\n CURSOR MOVEMENT: Use the arrow keys:->,&lt;-,etc.;Point the mouse cursor,click B1\n CM: Ctrl-A\t\tMove the cursor to the BEGINNING of the current line\n CM: Ctrl-E\t\tMove the cursor to the END of the current line\n EDITING: All keyboard entry is in \'insert\' mode\n E:  Backspace, Delete keys\tDelete one character to the LEFT of the cursor\n E:  Ctrl-D\t\t\tDelete one character to the RIGHT of the cursor\n E:  Ctrl-K\t\tKILL to the end of the line (from the cursor)\n E:  Ctrl-Y\t\tYANK back the contents of the kill buffer; \'Cut and \n\t\t\t  paste\'; (Can move the cursor first) ^ 3)\n:value ^2^\n:mouse_text ^Use MB1 to specify the copy number from \'Repeat\', or to define the list of traces, you wish to include/exclude.^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="FLOW_ELSEIF #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="MODE" type="long"> 0 </par>
+              <par name="PRIM_KEY" type="string"> "REPEAT  " </par>
+              <par name="SCND_KEY" type="string"> "NONE    " </par>
+              <par name="LIST" type="string"> 2 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="FXDECON #2">
+      <par name="ToolName" type="string"> FXDECON </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> "F-X Decon" </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> true </par>
+          <par name="name" type="string"> fxdecon </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^F-X Decon^\n:enablep T\n:name FXDECON\n:value_tab 54\n:plot_label T\n:rules ((((VALUE FLT_TYPE)) RULE1 (= (VALUE (QUOTE FLT_TYPE)) 1) (PROGN (DO_NOT_SHOW (QUOTE RADAPT)) (DO_SHOW (QUOTE NPF)) (DO_SHOW (QUOTE PCTN)))) (((VALUE FLT_TYPE)) RULE2 (= (VALUE (QUOTE FLT_TYPE)) 2) (PROGN (DO_SHOW (QUOTE RADAPT)) (DO_SHOW (QUOTE NPF)) (DO_NOT_SHOW (QUOTE PCTN)))) (((VALUE HDRLIMIT)) RULE3 (VALUE (QUOTE HDRLIMIT)) (DO_SHOW (QUOTE HDRNAME)) (DO_NOT_SHOW (QUOTE HDRNAME))) (((VALUE NTRW) (VALUE NPF)) NPF (&lt;= (VALUE (QUOTE NTRW)) (VALUE (QUOTE NPF))) (SET_VALUE (QUOTE NPF) (- (VALUE (QUOTE NTRW)) 1))))\n:exec_data (^FXDECON^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^FLT_TYPE^ :implicit (VALUE (QUOTE FLT_TYPE))) (^PCTN^ :implicit (VALUE (QUOTE PCTN))) (^RADAPT^ :implicit (VALUE (QUOTE RADAPT))) (^NTRW^ :implicit (VALUE (QUOTE NTRW))) (^NPF^ :implicit (VALUE (QUOTE NPF))) (^TIMEW^ :implicit (VALUE (QUOTE TIMEW))) (^TOVLP^ :implicit (VALUE (QUOTE TOVLP))) (^FR1^ :implicit (VALUE (QUOTE FR1))) (^FR2^ :implicit (VALUE (QUOTE FR2))) (^NPASSES^ :implicit (VALUE (QUOTE NPASSES))) (^HDRLIMIT^ :implicit (IF (VALUE (QUOTE HDRLIMIT)) 1 0)) (^HDRNAME^ :implicit (IF (VALUE (QUOTE HDRLIMIT)) (VALUE (QUOTE HDRNAME)) ^NONE^)) (^REMUTE^ :implicit (IF (VALUE (QUOTE REMUTE)) 1 0)))):parameter FLT_TYPE\n:text ^TYPE of filter^\n:plot_label T\n:type :circular\n:type_desc ((^Wiener Levinson^ 1 ^Apply complex Wiener Levinson prediction filter.^) (^L2 NORM ADAPTIVE^ 2 ^Apply LMS L2 norm adaptive prediction filter.^))\n:selected_item (^Wiener Levinson^ 1 ^Apply complex Wiener Levinson prediction filter.^)\n:value 1\n:mouse_text ^The output data is from a complex step ahead prediction filter, either W-L fixed or L2 norm adaptive.^\n:parameter PCTN\n:text ^Percentage of white noise^\n:plot_label T\n:type :typein\n:type_desc (:real 5 0.0 NIL)\n:value 0.0\n:mouse_text ^Percentage of white noise to be added to the zero lag autocorrelation value.^\n:parameter RADAPT\n:text ^Rate of adaptation^\n:plot_label T\n:type :typein\n:type_desc (:real 10 1.0E-10 NIL)\n:value 0.1\n:showp NIL\n:mouse_text ^This is the coefficient controlling the adaptation rate.^\n:parameter NTRW\n:text ^Horizontal window length^\n:plot_label T\n:type :typein\n:type_desc (:int 5 1 NIL)\n:value 10\n:mouse_text ^This is the horizontal F-X prediction window length in traces.^\n:parameter NPF\n:text ^Number of filter samples^\n:plot_label T\n:type :typein\n:type_desc (:int 5 1 NIL)\n:value 5\n:mouse_text ^This is the number of samples in the complex prediction filter.  (Minimum of 4 samps; longer for conflicting dips)^\n:parameter TIMEW\n:text ^Time window length^\n:plot_label T\n:type :typein\n:type_desc (:real 8 1.0E-6 NIL)\n:value 1000.0\n:mouse_text ^This is the time gate length (in milliseconds) for prediction windows.^\n:parameter TOVLP\n:text ^Time window overlap^\n:plot_label T\n:type :typein\n:type_desc (:real 8 0.0 NIL)\n:value 100.0\n:mouse_text ^This is the window extension in milliseconds (and on both sides) of time gates for prediction windows.^\n:parameter FR1\n:text ^F-X filter start frequency^\n:plot_label T\n:type :typein\n:type_desc (:real 8 0.0 NIL)\n:value 1.0\n:mouse_text ^This is minimum frequency of any SIGNAL OR NOISE in the seismic data.^\n:parameter FR2\n:text ^F-X filter end frequency^\n:plot_label T\n:type :typein\n:type_desc (:real 8 1.0E-6 NIL)\n:value 250.0\n:mouse_text ^This is maximum frequency of any SIGNAL OR NOISE in the seismic data.^\n:parameter NPASSES\n:text ^Number of times to apply F-X filter to each trace^\n:plot_label T\n:type :typein\n:type_desc (:int 5 1 5)\n:value 1\n:mouse_text ^For convenience multiple F-X passes may be used without inserting extra processes in the flow.^\n:parameter HDRLIMIT\n:text ^Apply filter only to selected traces?^\n:plot_label T\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:mouse_text ^Compute output only where chosen trace header is nonzero.^\n:parameter HDRNAME\n:text ^  Select trace header for filter application^\n:plot_label T\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^Trace type (data, aux, etc.)^\n:value ^TRC_TYPE^\n:showp NIL\n:mouse_text ^Choose which header to use in determining filter application.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter REMUTE\n:text ^Re-apply trace mute after filter?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^Yes ^ T)\n:value T\n:mouse_text ^Trace mutes (such as surgical and first break suppression mutes) may be re-applied after F-X filtering.^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="FXDECON #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="FLT_TYPE" type="long"> 1 </par>
+              <par name="PCTN" type="double"> 0.0 </par>
+              <par name="RADAPT" type="double"> 0.1 </par>
+              <par name="NTRW" type="long"> 10 </par>
+              <par name="NPF" type="long"> 5 </par>
+              <par name="TIMEW" type="double"> 1000.0 </par>
+              <par name="TOVLP" type="double"> 100.0 </par>
+              <par name="FR1" type="double"> 1.0 </par>
+              <par name="FR2" type="double"> 250.0 </par>
+              <par name="NPASSES" type="long"> 1 </par>
+              <par name="HDRLIMIT" type="long"> 0 </par>
+              <par name="HDRNAME" type="string"> NONE </par>
+              <par name="REMUTE" type="long"> 1 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="FLOW_ENDIF #1">
+      <par name="ToolName" type="string"> FLOW_ENDIF </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> ENDIF </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> true </par>
+          <par name="name" type="string"> flow_endif </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^ENDIF^\n:enablep T\n:name FLOW_ENDIF\n:value_tab 40\n:plot_label NIL\n:rules NIL\n:exec_data (^FLOW_ENDIF^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^MERGE^ :implicit 1))))\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="FLOW_ENDIF #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="MERGE" type="long"> 1 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="INLINE_SORT #1">
+      <par name="ToolName" type="string"> INLINE_SORT </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> "Inline Sort" </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> false </par>
+          <par name="name" type="string"> inline_sort </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^Inline Sort^\n:enablep T\n:name INLINE_SORT\n:value_tab 36\n:plot_label T\n:rules ((((VALUE N_BUFFER)) RULE_N_BUFFER_DEF (= (VALUE (QUOTE N_BUFFER)) -1) (SET_VALUE (QUOTE N_BUFFER) (* (DB_PARMGET_LINE ^MAXCPSz^) (DB_PARMGET_LINE ^NTRCDPz^)))) (((VALUE MAX_DTRZ)) RULE_MAX_DTRZ_DEF (= (VALUE (QUOTE MAX_DTRZ)) -1) (SET_VALUE (QUOTE MAX_DTRZ) (* (DB_PARMGET_LINE ^NTRCDPz^) 1))) (((VALUE SORTKEY2)) RULE_KEY2_NONE (= (VALUE (QUOTE SORTKEY2)) ^NONE    ^) (PROGN (SET_VALUE (QUOTE SORTKEY3) ^NONE    ^) (DO_NOT_SHOW (QUOTE SORTKEY3)) (DO_NOT_SHOW (QUOTE S_ORDER2))) (PROGN (DO_SHOW (QUOTE SORTKEY3)) (DO_SHOW (QUOTE S_ORDER2)))) (((VALUE SORTKEY3)) RULE_KEY3_NONE (= (VALUE (QUOTE SORTKEY3)) ^NONE    ^) (PROGN (SET_VALUE (QUOTE SORTKEY4) ^NONE    ^) (DO_NOT_SHOW (QUOTE SORTKEY4)) (DO_NOT_SHOW (QUOTE S_ORDER3))) (PROGN (DO_SHOW (QUOTE SORTKEY4)) (DO_SHOW (QUOTE S_ORDER3)))) (((VALUE SORTKEY4)) RULE_KEY4_NONE (= (VALUE (QUOTE SORTKEY4)) ^NONE    ^) (DO_NOT_SHOW (QUOTE S_ORDER4)) (DO_SHOW (QUOTE S_ORDER4))) (((SHOWP AUTOTEST) (SHOWP AUTOTERT)) RULE_AUTOTEST (PROGN (DO_NOT_SHOW (QUOTE AUTOTEST)) (DO_NOT_SHOW (QUOTE AUTOTERT)))))\n:exec_data (^INLINE_SORT^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^SORTKEY1^ :implicit (VALUE (QUOTE SORTKEY1))) (^SORTKEY2^ :implicit (VALUE (QUOTE SORTKEY2))) (^SORTKEY3^ :implicit (VALUE (QUOTE SORTKEY3))) (^SORTKEY4^ :implicit (VALUE (QUOTE SORTKEY4))) (^S_ORDER1^ :implicit (VALUE (QUOTE S_ORDER1))) (^S_ORDER2^ :implicit (VALUE (QUOTE S_ORDER2))) (^S_ORDER3^ :implicit (VALUE (QUOTE S_ORDER3))) (^S_ORDER4^ :implicit (VALUE (QUOTE S_ORDER4))) (^MAX_DTRZ^ :implicit (VALUE (QUOTE MAX_DTRZ))) (^N_BUFFER^ :implicit (VALUE (QUOTE N_BUFFER))) (^ENDENSKY^ :implicit (VALUE (QUOTE ENDENSKY))) (^MAXPRINT^ :implicit 1000) (^MEDIA^ :implicit (VALUE (QUOTE MEDIA))) (^COMPRESS^ :implicit (IF (VALUE (QUOTE COMPRESS)) 1 0)) (^MULTPASS^ :implicit (IF (VALUE (QUOTE MULTPASS)) 1 0)) (^AUTOTEST^ :implicit (IF (VALUE (QUOTE AUTOTEST)) 1 0)) (^AUTOTERT^ :implicit (VALUE (QUOTE AUTOTERT))))):parameter SORTKEY1\n:text ^Select new PRIMARY sort key^\n:plot_label T\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^3D inline number^\n:value ^ILINE_NO^\n:mouse_text ^Use MB1 to select a header entry from the headers menu as the new PRIMARY sort key.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter S_ORDER1\n:text ^PRIMARY sort order^\n:type :circular\n:type_desc ((^Ascending ^ 1 ^Output ensembles in ASCENDING order.^) (^Descending^ -1 ^Output ensembles in DESCENDING order.^))\n:selected_item (^Ascending ^ 1 ^Output ensembles in ASCENDING order.^)\n:value 1\n:mouse_text ^This dictates the order of the output ensembles.^\n:parameter SORTKEY2\n:text ^Select new SECONDARY sort key^\n:plot_label T\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^3D crossline number^\n:value ^XLINE_NO^\n:mouse_text ^Use MB1 to select a header entry from the headers menu as the new SECONDARY sort key.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter S_ORDER2\n:text ^SECONDARY sort order^\n:type :circular\n:type_desc ((^Ascending ^ 1 ^Output ensembles in ASCENDING order.^) (^Descending^ -1 ^Output ensembles in DESCENDING order.^))\n:selected_item (^Ascending ^ 1 ^Output ensembles in ASCENDING order.^)\n:value 1\n:mouse_text ^This dictates the order of the output ensembles.^\n:parameter SORTKEY3\n:text ^Select new TERTIARY sort key^\n:plot_label T\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^No trace header entry selected^\n:value ^NONE    ^\n:mouse_text ^Use MB1 to select a header entry from the headers menu as the new TERTIARY sort key.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter S_ORDER3\n:text ^TERTIARY sort order^\n:type :circular\n:type_desc ((^Ascending ^ 1 ^Output traces with the secondary key in ASCENDING order.^) (^Descending^ -1 ^Output traces with the secondary key in DESCENDING order.^))\n:selected_item (^Ascending ^ 1 ^Output traces with the secondary key in ASCENDING order.^)\n:value 1\n:showp NIL\n:mouse_text ^This dictates the order of traces within each output ensemble.^\n:parameter SORTKEY4\n:text ^Select new QUATERNARY sort key^\n:plot_label T\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^No trace header entry selected^\n:value ^NONE    ^\n:showp NIL\n:mouse_text ^Use MB1 to select a header entry from the headers menu as the new QUATERNARY sort key.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter S_ORDER4\n:text ^QUATERNARY sort order^\n:type :circular\n:type_desc ((^Ascending ^ 1 ^Output traces with the secondary key in ASCENDING order.^) (^Descending^ -1 ^Output traces with the secondary key in DESCENDING order.^))\n:selected_item (^Ascending ^ 1 ^Output traces with the secondary key in ASCENDING order.^)\n:value 1\n:showp NIL\n:mouse_text ^This dictates the order of traces within each output ensemble.^\n:parameter MAX_DTRZ\n:text ^Maximum traces per output ensemble^\n:plot_label T\n:type :typein\n:type_desc (:int 5 1 NIL)\n:value 200\n:mouse_text ^What is the maximum number of traces per ensemble AFTER sorting?  For a CDP sort, this is the maximum fold.^\n:parameter N_BUFFER\n:text ^Number of traces in buffer^\n:type :typein\n:type_desc (:int 8 NIL NIL)\n:value 3840\n:mouse_text ^How many traces must be buffered?  For a normal CDP sort, this is max fold multiplied by chans per record.^\n:parameter MEDIA\n:text ^Buffer type^\n:type :circular\n:type_desc ((^Disk^ 1 ^Buffer traces on disk^) (^Memory^ 2 ^Buffer traces in memory^))\n:selected_item (^Memory^ 2 ^Buffer traces in memory^)\n:value 2\n:mouse_text ^Use MB1 to rotate between choices for buffering traces to disk (large but slow) or memory (small but fast).^\n:parameter ENDENSKY\n:text ^Sort key which controls End-Of-Ensemble^\n:type :circular\n:type_desc ((^Primary^ 1 ^End-Ensemble set when PRIMARY key changes^) (^Secondary^ 2 ^End-Ensemble set when SECONDARY key changes^) (^Tertiary^ 3 ^End-Ensemble set when TERTIARY key changes^) (^Quaternary^ 4 ^End-Ensemble set when QUATERNARY key changes^))\n:selected_item (^Primary^ 1 ^End-Ensemble set when PRIMARY key changes^)\n:value 1\n:mouse_text ^Use MB1 to rotate between choices for End-Of-Ensemble key.  Line-Segment-End will be the key above the End-Of-Ensemble key.^\n:parameter COMPRESS\n:text ^Compress data before sorting?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:mouse_text ^Select \'Yes\' to reduce storage requirements by compressing the data before sorting.^\n:parameter MULTPASS\n:text ^Multiple pass?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:mouse_text ^Select \'Yes\' if buffer is not big enough for sort. Refer to help file for procedure.^\n:parameter AUTOTEST\n:text ^Run in AUTOTEST mode?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:showp NIL\n:mouse_text ^Select \'Yes\' if sort should stay the same as input primary/secondary keys and add DS_SEQNO as tertiary sort key^\n:parameter AUTOTERT\n:text ^AUTOTEST tertiary sort key^\n:plot_label T\n:type :typein\n:type_desc (:string 9)\n:value ^TLIVE_S^\n:showp NIL\n:mouse_text ^Enter tertiary sort key name for autotests^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="INLINE_SORT #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="SORTKEY1" type="string"> ILINE_NO </par>
+              <par name="SORTKEY2" type="string"> XLINE_NO </par>
+              <par name="SORTKEY3" type="string"> "NONE    " </par>
+              <par name="SORTKEY4" type="string"> "NONE    " </par>
+              <par name="S_ORDER1" type="long"> 1 </par>
+              <par name="S_ORDER2" type="long"> 1 </par>
+              <par name="S_ORDER3" type="long"> 1 </par>
+              <par name="S_ORDER4" type="long"> 1 </par>
+              <par name="MAX_DTRZ" type="long"> 200 </par>
+              <par name="N_BUFFER" type="long"> 3840 </par>
+              <par name="ENDENSKY" type="long"> 1 </par>
+              <par name="MAXPRINT" type="long"> 1000 </par>
+              <par name="MEDIA" type="long"> 2 </par>
+              <par name="COMPRESS" type="long"> 0 </par>
+              <par name="MULTPASS" type="long"> 0 </par>
+              <par name="AUTOTEST" type="long"> 0 </par>
+              <par name="AUTOTERT" type="string"> TLIVE_S </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="TRACEMATH #1">
+      <par name="ToolName" type="string"> TRACEMATH </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> "Trace Math" </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> true </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> true </par>
+          <par name="name" type="string"> tracemath </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^Trace Math^\n:enablep T\n:name TRACEMATH\n:value_tab 35\n:plot_label T\n:rules ((((VALUE MATHTYPE)) RULE1 (= (VALUE (QUOTE MATHTYPE)) 1) (DO_SHOW (QUOTE SCALAR)) (DO_NOT_SHOW (QUOTE SCALAR))) (((VALUE MATHTYPE)) RULE2 (= (VALUE (QUOTE MATHTYPE)) 1) (DO_SHOW (QUOTE MATHOPT1)) (DO_NOT_SHOW (QUOTE MATHOPT1))) (((VALUE MATHTYPE)) RULE3 (= (VALUE (QUOTE MATHTYPE)) 2) (DO_SHOW (QUOTE MATHOPT2)) (DO_NOT_SHOW (QUOTE MATHOPT2))) (((VALUE MATHTYPE)) RULE4 (= (VALUE (QUOTE MATHTYPE)) 2) (DO_SHOW (QUOTE ENS_MODE)) (DO_NOT_SHOW (QUOTE ENS_MODE))) (((VALUE MATHTYPE) (VALUE ENS_MODE)) RULE5 (AND (= (VALUE (QUOTE MATHTYPE)) 2) (VALUE (QUOTE ENS_MODE))) (DO_SHOW (QUOTE ODD_TRC)) (DO_NOT_SHOW (QUOTE ODD_TRC))))\n:exec_data (^TRACEMATH^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^MATHTYPE^ :implicit (VALUE (QUOTE MATHTYPE))) (^MATHOPT1^ :implicit (VALUE (QUOTE MATHOPT1))) (^MATHOPT2^ :implicit (VALUE (QUOTE MATHOPT2))) (^SCALAR^ :implicit (VALUE (QUOTE SCALAR))) (^ENS_MODE^ :implicit (IF (VALUE (QUOTE ENS_MODE)) 1 0)) (^ODD_TRC^ :implicit (VALUE (QUOTE ODD_TRC))))):parameter MATHTYPE\n:text ^MODE of operation^\n:plot_label T\n:type :circular\n:type_desc ((^Trace/Scalar^ 1 ^Trace/Scalar math operation (add, subtract, multiply, or divide scalars with traces).^) (^Trace/Trace ^ 2 ^Trace/Trace math operation (add, subtract, multiply, or divide two traces).^))\n:selected_item (^Trace/Trace ^ 2 ^Trace/Trace math operation (add, subtract, multiply, or divide two traces).^)\n:value 2\n:mouse_text ^You can apply Trace/Scalar operations or Trace-to-Trace operations to traces.^\n:parameter MATHOPT1\n:text ^TYPE of trace/scalar operation^\n:plot_label T\n:type :pop_choose\n:type_desc ((^Add Scalar^ 1 ^Add the Scalar to the trace sample values.^) (^Scalar minus Sample^ 2 ^Subtract the TRACE sample values from the Scalar.^) (^Multiply by Scalar^ 3 ^Multiply the Scalar times the trace sample values.^) (^Divide INTO Scalar^ 4 ^Divide the Scalar by the Trace sample values.^))\n:selected_item (^Add Scalar^ 1 ^Add the Scalar to the trace sample values.^)\n:value 1\n:showp NIL\n:mouse_text ^Trace/Scalar operations include ADD, SUBTRACT, MULTIPLY and DIVIDE.^\n:parameter MATHOPT2\n:text ^TYPE of trace/trace operation^\n:plot_label T\n:type :pop_choose\n:type_desc ((^Add Traces^ 1 ^Add the two traces and output one trace.^) (^Subtract Traces^ 2 ^Subtract the second trace from the first trace and output one trace.^) (^Multiply Traces^ 3 ^Multiply the two traces and output one trace.^) (^Divide Traces^ 4 ^Divide the first trace by the second trace and output one trace.^))\n:selected_item (^Subtract Traces^ 2 ^Subtract the second trace from the first trace and output one trace.^)\n:value 2\n:mouse_text ^Trace-to-trace operations include ADD, SUBTRACT, MULTIPLY and DIVIDE.^\n:parameter ENS_MODE\n:text ^Honor ensemble boundaries^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^Yes ^ T)\n:value T\n:mouse_text ^If this is set to YES, trace/trace operations will not cross ensemble boundaries.^\n:parameter ODD_TRC\n:text ^How to handle odd ensemble traces^\n:type :circular\n:type_desc ((^PASS^ 1 ^Pass through the last trace in an ensemble if the number of traces in an ensemble is odd.^) (^KILL^ 2 ^Kill the last trace in an ensemble if the number of traces in an ensemble is odd.^))\n:selected_item (^PASS^ 1 ^Pass through the last trace in an ensemble if the number of traces in an ensemble is odd.^)\n:value 1\n:mouse_text ^You can either KILL or PASS the last trace in an ensemble if the number of traces in the ensemble is ODD.^\n:parameter SCALAR\n:text ^SCALAR value^\n:plot_label T\n:type :typein\n:type_desc (:real 12 NIL NIL)\n:value 1.0\n:showp NIL\n:mouse_text ^This is the scalar to be used by the above operation.^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="TRACEMATH #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="MATHTYPE" type="long"> 2 </par>
+              <par name="MATHOPT1" type="long"> 1 </par>
+              <par name="MATHOPT2" type="long"> 2 </par>
+              <par name="SCALAR" type="double"> 1.0 </par>
+              <par name="ENS_MODE" type="long"> 1 </par>
+              <par name="ODD_TRC" type="long"> 1 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="TRACEDISPLAY #1">
+      <par name="ToolName" type="string"> TRACEDISPLAY </par>
+      <par name="enabled" type="boolean"> false </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="label" type="string"> "Trace Display" </par>
+          <par name="parallel_enabled" type="boolean"> false </par>
+          <par name="parallelizable" type="boolean"> false </par>
+          <par name="product" type="string"> PROMAX </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="ipmEnabled" type="boolean"> true </par>
+          <par name="name" type="string"> traceDisplay </par>
+          <par name="toolType" type="string"> NORMAL </par>
+          <par name="type" type="string"> Lisp </par>
+          <par name="legalHybrid" type="boolean"> true </par>
+        </parset>
+        <parset name="MENUDATA">
+          <par name="MENUDATA" type="string"> "(:label\n^Trace Display^\n:enablep NIL\n:name TRACEDISPLAY\n:value_tab 48\n:plot_label T\n:rules ((((VALUE XSERVER)) TEST_SCREEN_NAME (NOT (= (VALUE (QUOTE XSERVER)) ^This Screen^)) (PROGN (SETQ TEMP (HOST_VALID_P (VALUE (QUOTE XSERVER)))) (IF TEMP (ADD_ERROR (QUOTE XSERVER) TEMP) (SET_ERROR_LIST (QUOTE XSERVER) TEMP))) (SET_ERROR_LIST (QUOTE XSERVER) NIL)) (NIL SOCKET_DEBUG_RULE T (IF (= (PRINTENV (QUOTE SOCKET_DEBUG)) ^t^) (PROGN (DO_SHOW (QUOTE DEBUG)) (DO_SHOW (QUOTE PROGRAM))) (PROGN (DO_NOT_SHOW (QUOTE DEBUG)) (DO_NOT_SHOW (QUOTE PROGRAM))))) (((VALUE NUM_DISPLAY_TRACES)) MAXTRACES (= (VALUE (QUOTE NUM_DISPLAY_TRACES)) 0) (PROGN (DO_NOT_SHOW (QUOTE OVERLAP)) (DO_SHOW (QUOTE ENS_PAN_INC)) (DO_SHOW (QUOTE NPANEL))) (PROGN (DO_SHOW (QUOTE OVERLAP)) (DO_NOT_SHOW (QUOTE ENS_PAN_INC)) (DO_NOT_SHOW (QUOTE NPANEL)))) (((VALUE NUM_DISPLAY_TRACES) (VALUE OVERLAP)) OVERLAP (AND (> (VALUE (QUOTE NUM_DISPLAY_TRACES)) 0) (>= (VALUE (QUOTE OVERLAP)) (VALUE (QUOTE NUM_DISPLAY_TRACES)))) (ADD_ERROR (QUOTE OVERLAP) ^Overlap must be less than maximum number of TRACES/screen^) (SET_ERROR_LIST (QUOTE OVERLAP) NIL)) (((VALUE NUM_ENSEMBLES)) GAP_ON (= (VALUE (QUOTE NUM_ENSEMBLES)) 1) (DO_NOT_SHOW (QUOTE ENSEMBLE_GAP)) (DO_SHOW (QUOTE ENSEMBLE_GAP))) (((VALUE AUTOSAVE)) BATCH_RULE (EQUAL (VALUE (QUOTE AUTOSAVE)) T) (DO_SHOW (QUOTE NBATCH)) (DO_NOT_SHOW (QUOTE NBATCH))) (((VALUE DISPMODE)) BIAS_RULE (OR (= (VALUE (QUOTE DISPMODE)) 0) (= (VALUE (QUOTE DISPMODE)) 2)) (DO_SHOW (QUOTE VARBIAS)) (DO_NOT_SHOW (QUOTE VARBIAS))) (((VALUE LKEYNAM2)) LABEL_MODE (EQUAL (VALUE (QUOTE LKEYNAM2)) ^NONE    ^) (DO_NOT_SHOW (QUOTE LABLMOD2)) (DO_SHOW (QUOTE LABLMOD2))) (((SHOWP LABLMOD2) (VALUE LABLMOD2)) INC_RULE (AND (SHOWING (QUOTE LABLMOD2)) (NOT (= (VALUE (QUOTE LABLMOD2)) 3))) (DO_SHOW (QUOTE LABLINC2)) (DO_NOT_SHOW (QUOTE LABLINC2))) (((VALUE SCALEMODE)) SCALE_RULE (= (VALUE (QUOTE SCALEMODE)) 1) (PROGN (DO_SHOW (QUOTE CLIP)) (DO_SHOW (QUOTE ASCALAR)) (DO_SHOW (QUOTE SCALEOPT)) (DO_NOT_SHOW (QUOTE LMFRDATA))) (PROGN (DO_NOT_SHOW (QUOTE CLIP)) (DO_NOT_SHOW (QUOTE ASCALAR)) (DO_NOT_SHOW (QUOTE SCALEOPT)) (DO_SHOW (QUOTE LMFRDATA)))) (((VALUE SCALEMODE) (VALUE LMFRDATA)) MIN_MAX_RULE (AND (= (VALUE (QUOTE SCALEMODE)) 2) (NOT (VALUE (QUOTE LMFRDATA)))) (PROGN (DO_SHOW (QUOTE SCRN_MIN)) (DO_SHOW (QUOTE SCRN_MAX))) (PROGN (DO_NOT_SHOW (QUOTE SCRN_MIN)) (DO_NOT_SHOW (QUOTE SCRN_MAX)))) (((VALUE NPANEL) (SHOWP NPANEL)) PANEL_RULE (AND (> (VALUE (QUOTE NPANEL)) 1) (SHOWING (QUOTE NPANEL))) (DO_SHOW (QUOTE SPLIT)) (DO_NOT_SHOW (QUOTE SPLIT))) (((VALUE DISPMODE)) COLORBAR_RULE (OR (= (VALUE (QUOTE DISPMODE)) 3) (= (VALUE (QUOTE DISPMODE)) 4)) (DO_SHOW (QUOTE COLORBAR)) (DO_NOT_SHOW (QUOTE COLORBAR))) (((VALUE DISPMODE)) INTERP_RULE (NOT (= (VALUE (QUOTE DISPMODE)) 1)) (DO_SHOW (QUOTE INTERP)) (DO_NOT_SHOW (QUOTE INTERP))))\n:exec_data (^ST_TRACE_DISPLAY^ (^GENERAL^ (^version^ :implicit ^ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $^) (^Xserver^ :implicit (IF (= (VALUE (QUOTE XSERVER)) ^This Screen^) (WHERE_PROMAX_DISPLAYS) (VALUE (QUOTE XSERVER)))) (^tstart^ :implicit (VALUE (QUOTE TSTART))) (^tend^ :implicit (VALUE (QUOTE TEND))) (^n_traces^ :implicit (VALUE (QUOTE NUM_DISPLAY_TRACES))) (^overlap^ :implicit (VALUE (QUOTE OVERLAP))) (^n_ensmbl^ :implicit (VALUE (QUOTE NUM_ENSEMBLES))) (^ens_gap^ :implicit (VALUE (QUOTE ENSEMBLE_GAP))) (^ens_inc^ :implicit (VALUE (QUOTE ENS_PAN_INC))) (^varspace^ :implicit (IF (VALUE (QUOTE VAR_SPACE)) 1 0)) (^wrtmode^ :implicit (VALUE (QUOTE OUTPUT_MODE))) (^dispmode^ :implicit (VALUE (QUOTE DISPMODE))) (^colorbar^ :implicit (IF (VALUE (QUOTE COLORBAR)) 1 0)) (^varbias^ :implicit (VALUE (QUOTE VARBIAS))) (^interp^ :implicit (VALUE (QUOTE INTERP))) (^headplot^ :implicit (VALUE (QUOTE HEADBOARD))) (^autosave^ :implicit (IF (VALUE (QUOTE AUTOSAVE)) 1 0)) (^maximage^ :implicit (VALUE (QUOTE MAXIMAGES))) (^savecolr^ :implicit (IF (VALUE (QUOTE SAVETYPE)) 1 0)) (^pixmap^ :implicit (VALUE (QUOTE SAVEWHERE))) (^nbatch^ :implicit (VALUE (QUOTE NBATCH))) (^direct^ :implicit (VALUE (QUOTE DIRECTION))) (^polarity^ :float (VALUE (QUOTE POLARITY))) (^lkeynam1^ :implicit (VALUE (QUOTE LKEYNAM1))) (^lkeynam2^ :implicit (VALUE (QUOTE LKEYNAM2))) (^lablmod2^ :implicit (VALUE (QUOTE LABLMOD2))) (^lablinc2^ :implicit (VALUE (QUOTE LABLINC2))) (^scalmode^ :implicit (VALUE (QUOTE SCALEMODE))) (^clip^ :implicit (VALUE (QUOTE CLIP))) (^ascalar^ :implicit (VALUE (QUOTE ASCALAR))) (^scaleopt^ :implicit (VALUE (QUOTE SCALEOPT))) (^lmfrdata^ :implicit (IF (VALUE (QUOTE LMFRDATA)) 1 0)) (^scalemin^ :implicit (VALUE (QUOTE SCRN_MIN))) (^scalemax^ :implicit (VALUE (QUOTE SCRN_MAX))) (^npanel^ :implicit (VALUE (QUOTE NPANEL))) (^split^ :implicit (VALUE (QUOTE SPLIT))) (^orient^ :implicit (VALUE (QUOTE ORIENTATION))) (^program^ :implicit (VALUE (QUOTE PROGRAM))) (^DEBUG^ :implicit (IF (VALUE (QUOTE DEBUG)) 2 0)))):parameter XSERVER\n:text ^Select display DEVICE^\n:type :typein\n:type_desc (:string 32)\n:value ^This Screen^\n:mouse_text ^\'This Screen\' for current display or type in a display name to override the current display default.^\n:parameter TSTART\n:text ^Specify display START time^\n:type :typein\n:type_desc (:real 7 0.0 NIL)\n:value 0.0\n:mouse_text ^Specify the starting time of the display in msec.^\n:parameter TEND\n:text ^Specify display END time^\n:type :typein\n:type_desc (:real 7 0.0 NIL)\n:value 0.0\n:mouse_text ^Specify the ending time of the display in msec.^\n:parameter NUM_DISPLAY_TRACES\n:text ^Maximum number of TRACES/screen^\n:type :typein\n:type_desc (:int 4 0 NIL)\n:value 0\n:mouse_text ^What is the maximum number of traces to be displayed on the screen at a time? (enter 0 for automatic mode).^\n:parameter OVERLAP\n:text ^  Traces to overlap between screens^\n:type :typein\n:type_desc (:int 4 0 NIL)\n:value 0\n:showp NIL\n:mouse_text ^How many traces do you wish to overlap between screens?^\n:parameter NUM_ENSEMBLES\n:text ^Number of ENSEMBLES(line segments)/screen ^\n:type :typein\n:type_desc (:int 4 1 NIL)\n:value 2\n:mouse_text ^Maximum number of trace ENSEMBLES (stacked line segments) to be displayed on the screen at one time.^\n:parameter ENSEMBLE_GAP\n:text ^  Trace GAP between ensembles^\n:type :typein\n:type_desc (:real 4 0.0 NIL)\n:value 1.0\n:mouse_text ^What is the gap width in traces between ensembles when displaying multiple ensembles/screen?^\n:parameter ENS_PAN_INC\n:text ^  Ensemble increment^\n:type :typein\n:type_desc (:int 4 0 NIL)\n:value 0\n:mouse_text ^Enter the number of trace ensembles between successive screens. (enter 0 to increment by Number of ENSEMBLES/screen).^\n:parameter VAR_SPACE\n:text ^Do you want to use variable trace spacing?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:mouse_text ^Do you want to position the traces by the sort key values?^\n:parameter OUTPUT_MODE\n:text ^Output Mode^\n:type :circular\n:type_desc ((^When Done^ 2 ^Return traces to the flow when you display the next screen.^) (^Immediate^ 1 ^Return traces to the flow as soon as they are read.^))\n:selected_item (^When Done^ 2 ^Return traces to the flow when you display the next screen.^)\n:value 2\n:mouse_text ^Choose when to put traces back into the flow^\n:parameter DISPMODE\n:text ^Trace display MODE^\n:type :pop_choose\n:type_desc ((^WT/VA^ 0 ^Display traces in WIGGLE TRACE/VARIABLE AREA mode.^) (^WT^ 1 ^Display traces in WIGGLE TRACE mode.^) (^VA^ 2 ^Display traces in VARIABLE AREA ONLY mode.^) (^Color^ 3 ^Display traces in VARIABLE DENSITY color mode.^) (^Grayscale^ 4 ^Display traces in VARIABLE DENSITY grayscale mode.^))\n:selected_item (^WT/VA^ 0 ^Display traces in WIGGLE TRACE/VARIABLE AREA mode.^)\n:value 0\n:parameter VARBIAS\n:text ^  Offset BIAS for variable area^\n:type :typein\n:type_desc (:real 7 -100.0 100.0)\n:value 0.0\n:mouse_text ^What percent bias do you want for variable area trace display (positive=more black, negative=less black).^\n:parameter COLORBAR\n:text ^  Display color bar?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:showp NIL\n:mouse_text ^Do you want a color bar displayed?^\n:parameter INTERP\n:text ^  Interpolation^\n:type :circular\n:type_desc ((^Smooth^ 0 ^Smooth linear interpolation of pixels^) (^Nearest Sample^ 1 ^Blockier nearest sample interpolation of pixels^))\n:selected_item (^Smooth^ 0 ^Smooth linear interpolation of pixels^)\n:value 0\n:mouse_text ^Choose pixel interpolation method^\n:parameter HEADBOARD\n:text ^Header Plot Parameter^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^No trace header selected  ^\n:value ^NONE    ^\n:mouse_text ^Use MB1 to select a trace header entry to plot in the headboard.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter AUTOSAVE\n:text ^Automatically SAVE screens?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^Yes ^ T)\n:value T\n:mouse_text ^Do you want to automatically save every screen that is \'drawn\'?^\n:parameter MAXIMAGES\n:text ^Maximum number of screen images to save.^\n:type :typein\n:type_desc (:int 3 1 200)\n:value 10\n:mouse_text ^Maximum number of screen images to maintain. Older images will be deleted as new ones are saved.^\n:parameter SAVETYPE\n:text ^Save screens in Color?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^Yes ^ T)\n:value T\n:mouse_text ^Do you want to save color images?^\n:parameter SAVEWHERE\n:text ^Where to save screen images^\n:type :circular\n:type_desc ((^Xserver^ 1 ^Save images in the Xserver. Faster, but may not work on Xterminals with limited memory (see helpfile).^) (^Program^ 0 ^Save images in the program. Slower^))\n:selected_item (^Xserver^ 1 ^Save images in the Xserver. Faster, but may not work on Xterminals with limited memory (see helpfile).^)\n:value 1\n:parameter NBATCH\n:text ^Number of screens to collect^\n:type :typein\n:type_desc (:int 3 0 157)\n:value 1\n:mouse_text ^How many screens do you want to save before reviewing them?^\n:parameter DIRECTION\n:text ^DIRECTION of trace plotting^\n:type :circular\n:type_desc ((^Left to right^ 1 ^Display traces with low numbers on the LEFT-hand side of the screen.^) (^Right to left^ 2 ^Display traces with low numbers on the RIGHT-hand side of the screen.^))\n:selected_item (^Left to right^ 1 ^Display traces with low numbers on the LEFT-hand side of the screen.^)\n:value 1\n:mouse_text ^Use MB1 to swithc between choices for flipping the direction of the trace plot.^\n:parameter POLARITY\n:text ^POLARITY of trace display^\n:type :circular\n:type_desc ((^Normal  ^ 1.0 ^Display traces with NORMAL polarity.^) (^Reversed^ -1.0 ^Reverse trace polarity before plotting.^))\n:selected_item (^Normal  ^ 1.0 ^Display traces with NORMAL polarity.^)\n:value 1.0\n:parameter LKEYNAM1\n:text ^Primary trace LABELING header entry^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^3D inline number^\n:value ^ILINE_NO^\n:mouse_text ^Use MB1 to select a header entry to use as the \'top\' trace annotation.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter LKEYNAM2\n:text ^Secondary trace LABELING header entry^\n:type :function\n:type_desc (HEADER_LIST HEADERS)\n:selected_item ^3D crossline number^\n:value ^XLINE_NO^\n:mouse_text ^Use MB1 to select a header entry to use as the \'secondary\' trace annotation.^\n:properties (:supported_formats (^PROMAX^ ^PROMAX_SMART^ ^PROMAX_TAPE^)\n )\n:parameter LABLMOD2\n:text ^  MODE of Secondary trace annotation^\n:type :pop_choose\n:type_desc ((^Incremental^ 2 ^Label the first trace and every INCREMENTAL trace thereafter. (5: 1-6-11-16 etc.)^) (^Multiple^ 1 ^Label a trace if the header value falls on a MULTIPLE of the chosen increment. (5: 5-10-15-20 etc.)^) (^Different^ 3 ^Label the 1st trace, or every trace, the header value is DIFFERENT from the previous one. (Once per gather.)^))\n:selected_item (^Incremental^ 2 ^Label the first trace and every INCREMENTAL trace thereafter. (5: 1-6-11-16 etc.)^)\n:value 2\n:mouse_text ^What labeling mode \'frequency\' do you wish to use to label the BOTTOM trace header annotation?^\n:parameter LABLINC2\n:text ^    INCREMENT for Secondary trace annotation^\n:type :typein\n:type_desc (:int 3 1 NIL)\n:value 5\n:mouse_text ^What is the increment you wish to use for the BOTTOM trace annotation? (Example: every 5th, or multiple of 5.)^\n:parameter SCALEMODE\n:text ^Trace scaling mode^\n:type :circular\n:type_desc ((^Conventional^ 1 ^Use Conventional trace scaling in conjunction with the selected scaling option.^) (^Range-Limited^ 2 ^Use Range-limited trace scaling (includes a bias). Utilize a (Min/Max)/2 scaling logic. (Ideal for F-K displays.)^))\n:selected_item (^Conventional^ 1 ^Use Conventional trace scaling in conjunction with the selected scaling option.^)\n:value 1\n:mouse_text ^Use MB1 to select conventional or range-limited scaling. Click MB1 on \'?\' for further discussion of modes.^\n:parameter CLIP\n:text ^  Trace excursion at which to CLIP^\n:type :typein\n:type_desc (:real 7 1.0E-5 10)\n:value 2.0\n:mouse_text ^How many excursions do you wish your data to cross before being clipped? (2: clipped at 2nd. crossing.)^\n:parameter ASCALAR\n:text ^  SCALAR for sample value multiplication^\n:type :typein\n:type_desc (:real 7 NIL NIL)\n:value 1.0\n:mouse_text ^This trace samples are multiplied by this scalar before displaying. Try 0.9 for WT, VA, WT/VA and 0.5 for Color.^\n:parameter SCALEOPT\n:text ^  Trace scaling option^\n:type :pop_choose\n:type_desc ((^Individual^ 1 ^Scale each trace individually. (Divide trace amplitudes by the mean absolute value of the trace.)^) (^Entire Screen^ 2 ^Scale the entire screen based on the average of all displayed traces. (Divide by the mean abs. value of ALL traces).^) (^No scaling^ 0 ^No additional trace equalization or scaling is applied.^))\n:selected_item (^Individual^ 1 ^Scale each trace individually. (Divide trace amplitudes by the mean absolute value of the trace.)^)\n:value 1\n:mouse_text ^Use MB1 to pop up a sub-menu where you may choose how to scale the displayed traces.^\n:parameter LMFRDATA\n:text ^  Get min/max amplitudes from the data?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^Yes ^ T)\n:value T\n:showp NIL\n:mouse_text ^If set to \'Yes\' the min/max amplitudes will be extracted from the data. Or you may supply the min/max amplitudes.^\n:parameter SCRN_MIN\n:text ^    Specify minimum amplitude to display^\n:type :typein\n:type_desc (:real 8 NIL NIL)\n:value -1.0\n:showp NIL\n:mouse_text ^Specify the minimum amplitude to display (without clipping).^\n:parameter SCRN_MAX\n:text ^    Specify maximum amplitude to display^\n:type :typein\n:type_desc (:real 8 NIL NIL)\n:value 1.0\n:showp NIL\n:mouse_text ^Specify the maximum amplitude to display (without clipping).^\n:parameter NPANEL\n:text ^Number of display panels^\n:type :typein\n:type_desc (:int 2 1 9)\n:value 1\n:mouse_text ^Enter the number of display panels you wish to create^\n:parameter SPLIT\n:text ^  Split data by^\n:type :circular\n:type_desc ((^Ensemble^ 0 ^Split ensembles in different panels.^) (^Demultiplex^ 1 ^Demultiplex traces into different panels.^))\n:selected_item (^Ensemble^ 0 ^Split ensembles in different panels.^)\n:value 0\n:showp NIL\n:parameter ORIENTATION\n:text ^Trace Orientation^\n:type :circular\n:type_desc ((^Vertical^ 0 ^Draw traces vertically (normal mode)^) (^Horizontal^ 1 ^Draw horizontal traces^))\n:selected_item (^Vertical^ 0 ^Draw traces vertically (normal mode)^)\n:value 0\n:parameter PROGRAM\n:text ^Program executable name^\n:type :edit\n:type_desc (30 100 2 ^ Example: /usr/stof/promax/sa/my_prog\n HELP: EMACS Editor Widget (scroll with down/up arrow keys)\n CURSOR MOVEMENT: Use the arrow keys:->,&lt;-,etc.;Point the mouse cursor,click B1\n CM: Ctrl-A\t\tMove the cursor to the BEGINNING of the current line\n CM: Ctrl-E\t\tMove the cursor to the END of the current line\n EDITING: All keyboard entry is in \'insert\' mode\n E:  Backspace, Delete keys\tDelete one character to the LEFT of the cursor\n E:  Ctrl-D\t\t\tDelete one character to the RIGHT of the cursor\n E:  Ctrl-K\t\tKILL to the end of the line (from the cursor)\n E:  Ctrl-Y\t\tYANK back the contents of the kill buffer; \'Cut and \n\t\t\t  paste\'; (Can move the cursor first) ^ 3)\n:value ^traceDisplay.exe^\n:showp NIL\n:mouse_text ^Type path name of program executable.  If the path doesn\'t start with a /, the main ProMAX executable directory is used.^\n:parameter DEBUG\n:text ^Debug mode?^\n:type :boolean\n:type_desc ((^Yes ^ T) (^No^ NIL))\n:selected_item (^No^ NIL)\n:showp NIL\n:mouse_text ^To debug program, enter YES.  You will have to debug the program yourself^\n)\n" </par>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+        <parset name="execParameters">
+          <parset name="ST_TRACE_DISPLAY #0">
+            <parset name="GENERAL">
+              <par name="version" type="string"> "ProMAX $Id: exec.0.pwflow 29824 2008-05-30 03:29:11Z dgrygier $ $Revision: 29824 $ $Date: 2008-05-29 21:29:11 -0600 (Thu, 29 May 2008) $" </par>
+              <par name="Xserver" type="string"> localhost:11.0 </par>
+              <par name="tstart" type="double"> 0.0 </par>
+              <par name="tend" type="double"> 0.0 </par>
+              <par name="n_traces" type="long"> 0 </par>
+              <par name="overlap" type="long"> 0 </par>
+              <par name="n_ensmbl" type="long"> 2 </par>
+              <par name="ens_gap" type="double"> 1.0 </par>
+              <par name="ens_inc" type="long"> 0 </par>
+              <par name="varspace" type="long"> 0 </par>
+              <par name="wrtmode" type="long"> 2 </par>
+              <par name="dispmode" type="long"> 0 </par>
+              <par name="colorbar" type="long"> 0 </par>
+              <par name="varbias" type="double"> 0.0 </par>
+              <par name="interp" type="long"> 0 </par>
+              <par name="headplot" type="string"> "NONE    " </par>
+              <par name="autosave" type="long"> 1 </par>
+              <par name="maximage" type="long"> 10 </par>
+              <par name="savecolr" type="long"> 1 </par>
+              <par name="pixmap" type="long"> 1 </par>
+              <par name="nbatch" type="long"> 1 </par>
+              <par name="direct" type="long"> 1 </par>
+              <par name="polarity" type="double"> 1.0 </par>
+              <par name="lkeynam1" type="string"> ILINE_NO </par>
+              <par name="lkeynam2" type="string"> XLINE_NO </par>
+              <par name="lablmod2" type="long"> 2 </par>
+              <par name="lablinc2" type="long"> 5 </par>
+              <par name="scalmode" type="long"> 1 </par>
+              <par name="clip" type="double"> 2.0 </par>
+              <par name="ascalar" type="double"> 1.0 </par>
+              <par name="scaleopt" type="long"> 1 </par>
+              <par name="lmfrdata" type="long"> 1 </par>
+              <par name="scalemin" type="double"> -1.0 </par>
+              <par name="scalemax" type="double"> 1.0 </par>
+              <par name="npanel" type="long"> 1 </par>
+              <par name="split" type="long"> 0 </par>
+              <par name="orient" type="long"> 0 </par>
+              <par name="program" type="string"> traceDisplay.exe </par>
+              <par name="DEBUG" type="long"> 0 </par>
+            </parset>
+          </parset>
+        </parset>
+      </parset>
+    </parset>
+    <parset name="com.lgc.prowess.tool.assertion.AssertionTool #1">
+      <par name="ToolName" type="string"> com.lgc.prowess.tool.assertion.AssertionTool </par>
+      <par name="enabled" type="boolean"> true </par>
+      <parset name="parameters">
+        <parset name="PROCDESC">
+          <par name="name" type="string"> com.lgc.prowess.tool.assertion.AssertionProc </par>
+          <par name="product" type="string"> PROWESS </par>
+          <par name="label" type="string"> "Testing Assertions|dev" </par>
+          <par name="collapse" type="boolean"> false </par>
+          <par name="toolType" type="string"> NORMAL </par>
+        </parset>
+        <parset name="menuParameters">
+          <par name="ASSERT_JAVASEIS_TYPE" type="boolean"> false </par>
+          <par name="JAVASEIS_TYPE" type="string"> CMP </par>
+          <par name="ASSERT_SMART_FRAMEWORK" type="boolean"> false </par>
+          <par name="ASSERT_DATA_IS_STACKED" type="boolean"> false </par>
+          <par name="ASSERT_DATA_IS_NOT_STACKED" type="boolean"> false </par>
+          <par name="ASSERT_DATA_IS_SYNTHETIC" type="boolean"> false </par>
+          <par name="ASSERT_DATA_IS_NOT_SYNTHETIC" type="boolean"> false </par>
+          <par name="ASSERT_NDIMENSIONS" type="boolean"> false </par>
+          <par name="NDIMENSIONS" type="int"> 0 </par>
+          <par name="ASSERT_PRIMARY_SORT" type="boolean"> false </par>
+          <par name="PRIMARY_SORT_TYPE" type="string"> cdp </par>
+          <par name="ASSERT_PRIMARY_SORT_HEADER" type="boolean"> false </par>
+          <par name="PRIMARY_SORT_HEADER_NAME" type="string"> AMPRATIO </par>
+          <par name="ASSERT_SECONDARY_SORT_HEADER" type="boolean"> false </par>
+          <par name="SECONDARY_SORT_HEADER_NAME" type="string"> AMPRATIO </par>
+          <par name="ASSERT_HEADERS" type="boolean"> false </par>
+          <par name="ASSERT_SAMPLE_AXIS" type="boolean"> false </par>
+          <par name="SAMPLE_AXIS" type="string"> TIME </par>
+          <par name="ASSERT_SAMPLE_DOMAIN" type="boolean"> false </par>
+          <par name="SAMPLE_DOMAIN" type="string"> TIME </par>
+          <par name="ASSERT_START_TIME" type="boolean"> false </par>
+          <par name="START_TIME" type="float"> 0.0 </par>
+          <par name="ASSERT_END_TIME" type="boolean"> false </par>
+          <par name="END_TIME" type="float"> 0.0 </par>
+          <par name="ASSERT_SAMPLE_INTERVAL" type="boolean"> false </par>
+          <par name="SAMPLE_INTERVAL" type="float"> 0.0 </par>
+          <par name="ASSERT_TRACE_LENGTH" type="boolean"> false </par>
+          <par name="TRACE_LENGTH" type="int"> 0 </par>
+          <par name="ASSERT_TRACE_AXIS" type="boolean"> false </par>
+          <par name="TRACE_AXIS" type="string"> CHAN </par>
+          <par name="ASSERT_MIN_LIVE_COUNT" type="boolean"> false </par>
+          <par name="MIN_LIVE_COUNT" type="int"> 0 </par>
+          <par name="ASSERT_MAX_LIVE_COUNT" type="boolean"> false </par>
+          <par name="MAX_LIVE_COUNT" type="int"> 0 </par>
+          <par name="ASSERT_FRAME_AXIS" type="boolean"> false </par>
+          <par name="FRAME_AXIS" type="string"> XLINE_NO </par>
+          <par name="ASSERT_ENSEMBLE_SIZE" type="boolean"> false </par>
+          <par name="ENSEMBLE_SIZE" type="int"> 0 </par>
+          <par name="ASSERT_NENSEMBLES" type="boolean"> false </par>
+          <par name="NENSEMBLES" type="int"> 0 </par>
+          <par name="ASSERT_NENSEMBLES_TOTAL" type="boolean"> false </par>
+          <par name="NENSEMBLES_TOTAL" type="int"> 0 </par>
+          <par name="ASSERT_NENSEMBLES_OBSERVED" type="boolean"> false </par>
+          <par name="NENSEMBLES_OBSERVED" type="int"> 0 </par>
+          <par name="ASSERT_VOLUME_AXIS" type="boolean"> false </par>
+          <par name="VOLUME_AXIS" type="string"> ILINE_NO </par>
+          <par name="ASSERT_NVOLUMES" type="boolean"> false </par>
+          <par name="NVOLUMES" type="int"> 0 </par>
+          <par name="ASSERT_HYPERCUBE_AXIS" type="boolean"> false </par>
+          <par name="HYPERCUBE_AXIS" type="string"> ILINE_NO </par>
+          <par name="ASSERT_NHYPERCUBES" type="boolean"> false </par>
+          <par name="NHYPERCUBES" type="int"> 0 </par>
+          <par name="ASSERT_MIN_SAMPLE_VALUE" type="boolean"> true </par>
+          <par name="MIN_SAMPLE_VALUE" type="float"> 0.0 </par>
+          <par name="ASSERT_MAX_SAMPLE_VALUE" type="boolean"> true </par>
+          <par name="MAX_SAMPLE_VALUE" type="float"> 0.0 </par>
+          <parset name="HEADERKEY">
+            <par name="flowType" type="string"> PWFlow </par>
+            <parset name="flowParameters">
+              <parset name="etc">
+                <par name="show" type="boolean"> false </par>
+              </parset>
+              <parset name="EXEC">
+                <parset name="PROCDESC">
+                  <par name="product" type="string"> PROWESS </par>
+                  <par name="collapse" type="boolean"> false </par>
+                  <par name="label" type="string"> com.lgc.prodesk.flowbuilder.menu.ExecutiveProc </par>
+                  <par name="name" type="string"> com.lgc.prodesk.flowbuilder.menu.ExecutiveProc </par>
+                  <par name="toolType" type="string"> NORMAL </par>
+                  <par name="type" type="string"> Java </par>
+                </parset>
+                <parset name="menuParameters">
+                  <par name="CHAINED" type="boolean"> false </par>
+                  <par name="PRECURSORS" type="string"> "" </par>
+                  <par name="RECOMENDED_NUM_JOBLETS" type="int"> 1 </par>
+                  <par name="OVERRIDE_XMX_VALUE" type="boolean"> false </par>
+                  <par name="JAVA_XMX_VALUE" type="long"> 2048 </par>
+                </parset>
+                <parset name="parameterAttributes">
+                </parset>
+              </parset>
+            </parset>
+            <parset name="modules">
+            </parset>
+            <parset name="connections">
+            </parset>
+          </parset>
+        </parset>
+        <parset name="parameterAttributes">
+        </parset>
+      </parset>
+    </parset>
+  </parset>
+  <parset name="connections">
+    <parset name="connection #1">
+      <par name="src" type="string"> "com.lgc.prowess.tool.input.SmartInputTool #1" </par>
+      <par name="dst" type="string"> "REPEAT #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #2">
+      <par name="src" type="string"> "REPEAT #1" </par>
+      <par name="dst" type="string"> "FLOW_IF #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #3">
+      <par name="src" type="string"> "FLOW_IF #1" </par>
+      <par name="dst" type="string"> "FLOW_ELSEIF #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #4">
+      <par name="src" type="string"> "FLOW_ELSEIF #1" </par>
+      <par name="dst" type="string"> "FXDECON #2" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #5">
+      <par name="src" type="string"> "FXDECON #2" </par>
+      <par name="dst" type="string"> "FLOW_ENDIF #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #6">
+      <par name="src" type="string"> "FLOW_ENDIF #1" </par>
+      <par name="dst" type="string"> "INLINE_SORT #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #7">
+      <par name="src" type="string"> "INLINE_SORT #1" </par>
+      <par name="dst" type="string"> "TRACEMATH #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #8">
+      <par name="src" type="string"> "TRACEMATH #1" </par>
+      <par name="dst" type="string"> "TRACEDISPLAY #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+    <parset name="connection #9">
+      <par name="src" type="string"> "TRACEDISPLAY #1" </par>
+      <par name="dst" type="string"> "com.lgc.prowess.tool.assertion.AssertionTool #1" </par>
+      <par name="srcPort" type="string"> default </par>
+      <par name="dstPort" type="string"> default </par>
+    </parset>
+  </parset>
+</parset>

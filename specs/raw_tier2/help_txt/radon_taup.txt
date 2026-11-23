@@ -1,0 +1,419 @@
+Interactive Radon/Tau-P Analysis1109
+
+ProMAX® Reference
+
+Interactive Radon/Tau-P Analysis
+Interactive Radon/Tau-P Analysis transforms data to timemoveout space for picking a mute to attenuate energy with
+undesirable moveout.
+
+Theory
+Radon Filter is commonly used for suppression of multiples.
+The normal technique is to model multiples and subtract
+them from the input seismic trace data. Radon ﬁlters are
+then applied to pass the primary energy. However, in practice
+this tends to produce an artiﬁcial and wormy appearing
+result.
+The Radon transform distinguishes between primaries and
+multiples based on the residual moveout from near to far
+offset. A parabolic form of the Radon transform is used since
+multiples have an approximately parabolic form after NMO.
+An approximately hyperbolic form can also be used. This
+hyperbolic approximation is more accurate at times around
+offset=depth, but is not as accurate for shallower events as
+the parabolic method.
+The transform is applied for linear moveout as well.
+Sparse Transform Option
+Conventional Radon Filtering has limitations on the
+discrimination possible between multiples and primaries.
+These limitations stem from the fact that events in T-X space
+do not transform to points in Tau-P space, but exhibit a
+“butterﬂy” shape. The sparse transform option will reduce
+the size of the butterﬂy in the Moveout (P) direction, but can
+cause dispersion of energy in the time (Tau) direction. The
+sparse transform does this by concentrating energy on the
+Moveout samples which have the most energy. This
+discrimination against weak events tends to reduce the effect
+of aliased events as well as enhance those which are desired.
+There are two options for the computation of the sparse
+radon transform. The frequency domain sparse radon
+transform attempts to generate a sparse transform in the Pdirection using a stability parameter to help stabilize the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1110
+
+ProMAX® Reference
+
+solution. The time-domain sparse radon attempts to generate
+a transform in both the P and time directions.
+In order for the sparse option to be most effective, the
+primaries should be ﬂattened by applying NMO before Radon
+Filter or Analysis. This will align all of the primary energy
+near P=0, giving greatest weight to the primary reﬂections in
+the sparse transform. Multiple energy should be expected to
+fall on a variety of P-values, so the sparse solution does not
+reconstruct it as well as the aligned primaries. Incoherent
+noise and aliased energy should be diminished for this same
+reason.
+Testing should be done to determine the optimum amount of
+sparseness to use for each dataset. There is a tradeoff
+between the ﬁdelity of data reconstruction and the separation
+of events which can be obtained.
+
+Usage
+Input Data
+Input CDP domain data to Interactive Radon/Tau-P
+Analysis and Radon Filter that has NMO ﬁrst applied using
+the primary velocities and an appropriate mute for
+eliminating ﬁrst break refractions and NMO stretch. A Radon
+space is then computed for the analysis CDP.
+Beneﬁts
+This method requires no knowledge of the multiple
+generating mechanism, and unlike the F-K demultiple
+processes, it attenuates multiples at all offsets equally. It also
+works fairly well with non-uniform geometries.
+A minimum moveout of 30 ms from near trace to far trace is
+required for this algorithm to be effective on real data. The
+greater the moveout differential, the more effective the Radon
+ﬁlter. However, large moveout differentials can require more
+p-values over a greater range for adequate sampling.
+Note: Choose this parameter with care because run time for
+this process increases with the square of the number of pvalues. Radon ﬁltering is a compute intensive process
+requiring several minutes for a high fold CDP.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1111
+
+ProMAX® Reference
+
+Displaying Output
+Use Radon Analysis to display data as time versus residual
+moveout. Primaries map from offset space to zero residual
+moveout in Radon space. Multiples map to the positive
+residual moveout zone. Overcorrected events are in the
+negative residual moveout portion of Radon space. This is
+why the typical range of minimum to maximum p values for a
+Radon Transform are biased toward positive values, typically
+from -x0 ms to +x00 ms.
+
+Input Gather
+
+Inverse Transform
+Radon Transform
+
+Removing Multiplies
+Use the following steps to remove multiples.
+1. Apply NMO with the primary velocity function.
+2. Run Radon Analysis on a representative set of CDPs. Set
+the Radon Transform parameters using the Edit
+➛Transform Parameters pulldown menu.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1112
+
+ProMAX® Reference
+
+To pick a top mute use Edit ➛ Select Mutes and Edit ➛
+Mute Parameters pulldown menus.
+
+Apply the mute for quality control by clicking on the
+Paintbrush icon.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1113
+
+ProMAX® Reference
+
+Reﬁne the transform parameters and mute until the
+desired output is achieved.
+3. Run the Radon Filter using the mute and parameters
+picked in Step 2.
+Radon analysis also provides general functions of display and
+interactive parameter ﬁle creation for the Radon transformed
+data. The display function is actually a subset of the full
+trace display process. Any parameters not available on the
+menu can be available for modiﬁcation once the ﬂow has
+executed, using pulldown menus from the menu bar.
+The display supports interactive picking of mutes for
+subsequent Radon ﬁlters. The display uses the range-limited
+scaling option.
+Note: The reference offset must be the same as used in
+Radon Filter, to apply the same mutes.
+Parameters controlling the ﬁdelity of the ﬁltering are
+interactively changed. Output from the inverse transform is
+viewed to evaluate the entire ﬁltering process.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1114
+
+ProMAX® Reference
+
+References
+Original FORTRAN subroutines for the hi-res time-domain Radon transfer were
+written by M. D. Sacchi at the Signal Analysiis and Imaging Group (SAIG), University of Alberta.
+Cary, P., 1998. The simplest discrete Radon transform. SEG Expanded Abstracts,
+Vol. II, p. 1999-2002.
+Foster, D.J., and Mosher, C.C., 1992, Suppression of multiple reﬂections using the
+Radon transform: Geophysics, vol 57 p386-395.
+Hampson, D., 1986, Inverse velocity stacking for multiple elimination: Journal of
+the Canadian Society of Exploration Geophysicists, vol 22 p44-55.
+Sacchi, M.D., 2006, Time Domain High Resolution Radon Transforms, Signal
+Analysis and Imaging Group Annual Report 7.
+Sacchi, M.D. and Ulrych, T. J., 1995. High resolution velocity gathers and offsetspace reconstruction: Geophysics, 60, 1169-1177.
+Sacchi, M.D., 1999. Fast high resolution parabolic Radon transform. SEG
+Expanded Abstracts, Vol. II, p. 1477-1480.
+Thorson, J. R., and Claerbout, J. F., 1985, Velocity stack and slant stack stochastic inversion: Geophysics, vol 50 p2727-2741.
+
+Parameters
+Select display Device
+Select This Screen to display the interactive Radon/Tau-P
+window to your computer screen.
+Number of P-values
+Enter the number of p-values for the radon transform. A
+typical range is between 20 and 40. Minimally, the number of
+p-values should equal the maximum fold of the input data.
+Too low a value generates streaks in the output; too large a
+value greatly increases runtime.
+Minimum P-value of interest (ms)
+Enter the minimum p-value of interest, in ms. This value
+represents the largest overcorrection on the data at the far
+offset. Start with a value around -100 ms. Allow the
+primaries to show a slight overcorrection. You must also
+allow for the ﬁnite length of the primary reﬂection wavelet.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1115
+
+ProMAX® Reference
+
+Maximum P-value of interest (ms)
+Enter the maximum p-value of interest, in ms. This value
+represents the largest undercorrection on the data at the far
+offset. Start with a value of around 400 ms. This value
+depends on the data, the velocities of the multiple energy,
+and the offsets used in recording the data. Select the
+maximum value seen in the data for undercorrected
+multiples, and add about a 100 ms margin.
+Note: All coherent events on the data should fall between the
+minimum and maximum p-values of interest. If coherent
+energy falls outside of this range, the least-squares ﬁt
+attempts to model it into the range of p-values. This results
+in artifacts in the output.
+Minimum time of interest (ms)
+Enter the minimum time in ms. The minimum time is the top
+of the window on the input data.
+Maximum time of interest (ms)
+Enter the maximum time in ms. The maximum time is the
+bottom of the window on the input data. Enter 0 to
+automatically set the maximum data time.
+Minimum frequency of interest
+Enter the minimum coherent frequency in Hz in the data.
+Maximum frequency of interest
+Enter the maximum coherent frequency in Hz in the data.
+Type of transform to perform
+Select from the following transforms, how to model events:
+• Parabolic is a parabolic radon transform.
+• Hyperbolic is exactly hyperbolic for events at depths
+equal to the reference offset. This has greater error than
+Parabolic for shallower events.
+• Linear is used to attack linear noise, also known as
+slant stack.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1116
+
+ProMAX® Reference
+
+Parabolic and Hyperbolic are normally used for multiple
+rejection.
+Reference offset for delta moveout
+Enter the reference that mute parameters were picked for a
+particular delta moveout. A larger residual moveout is
+expected for larger offsets, hence the need to deﬁne a
+reference for the mutes. P-values are expected to vary with
+the square of the change in reference offset. The reference
+offset should be close to the maximum offset of the input
+data, and must agree with that speciﬁed in Radon Filter.
+Damping for radon solution
+Enter a fraction of damping (white noise) to add for the
+matrix solver. For typical datasets, the damping should be set
+to a value between 0.01 and 0.1. Higher values are
+appropriate for noisier data.
+If the damping is set less than 0.01, it is assumed that the
+data are very clean, such as synthetics. An alternative matrix
+solution can be used, depending on the stability of the matrix
+at each frequency. Results can be signiﬁcantly different
+compared with higher levels of noise.
+Compute a sparse (Hi-res) radon solution?
+Select Yes to compute a sparse radon transform. The sparse
+solution is an iterative solution which will take more time to
+compute, but can give sharper deﬁnition of events along the
+moveout axis.
+Compute a sparse (Hi-res) radon in time domain?
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. If ’yes’, then the computation of the Radon solution
+will be done in the time domain rather than in the frequency
+domain. The frequency domain solution can be sparse in the
+moveout direction, but can not do a good job of enforcing
+sparseness in the tau direction. By computing the solution
+in time domain, the computation can enforce sparseness in
+both directions more effectively. The time domain
+computation will run several times (~5) longer than the
+frequency domain solution.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1117
+
+ProMAX® Reference
+
+Maximum number of sparse iterations
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. A sparse, or hi-res, solution to the radon must be
+solved iteratively. This parameter speciﬁes the number of
+iterations allowed to compute the solution. A value of 3 is
+suggested to start. The value may be increased to 4 or 5 if a
+sparser solution is desired, but the runtime will increase
+proportionately.
+Sparseness parameter
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. Enter the amount of sparseness in the solution
+measured as a fraction of the main matrix diagonal. Use
+values between 0 and 1.0. A larger value will give a solution
+which is sparser in the moveout axis. Values between 0.05
+and 0.2 should be tested.
+The Sparseness parameter applies to both the time and
+frequency-domain sparse options.
+Sparseness stability parameter
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. Enter a value between 0.001 and 0.1. Test these
+values until you ﬁnd the correct solution for your data. A
+smaller value allows a sparser solution to be computed. This
+parameter (measured as a fraction of sparseness parameter)
+avoids division by zero. It has a similar, but opposite, effect to
+the Sparseness parameter.
+The Sparseness stability parameter only applies to to the
+frequency-domain option.
+Number of CG iterations
+Typical values are 2-3 wheen only doing the frequencydomain transform and 20-30 when the time-domain
+transform is selected.
+This parameter is used in the computation of both the time
+and frequency-domain transforms but has more impact on
+the time-domain transform. Normally the conjugate-gradient
+algorithm is only used in the frequency-domain trasnform
+when the Toepplitz matrix solver does not give a good
+solution because the matrix is close to singular. In this case,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1118
+
+ProMAX® Reference
+
+2-3 iterations of the conjugate-gradient algortihm gives a
+good solution.
+For the time-domain transform, only the conjugate-gradient
+algorithm is used to generate a solution so it is necessary to
+use 20-30 iterations.
+Mute the data in the radon/tau-p domain?
+Select Yes to allow the muting of primaries or multiples after
+the transform.
+Type of mute
+This appears if Yes to Mute the data in the radon/tau-p
+domain. Select either a Top or Bottom mute.
+Select mute parameter ﬁle
+This appears if Yes to Mute the data in the radon/tau-p
+domain. Select a ﬁle to hold the mute speciﬁcations picked in
+this execution. You need to Add a new mute table if one does
+not currently exist in the directory. To add a new mute table,
+go to the list of mute tables and click on the INVALID entry.
+You are prompted to enter the Primary and Secondary keys
+for the table. The primary key should be CDP for CDP gathers
+or a shot related attribute such as SIN or SOURCE for shot
+organized gathers. However, the secondary key must be User
+Speciﬁed as Moveout.
+Length of mute ramp
+This appears if Yes to Mute the data in the radon/tau-p
+domain. Select the length of the tau (time) ramp to apply to
+the data when the mute is applied.
+Subtract TX data
+Select Yes to subtract the modeled TX data from the input TX
+data. Create attenuation and few artifacts is achieved by
+modeling the multiples and subtracting them from the input
+record. If this parameter is No, it is assumed that primaries
+have been modeled.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1119
+
+ProMAX® Reference
+
+Remute ﬂag
+Select Yes to reapply any mutes which were on the input TX
+data. A map is made of zero amplitude samples on the input
+dataset, and these samples are re-zeroed on output.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Radon/Tau-P Analysis1120
+
+Other Docs
+
+Search Page
+
+ProMAX® Reference
+
+Known Problems
+
+

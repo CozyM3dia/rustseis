@@ -1,0 +1,30 @@
+; 1 FIELD
+'(
+  :name spreadsheet
+  :label "2D Land Geometry Spreadsheet*"
+  :value_tab 40
+
+  :exec_data 
+  ("CALLER  "
+   ("SPECIAL"
+	("TOOLTYPE"  :implicit "STAND_ALONE")
+	("PATHNAME"  :implicit "module_call.exe")
+	)
+   ("GENERAL"
+	("version" :implicit "ProMAX $Id: geomspread_land.menu 41831 2007-09-01 20:51:38Z crs $  $Revision: 41831 $  $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+	("EXEC"    :implicit (promax_path "sys/exe/geomspread"))
+	("NARGS"   :implicit 7 )
+	("ARG"     :implicit "-area" )
+	("ARG"     :implicit (current_area) )
+	("ARG"     :implicit "-line" )
+	("ARG"     :implicit (current_line) )
+	("ARG"     :implicit "-land" )
+	("ARG"     :implicit "-2d" )
+	("ARG"     :implicit ^-name \"ProMAX 2D Land Geometry Spreadsheet: Copyright 1994 Advance Geophysical Inc.  All rights Reserved.\"^ )
+	)
+   )
+  )
+
+
+
+

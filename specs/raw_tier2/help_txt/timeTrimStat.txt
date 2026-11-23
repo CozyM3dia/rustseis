@@ -1,0 +1,281 @@
+Time Varying Trim Statics2532
+
+ProMAX® Reference
+
+Time Varying Trim Statics
+Time Varying Trim Statics creates time varying trim statics
+for windows along the traces in a CDP gather.
+
+Theory
+This process is useful for cleaning up a brute stack which will
+be used as model traces for External Model correlation statics
+or for removing residual moveout before a brute stack. Refer
+to Horizon Trim Statics.
+Trim statics are computed for each time window. After the
+statics are computed for each time window, the statics
+applied at each sample by interpolating the statics between
+the window centers above and below the sample. The static
+values of the ﬁrst and last window are extended to the
+beginning and the end of the trace.
+If you are trying to remove residual moveout on gathers, you
+are encouraged to use the macro bin option. The macro bin
+option computes the trim static for a super gather produced
+by summing across CDP gathers. The computed trim statics
+are then applied to each trace. This process does not write to
+the Ordered Parameter Files.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time Varying Trim Statics2533
+
+ProMAX® Reference
+
+Examples
+Stack without any statics.
+
+Stack with time varying trim statics. Trim statics are computed every
+200 ms. Window half length is 400 ms.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time Varying Trim Statics2534
+
+ProMAX® Reference
+
+Stack with whole trace trim statics.
+
+Eigenstack of original data (no trim statics).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time Varying Trim Statics2535
+
+ProMAX® Reference
+
+Eigenstack of data with time varying trim statics.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time Varying Trim Statics2536
+
+ProMAX® Reference
+
+Macro binning.
+CDP #
+69 70 71 72 73 74 75
+Offset:
+-1250
+-1150
+-1050
+-950
+-850
+-750
+-650
+-550
+-450
+-350
+-250
+-150
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+
+Macro bins in
+which traces are
+summed
+
+12 traces in each ensemble (x marks one trace)
+The traces in a bin are stacked with the following weights for
+each CDP:
+
+CDP #
+Weights:
+
+69
+.25
+
+70
+.5
+
+71
+.75
+
+72
+1.
+
+73
+.75
+
+74
+.5
+
+75
+.25
+
+This example binning is produced from 7 CDPs in a macro trace, having OFFSET
+bin spacing of 300 ft. or m, and either -1150, -850, -550 or -250 as the Center of
+an OFFSET bin.
+
+Overlapping windows with triangular taper.
+
+window half length
+
+0 ms
+
+window interval
+
+4000 ms
+
+trace
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time Varying Trim Statics2537
+
+ProMAX® Reference
+
+Parameters
+Window interval
+Enter the time interval to compute a different trim statics.
+Window half length
+Enter the length of the window at each time interval. A
+triangular taper is applied to the windows.
+Maximum trim static
+Enter the maximum trim static value. Computed trim statics
+values will not be larger than this value.
+Minimum live samples in gate (in percent)
+Enter the percentage of minimum live samples in a gate.
+Windows with fewer live samples than this value are not used
+in statics computations.
+Use macro bins?
+Enter Yes to create macro bins across CDP gathers.
+Number of CDPs in a macro bin
+This appears if Yes to Use macro bins. Enter an odd integer
+representing the total number of CDPs in a macro bin.
+Secondary header word for macro bins
+This appears if Yes to Use macro bins. Select offset, binned
+offset, or the absolute value to stack traces from neighboring
+CDP gathers.
+Center of an AOFFSET bin
+This appears if Yes to Use macro bins. Enter the center of
+any bin. The other bins centers will be an integral number of
+bin spacings from this value.
+AOFFSET bin spacing
+This appears if Yes to Use macro bins. Enter the bin center
+spacing. The number of bins is automatically computed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,447 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+;  Menu for socket tool implementation of test trace display
+;  Tony Gerhardstein
+
+'(
+  :name tracedisplay
+  :label "Trace Display"
+  :value_tab 48
+
+  :parameter Xserver
+  :text "Select display DEVICE"
+  :type :typein
+  :type_desc (:string 32)
+  :value "This Screen"
+  :mouse_text "'This Screen' for current display or type in a display name to override the current display default."
+
+  :parameter tstart
+  :text "Specify display START time"
+  :type :typein
+  :type_desc (:real 7 0.0 nil)
+  :value 0.0
+  :mouse_text "Specify the starting time of the display in msec."
+
+  :parameter tend
+  :text "Specify display END time"
+  :type :typein
+  :type_desc (:real 7 0.0 nil)
+  :value 0.0
+  :mouse_text "Specify the ending time of the display in msec."
+  
+  :parameter num_display_traces
+  :text "Maximum number of TRACES/screen"
+  :type :typein
+  :type_desc ( :int 4 0 nil )
+  :value 0
+  :mouse_text "What is the maximum number of traces to be displayed on the screen at a time? (enter 0 for automatic mode)."
+ 
+  :parameter overlap
+  :text "  Traces to overlap between screens"
+  :type :typein
+  :type_desc (:int 4 0 nil)
+  :value 0
+  :mouse_text "How many traces do you wish to overlap between screens?"
+
+  :parameter num_ensembles
+  :text "Number of ENSEMBLES(line segments)/screen "
+  :type :typein
+  :type_desc (:int 4 1 nil)
+  :value 1
+  :mouse_text "Maximum number of trace ENSEMBLES (stacked line segments) to be displayed on the screen at one time."
+
+  :parameter ensemble_gap
+  :text "  Trace GAP between ensembles"
+  :type :typein
+  :type_desc (:real 4 0.0 nil)
+  :value 1.0
+  :mouse_text "What is the gap width in traces between ensembles when displaying multiple ensembles/screen?"
+
+  :parameter ens_pan_inc
+  :text "  Ensemble increment"
+  :type :typein
+  :type_desc (:int 4 0 nil)
+  :value 0
+  :mouse_text "Enter the number of trace ensembles between successive screens. (enter 0 to increment by Number of ENSEMBLES/screen)."
+
+  :parameter var_space
+  :text "Do you want to use variable trace spacing?"
+  :type :boolean
+  :value nil
+  :mouse_text "Do you want to position the traces by the sort key values?"
+
+  :parameter output_mode
+  :text "Output Mode"
+  :type :circular
+  :type_desc 
+  (
+   ("When Done" 2  "Return traces to the flow when you display the next screen.")
+   ("Immediate" 1  "Return traces to the flow as soon as they are read.")
+   )
+  :selected_item ("When Done" 2  "Return traces to the flow when you display the next screen.")
+
+  :mouse_text "Choose when to put traces back into the flow"
+
+  :parameter dispmode
+  :text "Trace display MODE"
+  :type pop_choose:
+  :type_desc (
+			  ("WT/VA"     0 "Display traces in WIGGLE TRACE/VARIABLE AREA mode.")
+			  ("WT"        1 "Display traces in WIGGLE TRACE mode.")
+			  ("VA"        2 "Display traces in VARIABLE AREA ONLY mode.")
+			  ("Color"     3 "Display traces in VARIABLE DENSITY color mode.")
+			  ("Grayscale" 4 "Display traces in VARIABLE DENSITY grayscale mode.")
+			  )
+  :value 0
+
+  :parameter varbias
+  :text "  Offset BIAS for variable area"
+  :type :typein
+  :type_desc (:real 7 -100.0 100.0)
+  :value 0.0
+  :mouse_text "What percent bias do you want for variable area trace display (positive=more black, negative=less black)."
+
+  :parameter colorbar
+  :text "  Display color bar?"
+  :type :boolean
+  :value nil
+  :mouse_text "Do you want a color bar displayed?"
+
+  :parameter interp
+  :text "  Interpolation"
+  :type :circular
+  :type_desc 
+  (
+   ("Smooth"         0 "Smooth linear interpolation of pixels")
+   ("Nearest Sample" 1 "Blockier nearest sample interpolation of pixels")
+  )
+  :mouse_text "Choose pixel interpolation method"
+
+  :parameter headboard
+  :text "Header Plot Parameter"
+  :type :function
+  :type_desc (header_list headers)
+  :value "NONE    "
+  :selected_item "No trace header selected  "
+  :mouse_text "Use MB1 to select a trace header entry to plot in the headboard."
+
+  :parameter autosave
+  :text "Automatically SAVE screens?"
+  :type :boolean
+  :value t
+  :mouse_text "Do you want to automatically save every screen that is 'drawn'?"
+
+  :parameter maximages
+  :text "Maximum number of screen images to save."
+  :type :typein
+  :type_desc (:int 3 1 200)
+  :value 10
+  :mouse_text "Maximum number of screen images to maintain. Older images will be deleted as new ones are saved."
+
+  :parameter saveType
+  :text "Save screens in Color?"
+  :type :boolean
+  :value t
+  :mouse_text "Do you want to save color images?"
+
+  :parameter saveWhere
+  :text "Where to save screen images"
+  :type :circular
+  :type_desc (
+			  ("Xserver" 1 "Save images in the Xserver. Faster, but may not work on Xterminals with limited memory (see helpfile).")
+			  ("Program" 0 "Save images in the program. Slower"))
+
+  :parameter nbatch
+  :text "Number of screens to collect"
+  :type :typein
+  :type_desc (:int 3 0 157)
+  :value 1
+  :mouse_text "How many screens do you want to save before reviewing them?"
+
+  :parameter direction
+  :text "DIRECTION of trace plotting"
+  :type :circular
+  :type_desc (
+			  ("Left to right" 1 "Display traces with low numbers on the LEFT-hand side of the screen.")
+			  ("Right to left" 2 "Display traces with low numbers on the RIGHT-hand side of the screen."))
+  :value 1
+  :mouse_text "Use MB1 to swithc between choices for flipping the direction of the trace plot."
+
+  :parameter polarity
+  :text "POLARITY of trace display"
+  :type :circular
+  :type_desc (
+			  ("Normal  "  1.0 "Display traces with NORMAL polarity.")
+			  ("Reversed" -1.0 "Reverse trace polarity before plotting.")
+			  )
+
+  :parameter lkeynam1
+  :text "Primary trace LABELING header entry"
+  :type :function
+  :type_desc (header_list headers)
+  :value "SOURCE  "
+  :selected_item "Live source number"
+  :mouse_text "Use MB1 to select a header entry to use as the 'top' trace annotation."
+
+  :parameter lkeynam2
+  :text "Secondary trace LABELING header entry"
+  :type :function
+  :type_desc (header_list headers)
+  :value "CHAN    "
+  :selected_item "Recording channel number"
+  :mouse_text "Use MB1 to select a header entry to use as the 'secondary' trace annotation."
+
+  :parameter lablmod2
+  :text "  MODE of Secondary trace annotation"
+  :type pop_choose:
+  :type_desc (
+			  ("Incremental"  2 "Label the first trace and every INCREMENTAL trace thereafter. (5: 1-6-11-16 etc.)" )
+			  ("Multiple"  1 "Label a trace if the header value falls on a MULTIPLE of the chosen increment. (5: 5-10-15-20 etc.)" )
+			  ("Different" 3 "Label the 1st trace, or every trace, the header value is DIFFERENT from the previous one. (Once per gather.)" ) )
+  :mouse_text "What labeling mode 'frequency' do you wish to use to label the BOTTOM trace header annotation?"
+
+  :parameter lablinc2
+  :text "    INCREMENT for Secondary trace annotation"
+  :type :typein
+  :type_desc ( :int 3 1 nil )
+  :value 5
+  :mouse_text "What is the increment you wish to use for the BOTTOM trace annotation? (Example: every 5th, or multiple of 5.)"
+
+
+  :parameter scalemode
+  :text "Trace scaling mode"
+  :type :circular
+  :type_desc (
+			  ("Conventional" 1 "Use Conventional trace scaling in conjunction with the selected scaling option.")
+			  ("Range-Limited" 2 "Use Range-limited trace scaling (includes a bias). Utilize a (Min/Max)/2 scaling logic. (Ideal for F-K displays.)"))
+  :selected_item ("Conventional" 1 "Use Conventional trace scaling in conjunction with the selected scaling option.")
+  :mouse_text "Use MB1 to select conventional or range-limited scaling. Click MB1 on '?' for further discussion of modes."
+
+  :parameter clip
+  :text "  Trace excursion at which to CLIP"
+  :type :typein
+  :type_desc (:real 7 1.0e-5 10)
+  :value 2.0
+  :mouse_text "How many excursions do you wish your data to cross before being clipped? (2: clipped at 2nd. crossing.)"
+
+  :parameter ascalar
+  :text "  SCALAR for sample value multiplication"
+  :type :typein
+  :type_desc (:real 7 nil nil)
+  :value 1.0
+  :mouse_text "This trace samples are multiplied by this scalar before displaying. Try 0.9 for WT, VA, WT/VA and 0.5 for Color."
+
+  :parameter scaleopt
+  :text "  Trace scaling option"
+  :type pop_choose:
+  :type_desc (
+			  ("Individual" 1 "Scale each trace individually. (Divide trace amplitudes by the mean absolute value of the trace.)")
+			  ("Entire Screen" 2 "Scale the entire screen based on the average of all displayed traces. (Divide by the mean abs. value of ALL traces).")
+			  ("No scaling" 0 "No additional trace equalization or scaling is applied.")
+			  )
+										;I like individual scaling for default - mmb
+										;:selected_item ("Entire Screen" 2 "Scale the entire screen based on the average of all displayed traces. (Divide by the mean abs. value of ALL traces).")
+  :mouse_text "Use MB1 to pop up a sub-menu where you may choose how to scale the displayed traces."
+
+  :parameter lmfrdata
+  :text "  Get min/max amplitudes from the data?"
+  :type :boolean
+  :value t
+  :mouse_text "If set to 'Yes' the min/max amplitudes will be extracted from the data. Or you may supply the min/max amplitudes."
+
+  :parameter scrn_min
+  :text "    Specify minimum amplitude to display"
+  :type :typein
+  :type_desc (:real 8 nil nil)
+  :value -1.0
+  :mouse_text "Specify the minimum amplitude to display (without clipping)."
+
+  :parameter scrn_max
+  :text "    Specify maximum amplitude to display"
+  :type :typein
+  :type_desc (:real 8 nil nil)
+  :value 1.0
+  :mouse_text "Specify the maximum amplitude to display (without clipping)."
+
+  :parameter npanel
+  :text "Number of display panels"
+  :type :typein
+  :type_desc (:int 2 1 9)
+  :value 1
+  :mouse_text "Enter the number of display panels you wish to create"
+
+  :parameter split
+  :text "  Split data by"
+  :type :circular
+  :type_desc (
+			  ("Ensemble" 0   "Split ensembles in different panels.")
+			  ("Demultiplex" 1 "Demultiplex traces into different panels.")
+			  )
+  :selected_item ("Primary Key" 0 "Place ensembles in different panels")
+
+  :parameter orientation
+  :text "Trace Orientation"
+  :type :circular
+  :type_desc (
+			  ("Vertical"   0 "Draw traces vertically (normal mode)" )
+			  ("Horizontal" 1 "Draw horizontal traces")
+			  )
+  :selected_item ("Vertical"   0 "Draw traces vertically (normal mode)" )
+
+  :parameter program
+  :text "Program executable name"
+  :type edit:
+  :type_desc (30 100 2 " Example: /usr/stof/promax/sa/my_prog
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  :value "traceDisplay.exe"
+  :mouse_text "Type path name of program executable.  If the path doesn't start with a /, the main ProMAX executable directory is used."
+  :showp nil
+
+  :parameter DEBUG
+  :text "Debug mode?"
+  :type :boolean
+  :value nil
+  :mouse_text "To debug program, enter YES.  You will have to debug the program yourself"
+  :showp nil
+
+  ;; execution parameterisation for a socket tool
+  :exec_data 
+  ("ST_TRACE_DISPLAY"
+   ("GENERAL"
+	("version" :implicit "ProMAX $Id: traceDisplay.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+	("Xserver"  :implicit (if (= (value 'Xserver) "This Screen") (where_promax_displays) (value 'Xserver)))
+	("tstart"   :implicit (value 'tstart))
+	("tend"     :implicit (value 'tend))
+	("n_traces" :implicit (value 'num_display_traces))
+	("overlap"  :implicit (value 'overlap))
+	("n_ensmbl" :implicit (value 'num_ensembles))
+	("ens_gap"  :implicit (value 'ensemble_gap))
+	("ens_inc"  :implicit (value 'ens_pan_inc))
+	("varspace" :implicit (if (value 'var_space) 1 0))
+	("wrtmode"  :implicit (value 'output_mode))
+	("dispmode" :implicit (value 'dispmode))
+	("colorbar" :implicit (if (value 'colorbar) 1 0))
+	("varbias"  :implicit (value 'varbias))
+	("interp"   :implicit (value 'interp))
+	("headplot" :implicit (value 'headboard))
+	("autosave" :implicit (if (value 'autosave) 1 0))
+	("maximage" :implicit (value 'maximages))
+	("savecolr" :implicit (if (value 'saveType) 1 0))
+	("pixmap"   :implicit (value 'saveWhere))
+	("nbatch"   :implicit (value 'nbatch))
+	("direct"   :implicit (value 'direction))
+	("polarity" :float    (value 'polarity))
+	("lkeynam1" :implicit (value 'lkeynam1))
+	("lkeynam2" :implicit (value 'lkeynam2))
+	("lablmod2" :implicit (value 'lablmod2))
+	("lablinc2" :implicit (value 'lablinc2))
+	("scalmode" :implicit (value 'scalemode))
+	("clip"     :implicit (value 'clip))
+	("ascalar"  :implicit (value 'ascalar))
+	("scaleopt" :implicit (value 'scaleopt))
+	("lmfrdata" :implicit (if (value 'lmfrdata) 1 0))
+	("scalemin" :implicit (value 'scrn_min))
+	("scalemax" :implicit (value 'scrn_max))
+	("npanel"   :implicit (value 'npanel))
+	("split"    :implicit (value 'split))
+	("orient"   :implicit (value 'orientation))
+	("program"  :implicit (value 'program))
+	("DEBUG"    :implicit (if (value 'DEBUG) 2 0))
+	)
+   )
+
+  :rules 
+  (
+   ;; Verify the Screen specification
+   (test_screen_name (NOT (= (value 'Xserver) "This Screen"))
+					 (progn
+					   (setq temp (host_valid_p (value 'Xserver)))
+					   (if temp
+						   (add_error 'Xserver temp)
+						 (set_error_list 'Xserver temp)))
+					 (set_error_list 'Xserver nil))
+
+;  This rule says that the DEBUG parameter should be shown only if
+;  the environment variable SOCKET_DEBUG is set to "t"
+   (socket_debug_rule t
+					  (if (= (printenv 'SOCKET_DEBUG) "t")
+						  (progn (do_show 'DEBUG)
+								 (do_show 'program))
+						(progn (do_not_show 'DEBUG) 
+							   (do_not_show 'program))))
+
+										; Turn things on/off based on Max traces/screen
+   (maxTraces (= (value 'num_display_traces) 0)
+			  (progn (do_not_show 'overlap)
+					 (do_show 'ens_pan_inc)
+					 (do_show 'npanel))
+			  (progn (do_show 'overlap)
+					 (do_not_show 'ens_pan_inc)
+					 (do_not_show 'npanel)))
+										; Make sure the overlap is in range
+   (overlap (and (> (value 'num_display_traces) 0)
+				 (>= (value 'overlap) (value 'num_display_traces)))
+			(add_error 'overlap "Overlap must be less than maximum number of TRACES/screen")
+			(set_error_list 'overlap nil))
+										; Display ensemble_gap when ensembles/screen > 1
+   (gap_on (= (value 'num_ensembles) 1)
+		   (do_not_show 'ensemble_gap) 
+		   (do_show 'ensemble_gap))
+
+										; Show/do not show batch screen save
+   (batch_rule (equal (value 'autosave) t)
+			   (do_show 'nbatch) 
+			   (do_not_show 'nbatch))
+
+										; Show bias when WT/VA or VA modes
+   (bias_rule (or (= (value 'dispmode) 0) (= (value 'dispmode) 2))
+			  (do_show 'varbias) (do_not_show 'varbias))
+										; Turn label_mode on/off based on lable
+   (label_mode (equal (value 'lkeynam2) "NONE    ")
+			   (do_not_show 'lablmod2)
+			   (do_show 'lablmod2))
+										; Turn on lablinc2 based on lablmod2
+   (inc_rule (and (showing 'lablmod2) (not (= (value 'lablmod2) 3)))
+			 (do_show 'lablinc2) 
+			 (do_not_show 'lablinc2))
+										; Turn scale mode parameters on/off
+   (scale_rule (= (value 'scalemode) 1) 
+			   (progn (do_show 'clip)
+					  (do_show 'ascalar)
+					  (do_show 'scaleopt)
+					  (do_not_show 'lmfrdata))
+			   (progn (do_not_show 'clip)
+					  (do_not_show 'ascalar)
+					  (do_not_show 'scaleopt)
+					  (do_show 'lmfrdata)))
+										; Get scale min/max
+   (min_max_rule (and (= (value 'scalemode) 2) 
+					  (not (value 'lmfrdata)))
+				 (progn (do_show 'scrn_min)
+						(do_show 'scrn_max))
+				 (progn (do_not_show 'scrn_min)
+						(do_not_show 'scrn_max)))
+
+										; Turn panel parameters  on/off depending on the number of panels
+   (panel_rule (and (> (value 'npanel) 1) (showing 'npanel))
+			   (do_show 'split)
+			   (do_not_show 'split))
+
+   (colorbar_rule (or (= (value 'dispmode) 3) (= (value 'dispmode) 4))
+				  (do_show 'colorbar) (do_not_show 'colorbar))
+
+   (interp_rule (not (= (value 'dispmode) 1))
+				  (do_show 'interp) (do_not_show 'interp))
+
+   )
+  )
+
+

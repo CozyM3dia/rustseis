@@ -1,0 +1,165 @@
+Inline Sort1211
+
+ProMAX® Reference
+
+Inline Sort
+Inline Sort is used to change the sort order of data in a ﬂow
+without writing and reading a complete dataset.
+
+Theory
+This process buffers traces to disk or memory as they pass
+through the ﬂow, and then reads them back in the order you
+speciﬁed, and passes them along in the ﬂow. The size of the
+buffer can generally be much smaller than the entire dataset.
+If the input dataset is too large to sort using the largest buffer
+size available, a multipass sort may be used. Those traces
+which were successfully sorted to the speciﬁed order will
+have the SORT_RUN trace header ﬂag set to 1, while those
+traces which were not sorted will have this ﬂag set to 0. It is
+possible to separate the sorted from unsorted traces by using
+an IF, ELSE, ENDIF block selecting the primary header word
+SORT_RUN. The unsorted data may be recycled through
+Inline Sort to produce another sorted dataset and possibly
+another unsorted dataset. After cycling the data through
+Inline Sort several times, all data is sorted in two or more
+subsets. These sorted datasets can be merged using Merge
+Sorted Datasets.
+Inline Sort Simulation is used to determine the number of
+traces sorted or unsorted through several passes of Inline
+Sort in the multipass mode.
+If traces with a NULL primary key are encountered, these
+traces are omitted from the sorted output. The number of
+such traces are reported in the view ﬁle.
+
+Usage
+Use Inline Sort to create two datasets sorted within
+themselves. This ﬂow may need to be split into two separate
+ﬂows since there may not be sufﬁcient buffer space to do the
+second Inline Sort directly after the ﬁrst one.
+Disk Data Input
+ELSE
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Inline Sort1212
+
+ProMAX® Reference
+
+Disk Input <- Unsorted Data
+Inline Sort
+IF (MODE = Include, Primary header word = SORT_RUN)
+Disk Output -> First Sort Data
+ELSE
+Inline Sort
+Disk Output -> Second Sort Data
+ENDIF
+
+Use Merge Sorted Datasets to combine ﬁrst sort data with
+the second sort data.
+Disk Input <- First Sort Data
+Merge Sorted Datasets <- Second Sort Data
+Disk Output -> Merged Sorted Data
+
+A new capability allows Tape Data Output without using IF,
+ELSE, ENDIF to discriminate between sorted and unsorted
+data.
+
+Parameters
+Select new PRIMARY sort key
+Select a header entry from the Trace Headers window to use
+as the new primary sort key. Although any header entry can
+be used, typical choices are SOURCE, CDP, RECEIVER, and
+OFFSET.
+PRIMARY sort order
+Select the order of the output ensembles. Choices are:
+ascending or descending. This is used to effectively reverse
+the order of the traces, but the buffer must be large enough
+to hold the entire dataset.
+Select new SECONDARY sort key
+Select a header entry from the Trace Headers window to use
+as the new secondary sort key. Although any header entry
+can be used, typical choices are OFFSET and CHAN.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Inline Sort1213
+
+ProMAX® Reference
+
+SECONDARY sort order
+Select output order for traces with the secondary key.
+Choices are: ascending or descending. This has no effect on
+the size of the buffer.
+Select new TERTIARY sort key
+Select a header entry from the Trace Headers window to use
+as the new tertiary sort key.
+Maximum traces per output ensemble
+Enter the maximum number of traces per ensemble after
+sorting. Ensembles are split in two if this value is too low. If it
+is too high, memory resources may be strained
+unnecessarily. You will be warned ﬁrst. On lines with
+geometry assigned, this defaults to the maximum CDP fold.
+For sorts to other domains, consult the Line Order database
+for the maximum number of traces per ensemble.
+Number of traces in buffer
+Enter the number of traces to buffer. For a normal CDP sort,
+this is the maximum fold multiplied by the number of
+channels per record.
+Note: If the input ensembles are out of order, or the data is
+reversed, the buffer must be large enough to hold the entire
+dataset. If not, traces will be lost. If the dataset cannot be
+sorted in one pass with the largest buffer available, the data
+must be sorted as Multiple pass sort. Multipass sort allows
+the dataset to be split in the sorting process and merged later
+using Merge Sorted Datasets.
+Buffer type
+Select to buffer traces to:
+• Disk, which is recommended in most cases, unless you
+are simply changing the secondary sort order.
+• Memory, which is much faster, but many typical sorts
+require too large of a buffer to be done in memory.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Inline Sort1214
+
+ProMAX® Reference
+
+Sort key which controls End-of-Ensemble
+The options are Primary, Secondary, Tertiary, and
+Quaternary.
+Compress data before sorting?
+Select Yes to reduce storage requirements by compressing
+the data before sorting. Trace are uncompressed as they are
+sorted and passed out into the ﬂow.
+Multiple pass?
+Select Yes to sort the data in a multiple pass. This is required
+if the buffer is not big enough for a sort.
+Traces properly sorted have the SORT_RUN ﬂag set to 1 in
+the trace headers and those traces which are not properly
+sorted have the SORT_RUN ﬂag set to 0. Use an IF, ELSE,
+ENDIF block to split the data in the ﬂow based on this
+SORT_RUN ﬂag. The data with SORT_RUN set to 0 must pass
+through Inline Sort at least one more time in order to
+properly sort these traces. The two sorted datasets are
+merged using Merge sorted datasets.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,13 @@
+[package]
+name = "rustseis-io"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+memmap2.workspace = true
+rayon.workspace = true
+rusqlite.workspace = true
+rustseis-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

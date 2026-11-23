@@ -1,0 +1,72 @@
+Header Values1516
+
+ProMAX® Reference
+
+Header Values
+Header Values provides a list of values for selected trace
+header entries at whatever point it is inserted in the
+processing ﬂow.
+
+Theory
+Most ProMAX® header entries are 4-byte integers or reals.
+Header Values prints all digits for 4-byte integers and 7
+signiﬁcant digits for 4-byte reals. A few header entries, like
+PARMTEST, are character strings. Header Values prints up
+to 32 characters and issues a warning if the string is longer.
+ProMAX® header entries can be 8-byte integers or reals.
+Header Values prints all digits for 8-byte integers and 16
+signiﬁcant digits for 8-byte reals. If any selected header entry
+contains more than 1 value, Header Values prints the ﬁrst
+value only and issues a warning.
+If all selected header entries are 4-byte integers or reals,
+Header Values can print up to 20 values. If some selected
+entries are character strings or 8-byte integers or reals, fewer
+values can be printed.
+Header Values prints the values of all selected header entries
+for one trace on one line. The header values are preceded by a
+sequential ensemble counter. When Output device is
+Output, the ﬁrst value of each line is a counter for the
+number of Header Values in the ﬂow. This value can be used
+to distinguish output from multiple Header Values.
+When Output device is File or Printer, the list of header
+values is preceded by a title block containing the area, line,
+ﬂow, date and time. The title block also includes a counter for
+the number of Header Values in the ﬂow. This value can be
+used to distinguish output from multiple Header Values.
+
+Parameters
+Output device
+Select to send the output to one of the following:
+• Output sends output to job.output.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Header Values1517
+
+ProMAX® Reference
+
+• File sends output to a separate ﬁle in
+PROMAX_SCRATCH_HOME. See job.output for the
+name of the ﬁle.
+• Printer sends output to the printer identiﬁed by showﬁleprint in conﬁg_ﬁle.
+List only last trace in ensemble?
+Select Yes to list only the header values for the last trace in
+the ensemble. This is an ideal way to check ensemble number
+against input FFID for verifying geometry information.
+SPECIFY header entries
+List the names of up to 20 header entries. Use a comma,
+blank or / to separate names. If some entries are character
+strings or 8-byte integers or reals, fewer than 20 values can
+be printed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,161 @@
+CDP/Ensemble Stack171
+
+ProMAX® Reference
+
+CDP/Ensemble Stack
+CDP/Ensemble Stack vertically stacks input ensembles of
+traces.
+
+Theory
+Vertical stack algorithms include:
+Straigh stack sums the sample values with no recovery
+scaling.
+Straight mean stack sums the sample values and divides by
+the number of samples summed raised to a supplied power,
+0.5 for square root of contributing sample count scaling.
+Header value weighted stack works the same way as
+Header Weighting. Any header can be selected. The traces
+are multiplied by the value of this header before summing.
+Possible header values might include autostatics correlation
+quality estimates.
+Sign bit stack adds +1.0 to the sum if the sample is positive
+or zero, and -1.0 if the sample is negative. The actual sample
+values are ignored.
+Minimum/maximum sample value exclusion stack drops
+the samples with the highest and lowest amplitudes from the
+stack.
+Diversity sum-Amplitude or Power stack uses a sliding
+gate to determine average trace power or amplitude on each
+trace. The midpoints of the gates are separated by half the
+gate length, so the gates overlap by 100%. The trace
+amplitudes in the gate are divided by the gate power or
+amplitude before summing and are then normalized by the
+inverse of the sum of the inverse gate powers. In order to
+ensure that very small input gate amplitudes do not
+dominate the sum, the minimum gate power used over each
+gate is the median gate power over all live traces. This
+ensures that any gate amplitude smaller than the median
+value will not contribute more than the median value.
+Median stack takes the median of the samples at each trace
+time, and puts that value into the output trace. This does not
+sum the samples.
+Other Docs
+
+Search Page
+
+Known Problems
+
+CDP/Ensemble Stack172
+
+ProMAX® Reference
+
+Alpha-trimmed mean stack excludes a percentage of the
+smallest and largest value samples.
+
+Usage
+The ﬁnal stack is normally output at the ﬁnal processing
+datum. In some cases a stack can be output at the ﬂoating
+datum. There is an option for turning off the application of
+the ﬁnal static shift. In the shot and receiver domain, no
+statics are applied and the stack is output at ﬂoating datum.
+You can also stack data without NMO corrections applied in
+this process. If the ﬁnal datum static is applied, an eight
+point sinc function interpolator is used to apply this static.
+The stack process expects to ﬁnd the elevation statics,
+including ﬁnal datum statics, in the trace headers. Stack
+trace header values for OFFSET and AOFFSET will have the
+value of the nearest trace contributor to that particular CDP
+bin assigned. Stack trace header values for NA_STAT and
+TOT_STAT are set to 0.0.
+
+References
+Sheriff, R. E., and Geldart, L. P., 1983, Exploration Seismology Vol 2: Data Processing, 53-54, Cambridge University Press.
+
+Parameters
+Sort order of input ensembles
+Select a header word from the following list that describes the
+primary sort order of the input traces:
+• CDP for which the primary sort must be CDP.
+• Shot for which the primary sort must be SIN.
+• Receiver for which the primary sort must be
+REC_SLOC.
+• Other stacks arbitrary ensembles.
+METHOD for trace summing
+Select the method for summing together the traces in each
+ensemble to produce the one output trace:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+CDP/Ensemble Stack173
+
+ProMAX® Reference
+
+• Straight sums the samples with no recovery scaling.
+• Mean sums the samples and divide by the number of
+samples summed raised to a user-supplied power.
+• Weighted multipies traces by a user-selected header
+value before summing.
+• Sign Bit adds +1.0 to the sum if the sample is positive or
+zero, and -1.0 if the sample is negative.
+• Min/Max Exclude excludes the largest sample and
+smallest sample from the stack sum.
+• Div-power creates a diversity stack based on the power
+within a sliding time gate.
+• Div-amplitude creates a diversity stack based on the
+amplitude within a sliding time gate.
+• Median takes the median of the samples at each trace
+time.
+• Alpha-trimmed Mean excludes a percentage of the
+smallest and largest value samples.
+Root power scalar for stack normalization
+This appears if Mean or Div-amplitude or Div-Power to
+Method for trace summing. Enter the power exponent for
+contributing sample normalization. The samples contributing
+to the output trace samples are counted and the stack is
+normalized by the count raised to this power. Processors
+often use a power of 0.5, square root scaling, to avoid
+excessively strong amplitudes on shallow times of the stack.
+Diversity scalar operator length
+This appears if either Div-power or Div-amplitude to
+Method for trace summing. Enter the sliding gate operator
+length used to compute the diversity scalars. This is similar
+to an AGC. The operator length should be about the length of
+a typical wavelet; about 20 to 50 samples.
+Select Header Word for Trace Weighting
+This appears if Weighted to Method for trace summing.
+Select a header word to multiply the trace samples before
+summing. Refer to the Header Weighting helpﬁle.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+CDP/Ensemble Stack174
+
+ProMAX® Reference
+
+Percent of samples to exclude
+This appears if Alpha-trimmed Mean or Summing traces to
+Method for trace summing. Enter the percentage of data to
+exclude. For example, 25% exclusion would reject the largest
+12.5% and the smallest 12.5% of the samples.
+Apply ﬁnal datum statics after stack
+Select Yes to apply ﬁnal datum after stack. Select No if you
+want the stack to be relative to the ﬂoating datum.
+Has NMO been applied?
+Select Yes if NMO has been applied to the input data. Select
+No if NMO has not been applied to the input data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

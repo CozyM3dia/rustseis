@@ -1,0 +1,108 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: AGC
+label: "Automatic Gain Control"
+value_tab: 35
+
+parameter: MODE_APP
+text: "Application mode"
+type: pop_choose:
+type_desc: (
+ ("APPLY         " 1 "Apply Automatic Gain Control scalars only.")
+ ("APPLY & SAVE  " 2 "Apply Automatic Gain Control scalars AND save scalars in header.")
+ ("REMOVE AGC    " 3 "Remove Automatic Gain Control scalars stored in header AND delete header.")
+ ("OUTPUT SCALARS" 4 "Output the AGC scalar values as traces.")
+        )
+mouse_text: "Select AGC only, AGC and save scalars, or remove a previously saved AGC operation."
+plot_label: t
+
+parameter: MODE_AMP
+text: "Type of AGC scalar"
+type: pop_choose:
+type_desc: (
+ ("MEAN" 1 "Base the AGC scalar on the MEAN of the absolute values of the samples in the sliding time gate.") 
+ ("RMS " 2 "Base the AGC scalar on the Root Mean Square of the sample values in the sliding time gate.")
+ ("MEDIAN" 3 "Base the AGC scalar on the median of the sample values in the sliding time gate."))
+mouse_text: "AGC scalars can be computed using the MEAN, RMS, or MEDIAN of the samples in the sliding time gate."
+plot_label: t
+
+parameter: AGCLEN
+text: "AGC operator length"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 500.0
+mouse_text: "Amplitude estimation operator length in milliseconds for sliding gate AGC."
+plot_label: t
+
+parameter: MODE_WIN   
+text: "BASIS for scalar application"
+type: pop_choose:
+type_desc: (
+ ("Centered" 2 "Apply computed gain scalar to the CENTER sample of the gate (MOST COMMON MODE!).")
+ ("Trailing" 1 "Apply computed gain scalar to the FIRST (earliest in time) sample in the gate.")
+ ("Leading"  3 "Apply computed gain scalar to the LAST (latest in time) sample in the gate."))
+mouse_text: "For normal operations CENTERED should be used.  TRAILING and LEADING will distort waveforms."
+plot_label: t
+
+parameter: mode_option
+text: "Exclude hard zeroes?"
+type: boolean:
+value: t
+mouse_text: "'Hard zeroes' (0.0 values) may be excluded from scalar computations.  This avoids strange mute effects."
+
+parameter: robust_option
+text: "Robust Scaling?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to limit the AGC scaling to be within a factor of the median scalar."
+plot_label: t
+
+parameter: ROBUST
+text: "  Maximum scaling factor"
+type: typein:
+type_desc: ( real: 7 1.0 nil )
+value: 20.0
+mouse_text: "Forces the AGC scale factor to be within this factor of the median scalar."
+plot_label: t
+
+exec_data: (
+
+        ("AGC"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: agc.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("MODE_APP" implicit: (value 'MODE_APP))
+			("MODE_AMP" implicit: (value 'MODE_AMP))
+			("AGCLEN"   implicit: (value 'AGCLEN))
+			("MODE_WIN" implicit: (value 'MODE_WIN))
+			("MODEZERO" implicit: ( if (value 'mode_option) 1 0 ))
+			("ROBUST  " implicit: (if (value 'robust_option) (value 'ROBUST)  0.0 ))
+		)
+	    )
+
+	( (if ( = (value 'MODE_APP) 3 ) "HDR_DELETE" "VOID" )
+		("GENERAL"
+			("HDR_NAME" implicit: "AGC_SCAL" )
+		)
+	    )	
+
+)
+
+rules:(
+
+(application (= (value 'MODE_APP) 3 ) 
+	(do_not_show '(MODE_AMP AGCLEN MODE_WIN mode_option robust_option) )
+	(do_show '(MODE_AMP AGCLEN MODE_WIN mode_option robust_option) )   )
+
+(robust (and (value 'robust_option) (showing 'robust_option)) 
+	(do_show 'ROBUST) 
+	(dont_show 'ROBUST))
+
+
+	)
+
+)
+
+
+
+
+

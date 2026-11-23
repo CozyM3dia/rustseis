@@ -1,0 +1,106 @@
+SRME Adaptive Subtraction2096
+
+ProMAX Reference
+
+SRME Adaptive Subtraction
+Given an ensemble of Data traces and Noise traces (the Noise
+traces output from SRME, for instance), this module
+adaptively subtracts the Noise traces from the corresponding
+Data traces.
+
+Theory
+This adaptation involves the design and application of
+temporal ﬁlters to the noise such that the resulting estimate
+of the signal has minumum energy. These ﬁlters can change
+both temporally and spatially by appropriate selection of the
+windowing parameters.
+For some cases the noise estimated by state-of-the-art
+algorithms fails to fully model the actual target noise ﬁeld in
+the recorded data. Examples of this characteristic mismatch
+are coherent noise estimated from suboptimally sampled 3D
+data and multiple estimates produced by the SRME
+nonlinear algorithm. In cases such as these, an improved
+attenuation of the target noise ﬁeld may be achieved by using
+the adaptive subtraction strategy contained in this module.
+It is very important to use this approach with some caution.
+Since the basic criterion of the ﬁlter design is the
+minimization of the resultant energy in the ’signal’, an
+infelicitious choice of parameters has the danger of attacking
+the true reﬂection signal of interest. Hence, it is
+recommended practice to test a suite of candidate windowing
+parameters and choose one that preserves the signal as well
+as reducing the noise.
+In order to help ensure that the adaptive ﬁlter is matching
+noise in the estimate to noise in the original data, it can be
+helpful to design the ﬁlter by averaging the required
+correlations spatially. This facility is provided with the
+’spatially averging size’ parameter described below.
+If the input data contains high amplitude spurious energy,
+the adaptive ﬁltering algorithm may attempt to reduce this
+energy by severely distorting the noise estimate. In order to
+reduce the possibility of this signiﬁcantly distorting the signal
+estimate, it may be prudent to restrict the allowed
+
+Other Docs
+
+Known Problems
+
+SRME Adaptive Subtraction2097
+
+ProMAX Reference
+
+magnitude of the ﬁlter coefﬁcients (see ’maximum ﬁlter
+coefﬁcient’ parameter below).
+
+Usage
+Input to this tool should be ensembles containing Data traces
+and Noise traces for a speciﬁc ensemble. One example of the
+input, for instance, would be the output from SRME Match
+Filter.
+Output is ensembles with Noise adaptively subtracted from
+Data.
+
+Parameters
+Input data organization
+Four options are available here:
+• DDD...NNN-Panel of data + panel of noise
+• DNDN...DN-Data and noise alternate in ensemble
+• NNN...DDD Panel of noise + panel of data
+• NDND...ND-Noise and data alternate in ensemble
+Output option
+Two options are available here:
+• Signal-Output the estimated signal
+• Noise-Output the ﬁltered noise
+Temporal window length (ms)
+Length of the temporal design window (ms). This should be at
+least 5 times the chosen ﬁlter length.
+Filter length (ms)
+Length of the adaptive ﬁlter (ms). This should be less that
+20% of the temporal window length.
+Spatial averaging size
+Radius of circle (in ft or m) over which to average in ﬁlter
+design (0 means no spatial averaging).
+Other Docs
+
+Known Problems
+
+SRME Adaptive Subtraction2098
+
+ProMAX Reference
+
+Maximum ﬁlter coefﬁcient
+Specify maximum coefﬁent in ﬁlter (0 means no restriction).
+
+Other Docs
+
+Known Problems
+
+SRME Adaptive Subtraction2099
+
+Other Docs
+
+ProMAX Reference
+
+Known Problems
+
+

@@ -1,0 +1,215 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC BHSS
+'(
+ name: DATUM_STAT_CALC
+label: "Datum Statics Calculation*"
+value_tab: 35
+
+parameter: STATTYPE
+text: "Elevation or Refraction"
+type: circular:
+type_desc: (
+("Elevation"   1 "Compute Elevation statics to final datum." )
+("Refraction"  2 "Input Refraction statics to final datum" )
+           )
+mouse_text: "Elevation will compute shot, recv and cdp statics -- Refraction will copy shot and rcvr but compute cdp statics"
+plot_label: t
+
+parameter: FNL_ELEV
+text: "Final datum elevation"
+type: typein:
+type_desc: (:string 16)
+:value "0.00000"
+mouse_text: "Enter final datum elevation constant value or PARAMETER from the SRF GEOMETRY DataBase. See help for other suggestions."
+plot_label: t
+
+parameter: REPL_VEL
+text: "Replacement velocity"
+type: typein:
+type_desc: (:string 16)
+:value "0.00000"
+mouse_text: "Enter replacement velocity constant value or PARAMETER from the SRF GEOMETRY DataBase. See help for other suggestions."
+plot_label: t
+
+parameter: METHOD
+text: "Database math method for elevation statics"
+type: pop_choose:
+type_desc: ( 
+("Shot Holes Using Uphole Info"      1 "Do database math by conventional method (see file $PROMAX_HOME/port/misc/elev_stat_math).")
+("Shot Holes Ignoring Upholes Times" 2 "Do database math using weathering velocity to compute uphole times (see file $PROMAX_HOME/port/misc/noup_stat_math).")
+("Surface Source"                    4 "Do database math without shot depths and uphole times (see file $PROMAX_HOME/port/misc/surf_stat_math).")
+("Other (user-defined)"              3 "Do database math using some other method (user-defined stat_math file).")
+           )
+mouse_text: "Select the method to use to compute the statics.  The different methods have slightly different computation algoriths"
+plot_label: t
+
+parameter: METHOD1
+text: "Database math method for refraction statics"
+type: pop_choose:
+type_desc: ( 
+("Use the default ref_stat_math file" 1 "Do database math by conventional method (see file $PROMAX_HOME/port/misc/ref_stat_math).")
+("Other (user-defined)"               2 "Do database math using some other method (user-defined stat_math file).")
+           )
+mouse_text: "Select the math_file to be used for working with the refraction statics."
+plot_label: t
+
+parameter: W_VELOC
+text: "  Specify Weathering velocity"
+type: edit:
+type_desc: (30 80 5 " FORMAT: Groups of 'STATION:Weathering Velocity /' values
+ EXAMPLE: 101:3500 / 242:3800 / 440:4400 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "101:3000/201:3500/351:4000/"
+mouse_text: "Enter groups of STATION-Weathering Velocity values. **SEE EXAMPLE!!!**"
+
+parameter: MATHFILE
+text: "  Database math file for elevation statics"
+type: edit:
+type_desc: (31 80 5 " Format: / 'path' / 'filename'  
+ Example: /usr/joepro/elev_stat_method2")
+value: "/promax_home/port/misc/elev_stat_math"
+mouse_text: "This specifies the name of the file that is used for database math to generate elevation statics."
+
+parameter: MATHFIL1
+text: "Database math file for refraction statics"
+type: edit:
+type_desc: (31 80 5 " Format: / 'path' / 'filename'  
+ Example: /usr/johndoe/ref_stat_method2")
+value: "/promax_home/port/misc/ref_stat_math"
+mouse_text: "Specify the file name for the appropriate refraction static solution calculation."
+
+parameter: NMO_METH
+text: "NMO static method"
+type: circular:
+type_desc: (
+("Elevations"   1 "Use the smoothed surface elevations (NMO datum)." )
+("Mean Statics" 2 "Use the smoothed mean of source and receiver statics of contributing traces in a CDP." )
+           )
+mouse_text: "Select the method for creating the NMO statics.  See the help file for more explanation."
+plot_label: t
+
+parameter: NSMOOTH
+text: "Length of smoother"
+type: typein:
+type_desc: ( int: 4 1 nil )
+value: 51
+mouse_text: "Enter the length of the smoother (in CDPs).  Use an odd number."
+plot_label: t
+
+parameter: S_STATIC
+text: "Select SOURCE statics"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a SOURCE Statics file description (SDRM, SDLT, SGRM)from the SIN GEOMETRY database."
+
+parameter: R_STATIC
+text: "Select RECEIVER statics"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a RECEIVER Statics file description (RDRM, RDLT, RGRM)from the SRF GEOMETRY database."
+
+parameter: DATUM1
+text: "Processing DATUM"
+type: circular:
+type_desc: (
+("NMO DATUM"   1 "Compute non-zero cdp mean (C_STATIC)- when statics are applied, the data will be referenced to Smooth Surface (N_DATUM)" )
+("FINAL DATUM" 2 "Compute zero cdp mean (C_STATIC)- when statics are applied, the data will be referenced to FINAL DATUM. NMO_DATUM = FINAL DATUM" )
+           )
+mouse_text: "Select datum to which the data will be referenced after running Apply Datum Statics."
+plot_label: t
+
+parameter: DB_NUM
+text: "Run ID"
+type: typein:
+type_desc: ( string: 2 )
+value: "01"
+mouse_text: "Enter a 2 characters (number) identifying the database output parameters as S_STATXX, R_STATXX, C_STATXX."
+
+
+exec_data: ("DATUM_STAT_CALC"
+		("SPECIAL"
+			("TOOLTYPE"     implicit: "STAND_ALONE")
+			("PATHNAME"     implicit: "datum_stat_calc.exe" )
+			("version" implicit: "ProMAX $Id: datum_stat_calc.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("MATHFILE" implicit: 
+		         (cond ( ( = (value 'METHOD) 1 )
+				        (promax_path "port/misc/elev_stat_math" ))
+			       ( ( = (value 'METHOD) 2 )
+					(promax_path "port/misc/noup_stat_math" ))
+			       ( ( = (value 'METHOD) 4 )
+					(promax_path "port/misc/surf_stat_math" ))
+			       ( ( = (value 'METHOD) 3 ) (value 'MATHFILE) )
+			       )
+			 )
+                        ("STATTYPE" implicit: (value 'STATTYPE))
+			("METHOD"   implicit: (value 'METHOD))
+			("W_VELOC"  implicit: (value 'W_VELOC))
+			("FNL_ELEV" implicit: (value 'FNL_ELEV))
+			("REPL_VEL" implicit: (value 'REPL_VEL))
+			("NMO_METH" implicit: (value 'NMO_METH))
+			("NSMOOTH"  implicit: (value 'NSMOOTH))
+			("S_STATIC"     implicit: (first (type_desc 'S_STATIC)))
+			("R_STATIC"     implicit: (first (type_desc 'R_STATIC)))
+			("DATUM"    implicit: (value 'DATUM1))
+			("DB_NUM"   implicit: (value 'DB_NUM))
+			("MATHFIL1" implicit: 
+		         (cond ( ( = (value 'METHOD1) 1 )
+				        (promax_path "port/misc/ref_stat_math" ))
+			       ( ( = (value 'METHOD1) 2 ) (value 'MATHFIL1) )
+			       )
+			 )
+		)
+	    )
+
+rules: (
+
+            (rule1elev ( = (value 'STATTYPE) 1 )
+                   (do_show 'METHOD)
+                   (do_not_show 'METHOD) )
+
+            (rule1refr ( = (value 'STATTYPE) 2 )
+                   (do_show 'METHOD1)
+                   (do_not_show 'METHOD1) )
+
+            (rule2elev ( and ( = (value 'STATTYPE) 1 )( = (value 'METHOD) 3 ))
+                   (do_show 'MATHFILE)
+                   (do_not_show 'MATHFILE) )
+
+            (rule2refr ( and ( = (value 'STATTYPE) 2 )( = (value 'METHOD1) 2 ))
+                   (do_show 'MATHFIL1)
+                   (do_not_show 'MATHFIL1) )
+ 
+            (rule3 ( if ( evenp (value 'NSMOOTH) )
+                   (set_value 'NSMOOTH ( + (value 'NSMOOTH) 1 ))))
+
+            (rule4 ( and ( = (value 'STATTYPE) 1 ) ( = (value 'METHOD) 2 ))
+                   (do_show 'W_VELOC)
+                   (do_not_show 'W_VELOC) )
+
+            (rule5 ( = (value 'STATTYPE) 2 )
+                   (do_show '(S_STATIC R_STATIC))
+                   (do_not_show '(S_STATIC R_STATIC)) )
+
+            (rule1_call_dbparm ( value 'S_STATIC) (progn
+	        (set_value 'S_STATIC nil)
+	        (set_selected_item 'S_STATIC nil)
+	        (set_type_desc 'S_STATIC (list (choose_old_db_parm)))))
+
+            (rule1_call_dbparm ( value 'R_STATIC) (progn
+	        (set_value 'R_STATIC nil)
+	        (set_selected_item 'R_STATIC nil)
+	        (set_type_desc 'R_STATIC (list (choose_old_db_parm)))))
+
+       )
+
+)
+
+

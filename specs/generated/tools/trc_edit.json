@@ -1,0 +1,83 @@
+{
+  "menu_id": "trc_edit",
+  "tool_name": "TRC_EDIT",
+  "label": "Trace Kill/Reverse",
+  "parameter_count": 9,
+  "parameters": [
+    {
+      "name": "EDITMODE",
+      "prompt": "Trace editing MODE",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Traces may be either KILLED or REVERSED, or scanned for all ZEROs and then killed.  ZERO also zeros killed traces."
+    },
+    {
+      "name": "db_option",
+      "prompt": "Get edits from the DATABASE?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If you interactively created trace edit files, use this option to access one."
+    },
+    {
+      "name": "INC_MODE",
+      "prompt": "Trace selection MODE",
+      "kind": "circular",
+      "default": null,
+      "help": "The traces in the list can be either INCLUDED or EXCLUDED from subsequent processes.",
+      "choices": [
+        {
+          "label": "Kill/Reverse traces in select list",
+          "value": "0",
+          "help": "kill or reverse all listed traces"
+        },
+        {
+          "label": "Kill/Reverse traces NOT in select list",
+          "value": "1",
+          "help": "kill or reverse all traces NOT listed"
+        }
+      ]
+    },
+    {
+      "name": "KILLNAME",
+      "prompt": "SELECT trace Kill parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a TRACE KILL parameter file from the parameter file menu."
+    },
+    {
+      "name": "RVRSNAME",
+      "prompt": "SELECT trace Reverse parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a TRACE REVERSE parameter file from the parameter file menu."
+    },
+    {
+      "name": "EDITKEY1",
+      "prompt": "PRIMARY edit list header word",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying traces to be edited."
+    },
+    {
+      "name": "EDITKEY2",
+      "prompt": "SECONDARY edit list header word",
+      "kind": "function",
+      "default": "CHAN    ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the SECONDARY key for specifying traces to be edited."
+    },
+    {
+      "name": "EDITKEY3",
+      "prompt": "TERTIARY edit list header word",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the TERTIARY key for specifying traces to be edited."
+    },
+    {
+      "name": "EDIT_LST",
+      "prompt": "SPECIFY traces to be edited",
+      "kind": "edit",
+      "default": "1:60,78/14:1,40,120/",
+      "help": "Use MB1 to access the text editor and define the locations of the traces to be edited."
+    }
+  ]
+}

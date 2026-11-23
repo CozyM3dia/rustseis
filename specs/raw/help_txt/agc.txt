@@ -1,0 +1,126 @@
+Automatic Gain Control2040
+
+ProMAX® Reference
+
+Automatic Gain Control
+AGC automatically varies the gain applied to trace samples
+as a function of sample amplitude within an AGC time
+window.
+Click on link to check for Known Problems.
+
+Theory
+The AGC operator length deﬁnes the length of the AGC
+window used for gain computations. The AGC program moves
+the window down the trace sample-by-sample and calculates
+a scale factor at each location. The scale factor is equal to the
+inverse of the mean, median, or RMS amplitude in the
+window. The scalar is applied to the sample at the beginning,
+center, or end of the AGC window.
+At the start and end of the trace, where there is less data in
+the window than the operator length requested, the window
+will be made as long as possible. Therefore, the window will
+grow at the start of the trace until it reaches the full operator
+length, and will remain constant until it reaches the end of
+the data, where it will shrink to a progressively smaller value.
+
+Usage
+There are four modes of application:
+• Apply derives and applies AGC scalars.
+• Apply and Save applies and saves scalars in the trace
+headers for later inverse scaling.
+• Remove AGC removes AGC by inverse scaling the trace
+using scalars derived and saved either in the ﬂow or
+from a previous run.
+• Output Scalar Traces outputs scalar traces.
+The success of multi-channel ﬁlters, such as F-K and Radon,
+often depends upon the data being well balanced. AGC is a
+simple, effective method to achieve this scaling, but results in
+the loss of true amplitudes. AGC removal allows you to nearly
+restore the original amplitude proﬁle after ﬁltering.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Automatic Gain Control2041
+
+ProMAX® Reference
+
+After AGC removal the trace header scalars are deleted. If
+scalars are saved in the trace headers, they should be
+removed in the same ﬂow to reduce the storage requirement
+upon output.
+To prevent harsh scaling of very weak or anomalously strong
+zones the AGC gain can be limited to a speciﬁed factor of the
+median gain.
+
+Parameters
+Application mode
+Select one of the gain application modes:
+• Apply applies AGC scalars only.
+• Apply and Save applies AGC scalars and save in trace
+headers.
+• Remove AGC removes AGC scalar stored in headers
+from an earlier AGC. (No other parameters are necessary.)
+• Output Scalar Traces outputs scalar values as traces.
+Type of AGC scalar
+The three options for the AGC scalar type are:
+• Mean bases the AGC scalar on the mean of the absolute
+values of the samples in the sliding time gate.
+• RMS bases the AGC scalar on the root mean square of
+the sample values in the sliding time gate.
+• Median bases the scalar on the median absolute sample
+value in the window.
+AGC operator length
+Enter the Automatic Gain Control operator length in ms.
+BASIS for scalar application
+The choices for applying computed gain are:
+• Centered uses the middle sample in each sliding gate.
+• Trailing uses the ﬁrst sample in each sliding gate.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Automatic Gain Control2042
+
+ProMAX® Reference
+
+• Leading uses the last sample in each sliding gate.
+Exclude hard zeroes?
+Select Yes, the default, to exclude hard zeroes, which
+normally result from trace muting operations, such as ﬁrst
+break mutes. Select No to exclude hard zeroes from AGC
+scalar computations.
+Robust scaling?
+Select Yes to limit the AGC gain curve to be within a speciﬁed
+factor of the median gain applied to the entire trace.
+Maximum scaling factor
+This appears if Yes to Robust Scaling. Enter a factor to limit
+the gain to be between (1/Maximum Factor)*(Median Gain)
+and (Maximum Factor)*(Median Gain). For example, if 10 is
+the maximum scaling factor, then the maximum gain could
+be no larger than 10 times the median gain and the minimum
+gain could be no less than 1/10 of the median gain.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Automatic Gain Control2043
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,62 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC PROSPECTOR BHSS
+'(
+name: ENS_DEFINE
+label: "Ensemble Redefine"
+value_tab: 55
+
+
+parameter: CMODE
+text: "Mode of application"
+type: pop_choose:
+type_desc: (
+   ("Change"     "CHANGE"     "Set ensemble boundary when header changes.")
+   ("Sign"       "SIGN"       "Set ensemble boundary when header changes sign.")
+   ("Difference" "DIFFERENCE" "Set ensemble boundary depending on absolute difference of headers.")
+   ("Sequence"   "SEQUENCE"   "Set ensemble boundary every 'Maximum traces per ensemble'.")  
+   ("Entire"     "ENTIRE"     "Collect entire dataset into a single ensemble.")  )
+mouse_text: "Choose condition on which to reset ensemble boundaries."
+plot_label: t
+
+parameter: PRIM_KEY
+text: "  Select PRIMARY key to re-define output ensembles"
+type: function:
+type_desc: (header_list headers)
+value: "NONE    "
+selected_item: "**INVALID**"
+mouse_text: "Use MB1 to select a header word from the headers menu as the PRIMARY key for re-defining input ensembles."
+
+parameter: ADIFF
+text: "  Header difference"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: 10.0
+mouse_text: "What is the absolute difference in trace headers which defines a new ensemble?"
+
+parameter: MAXTR
+text: "Maximum traces per output ensemble"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 0
+mouse_text: "What is the maximum number of traces per output ensemble AFTER re-defining the ensembes?"
+
+exec_data: ("ENS_DEFINE"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: ens_define.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("PRIM_KEY" implicit: (value 'PRIM_KEY))
+			("CMODE"    implicit: (value 'CMODE))
+			("ADIFF"    implicit: (value 'ADIFF))
+			("MAXTR"    implicit: (value 'MAXTR))
+			("CTASK"    implicit:  "DEFINE" )
+		)
+	   )
+
+rules: (
+	(pkey   (or (= (value 'CMODE) "SEQUENCE") (= (value 'CMODE) "ENTIRE" ))
+		(dont_show 'PRIM_KEY) (do_show 'PRIM_KEY)) 
+
+        (diff   (= (value 'CMODE) "DIFFERENCE" )
+                 (do_show 'ADIFF) (dont_show 'ADIFF) )
+        )
+)
+
+

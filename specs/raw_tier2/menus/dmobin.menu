@@ -1,0 +1,57 @@
+; IIID IVD 1 DEV DEPTHC
+'(
+ name: DMOBIN
+label: "Common Offset DMO Binning"
+value_tab: 39
+
+
+parameter: OFFNEAR
+text: "Near offset bin"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value:  50.0
+mouse_text: "Enter near offset DMO bin.  Any offsets less that this are included in the first bin."
+plot_label: t
+
+parameter: BININC
+text: "Bin increment"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value:  50.0
+mouse_text: "Enter offset bin increment."
+plot_label: t
+
+parameter: NBINS
+text: "Maximum number of bins"
+type: typein:
+type_desc: ( int: 4 1 nil )
+value:  50.0
+mouse_text: "Enter maximum of bins.  Traces with offsets beyond this bin limit are included in the last bin."
+plot_label: t
+
+parameter: IAOFFSET
+text: "Use absolute value of offset?"
+type: boolean:
+value: t
+mouse_text: "Select 'Yes' to use AOFFSET header instead of OFFSET.  This will create only positive DMO offsets."
+plot_label: t
+
+parameter: ISET_OFF
+text: "Set offset header to binned center?"
+type: boolean:
+value: t
+mouse_text: "Select 'Yes' to set the offset header, OFFSET, equal to the DMO offset, DMOOFF."
+plot_label: t
+
+
+exec_data: ("DMOBIN"
+		("GENERAL"
+                        ("version "  implicit: "$Id: dmobin.menu 41831 2007-09-01 20:51:38Z crs $" )
+			("OFFNEAR "  implicit: (value 'OFFNEAR))
+			("BININC  "  implicit: (value 'BININC))
+			("NBINS   "  implicit: (value 'NBINS))
+			("IAOFFSET"  implicit: (if (value 'IAOFFSET) 1 0 ))
+			("ISET_OFF"  implicit: (if (value 'ISET_OFF) 1 0 ))
+		)
+	    )
+)

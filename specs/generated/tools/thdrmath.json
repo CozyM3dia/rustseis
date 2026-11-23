@@ -1,0 +1,139 @@
+{
+  "menu_id": "thdrmath",
+  "tool_name": "THDRMATH",
+  "label": "Trace Header Math",
+  "parameter_count": 17,
+  "parameters": [
+    {
+      "name": "mode",
+      "prompt": "Select mode",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select the math mode."
+    },
+    {
+      "name": "OPERATE",
+      "prompt": "DEFINE trace header equation(s)",
+      "kind": "edit",
+      "default": "new_elev = rec_elev + 100",
+      "help": "Use MB1 to access the text editor and define equations to overwrite old header words or create new ones."
+    },
+    {
+      "name": "IENSTRC",
+      "prompt": "Renumber ensembles or traces?",
+      "kind": "circular",
+      "default": null,
+      "help": "You can renumber either the ensemble number or the traces within ensembles.",
+      "choices": [
+        {
+          "label": "ENSEMBLES",
+          "value": "1",
+          "help": "Renumber ensembles in the order in which they are input."
+        },
+        {
+          "label": "TRACES",
+          "value": "2",
+          "help": "Renumber headers of traces within ensembles, renumbering starts at the begining of each ensemble."
+        }
+      ]
+    },
+    {
+      "name": "CHEADNAM",
+      "prompt": "SELECT trace header word",
+      "kind": "function",
+      "default": "NONE    ",
+      "help": "Use MB1 to select a header word from the headers menu as the HEADER NAME key for renumbering."
+    },
+    {
+      "name": "STARTVAL",
+      "prompt": "Starting value",
+      "kind": "typein",
+      "default": "no default",
+      "help": "Value to assign to first trace header encountered, entry for floating point trace headers MUST include a decimal."
+    },
+    {
+      "name": "INC_VAL",
+      "prompt": "Increment value",
+      "kind": "typein",
+      "default": "no default",
+      "help": "Value by which to increment successive headers, entry for floating point header values MUST include a decimal."
+    },
+    {
+      "name": "IRESET",
+      "prompt": "Reset the Starting value at header change?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you want to reset the renumber counter to the Starting value when a different trace header changes value?"
+    },
+    {
+      "name": "CHDRESET",
+      "prompt": "SELECT reset renumber trace header word",
+      "kind": "function",
+      "default": "S_LINE  ",
+      "help": "Use MB1 to select a header word from the headers menu as the HEADER NAME key for resetting."
+    },
+    {
+      "name": "ANGLE",
+      "prompt": "Rotation angle",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Clockwise rotation angle of new coordinate relative to the original axes. (0.0 - 360.0 degrees)"
+    },
+    {
+      "name": "XSHIFT",
+      "prompt": "X coordinate shift",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Value of X coordinate in old system of the new, translated origin.  (0.0 = no shift in X position)"
+    },
+    {
+      "name": "YSHIFT",
+      "prompt": "Y coordinate shift",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Value of Y coordinate in the old system of the new, translated origin.  (0.0 = no shift in Y position)"
+    },
+    {
+      "name": "warning",
+      "prompt": "** CHANGE THESE ONLY IF YOU UNDERSTAND THE CONSEQUENCES **",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "IVALID",
+      "prompt": "Trace number valid?",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Set the global runtime flag for valid database. (i.e. trace numbers are unique and match the database)"
+    },
+    {
+      "name": "IGEOM",
+      "prompt": "Geometry valid?",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Set the global runtime flag for valid geometry. (i.e. geometry in the trace headers matches the database)"
+    },
+    {
+      "name": "IDOMAIN",
+      "prompt": "Domain of data",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select new data type."
+    },
+    {
+      "name": "IDTYP",
+      "prompt": "Data type",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select data type."
+    },
+    {
+      "name": "ISORT",
+      "prompt": "Primary sort of data",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select new primary sort order."
+    }
+  ]
+}

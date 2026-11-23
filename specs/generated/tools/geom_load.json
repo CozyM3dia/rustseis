@@ -1,0 +1,78 @@
+{
+  "menu_id": "geom_load",
+  "tool_name": "GEOM_LOAD",
+  "label": "Inline Geom Header Load",
+  "parameter_count": 10,
+  "parameters": [
+    {
+      "name": "DO_STATS",
+      "prompt": "Compute and apply statics to sea level?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Select 'Yes' to compute the source-receiver static to sea level and apply it."
+    },
+    {
+      "name": "W_VEL",
+      "prompt": "Water velocity",
+      "kind": "typein",
+      "default": "0.001",
+      "help": "What is the water velocity (ft or m per sec) used for static correction to sea level."
+    },
+    {
+      "name": "CHEADER1",
+      "prompt": "Primary header to match database",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose one of the primary headers to match the SIN database."
+    },
+    {
+      "name": "CHEADER2",
+      "prompt": "Secondary header to match database",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose one of the secondary headers to match the SIN database."
+    },
+    {
+      "name": "SHIFT",
+      "prompt": "Time shift",
+      "kind": "typein",
+      "default": "0",
+      "help": "What time shift (in seconds) should be applied to the header in order to match the database entry?"
+    },
+    {
+      "name": "TOLER",
+      "prompt": "Time tolerance",
+      "kind": "typein",
+      "default": "0",
+      "help": "What tolerance (in seconds) is allowable for matching the headers and database entry for time of shot?"
+    },
+    {
+      "name": "IUSE_TRC",
+      "prompt": "Match by valid trace number?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to use valid trace numbers from the header to match the database.  They must have been assigned previously."
+    },
+    {
+      "name": "KILL_CDP",
+      "prompt": "Drop traces with NULL CDP headers?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to discard traces which have a NULL CDP header.  (ex. traces that fell outside a bin space definition.)"
+    },
+    {
+      "name": "KILL_SRF",
+      "prompt": "Drop traces with NULL receiver headers?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to discard traces which have a NULL REC_SLOC header. (ex. traces that did not have an assigned receiver position.)"
+    },
+    {
+      "name": "IVERBOSE",
+      "prompt": "Verbose diagnostics?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select 'Yes' to list shot and channel of every trace that had a null header loaded."
+    }
+  ]
+}

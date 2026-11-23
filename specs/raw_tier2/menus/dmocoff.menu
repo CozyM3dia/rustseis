@@ -1,0 +1,78 @@
+; IIID IVD 1 DEV DEPTHC
+'(
+ name: DMOCOFF
+label: "Common Offset DMO"
+value_tab: 39
+
+
+parameter: CDPINC
+text: "CDP increment (ft/m)"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value:  55.0
+mouse_text: "Enter distance between Common Mid Point traces."
+plot_label: t
+
+
+parameter: TRCSPC
+text: "Average trace spacing (ft/m)"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value: 110.0
+mouse_text: "Enter average distance between traces on Common Offset Section.  It is used to prevent aliasing."
+plot_label: t
+
+
+parameter: VEL
+text: "DMO velocity (ft,m/sec)"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value: 5000.
+mouse_text: "DMO velocity (ft,m/sec)."
+plot_label: t
+
+
+parameter: OFFMAX
+text: "Largest offset to apply DMO"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value: 5000.
+mouse_text: "Memory requirements increase with offset"
+plot_label: t
+
+
+parameter: REMUTE
+text: "Reapply trace mute after DMO ?"
+type: circular:
+type_desc: (
+   ( "remute" 1 "Data are remuted after DMO" )
+   ( "do not remute" 0 "Data are not remuted after DMO" )
+           )
+value: 1
+mouse_text: "Trace mutes (such as surgical and first break suppression m
+utes) may be reapplied after DMO."
+
+
+parameter: REKILL
+text: "Rezero traces after DMO ?"
+type: circular:
+type_desc: ( 
+   ( "rezero dead traces" 1 "Dead traces are rekilled after DMO" )
+   ( "do not re-zero"     0 "Dead traces are not rekilled after DMO" )
+           )
+value: 1
+mouse_text: "Dead input traces may be rekilled after DMO."
+
+
+exec_data: ("DMOCOFF"
+		("GENERAL"
+                        ("version" implicit: "ProMAX $Id: dmocoff.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("CDPINC"   implicit: (value 'CDPINC))
+			("TRCSPC"   implicit: (value 'TRCSPC))
+			("VEL"      implicit: (value 'VEL))
+			("OFFMAX"   implicit: (value 'OFFMAX))
+                        ("REMUTE"   implicit: (value 'REMUTE))
+                        ("REKILL"   implicit: (value 'REKILL))
+		)
+	    )
+)

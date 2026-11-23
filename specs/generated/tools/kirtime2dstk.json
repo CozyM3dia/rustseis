@@ -1,0 +1,15 @@
+{
+  "menu_id": "kirtime2dstk",
+  "tool_name": "kirtime2dstk",
+  "label": "2D Poststack Kirchhoff Time Migration",
+  "parameter_count": 1,
+  "parameters": [
+    {
+      "name": "KT2D",
+      "prompt": "KT2D",
+      "kind": "boolean",
+      "default": "t",
+      "help": ""
+    }
+  ]
+}

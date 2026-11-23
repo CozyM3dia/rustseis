@@ -1,0 +1,369 @@
+True Amplitude Recovery2100
+
+ProMAX® Reference
+
+True Amplitude Recovery
+True Amplitude Recovery applies a time and possibly space
+variant gain function to traces to compensate for loss of
+amplitude due to wavefront spreading and attenuation. In
+ProMAX® VSP, the process is called VSP True Amplitude
+Recovery and the behavior is slightly different.
+
+Theory
+The process offers a number of true amplitude recovery
+schemes which can be used separately or in combination.
+Options include correction for spherical divergence and
+inelastic attenuation, a dB/sec correction and a power-oftime correction. At least one option must be selected.
+Spherical divergence correction
+This correction compensates for loss of amplitudes due to
+spherical wavefront spreading. If 1/dist for Basis for
+spherical spreading, the gain correction is
+g(t) = t × v(t)
+If 1/(time*vel**2) for Basis for spherical spreading, the
+gain correction is
+2
+
+g(t) = t × v (t)
+t is time and v(t) is an RMS (stacking) velocity function.
+Inelastic attenuation correction
+This correction compensates for loss of amplitudes due to
+inelastic attenuation. The gain correction is
+g(t) = e
+
+α × t × v(t)
+
+α is the Inelastic attenuation correction constant, t is
+time and v(t) is an RMS (stacking) velocity function.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2101
+
+ProMAX® Reference
+
+dB/sec correction
+This correction is a simple decibels per second amplitude
+adjustment. If Time zero for dB/sec correction start time,
+the gain correction is
+g(t) = 10
+
+t × C ⁄ 20
+
+If Water bottom for dB/sec correction start time, the gain
+correction is
+g(t) = 1.0 for t ≤ t wb and
+g(t) = 10
+
+( t – t wb ) × C ⁄ 20
+
+for t > t wb
+
+C is the dB/sec correction constant, t is time and twb is the
+water-bottom time (WB_TIME from the trace header).
+Time raised to a power correction
+This correction is a simple amplitude adjustment. The gain
+correction is
+g(t) = t
+
+POWER
+
+POWER is the Time-Power constant and t is time.
+Normalization
+The computed gain curve is multiplied by a normalization
+constant so that trace amplitudes are relatively unchanged.
+There are three options for the source of the normalization
+constant: Calculate, Menu and Header.
+Calculate
+The normalization constant is calculated during the
+Initialization phase from the menu parameters. If Yes to Are
+velocities spatially variant, the gain curve is calculated
+using a velocity function interpolated for CDP 1. If Water
+bottom for dB/sec correction start time, the gain curve is
+calculated using WB_TIME = 0. Then, the normalization
+constant is the inverse of the value of the gain curve at
+Normalization reference TIME.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2102
+
+ProMAX® Reference
+
+The calculated normalization constant is independent of the
+data. The same value is used for all traces, even when gain
+curves vary because velocities are spatially variant or the
+dB/sec correction starts at the water bottom.
+Menu
+The source of the normalization constant is parameter
+Normalization constant. If removing TAR, the reciprocal of
+the menu value is used. The same value is used for all traces.
+Header
+The source of the normalization constant is trace header
+entry TAR_NORM. If removing TAR, the reciprocal of the
+header value is used. Unlike the Calculate and Menu
+options, the same value is not used for all traces. Instead, the
+value of TAR_NORM in each trace header is used for that
+trace. The job aborts if TAR_NORM is NULL or less than or
+equal to zero.
+Seeing normalization constant values
+The Calculate option prints the normalization constant in
+the STDERR section of job.output.
+When applying TAR, the Calculate and Menu options put the
+normalization constant in new trace header entry
+TAR_NORM. If TAR_NORM already exists, it is overwritten
+with the new normalization constant.
+When removing TAR, all options set trace header entry
+TAR_NORM to 1.0.
+VSP True Amplitude Recovery differences
+For each trace, the two-way time RMS velocity function is
+converted to one-way VSP time using the ﬁrst break pick time
+(FB_PICK from the trace header). There must be a FB_PICK
+time for each trace. Any null value will cause the job to
+abort.
+Parameter Are velocities spatially variant is hidden.
+Velocities cannot be spatially variant.
+Parameter dB/sec correction start time is hidden. The
+dB/sec correction always starts from time 0.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2103
+
+ProMAX® Reference
+
+If Calculate to Normalization source, the normalization
+constant is calculated using the FB_PICK time for the ﬁrst
+live input trace. The calculated normalization constant is
+NOT independent of the data.
+
+Usage
+You can use the following ﬂow to input traces that are all
+ones to True Amplitude Recovery and see the gains.
+Disk Data Input
+Trace Math
+MODE of operation
+
+Trace/Scalar
+
+TYPE of trace/scalar operation
+
+Multiply by Scalar
+
+SCALAR value
+
+0.
+
+Trace Math
+MODE of operation
+
+Trace/Scalar
+
+TYPE of trace/scalar operation
+
+Add Scalar
+
+SCALAR value
+
+1.
+
+True Amplitude Recovery
+Trace Display
+
+Parameters
+Apply spherical divergence corrections?
+Select Yes to compute corrections to compensate for loss of
+amplitudes based on spherical wavefront spreading.
+Basis for spherical spreading
+This appears if Yes to Apply spherical divergence
+corrections. Select spherical divergence corrections from:
+• 1/dist bases spherical spreading on the reciprocal of the
+distance the wavefront has travelled.
+• 1/(time*vel**2) bases spherical spreading on a function
+of travel time and velocity.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2104
+
+ProMAX® Reference
+
+Apply inelastic attenuation corrections?
+Select Yes to compute corrections to compensate for loss of
+amplitudes due to inelastic attenuation.
+Inelastic attenuation correction constant
+This appears if Yes to Apply inelastic attenuation
+corrections. Enter the constant inelastic attenuation value
+used to compute amplitude attenuation corrections. The
+default value is 0.0002. You must enter a value between
+0.000001 and 0.01.
+Get TAR velocity function from database?
+This appears if Yes to Apply spherical divergence
+corrections or Yes to Apply inelastic attenuation
+corrections. Select Yes to retrieve the velocity function used
+for spherical spreading and inelastic attenuation corrections
+from the database.
+Are velocities spatially variant?
+This appears if Yes to Apply spherical divergence
+corrections or Yes to Apply inelastic attenuation
+corrections. Select Yes to input velocities as spatially variant
+by CDP. This will cause a longer run time.
+In ProMAX® VSP this parameter is hidden and velocities
+cannot be spatially variant.
+Select velocity parameter ﬁle
+This appears if Yes to Get TAR velocity function from
+database. Select an RMS (stacking) velocity table from the list
+deﬁned for the line.
+If No to Are velocities spatially variant, the table must
+contain a single velocity function for one location. If Yes to
+Are velocities spatially variant, the table must contain
+velocity functions for more than one location.
+Specify TAR velocity function
+This appears if No to Get TAR velocity function from
+database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2105
+
+ProMAX® Reference
+
+If No to Are velocities spatially variant, you must specify a
+TAR velocity function as T1-V1, T2-V2, T3-V3,...Tn-Vn. Enter
+a single average velocity function.
+If Yes to Are velocities spatially variant, you must specify
+the TAR velocity functions as CDP1:T1-V1,...,TnVn/CDP2:T1-V1,...,Tn-Vn/.../. Enter multiple velocity
+functions.
+Apply dB/sec corrections?
+Select Yes to compute corrections by a simple dB/sec
+amplitude adjustment function.
+dB/sec correction start time
+This appears if Yes to Apply dB/sec corrections. Select the
+start time for the correction from:
+• Time 0 starts at time zero.
+• Water bottom starts at the water-bottom time.
+In ProMAX® VSP this parameter is hidden and the dB/sec
+correction always starts at time zero.
+dB/sec correction constant
+This appears if Yes to Apply dB/sec corrections. Enter the
+constant dB/sec value used to compute amplitude
+corrections. The default value is 6.0 dB. You must enter a
+value greater than or equal to -120 dB.
+Apply time raised to a power corrections?
+Select Yes to compute corrections by raising the time to a
+power and then multiplying the sample by this value.
+Time-Power constant
+This appears if Yes to Apply time-raised-to-a-power
+corrections. Enter the constant power to raise before
+multiplying the trace samples by this computed value. The
+default value is 2.0. Enter a value greater than or equal to
+-10.0.
+APPLY or REMOVE amplitude corrections?
+Select from:
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2106
+
+ProMAX® Reference
+
+• Apply multiplies the data by the speciﬁed correction factors. Gain corrections increase with time. This is the
+normal mode and corrects the data for loss of signal
+strength.
+• Remove divides the data by the speciﬁed correction factors. Gain corrections decrease with time. This mode can
+be used to remove the effects of a previous application of
+True Amplitude Recovery or it can be used to introduce earth amplitude effects into synthetic data.
+Maximum application TIME
+Enter the maximum time in milliseconds for computing TAR
+corrections. Below this time the gain curve is held constant at
+the value for the maximum application time. The default, 0.0,
+means continue computing the gain curve to trace end.
+Normalization source
+The computed gain curve is multiplied by a normalization
+constant so that trace amplitudes are relatively unchanged.
+Select the source of the normalization constant from:
+• Calculate the normalization constant from menu
+parameters. The normalization constant is calculated
+during the Initialization phase and is independent of
+the data.
+• Menu to use the value of parameter Normalization constant.
+• Header to use the value of trace header entry
+TAR_NORM.
+The Menu option is useful if you are applying a spherical
+divergence or inelastic attenuation correction, which depends
+upon velocity, to several lines with much different velocities
+at CDP 1. An example is a 2-D marine survey in which half
+the dip lines have CDP 1 near shore and the other half have
+CDP 1 in deep water. With the Calculate option, the
+normalization constant is different for each line and could
+introduce noticeable amplitude mismatches among the lines.
+Instead, ﬁrst apply TAR using the Calculate option to 1 trace
+from each of a representative sample of lines. Look at the
+calculated normalization constants printed in job.output. Then
+use the Menu option to apply TAR to all lines using a single
+average value for Normalization constant.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+True Amplitude Recovery2107
+
+ProMAX® Reference
+
+Note: The Menu option is not needed for different data sets in
+the same line. Given the same menu parameters, the
+Calculate option always calculates the same normalization
+constant.
+The Header option can be useful when removing a previously
+applied TAR. When applying TAR, True Amplitude Recovery
+writes the normalization constant to trace header entry
+TAR_NORM so that it is available during removal.
+Normalization reference TIME
+This appears if Calculate to Normalization source. Enter
+the reference time in milliseconds for normalizing TAR
+corrections. The computed gain curve is normalized by
+dividing by the gain at the normalization reference time. The
+default, 0.0, means use the middle of the trace as the
+reference time.
+This parameter is useful if you want to remove a previously
+applied TAR and the trace length has changed or if you want
+to apply the same TAR, with the same normalization
+constant, to data sets with different trace lengths.
+Normalization constant
+This appears if Menu to Normalization source. Enter the
+normalization constant, which must be greater than zero.
+The computed gain curve is normalized by multiplying by this
+value.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

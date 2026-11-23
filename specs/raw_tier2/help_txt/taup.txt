@@ -1,0 +1,234 @@
+Tau-P Transform257
+
+ProMAX® Reference
+
+Tau-P Transform
+Tau-P Transform creates a slant stack by transforming
+samples in the time and offset domain to Tau (intercept time)
+and P (Slowness), using the Radon transform.
+
+Theory
+Data in the X-T space deﬁned by (Xmin,Tmin) (Xmax,Tmax) is
+transformed to the butterﬂy-shaped region deﬁned by the
+points T1, T2, (P=0,Tmax), T4, T3, and (P=0,Tmin).
+T3=pmax*xmax
+
+T1=pmin*xmin
+P=0
+X=0
+
+Tmin
+
+Tmax
+
+T2=pmin*xmax
+
+T4=pmax*xmin
+
+Usage
+Tau-P creates new header entries called SLOWNESS,
+TAUMIN, and TAUPIN. SLOWNESS is the P value for the
+trace, TAUMIN is the Tau value of sample one of the trace,
+and TAUPIN contains information used by the inverse
+transform. Required input trace headers are CDP and
+OFFSET for prestack data and CDP, CDP_X and CDP_Y for
+stacked data.
+In order to have Screen Display show SLOWNESS values
+with a sufﬁcient number of signiﬁcant digits, values are
+stored in the header in units of ms/kilometer or ms/kilofoot.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Tau-P Transform258
+
+ProMAX® Reference
+
+When specifying slowness parameter values, remember to
+use the appropriate units.
+This program can change the data length, and/or the
+number of traces in an ensemble. Pay close attention to the
+time or Tau value that is stored in sample one of the output
+trace. You may ﬁnd it necessary to apply a static shift after
+the inverse Tau-P Transform.
+When used on stacked data, the best results are obtained
+with a full CDP database containing X and Y coordinates of
+each CDP location. If this database does not exist, the
+program attempts to read the minimum and maximum CDP
+numbers from the database (CDPMINz, and CDPMAXz) as
+well as the distance between CDPs in the inline direction
+(DCDPILNz). It uses these attributes to estimate the number
+of traces and the distances required.
+Note: This process works as a simple slant-stack. A rho ﬁlter
+is used in the inverse Tau-P transform to approximately
+restore the original frequency content of the data. However,
+as with any slant-stack, spatial aliasing of the higher
+frequencies can occur. This aliasing appears as an increase
+in the high frequency content of the data output from the
+inverse transform. In order to minimize the aliasing,
+transform only those dips which are required and bandlimit
+the data to the signal bandwidth.
+
+References
+Stoffa,P.L., Buhl,P., Diebold,J.B., and Wenzel, F., 1981, Direct mapping of seismic
+data to the domain of intercept time and ray parameter - A plane wave decomposition: Geophysics, 46, 255-267.
+
+Parameters
+Minimum slowness (ms/km or ms/kf)
+Enter the minimum slowness value of interest. This value will
+be in units of ms/kilometer or ms/kilofeet, depending on the
+data units. The value may be negative.
+Maximum slowness (ms/km or ms/kf)
+Enter the maximum slowness value of interest. This value
+will be in units of ms/kilometer or ms/kilofeet, depending on
+the data units. The value may be negative.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Tau-P Transform259
+
+ProMAX® Reference
+
+Slowness increment (ms/km or ms/kf)
+Enter the increment between traces for the slowness value, in
+Tau-P space. The number of traces generated in Tau-P space
+is: (Maximum P - Minimum P) / (Delta P) + 1 If the increment
+is less than or equal to 0, a default increment is computed so
+that the number of output traces is approximately the same
+as the number of input traces.
+Minimum time of interest (ms)
+Enter the minimum time, in ms, to transform to Tau-P space.
+Sample values at times earlier than this control point are
+ignored.
+Maximum time of interest (ms)
+Enter the maximum time, in ms, to transform to Tau-P
+space. Sample values at times later than this control point
+are ignored.
+Place a window on Tau?
+Select Yes to place a window on the Tau range to be
+computed. Select No, the default, to compute the minimum
+Tau value:
+τ min = T min – Px
+where Tmin is the minimum input time considered, and Px is
+the maximum of:
+(The minimum slowness) * (The minimum trace offset), or
+(The maximum slowness) * (The maximum trace offset)
+The maximum default Tau value computed is:
+τ max = T max + τ min
+Minimum Tau of interest
+This appears if Yes to Place a window on Tau. Enter a
+minimum Tau value to output in the slant stack. This value
+may be negative.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Tau-P Transform260
+
+ProMAX® Reference
+
+Maximum Tau of interest
+This appears if Yes to Place a window on Tau. Enter a
+maximum Tau value to output in the slant stack. This value
+may be negative.
+Minimum signed offset of interest
+Enter the minimum offset to transform. Traces with offsets
+smaller than this value are ignored.
+Maximum signed offset of interest
+Enter the maximum offset to transform. Traces with offsets
+greater than this value are ignored.
+Normalize Tau-P amplitudes by square root of X?
+Select Yes to normalize Tau-P amplitudes by the square root
+of the offset X.
+Zero offset for stacked data (X)
+Enter the x location to use for zero offset. For stacked
+sections, this process calculates pseudo-offset values from
+the trace header x,y pairs and the speciﬁed x, y location of
+the zero offset.
+This is an important parameter, and the default location of
+the origin is probably incorrect. It is strongly suggested that
+the transform be kept single sided for stacked data.
+Therefore, it is best to choose an X value from either the ﬁrst
+or last CDP on the line. X values for traces can be determined
+by using the header icon in Screen Display.
+Zero offset for stacked data (Y)
+Enter the y location to use for zero offset. As with the X
+coordinate of the pseudo-offset origin, the Y value must be
+chosen with care. It is suggested that the Y coordinate be
+taken from the same trace as the X parameter.
+Output data type
+The process outputs:
+• Tau-P outputs the Tau_P transform of the X-T input.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Tau-P Transform261
+
+ProMAX® Reference
+
+• Semblance outputs the semblance of the Tau_P transformed data.
+• Product outputs the product of Tau-P transformed data
+and the Tau-P Semblance.
+The semblance is normalized by the maximum semblance
+value found.
+Semblance gain factor
+This appears if Semblance or Product to Output data type.
+Enter the semblance gain factor, g, to apply to the semblance
+as follows:
+S ′ i,
+
+j
+
+= 0.5 [ 1 – cos ( π S ig j ) ]
+,
+
+Where Si,j is the semblance for a given Tau-P pair and S’i,j is
+the gained Tau-P pair.
+Gain is applied after the semblance is normalized, but before
+thresholds and/or smoothing.
+Semblance averaging window width
+This appears if Semblance or Product to Output data type.
+Enter a window width, in samples for semblance smoothing;
+the sample at the center of the window is set to the average of
+the samples in the window. The default averaging window
+length is one sample, that is, no smoothing is performed.
+Semblance threshold
+This appears if Semblance or Product to Output data type.
+Enter a threshold to apply to the semblance, such that for
+semblance S:
+S = 0 if S < threshold
+S = S if S >= threshold
+
+The threshold function is applied before any smoothing is
+done.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Tau-P Transform262
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

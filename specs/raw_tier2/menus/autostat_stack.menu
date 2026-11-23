@@ -1,0 +1,359 @@
+; 1
+'(
+ name: autostat_stack
+label: "Compare Autostatics Stack"
+value_tab: 51
+
+
+parameter: LABEL
+text: "SELECT input trace data file"
+type: function:
+type_desc: (dataset_list datasets)
+value: "YOU MUST ENTER THIS!"  
+selected_item: "INVALID"
+mouse_text: "Use Mouse Button 1 to select an input dataset file description from the DATASETS menu."
+
+
+parameter: KEYLIST
+text: "  SPECIFY the input CDP range(s)"
+type: edit:
+type_desc: (25 80 5 " FORMAT: CDP1-CDP2,CDP3-CDP4/
+ EXAMPLES: 101-125 / 101-125,201-225/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1-100000/"
+mouse_text: "Use Mouse Button 1 to access the editor and define your desired input CDP range(s) to test."
+
+
+parameter: SCRATCH
+text: "Temporary SCRATCH data file"
+type: function:
+type_desc: (dataset_list datasets)
+value: "YOU MUST ENTER THIS!"  
+selected_item: "INVALID"
+mouse_text: "Use MB1 to select/add the dataset file description for a temporary output data SCRATCH file."
+
+
+parameter: F_DELETE
+text: "  Automatically delete this file upon completion?"
+type: boolean:
+value:  t
+mouse_text: "Do can automatically delete this file after completion, or save it for possible subsequent hardcopy plotting."
+
+
+parameter: dbname_option
+text: "Normal database entry naming mode?"
+type: boolean:
+value: t
+mouse_text: "If the name of the database entry created by the autostatics program ends in '0000', set this to 'YES'."
+
+
+parameter: TYPESTAT
+text: "  Type of residual statics to apply"
+type: pop_choose:
+type_desc: (
+ ("Max. Power Autostatics"      1 "Apply residual statics computed using the Power Maximization Residual Statics module." )
+ ("Correlation Autostatics"     2 "Apply residual statics computed using the Correlation Residual Statics module." ) 
+ ("Differential Autostatics"    3 "Apply residual statics computed using the Differential Autostatics module." ) 
+ ("Summed Diff. Autostatics"    4 "Apply residual statics computed using the Summed Differential Autostatics module." ) 
+ ("Steepest Ascent Autostatics" 6 "Apply residual statics computed using the pure steepest ascent option in Hybrid GA/SA Autostatics module." ) 
+ ("Hybrid GA/SA Autostatics"    7 "Apply residual statics computed using the Hybrid Genetic/Steepest Ascent Autostatics module." ) 
+            )
+mouse_text: "Select the type of surface consistant residual statics you wish to apply."
+
+
+parameter: DB_PARM1
+text: "  Source residual statics database parameter"
+type: action:
+type_desc: ("SIN STATICS  SPWR0000")
+mouse_text: "Use MB1 to specify the SOURCE residual statics parameter to read from the database and apply to the input traces."
+
+
+parameter: DB_PARM2
+text: "  Receiver residual statics database parameter"
+type: action:
+type_desc: ("SRF STATICS  RPWR0000")
+mouse_text: "Use MB1 to specify the RECEIVER residual statics parameter to read from the database and apply to input traces."
+
+
+parameter: plot
+text: "Suppress screen display?"
+type: boolean:
+value: nil
+mouse_text: "Traces can be passed on without Screen Display to, for example, Disk Data Output."
+
+
+parameter: X_SERVER
+text: "  Select display DEVICE"
+type: :typein
+type_desc: (:string 32)
+:value "This Screen"
+mouse_text: "'This Screen' for current display or type in a display name to override the current display default."
+
+parameter: NTR_SCRN
+text: "  Number of traces per display screen"
+type: typein:
+type_desc: ( int: 4 1 nil )
+value: -1
+mouse_text: "What is the maximum number of traces to be displayed on the screen at a time?"
+
+
+parameter: HDR_VAL1
+showp: nil
+type: string:
+value: "PS_STAT "
+
+
+parameter: HDR_VAL2
+showp: nil
+type: string:
+value: "PR_STAT "
+
+
+exec_data: (
+              ("DISKREAD2"
+		("SPECIAL" 
+                        ("TOOLTYPE"  implicit: "INPUT")
+		 )
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: autostat_stack.menu 36185 2004-09-30 21:08:41Z dxjohnst $ $Revision: 36185 $ $Date: 2004-09-30 15:08:41 -0600 (Thu, 30 Sep 2004) $")
+			("MEDIA"     implicit: 0 )
+			("LABEL"     implicit: (value 'LABEL))
+			("SORTOPT"   implicit: 1 )
+			("PKEYNAM"   implicit: "CDP     " )
+			("SKEYNAM"   implicit: "NONE    " )
+			("TKEYNAM"   implicit: "NONE    " )
+			("KEYLIST"   implicit: (value 'KEYLIST))
+			("THDRONLY"  implicit: 0 )
+			("SAMPRATE"  implicit: 0.0 )
+		 )
+	       )
+              ("REPEAT"
+		("GENERAL"
+			("MODE"    implicit: 1 )
+			("NCOPIES" implicit: 2 )
+		 )
+	       )
+              ("FLOW_IF"
+		("GENERAL"
+			("MODE"     implicit: 0 )
+			("PRIM_KEY" implicit: "REPEAT  " )
+			("SCND_KEY" implicit: "NONE    " )
+			("LIST"     implicit: "1" )
+		 )
+	       )
+              ("THDRMATH"
+		("GENERAL"
+			("OPERATE" implicit: "PARMTEST='Without Autostatics'" )
+		 )
+	       )
+              ("FLOW_ELSE"
+		("GENERAL" 
+		 )
+	       )
+              ("THDRMATH"
+		("GENERAL"
+			("OPERATE" implicit: "PARMTEST='With Autostatics'" )
+		 )
+	       )
+              ("DB_HDR_LOAD"
+		("GENERAL"
+			("DIRECT"   implicit: 0 )
+			("NUMPARMS" implicit: 2 )
+			("DB_PARM1" implicit: (first (type_desc 'DB_PARM1)))
+			("DB_PARM2" implicit: (first (type_desc 'DB_PARM2)))
+			("HDR_VAL1" implicit: (value 'HDR_VAL1))
+			("HDR_VAL2" implicit: (value 'HDR_VAL2))
+		 )
+	       )
+              ("HDRSTAT"
+		("GENERAL"
+			("BULKSHFT" implicit: 0.0 )
+			("DO_WHAT"  implicit: 1 )
+			("APL_MODE" implicit: 2 )
+			("RMV_STAT" implicit: 0 )
+			("NUM_HDRS" implicit: 2 )
+			("HDR_VAL0" implicit: (value 'HDR_VAL1))
+			("HDR_VAL1" implicit: (value 'HDR_VAL2))
+		 )
+	       )
+              ("FLOW_ENDIF"
+	   	("GENERAL"
+		 )
+	       )
+              ("STACK"
+		("GENERAL"
+			("SRT_ORDR" implicit: "CDP     " )
+			("SUM_MODE" implicit: "MEAN_SUM" )
+			("DO_STAT"  implicit: 1 )
+			("NMO_APLD" implicit: 1 )
+		 )
+	       )
+               ("DISKWRITE"
+		("GENERAL"
+			("VERSION"  implicit: 0.1)
+			("LABEL"    implicit: (value 'SCRATCH))
+			("DESCRIPT" implicit: (selected_item 'SCRATCH))
+			("STATUS"   implicit: 1 )
+			("TMAX"     implicit: 0.0 )
+			("ALTSTORE" implicit: 0 )
+			("COMPRESS" implicit: 1 )
+			("N_BUFFER" implicit: 32 )
+		 )
+	       )
+              ("DISKREAD2"
+		("SPECIAL" 
+                        ("TOOLTYPE"     implicit: "INPUT")
+		 )
+		("GENERAL"
+			("MEDIA"     implicit: 0 )
+			("LABEL"     implicit: (value 'SCRATCH))
+			("SORTOPT"   implicit: 1 )
+			("PKEYNAM"   implicit: "REPEAT  " )
+			("SKEYNAM"   implicit: "NONE    " )
+			("TKEYNAM"   implicit: "NONE    " )
+			("KEYLIST"   implicit: "1-2" )
+			("THDRONLY"  implicit: 0 )
+			("SAMPRATE"  implicit: 0.0 )
+		 )
+	       )
+	      ( ( if (value 'plot ) "VOID" "TR_DISPLAY" )
+		("GENERAL"
+			("X_SERVER" implicit: 
+			 (if (= (value 'X_SERVER) "This Screen")
+			     (where_promax_displays)
+			   (value 'X_SERVER)))
+			("TSTART"   implicit: 0.0 )
+			("TEND"     implicit: 8000.0 )
+			("NTR_SCRN" implicit: (value 'NTR_SCRN))
+			("NEN_SCRN" implicit: 1 )
+			("GAP"      implicit: 1 )
+			("SCROLL"   implicit: 0 )
+			("XMAGNIFY" implicit: 1.0 )
+			("YMAGNIFY" implicit: 1.0 )
+			("DISPMODE" implicit: 2 )
+			("VARBIAS"  implicit: 0.0 )
+			("AUTOSAVE" implicit: 1 )
+			("NIMAGES"  implicit: 2 )
+			("NBATCH"   implicit: 1 )
+			("DIRECT"   implicit: 1 )
+			("POLARITY" implicit: 1.0 )
+			("TIMELINE" implicit: 100 )
+			("TIMEBOLD" implicit: 1000 )
+			("TIMEANN"  implicit: 500 )
+			("LKEYNAM1" implicit: "CDP     " )
+			("LABLMOD1" implicit: 2 )
+			("LABLINC1" implicit: 10 )
+			("LKEYNAM2" implicit: "TR_FOLD " )
+			("LABLMOD2" implicit: 2 )
+			("LABLINC2" implicit: 10 )
+			("POSITION" implicit: 0 )
+			("CLIP"     implicit: 2.0 )
+			("MODSCALE" implicit: 1 )
+			("ASCALAR"  implicit: 1.0 )
+			("SCALEOPT" implicit: 1 )
+			("LMFRDATA" implicit: 0 )
+			("SCRN_MIN" implicit: -10.0 )
+			("SCRN_MAX" implicit: 10.0 )
+			("INTERP"   implicit: 1 )
+			("SPLT_ENS" implicit: 1 )
+		)
+	      )
+              ( ( if (value 'F_DELETE) "UTIL"  "VOID")
+		("SPECIAL"
+			("TOOLTYPE"  implicit: "STAND_ALONE")
+			("PATHNAME"  implicit: "util.exe")
+		)
+		("GENERAL"
+			("TASK"     implicit: "PARM_ACT")
+			("PARMTYPE" implicit: "DATA")
+			("ACTION"   implicit: "DELETE")
+			("LABEL"    implicit: (value 'SCRATCH))
+		)
+	      )
+	)
+
+rules: (
+	(tr_display	(value 'plot)
+			(dont_show '(X_SERVER NTR_SCRN))
+			(do_show '(X_SERVER NTR_SCRN)))
+	(test_host_name (NOT (= (value 'X_SERVER) "This Screen"))
+			(progn
+			  (setq temp (host_valid_p (value 'X_SERVER)))
+			  (if temp 
+			      (add_error 'X_SERVER temp)
+			    (set_error_list 'X_SERVER temp)))
+			(set_error_list 'X_SERVER nil)
+			)
+ (rule1  ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 1 )) 
+	 ( set_type_desc 'DB_PARM1 '("SIN STATICS  SPWR0000")))
+ (rule2  ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 2 )) 
+	 ( set_type_desc 'DB_PARM1 '("SIN STATICS  SCOR0000")))
+ (rule3  ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 3 )) 
+	 ( set_type_desc 'DB_PARM1 '("SIN STATICS  SST10000")))
+ (rule4  ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 4 )) 
+	 ( set_type_desc 'DB_PARM1 '("SIN STATICS  SST20000")))
+ (rule6  ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 6 )) 
+	 ( set_type_desc 'DB_PARM1 '("SIN STATICS  S_SA0000")))
+ (rule7  ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 7 )) 
+	 ( set_type_desc 'DB_PARM1 '("SIN STATICS  SHYB0000")))
+ (rule11 ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 1 )) 
+	 ( set_type_desc 'DB_PARM2 '("SRF STATICS  RPWR0000")))
+ (rule12 ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 2 )) 
+	 ( set_type_desc 'DB_PARM2 '("SRF STATICS  RCOR0000")))
+ (rule13 ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 3 )) 
+	 ( set_type_desc 'DB_PARM2 '("SRF STATICS  RST10000")))
+ (rule14 ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 4 )) 
+	 ( set_type_desc 'DB_PARM2 '("SRF STATICS  RST20000")))
+ (rule16 ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 6 )) 
+	 ( set_type_desc 'DB_PARM2 '("SRF STATICS  R_SA0000")))
+ (rule17 ( and (value 'dbname_option ) ( = (value 'TYPESTAT) 7 )) 
+	 ( set_type_desc 'DB_PARM2 '("SRF STATICS  RHYB0000")))
+ (rule21 ( value 'dbname_option ) (do_not_show 'DB_PARM1) (do_show 'DB_PARM1) )
+ (rule22 ( value 'dbname_option ) (do_not_show 'DB_PARM2) (do_show 'DB_PARM2) )
+ (rule23 ( value 'dbname_option ) (do_show 'TYPESTAT) (do_not_show 'TYPESTAT) )
+ (rule31 ( if ( = (value 'TYPESTAT) 1 ) (set_value 'HDR_VAL1 "PS_STAT " ) ) ) 
+ (rule32 ( if ( = (value 'TYPESTAT) 2 ) (set_value 'HDR_VAL1 "CS_STAT " ) ) ) 
+ (rule33 ( if ( = (value 'TYPESTAT) 3 ) (set_value 'HDR_VAL1 "DS_STAT " ) ) ) 
+ (rule34 ( if ( = (value 'TYPESTAT) 4 ) (set_value 'HDR_VAL1 "SDS_STAT" ) ) ) 
+ (rule36 ( if ( = (value 'TYPESTAT) 6 ) (set_value 'HDR_VAL1 "SAS_STAT" ) ) ) 
+ (rule37 ( if ( = (value 'TYPESTAT) 7 ) (set_value 'HDR_VAL1 "HYS_STAT" ) ) ) 
+ (rule41 ( if ( = (value 'TYPESTAT) 1 ) (set_value 'HDR_VAL2 "PR_STAT " ) ) ) 
+ (rule42 ( if ( = (value 'TYPESTAT) 2 ) (set_value 'HDR_VAL2 "CR_STAT " ) ) ) 
+ (rule43 ( if ( = (value 'TYPESTAT) 3 ) (set_value 'HDR_VAL2 "DR_STAT " ) ) ) 
+ (rule44 ( if ( = (value 'TYPESTAT) 4 ) (set_value 'HDR_VAL2 "SDR_STAT" ) ) ) 
+ (rule46 ( if ( = (value 'TYPESTAT) 6 ) (set_value 'HDR_VAL2 "SAR_STAT" ) ) ) 
+ (rule47 ( if ( = (value 'TYPESTAT) 7 ) (set_value 'HDR_VAL2 "HYR_STAT" ) ) ) 
+ (rule1_call_dbparm ( and ( not (value 'dbname_option) ) (value 'DB_PARM1))
+             ( progn
+                   (set_value 'DB_PARM1 nil)
+		   (set_selected_item 'DB_PARM1 nil)
+	           (set_type_desc 'DB_PARM1 (list (choose_old_db_parm)))))
+ (rule2_call_dbparm ( and ( not (value 'dbname_option) ) (value 'DB_PARM2))
+             ( progn
+                   (set_value 'DB_PARM2 nil)
+		   (set_selected_item 'DB_PARM2 nil)
+	           (set_type_desc 'DB_PARM2 (list (choose_old_db_parm)))))
+ (NTR_SCRN_default_rule ( = ( value 'NTR_SCRN) -1 )
+  	     (set_value 'NTR_SCRN ( + (- (db_parmget_line "MAXCDPz")  
+		( db_parmget_line "MINCDPz") ) 1 ) ) )
+       )
+
+)
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,207 @@
+{
+  "menu_id": "segy_read",
+  "tool_name": "SEG_READ",
+  "label": "SEG-Y Input",
+  "parameter_count": 26,
+  "parameters": [
+    {
+      "name": "extern_history",
+      "prompt": "extern_history",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "FLAVOUR",
+      "prompt": "Type of SEG-Y",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose the type of SEG-Y to input."
+    },
+    {
+      "name": "BYTESWAP",
+      "prompt": "Invert normal byte order correction?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "The SEG-Y standard requires big endian numeric formatting, but some systems blithely violate this explicit requirement."
+    },
+    {
+      "name": "MULTIPLE",
+      "prompt": "Input MULTIPLE files from tape(s)?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If the user wants to load multiple tapes or files from tape(s). If a tape contains multiple files (EOF between files) or the SEG-Y file spans multiple tapes, specify 'YES'. Otherwise specify 'NO' and ProMAX will end the job after encountering an EOF."
+    },
+    {
+      "name": "MULTCONT",
+      "prompt": "Multiple file SELECTION",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "You can input ALL files/tapes or select a range of sequential file numbers."
+    },
+    {
+      "name": "FILELIST",
+      "prompt": "Specify input FILES list",
+      "kind": "edit",
+      "default": "1-100/",
+      "help": "If a tape contains multiple SEG-Y files (EOF between files), enter the list of sequential files that you want to input. MAX=50000."
+    },
+    {
+      "name": "ANALYZER",
+      "prompt": "Invoke SeisWorks SEG-Y Analyzer?",
+      "kind": "circular",
+      "default": "0",
+      "help": "Launches an interactive SEG-Y analyzer application to allow you to scan the input disk file while preparing menu parameters.",
+      "choices": [
+        {
+          "label": "Launch",
+          "value": "1",
+          "help": "Launch SEG-Y Analyzer"
+        },
+        {
+          "label": "Launch",
+          "value": "0",
+          "help": "Launch SEG-Y Analyzer"
+        },
+        {
+          "label": "Launch",
+          "value": "0",
+          "help": "Launch SEG-Y Analyzer"
+        }
+      ]
+    },
+    {
+      "name": "SCSISIZE",
+      "prompt": "MAXIMUM data block size in bytes",
+      "kind": "typein",
+      "default": "65535",
+      "help": "Maximum size of a data block in bytes that will be encountered. For values greater than 65536, you must have a long block driver."
+    },
+    {
+      "name": "ABORT",
+      "prompt": "Number of read errors in a row before ABORTING job?",
+      "kind": "typein",
+      "default": "10",
+      "help": "Specify the number of errors in a row before aborting. '0' means ignore all errors. Greater than '0' will output dead traces until number of errors is reached."
+    },
+    {
+      "name": "NSAMPS1",
+      "prompt": "Samples per data trace (override binary header)",
+      "kind": "typein",
+      "default": "0",
+      "help": "What is number of samples per data trace. Enter 0 to get from SEG-Y binary header bytes 21-22."
+    },
+    {
+      "name": "NSAMPS2",
+      "prompt": "Number of samples per data trace",
+      "kind": "typein",
+      "default": "1001",
+      "help": "What is number of samples per data trace. FOR A SIERRA DISK FILE THIS VALUE MUST BE ENTERED."
+    },
+    {
+      "name": "STORE",
+      "prompt": "Store reel header in processing history?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "The 3200-byte SEG-Y reel header (EBCDIC) will be stored in the dataset processing history."
+    },
+    {
+      "name": "AUXOPT",
+      "prompt": "Input AUXILIARY traces?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Auxiliary traces may either be input normally or ignored."
+    },
+    {
+      "name": "TTRACE",
+      "prompt": "Get CHANNEL NUMBER from trace headers?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Do you wish to get the channel number from the trace headers or number the channel sequentially in a ensemble?"
+    },
+    {
+      "name": "FORMAT",
+      "prompt": "Input trace FORMAT",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "What is the format of the trace data samples?"
+    },
+    {
+      "name": "MPFACTOR",
+      "prompt": "Apply trace weighting factors (2**-N)?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Specify whether to apply the millivolt conversion factor stored in header bytes 169-170 of the standard SEG-Y header to fixed point sample formats."
+    },
+    {
+      "name": "COORREF",
+      "prompt": "Input Global XY reference coordinates?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Specify whether to input the global reference coordinates 'xref' and 'yref'. If 'NO', then these parameters are not used."
+    },
+    {
+      "name": "XREF",
+      "prompt": "Global X reference coordinate",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the global X reference coordinate. All X coordinates will have this reference subtracted from their original value."
+    },
+    {
+      "name": "YREF",
+      "prompt": "Global Y reference coordinate",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the global Y reference coordinate. All Y coordinates will have this reference subtracted from their original value."
+    },
+    {
+      "name": "COORSCAL",
+      "prompt": "Use the coordinate scalar?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "This flag determines whether to apply the coordinate scalar (bytes 71-72) to the coordinates (bytes 73-88) when reading SEG-Y trace headers. Choose 'YES' for a standard SEG-Y header."
+    },
+    {
+      "name": "TIMESCAL",
+      "prompt": "Use the Rev 1 time scalar?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "This flag determines whether to apply the time scalar (bytes 215-216) to the statics, lag times and mutes (bytes 95-114) when reading SEG-Y trace headers.  Ignored if the input is not SEG-Y Rev 1 or higher."
+    },
+    {
+      "name": "SCANALL",
+      "prompt": "Scan range of all header words?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Choose 'YES' to scan range of all 240 bytes header fields."
+    },
+    {
+      "name": "REVONE",
+      "prompt": "Use SEG-Y Rev 1 header mapping?",
+      "kind": "pop_choose",
+      "default": "2",
+      "help": "Controls whether to decode header bytes 181-240 according to the SEG-Y Rev 1 standard."
+    },
+    {
+      "name": "IOVER",
+      "prompt": "Remap SEG-Y header values?",
+      "kind": "boolean",
+      "default": null,
+      "help": "Choose 'YES' to input/override SEG-Y trace header values."
+    },
+    {
+      "name": "OVERRIDE",
+      "prompt": "Input/override trace header entries",
+      "kind": "edit",
+      "default": "sou_sloc,,4I,,233/srf_sloc,,4I,,237/",
+      "help": "Enter: 1-8char keyword, max 32char description (for new keyword), 2I or 4I or 4R or 8R, IEEE or IBM, byte start (1-240)/ ... /"
+    },
+    {
+      "name": "OVERRDIO",
+      "prompt": "Input/override trace header entries",
+      "kind": "edit",
+      "default": "io_31,# vertically summed trcs in trc,2I,,31/\nio_35,1=production 2=test,2I,,35/\nrec_elev,,4I,,41/sou_elev,,4I,,45/\nio_115,numsamp,2I,,115/\nio_117,sample rate in micros,2I,,117/\nio_125,data type-raw-correlated-stacked,2I,,125/\nio_127,sweep start in 0.1 hz,2I,,127/\nio_129,sweep freq end,2i,,129/\nio_131,sweep length in ms,2I,,131/\nio_133,sweep type,2I,,133/\nio_135,sweep taper at start,2I,,135/\nio_137,sweep taper at end,2I,,137/\nio_139,taper type,2I,,139/\nio_159,day of year,2I,,159/\nio_161,hour of day,2I,,161/\nio_163,min of hour,2I,,163/\nio_167,time basis code,2I,,167/\nio_171,windowed data start time in samp,2I,,171/\nio_173,windowed data length in samples,2I,,173/\nio_175,ms byte and mid byte of window,2I,,175/\nio_177,ls byte and ms byte of window,2I,,177/\nio_179,mid byte and ls byte of window,2i,,179/\nio_181,trace header revision #,2I,,181/\nshotid,,4I,,183/\nio_187,aux chan signal description,1I,,187/\nio_188,aux chan id from RSR,1I,,188/\ns_line,,4I,,189/\nsou_sloc,,4I,,193/\nr_line,,2I,,197/\nsrf_sloc,,2I,,199/\nio_201,vectorseis module type,1I,,201/\nio_202,VSMT sensor scaling code in hex,1I,,202/\nio_203,VSMT horz orientation angle,2I,,203/\nio_205,VSMT VOA-vert orientation angle,2I,,205/\nio_207,source type,1I,,207/\nio_208,sensor type,1I,,208/\nio_209,aux chan set type,1I,,209/\nio_210,noise edit type,1I,,210/\nio_211,noise edit gate length in ms,2I,,211/\nio_213,device type,1I,,213/\nio_214,device serial#,3I,,214/\nio_217,device channel #,1I,,217/\nio_218,aux chan source set id,1I,,218/\nio_219,device status bits,1I,,219/\nio_220,LAT test type and codes,1I,,220/\nio_221,fixed low cut freq:on=3.0hz,2I,,221/\nio_223,fixed low cut slope on=12 db,1I,,223/\nio_224,box function,1I,,224/\nio_225,RSR or T2 dependent,2I,,225/\nio_227,RSR or T2 dependent,2I,,227/\nio_229,RSR or T2 dependent,2I,,229/\nio_231,RSR or T2 dependent,2I,,231/\nio_233,event type,1I,,233/\nio_234,sensor type id,1I,,234/\nio_235,VSMT serial#,3I,,235/\nio_238,VSMT version3,1I,,238/\nio_239,VSMT revision#,1I,,239/\nio_240,data modified flags-bits0-7,1I,,240/",
+      "help": "Enter: 1-8char keyword, max 32char description (for new keyword), 2I or 4I or 4R or 8R, IEEE or IBM, byte start (1-240)/ ... /"
+    }
+  ]
+}

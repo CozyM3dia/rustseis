@@ -1,0 +1,664 @@
+427
+
+Developer’s Programming Guide
+
+Appendix: Single Buffer Tool
+Examples
+
+This appendix provides examples of two types of single buffer
+tools. The ﬁrst type is an ensemble deﬁnition program in
+FORTRAN. The second type is a pre-stack trace interpolation
+program that has the same output as prestk_interp, a C language
+ensemble tool.
+
+Topics covered in this appendix:
+
+➲
+➲
+➲
+➲
+➲
+
+Other Docs
+
+ens_deﬁne.menu
+ens_deﬁne.inc
+ens_deﬁne.f
+interp_sb.menu
+interp_sb.c
+
+Search Page
+
+Known Problems
+
+ens_define.menu428
+
+Developer’s Programming Guide
+
+ens_deﬁne.menu
+'(
+name: ENS_DEFINE
+label: "Ensemble Re-define"
+value_tab: 51
+
+parameter: PRIM_KEY
+text: "Select PRIMARY key to re-define output ensembles"
+type: function:
+type_desc: (header_list headers)
+value: "NONE
+"
+selected_item: "**INVALID**"
+mouse_text: "Use MB1 to select a header word from the headers menu as the PRIMARY
+key for re-defining input ensembles."
+
+parameter: MAXTR
+text: "Maximum traces per output ensemble"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: 0
+mouse_text: "What is the maximum number of traces per output ensemble AFTER redefining the ensembes?"
+
+exec_data: ("ENS_DEFINE"
+("GENERAL"
+("version" implicit: "@(#)ens_define.menu
+("PRIM_KEY" implicit: (value 'PRIM_KEY))
+("MAXTR"
+implicit: (value 'MAXTR))
+)
+)
+
+40.1
+
+11/24/92" )
+
+)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+ens_define.inc429
+
+Developer’s Programming Guide
+
+ens_deﬁne.inc
+C-----------------------------------------------------------------------------C
+Include file for ENS_DEFINE.
+C
+C
+Original code by S. Rutt Bridges, April 30, 1991.
+C-----------------------------------------------------------------------------IMPLICIT NONE
+#include "global.inc"
+
+&
+
+C
+C
+C
+C
+C
+C
+C
+
+.....
+.....
+.....
+.....
+.....
+.....
+.....
+
+COMMON /SAVED_PARMS/ SAVE1z, IH_PRIM, ITRC_COUNT, IX_TRACE,
+IX_THDR, IFIRST_ENTRY, NOUT_EXEC, END1z
+INTEGER IH_PRIM, ITRC_COUNT, IX_TRACE, IX_THDR, IFIRST_ENTRY
+INTEGER NOUT_EXEC
+IH_PRIM - index of the primary key used to merge ensembles
+ITRC_COUNT - counter for the number of dumped traces in an ensemble
+IX_TRACE - address of the memory used to hold the last trace
+IX_THDR - address of the memory used to hold the last trace header
+IFIRST_ENTRY - value is 1 the very first time the executive is entered
+Number of traces to output in exec phase
+SCCS: @(#)ens_define.inc 31.4 6/18/92
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+ens_define.f430
+
+Developer’s Programming Guide
+
+ens_deﬁne.f
+C-----------------------------------------------------------------------------C
+C
+Initialization routine for ENS_DEFINE
+C
+C
+ENS_DEFINE is an ensemble definition tool. It resets ensemble flags
+C
+based on a change in a header word. Output ensembles may be larger
+C
+or smaller, depending on the changes in the header word. Examples of
+C
+the use of this tool:
+C
+C
+1. In the Ensemble Decon Parameter Test macro, we input data that
+C
+has a primary sort key of 'REPEAT' and a secondary sort key of
+C
+'CDP'. For the subsequent CDP stack, we need to have ensembles
+C
+defined by CDP. ENS_DEFINE provides this function.
+C
+C
+2. Typically for Radon Filtering, we need to use Ensemble Split to
+C
+seperate the positive and negative offsets. However, for a
+C
+subsequent CDP stack these traces need to form a single ensemble.
+C
+ENS_DEFINE provides this function.
+C
+C
+3. To create a single ensemble from a CDP stack, you should use the
+C
+special option of setting the primary header key word to NONE
+C
+which will force the entire dataset to be combined into a single
+C
+ensemble.
+C
+C
+Output parameters:
+C
+LEN_SAV - the number of parameters that must be saved
+C
+ITOOLTYPE
+- the tool type
+C
+C
+Original code by S. Rutt Bridges, April 30, 1991.
+C-----------------------------------------------------------------------------SUBROUTINE INIT_ENS_DEFINE( LEN_SAV, ITOOLTYPE )
+#include "ens_define.inc"
+#include "runtime.inc"
+CHARACTER CDESC*32, CPRIM_KEY*8
+INTEGER LEN_SAV, ITOOLTYPE, IERR, LENGTH, IFORMAT, NCHARS
+INTEGER MAXDTR, IOPTION
+CHARACTER CSCCS_KEY*50
+DATA CSCCS_KEY /'@(#)ens_define.f 31.5 6/18/92'/
+C ..... issue a stern warning if the tool is within an IF conditional
+IF (IF_DEPTHrz.NE.0) CALL EX_ERR_HELP( 'Warning: Ensemble '
+&
+// 'Re-define should not be used within IF''s !'
+&
+//'|Click here to CONTINUE (job may fail)'
+&
+//'|Click here to STOP'//CNULLpz, IOPTION )
+IF (IOPTION.EQ.3) CALL EX_ERR_STOP(
+&
+'Stopping execution as requested...' )
+C ..... initialize for the exec phase
+ITRC_COUNT = 0
+IFIRST_ENTRY = 1
+C ..... get the primary key name for ensemble redefinition
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+ens_define.f431
+
+Developer’s Programming Guide
+
+CALL EX_CGETPARM( 'PRIM_KEY', 1, CPRIM_KEY, NCHARS )
+cdd - this in now allowed, as a way of indicating that we don't care what the
+cdd
+primary key is
+c
+IF (CPRIM_KEY(1:4) .EQ. 'NONE')
+c
+&
+CALL EX_ERR_FATAL( 'Primary key must be specified.' )
+IF ( CPRIM_KEY(1:4) .EQ. 'NONE' ) THEN
+IH_PRIM = 0
+ELSE
+C ......... get the index in the trace header of the primary key
+CALL HDR_NAMINFO( CPRIM_KEY, CDESC, LENGTH, IFORMAT,
+&
+IH_PRIM, IERR )
+IF (IERR.NE.0) CALL EX_ERR_FATAL('Primary key '//CPRIM_KEY//
+&
+' does not occur in the trace header.')
+ENDIF
+C ..... reset the primary ensemble sort order
+IF (CPRIM_KEY(1:3).EQ.'CDP') THEN
+IPSORTz = ICDPpz
+ELSEIF (CPRIM_KEY(1:6).EQ.'SOURCE') THEN
+IPSORTz = ISINpz
+ELSEIF (CPRIM_KEY(1:3).EQ.'SIN') THEN
+IPSORTz = ISINpz
+ELSEIF (CPRIM_KEY(1:4).EQ.'FFID') THEN
+IPSORTz = ISINpz
+ELSEIF (CPRIM_KEY(1:8).EQ.'REC_SLOC') THEN
+IPSORTz = IRECSLOCpz
+ELSEIF (CPRIM_KEY(1:4).EQ.'CHAN') THEN
+IPSORTz = ICHANpz
+ELSEIF (CPRIM_KEY(1:6).EQ.'OFFSET') THEN
+IPSORTz = IOFFSETpz
+ELSEIF (CPRIM_KEY(1:7).EQ.'AOFFSET') THEN
+IPSORTz = IOFFSETpz
+ELSE
+IPSORTz = IUNKNOWNpz
+ENDIF
+C ..... get the maximum number of traces per output ensemble
+CALL EX_GETPARM( 'MAXTR
+', 1, MAXDTR )
+IF (MAXDTR.LE.0) CALL EX_ERR_FATAL( 'The maximum number of '
+& // 'traces per output ensemble MUST be specified!' )
+MAXDTRz = MAXDTR
+C ..... Set the maximum number of traces to buffer, and the trace and
+C ..... sample padding.
+CALL EX_BUFF_PARMS( MAXDTRz+1, 0, 0 )
+C ..... This tool can process trace headers only
+CALL EX_THDRONLY_OK
+C ..... set the number of words that need to be saved and the tool type
+LEN_SAV
+= CALC_LENSAV
+ITOOLTYPE = ISNL_BUFFpz
+RETURN
+END
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+ens_define.f432
+
+Developer’s Programming Guide
+
+C-----------------------------------------------------------------------------C
+Flow routine for ENS_DEFINE.
+C------------------------------------------------------------------------------
+
+&
+
+SUBROUTINE FLOW_ENS_DEFINE( TRACES, ITHDRS, RTHDRS, NSTORED,
+IFOUND_EOJ, NOUTPUT, NOVERLAP )
+
+#include "ens_define.inc"
+INTEGER NSTORED, ITHDRS(NTHz,NSTORED), IFOUND_EOJ, NOUTPUT,
+&
+NOVERLAP, J
+REAL TRACES(NUMSMPz,NSTORED), RTHDRS(NTHz,NSTORED)
+C ..... Initialize the number to output to zero (not ready yet)
+NOUTPUT = 0
+IF ( IFOUND_EOJ .EQ. 1 ) THEN
+C ......... We have reached the end of the data, output whatever we have
+NOUTPUT = NSTORED
+RETURN
+ENDIF
+IF ( IH_PRIM .NE. 0 ) THEN
+C ......... We are looking for the primary key value to change
+DO 100 J=2,NSTORED
+IF ( ITHDRS(IH_PRIM,J) .NE. ITHDRS(IH_PRIM,J-1) ) THEN
+C ................. Output up to the change
+NOUTPUT = J-1
+NOUT_EXEC = NOUTPUT
+C ................. Save what it not output for next time
+NOVERLAP = NSTORED - NOUTPUT
+RETURN
+ENDIF
+100
+CONTINUE
+ENDIF
+RETURN
+END
+
+C-----------------------------------------------------------------------------C
+C
+Execution routine for ENS_DEFINE
+C
+C
+Input parameters:
+C
+NTR_BUFF - size of the trace buffer (MAX(NSTORED, NOUTPUT)
+C
+from FLOW_ENS_DEFINE
+C
+C
+Input/output parameters:
+C
+ITHDRS - 2-d array of INTEGER*4 trace header entries
+C
+RTHDRS - 2-d array of REAL*4 trace header entries
+C
+C
+Unused parameters:
+C
+TRACES - 2-D array of trace samples
+C
+C
+Original code by S. Rutt Bridges, April 30, 1991.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+ens_define.f433
+
+Developer’s Programming Guide
+
+C
+Rewritten as a single buffered tools by D.E. Diller, May 12, 1992
+C
+C-----------------------------------------------------------------------------SUBROUTINE EXEC_ENS_DEFINE( TRACES, ITHDRS, RTHDRS, NTR_BUFF )
+#include "ens_define.inc"
+#include "header.inc"
+INTEGER NTR_BUFF, J, ITHDRS(NTHz,NTR_BUFF)
+REAL TRACES(NUMSMPz,NTR_BUFF), RTHDRS(NTHz,NTR_BUFF)
+C ..... no action needed for cleanup mode
+IF (CLEANUPz) RETURN
+C ..... Set the header values
+DO 100 J=1,NOUT_EXEC
+ITHDRS(ISEQNOz,J) = J
+ITHDRS(IEND_ENSz,J) = NLASTpz
+100
+CONTINUE
+ITHDRS(IEND_ENSz,NOUT_EXEC) = LASTTRpz
+RETURN
+END
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+interp_sb.menu434
+
+Developer’s Programming Guide
+
+interp_sb.menu
+'(
+name: INTERP_SB
+label: "Single Buffer Trace Interpolation"
+value_tab: 35
+exec_data: ("INTERP_SB"
+("GENERAL"
+("dummy"
+implicit: 1)
+)
+)
+)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+interp_sb.c435
+
+Developer’s Programming Guide
+
+interp_sb.c
+/*--------------------------------------------------------------------------*/
+/* interp_sb
+/* An example of a single buffer tool in C. The program collects an ensemble
+/* of data traces then passes the ensemble on to the exec_ subroutine.
+/* The program uses a change in Primary sort key value to detect that
+/* there has been a change in the ensemble rather than by using the END_ENS
+/* flag. This is done for demonstration of the nOverlap variable in
+/* the flow routine. The output data traces are the original traces
+/* plus a trace that is linearly interpolated between each input trace.
+/* The output ensemble therefore has 2*N - 1 traces where
+/* N is the number of input traces.
+/*
+/* The example called interp_db.c is identical to this example except that
+/* this is a single buffer tool and therefore the input trace buffer also
+/* serves as the ouptut trace buffer.
+/*-------------------------------------------------------------------------*/
+/* include promax interface, globals, error codes, etc */
+#include "cpromax.h"
+#include "cglobal.h"
+/* define saved parameters */
+BEGINPARMS
+int nInEnsemble; /* the number of traces passed to the exec subroutine */
+int pKeyHdrIndx; /* index of the primary sort key trace header (FFID, CDP etc)
+*/
+ENDPARMS(parms)
+/*-------------------------------------------------------------------*/
+/*
+/* description:
+/*
+initialization routine for interp_sb:
+/*
+/* output arguments:
+/*
+len_sav - length of the saved common block
+/*
+itooltype - type of tool
+/*
+/*-------------------------------------------------------------------*/
+void init_interp_sb_( len_sav, itooltype )
+int *len_sav, *itooltype;
+{
+int max_to_buffer, nPadTraces, nPadSamples;
+/* set the global pointers */
+GlobalRuntime *gr = globalRuntime;
+/* set the number of words that need to be saved */
+*len_sav = NPARMS(parms);
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+interp_sb.c436
+
+/*
+/*
+/*
+/*
+/*
+/*
+
+Developer’s Programming Guide
+
+Get the header array index for the primary sort key of the input data. */
+Note that 1 is subracted from the value of globalRuntime->ipkey */
+to obtain the index of the primary sort key that is appropriate for */
+the C language. The global variable trace indicies are indexed for */
+FORTRAN. This rule is true for globalRuntime->iskey as well as */
+the standard headers. */
+parms->pKeyHdrIndx = gr->ipkey - 1;
+
+/*
+/*
+/*
+/*
+/*
+
+Notify trace exec of maximum number of traces it will have to hold for */
+this module. The ex_buff_parms_() routine must be called in the init */
+subroutine of any buffered tool. NOTE that the routine is a FORTRAN */
+routine that is being directly called by this C routine so the address of */
+the variables are passed. */
+max_to_buffer = 2*gr->maxdtr;
+nPadTraces = 0;
+nPadSamples = 0;
+ex_buff_parms_( &max_to_buffer, &nPadTraces, &nPadSamples );
+
+/* we are going to output more traces per ensemble than are input */
+gr->maxdtr = (2*gr->maxdtr) - 1;
+/* set the tool type */
+*itooltype = ISNL_BUFF;
+}
+
+/*--------------------------------------------------------------------*/
+/*
+/* flow tool for interp_sb
+/*
+/* input args
+/*
+traces - 2d array of data traces
+/*
+ithdrs - 2-d array of input integer trace headers
+/*
+rthdrs - 2-d array of input float trace headers
+/*
+/*
+/*--------------------------------------------------------------------*/
+flow_interp_sb_( float *traces, int *ithdrs, float *rthdrs,
+int *nStored, int *ifound_eoj, int *nOutput, int *nOverlap )
+{
+GlobalRuntime *gr = globalRuntime;
+float **rhdrs;
+
+/*
+/*
+/*
+/*
+/*
+
+if( *nStored == 1 ){
+.. There is only one trace so we can't compare it to anything. This */
+.. situtation should only occur on the first call to the routine unless */
+.. the last trace input is a single-trace ensemble in which case more */
+.. code would be needed to handle that special case. We leave out that */
+.. extra code here as it would clutter the example. */
+*nOutput = 0;
+return;
+}
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+interp_sb.c437
+
+Developer’s Programming Guide
+
+/* put the trace headers into a 2d array that is easy to handle */
+rhdrs = fVecTo2d( rthdrs, *nStored, gr->nth );
+/* see if the primary key header value of most recent input trace has changed */
+if( rhdrs[*nStored-2][parms->pKeyHdrIndx] != rhdrs[*nStored-1][parms>pKeyHdrIndx] ||
+*ifound_eoj != 0 ){
+/* .. we have found enough traces to process */
+/* .. Set the number of traces to output from exec, a non-zero value tells */
+/* .. the trace executive that it is time to pass the traces to */
+/* .. exec_interp_sb_ */
+*nOutput = 2*(*nStored-1) - 1;
+/* .. set the number of traces that are being passed to the exec_ subroutine */
+parms->nInEnsemble = *nStored - 1;
+/* .. Let the last trace input on this call be the first trace input */
+/* .. on the next call since it is part of the next ensemble that we */
+/* .. will be collecting. */
+*nOverlap = 1;
+}
+else{
+/* .. signal the trace executive that we aren't ready to pass traces exec_ */
+*nOutput = 0;
+}
+free( rhdrs );
+
+}
+/*-------------------------------------------------------------------*/
+/*
+/*
+description:
+/*
+exectution routine for interp_sb
+/*
+/*
+input arguments:
+/*
+nStored - the amount of memory available (in traces) in the
+/*
+traces array. NOTE that the actual number of traces
+/*
+input was determined in the flow_interp_sb routine and
+/*
+passed to exec_interp_sb via the parms->nInEnsemble
+/*
+variable.
+/*
+/*
+input/output arguments:
+/*
+traces - 2-d array of traces
+/*
+ithdrs - 2-d array of integer trace headers
+/*
+rthdrs - 2-d array of float trace headers
+/*
+/*-------------------------------------------------------------------*/
+void exec_interp_sb_( float *traces, int *ithdrs,
+float *rthdrs, int *nStored )
+{
+float **rhdrs, **tracs;
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+interp_sb.c438
+
+Developer’s Programming Guide
+
+int i,j;
+/* set the global pointers */
+GlobalRuntime *gr = globalRuntime;
+/* if cleaning up release memory, close files, in this case there is nothing to
+do */
+if( gr->cleanup){
+return;
+}
+
+/* Arrange the trace and header arrays into 2d arrays that are easy to handle. */
+tracs = fVecTo2d( traces, *nStored, gr->numsmp );
+rhdrs = fVecTo2d( rthdrs, *nStored, gr->nth );
+/* Interpolate the sample values */
+for( i = 0; i < gr->numsmp; i++ ){
+for( j = parms->nInEnsemble-1; j > 0; j-- ){
+tracs[2*j][i]
+= tracs[j][i];
+tracs[2*j-1][i] = (tracs[j][i] + tracs[j-1][i])/2.;
+}
+}
+/* Take care of the headers too, interpolated traces will have a copy */
+/* of the header just before them */
+for( i = 0; i < gr->nth; i++ ){
+for( j = parms->nInEnsemble-1; j > 0; j-- ){
+rhdrs[2*j][i]
+= rhdrs[j][i];
+rhdrs[2*j-1][i] = rhdrs[j-1][i];
+}
+}
+free( tracs );
+free( rhdrs );
+}
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

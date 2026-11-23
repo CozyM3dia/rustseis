@@ -1,0 +1,72 @@
+Ensemble Redefine179
+
+ProMAX® Reference
+
+Ensemble Redeﬁne
+Ensemble Redeﬁne redeﬁnes ensembles of traces.
+
+Theory
+This process can be used to undo the effect of an Ensemble
+Split, or to redeﬁne trace ensemble boundaries by any trace
+header key.
+
+Usage
+Examples of uses of this tool include:
+• In Ensemble Decon Parameter Test, input data with
+the primary sort key of REPEAT and a secondary sort
+key of CDP. For the subsequent CDP stack, ensembles
+are deﬁned by CDP. ENS_DEFINE provides this function.
+• Typically for Radon and FK ﬁltering, the positive and
+negative offsets need to be separated. Upon ﬁlter completion, these separate ensembles need to be recombined.
+Ensemble Redeﬁne handles both operations.
+• To create a single ensemble from a CDP stack, use this
+process with NONE as a primary header word key. This
+special option disables header checking and combines
+all traces in the dataset into a single ensemble.
+
+Parameters
+Mode of application
+Select one of the following options:
+• Change sets ensemble boundaries when the header
+word changes.
+• Sign sets ensemble boundaries when the header
+changes sign.
+• Difference sets ensemble boundaries depending on
+absolute difference of headers.
+• Sequence sets the new ensemble boundary every Maximum traces per ensemble.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Ensemble Redefine180
+
+ProMAX® Reference
+
+• Entire collects the entire dataset into a single ensemble.
+Select PRIMARY key to redeﬁne output ensembles
+This appears if Change, Sign, or Difference to Mode of
+application. Select a header word to use as the primary
+header word key for determining the output ensembles. This
+should normally be the same as the primary sort order of the
+input ensembles, although this is not a requirement. Select
+None to combine all traces into a single ensemble.
+Header difference
+This appears if Difference to Mode of application. Enter a
+value in which any absolute value of the header difference
+greater than this value will create a new ensemble.
+Maximum traces per output ensemble
+Enter the maximum number of traces per output ensemble
+after redeﬁning the ensembles. It is important that the output
+data not exceed this value if any of the following processes
+are ensemble processes, such as Trace Display.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

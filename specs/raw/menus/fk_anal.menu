@@ -1,0 +1,268 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC PROSPECTOR BHSS
+'(
+name: fk_anal
+label: "FK Analysis (NEW)"
+value_tab: 45
+
+parameter: N_TRACES
+text: "Panel width in traces"
+type: typein:
+type_desc: ( int: 8 5 nil )
+value: 200
+mouse_text: "Number of traces to process at one time; use number of traces per ensemble for pre-stack."
+
+parameter: T_START
+text: "Starting time for analysis"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the minimum time which will be used in the analysis."
+
+parameter: T_END
+text: "Ending time for analysis"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the maximum time which will be used in the analysis.  If zero (0.0), the maximum time of input data will be used."
+
+
+parameter: XSPACING 
+text: "Distance between input traces"
+type: typein:
+type_desc: ( real: 9 0.0 nil )
+value: 0.0
+mouse_text: "Distance between input traces, default to 0.0 for value from global parameters.  Check View in flow (job.output) for value used."
+
+parameter: CONFIG
+text: "Starting display configuration"
+type: pop_choose:
+type_desc: (  
+ ("TX-TK-FX-FK" 0 "Four panel display of TX, TK, FX, FK." )
+ ("TX-FK" 1 "Two panel display of TX and FK." )
+ ("TX-ONLY" 2 "Single panel display of TX data only." )
+ ("FK-ONLY" 3 "Single panel display of FK data only." ) )
+value: 0
+mouse_text: "Choose one of four display configurations."
+
+parameter: K0CENTER
+text: "Position of zero wavenumber in display"
+;type: choose:
+type: circular:
+type_desc: (  
+ ("CENTER" 1 "Zero wavenumber (K=0) will be in center of display." )
+ ("LEFT" 0 "Zero wavenumber (K=0) will be on left side." ) )
+mouse_text: "Zero wavenumber may be positioned on left or in center of display."
+plot_label: t
+
+parameter: F0BOTTOM
+text: "Position of zero frequency in display:"
+;type: choose:
+type: circular:
+type_desc: (  
+ ("BOTTOM" 1 "Zero frequency (K=0) will be at bottom of display." )
+ ("TOP" 0 "Zero frequency (F=0) will be at top of display." ) )
+value: 1
+mouse_text: "Zero frequency may be positioned at top or bottom of display."
+plot_label: t
+
+parameter: DBSCALE
+text: "Plot FK,TK,TX panels in DB or Linear:"
+;type: choose:
+type: circular:
+type_desc: (  
+ ("DBSCALE" 1 "Plot using logarithmic DB scale." )
+ ("LINEAR" 0 "Plot using linear amplitude scale." ) )
+value: 1
+mouse_text: "Amplitudes of FK, TK, TX data panels may be plotted using either a Linear or dB (logarithmic) scale."
+plot_label: t
+
+parameter: TXPCTGAN
+text: "Initial TX gain setting (percentile)"
+type: typein:
+type_desc: ( real: 8 90.0 100. )
+value: 98.
+mouse_text: "Gain is set as a percentile of the input trace amplitudes, ( 90 to 100)."
+
+parameter: FKGAINMX
+text: "Initial FK maximum gain setting (db)"
+type: typein:
+type_desc: ( real: 8 -300.0 300.0 )
+value: 0.0
+mouse_text: "Upper limit for color scale when displaying FK data."
+
+parameter: FKGAINMN
+text: "Initial FK minimum gain setting (db)"
+type: typein:
+type_desc: ( real: 8 -300.0 300.0 )
+value: 0.0
+mouse_text: "Lower limit for color scale when displaying FK data."
+
+parameter: XFLATPCT
+text: "Percent flat for trace ramping"
+type: typein:
+type_desc: ( real: 8 0.0 100. )
+value: 100.
+mouse_text: "The offsets may be tapered prior to K-space transform to minimize FFT edge effects (100.0 = no ramping)."
+
+parameter: TFLATPCT
+text: "Percent flat for time ramping"
+type: typein:
+type_desc: ( real: 8 0.0 100. )
+value: 100.
+mouse_text: "The traces may be tapered prior to the frequency transform to minimize FFT edge effects (100.0 = no ramping)."
+
+; There will ALWAYS be an old table
+parameter: OLDTABLE
+text: "Edit OLD polygon table or create NEW one?"
+type: circular:
+type: typein: 
+type_desc: ( int: 1 1 1 )
+value: 1
+mouse_text: "The polygon table specifies the regions to keep or reject
+using FK filters. Create a new one or modify an old one."
+
+;parameter: OLDTABLE
+;text: "Edit OLD polygon table or create NEW one?"
+;type: circular:
+;type_desc: ( 
+;("NEW" 0 "Create NEW polygon table.") 
+;("OLD" 1 "Edit OLD polygon table."))
+;mouse_text: "The polygon table specifies the regions to keep or reject
+;using FK filters. Create a new one or modify an old one."
+
+
+parameter: FKPTABLE
+text: "Select mute polygon table"
+type: function:
+type_desc: ((parm_list "FKP") parms)
+value:  "NONE"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a polygon (mute) parameter file description from the parameter file menu."
+plot_label: t
+
+parameter: NEWTABLE
+text: "   Input new polygon table name"
+type: edit:
+type_desc: (30 100 2 " Example: fk-polygon1
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and 
+                          paste'; (Can move the cursor first) " 3 )
+value: "fk_polygon1"
+mouse_text: "Type in the name a new table to be created for polygon storage."
+
+parameter: PASS
+text: "Mode of F-K filter operation"
+;type: choose:
+type: circular:
+type_desc: (  
+ ("REJECT" 0 "Reject the specified F-K region." )
+ ("ACCEPT" 1 "Pass the specified F-K region." ) )
+mouse_text: "F-K filter can either pass or reject the specified F-K regions."
+plot_label: t
+
+parameter: PCTFLAT
+text: "Percent flat for F-K filter windowing"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 90.0
+mouse_text: "The F-K filter may be ramped (in T-X) to control the smoothness of the filter."
+
+parameter: NWINT
+text: "Time length of F-K filter (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 500.0
+mouse_text: "The F-K filter is transformed to T-X domain and windowed.  This will be the time extent of the filter."
+
+parameter: NWINX
+text: "Spatial extent of F-K filter (traces)"
+type: typein:
+type_desc: ( int: 8 3 nil )
+value: 50
+mouse_text: "The F-K filter is transformed to T-X domain and windowed.  This will be the spatial extent of the filter."
+
+parameter: program
+text: "Program executable name"
+type: edit:
+type_desc: (30 100 2 " Example: /usr/stof/promax/sa/my_prog
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and 
+                          paste'; (Can move the cursor first) " 3 )
+value: "fk_anal.exe"
+mouse_text: "Type path name of program executable.  If the path doesn't start wi
+th a /, the main ProMAX executable directory is used."
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "To debug program, enter YES.  You will have to debug the program yo
+urself"
+
+
+exec_data: ("ST_FK_ANALYSIS"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: fk_anal.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("CONFIG"   implicit: (value 'CONFIG))
+			("XSPACING" implicit: (value 'XSPACING))
+			("N_TRACES" implicit: (value 'N_TRACES))
+			("K0CENTER" implicit: (value 'K0CENTER))
+			("F0BOTTOM" implicit: (value 'F0BOTTOM))
+			("DBSCALE"  implicit: (value 'DBSCALE))
+			("TXPCTGAN" implicit: (value 'TXPCTGAN))
+			("FKGAINMX" implicit: (value 'FKGAINMX))
+			("FKGAINMN" implicit: (value 'FKGAINMN))
+			("TFLATPCT" implicit: (value 'TFLATPCT))
+			("XFLATPCT" implicit: (value 'XFLATPCT))
+			("PASS"     implicit: (value 'PASS))
+			("OLDTABLE" implicit: (value 'OLDTABLE))
+			("FKPTABLE" implicit: (if (=(value 'OLDTABLE) 1)
+						  (value 'FKPTABLE)
+						  (value 'NEWTABLE)))
+			("PCTFLAT"  implicit: (value 'PCTFLAT))
+			("NWINT"    implicit: (value 'NWINT))
+			("NWINX"    implicit: (value 'NWINX))
+			("T_START"  implicit: (value 'T_START))
+			("T_END"    implicit: (value 'T_END))
+			("program"  implicit: (value 'program))
+			("DEBUG"    implicit: (if (value 'DEBUG) 2 0))
+			)
+)
+	
+
+rules: (
+	( rule0 (dont_show 'OLDTABLE))
+	( rule1 ( = (value 'OLDTABLE) 1) 
+		(progn	(do_show 'FKPTABLE)
+			(dont_show 'NEWTABLE))
+		(progn	(dont_show 'FKPTABLE)
+			(do_show 'NEWTABLE))
+		)
+;  This rule says that the DEBUG parameter should be shown only if
+;  the environment variable SOCKET_DEBUG is set to "t"
+	(socket_debug_rule 
+	 (if (= (printenv 'SOCKET_DEBUG) "t")
+	     (progn (do_show 'DEBUG)
+		    (do_show 'program))
+	   (progn (do_not_show 'DEBUG) 
+		  (do_not_show 'program))))
+	)
+
+)
+
+
+

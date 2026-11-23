@@ -1,0 +1,71 @@
+; IIID IVD 1 PROSPECTOR DEV DEPTHC
+'(
+  name: kirtime2dstk
+  label: "2D Poststack Kirchhoff Time Migration"
+  value_tab: 55
+
+:include "kirtime_inc.menu" ("ST_PSTM2D" "GENERAL")
+
+; this is a 2D migration
+  parameter: KT2D
+  type: :boolean
+  value: t
+  showp: nil
+  plot_label: nil
+
+ 
+  exec_data: (
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "AOFFSET=0.0")))
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "OFFSET=0.0")))
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "REC_X=CDP_X")))
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "SOU_X=CDP_X")))
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "REC_Y=CDP_Y")))
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "SOU_Y=CDP_Y")))
+  ("THDRMATH" ("GENERAL" ("OPERATE" implicit: "NMO_APLD=0")))
+
+  ("TAR"
+   ("GENERAL"
+    ("NUM_WAYS" implicit: 2)
+    ("VELVARYS" implicit: 0)
+    ("APPLY_SD" implicit: 0)
+    ("APPLY_IE" implicit: 0)
+    ("APPLY_DB" implicit: 1)
+    ("APPLY_PW" implicit: 1)
+    ("DB_PER_S" implicit: (value 'DB_PER_S))
+    ("INLS_ATN" implicit: 0.0002) ; ignored
+    ("SDV_TYPE" implicit: 1) ; ignored
+    ("TAR_MODE" implicit: 2) ; i.e. remove
+    ("DB_VEL  " implicit: "NONE    ") ; ignored
+    ("TAR_VEL " implicit: "0-1480,8000-7000/") ; ignored
+    ("T_POWER " implicit: (value 'T_POWER))
+    ("TIME_MAX" implicit: 0.0)
+    ("TAR_REF " implicit: 0)
+    ("NORM_SRC" implicit: 1)
+    ("REF_TIME" implicit: 0.0)
+    ("TAR_NORM" implicit: 1.0)
+   )
+  )
+
+  ("ST_PSTM2D"
+   ("GENERAL"
+    ("version" implicit: "ProMAX $Id: kirtime2dstk.menu 45212 2010-02-24 22:34:55Z Stewart Levin $ $Revision: 45212 $ $Date: 2010-02-24 15:34:55 -0700 (Wed, 24 Feb 2010) $")
+   )
+  )
+
+  ) ; end exec_data
+
+  rules: (
+  (set2D t (setq KT2D t))
+
+; hide Supergather and Image Set Offset type selections for Stack
+  (stk (progn (do_not_show 'SG_APPL1)
+			  (do_not_show 'SG_APPL2)
+			  (do_not_show 'SG_APPL3)
+			  (do_not_show 'SG_APPL4)
+              (do_not_show 'IMGRTYP1)
+			  (do_not_show 'IMGRTYP2)
+			  (do_not_show 'IMGRTYP3)
+			  (do_not_show 'IMGRTYP4)))
+  ) ; end rules
+
+) ; end menu file

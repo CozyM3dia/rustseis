@@ -1,0 +1,176 @@
+{
+  "name": "NIAS_Tier2_120Shots_PSTM_and_Radon",
+  "description": "Real NIAS marine 120-shot Tier 2 validation: SEG-D -> Marine Geom -> Bandpass -> TAR -> SCAMP2 -> Decon -> FK -> IVA -> Split(Branch0: NMO + Parabolic Radon Demultiple + Stack + FX-Decon + Kirchhoff/FDMIG; Branch1: 2D Kirchhoff PSTM)",
+  "steps": [
+    {
+      "tool": "segd_read",
+      "params": {
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik",
+        "max_shots": 120,
+        "live_only": true
+      }
+    },
+    { "tool": "trace_len", "params": { "length_ms": 3500.0 } },
+    { "tool": "debias", "params": {} },
+    {
+      "tool": "geomspread_marine",
+      "params": {
+        "near_offset_m": 100.0,
+        "receiver_interval_m": 12.5,
+        "nominal_shot_interval_m": 25.0,
+        "cdp_bin_size_m": 6.25,
+        "chan1_is_near": true,
+        "source_depth_m": 5.0,
+        "streamer_depth_m": 6.0
+      }
+    },
+    {
+      "tool": "filter",
+      "params": { "spec_type": "Ormsby", "phase": "Zero", "freqs": [6.0, 12.0, 70.0, 90.0], "pad_pct": 25.0 }
+    },
+    { "tool": "tar", "params": { "time_power": 1.5, "max_time_ms": 3200.0 } },
+    {
+      "tool": "scamp2",
+      "params": {
+        "save_table": "nias_scamp",
+        "params": {
+          "gate_start_ms": 200.0,
+          "gate_end_ms": 3000.0,
+          "solve_source": true,
+          "solve_receiver": true,
+          "solve_offset": true,
+          "apply_source": true,
+          "apply_receiver": true,
+          "apply_offset": false,
+          "preserve_mean_amp": true
+        }
+      }
+    },
+    {
+      "tool": "decon",
+      "params": {
+        "operator_ms": 140.0,
+        "prediction_lag_ms": 16.0,
+        "white_noise_pct": 1.0,
+        "design_windows_ms": [[300.0, 3000.0]]
+      }
+    },
+    {
+      "tool": "fk_filt",
+      "params": {
+        "mode": "RejectLowVelocity",
+        "dx_m": 12.5,
+        "vel_cut_mps": 1350.0,
+        "taper_frac": 0.2,
+        "pedestal": 0.02
+      }
+    },
+    { "tool": "inline_sort", "params": { "primary": "CDP", "secondary": "AOFFSET" } },
+    {
+      "tool": "vaprecom71",
+      "params": {
+        "cdps": [],
+        "save_table": "nias_120_vel",
+        "auto_pick": true,
+        "scan": {
+          "v_min_mps": 1450.0,
+          "v_max_mps": 3500.0,
+          "dv_mps": 50.0,
+          "window_ms": 30.0,
+          "t_step_ms": 20.0,
+          "stretch_mute_pct": 50.0
+        }
+      }
+    },
+    {
+      "tool": "flow_split",
+      "params": {
+        "output_branch": 1,
+        "branches": [
+          [
+            {
+              "tool": "nmo",
+              "params": {
+                "velocity_table": "nias_120_vel",
+                "params": { "direction": "Forward", "stretch_mute_pct": 35.0, "stretch_taper_samples": 8 }
+              }
+            },
+            {
+              "tool": "radon_filter",
+              "params": {
+                "ensemble_key": "CDP",
+                "save_panel": "nias_radon_qc",
+                "params": {
+                  "mode": "Parabolic",
+                  "q_min_ms": -80.0,
+                  "q_max_ms": 320.0,
+                  "n_q": 45,
+                  "ref_offset_m": 1300.0,
+                  "f_min_hz": 6.0,
+                  "f_max_hz": 75.0,
+                  "damping": 0.02,
+                  "sparse_iters": 1,
+                  "action": "SubtractZone",
+                  "q_zone_min_ms": 45.0,
+                  "q_zone_max_ms": 320.0,
+                  "q_taper_ms": 20.0
+                }
+              }
+            },
+            { "tool": "stack", "params": { "method": "Mean" } },
+            { "tool": "agc", "params": { "operator_ms": 600.0, "basis": "Rms", "anchor": "Center" } },
+            { "tool": "fxdecon", "params": { "filter_len": 5, "horiz_window_traces": 24, "time_window_ms": 400.0 } },
+            {
+              "tool": "segy_write",
+              "params": {
+                "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\nias_tier2_120_radon_fx_stack.sgy",
+                "comment": "NIAS 120-shot Radon+FXDecon Stack"
+              }
+            },
+            {
+              "tool": "fdmig",
+              "params": {
+                "velocity_table": "nias_120_vel",
+                "params": { "dx_m": 6.25, "f_max_hz": 75.0, "pad_traces": 16 }
+              }
+            },
+            {
+              "tool": "segy_write",
+              "params": {
+                "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\nias_tier2_120_fdmig.sgy",
+                "comment": "NIAS 120-shot Radon+FXDecon+45deg FDMIG"
+              }
+            }
+          ],
+          [
+            {
+              "tool": "kirtime2d",
+              "params": {
+                "velocity_table": "nias_120_vel",
+                "params": {
+                  "dx_m": 6.25,
+                  "cdp_step": 1,
+                  "max_aperture_m": 1200.0,
+                  "max_dip_deg": 55.0,
+                  "max_stretch_ratio": 1.6,
+                  "apply_half_derivative": true,
+                  "anti_alias": true,
+                  "output_cig": false
+                }
+              }
+            },
+            { "tool": "agc", "params": { "operator_ms": 600.0, "basis": "Rms", "anchor": "Center" } },
+            { "tool": "fxdecon", "params": { "filter_len": 5, "horiz_window_traces": 24, "time_window_ms": 400.0 } },
+            {
+              "tool": "segy_write",
+              "params": {
+                "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\nias_tier2_120_pstm.sgy",
+                "comment": "NIAS 120-shot 2D Kirchhoff PSTM + FX-Decon"
+              }
+            }
+          ]
+        ]
+      }
+    }
+  ]
+}

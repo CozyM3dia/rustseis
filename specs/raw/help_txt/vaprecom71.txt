@@ -1,0 +1,431 @@
+Velocity Analysis Precompute57
+
+ProMAX® Reference
+
+Velocity Analysis Precompute
+Velocity Analysis Precompute prepares data for input to
+Velocity Analysis by calculating the semblance values,
+stacking the CDP traces to create the supergathers, and
+creating velocity function stacks (VFS) at predeﬁned CDP,
+inline, and crossline locations.
+
+Theory
+Precomputing velocity analysis data can signiﬁcantly speed
+up the interactive Velocity Analysis session, especially when a
+large number of CDPs are used to create the supergathers.
+When CDP, inline, or crossline ordered data is input to
+Velocity Analysis, calculation of the semblance values and
+creation of the gathers and VFS stacks are performed in real
+time. These compute extensive steps can take a signiﬁcant
+amount of time. In an interactive session, this long
+computation time generally is reﬂected by a relatively long
+delay in the display when going from one ensemble to the
+next. The speed is greatly improved by precomputing the
+Velocity Analysis data.
+Like Velocity Analysis, Velocity Analysis Precompute is an
+inline tool. Therefore, preprocessing of data can be performed
+in the same ﬂow before passing the data on to the Velocity
+Analysis Precompute.
+This process creates a new dataset which can be saved with
+Disk Data Output. This dataset is CDP ordered. Only those
+CDPs processed during this precomputing step are accessible
+in the interactive Velocity Analysis session.
+Velocity Analysis Precompute is an identical subset of the
+parameters and calculations of Velocity Analysis. For a more
+detailed description read the Velocity Analysis
+documentation.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute58
+
+ProMAX® Reference
+
+Usage
+A typical ﬂow for 2D or 3D Velocity Analysis is:
+SuperGather Formation*
+Apply Residual Statics
+Bandpass Filter
+Automatic Gain Control
+Velocity Analysis Precompute
+Disk Data Output > precompute
+Disk Data Input < precompute
+Velocity Analysis
+Volume Viewer / Editor
+
+Supergathers are sets of adjacent CDPs used in velocity
+analysis to:
+• increase signal-to-noise
+• study stacking power variability of nearby CDPs
+You can create supergathers before Velocity Analysis with
+Supergather Formation, 3D Supergather Formation, or
+3D Supergather Select. In Velocity Analysis, the nearest
+CDPs to the central supergather CDP are used. Nearness is
+calculated by the root-squared distance between CDP_X and
+CDP_Y coordinates, or INLINE_NO and XLINE_NO or CDP bin
+if coordinates are not in the header. If distances are equal,
+the smaller CDP bin number is considered nearer. Velocity
+Analysis applies a differential static correction relative to the
+central CDP to align the supergather CDPs.
+Velocity Analysis Precompute computes parts of the
+velocity analysis in batch mode. These parts include the
+smashed supergather, the semblance, the velocity functions,
+and velocity function stacks. Velocity analysis picking is still
+performed interactively, but faster than without
+precomputing. The parameters for Velocity Analysis
+Precompute is a subset of the full Velocity Analysis
+parameters.
+As a ﬁnal note, we recommend the following tips for Velocity
+Analysis Precompute.
+• Precompute is optional.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute59
+
+ProMAX® Reference
+
+• The parameter Is Data Precomputed must be set to Yes
+in Velocity Analysis.
+• Saving the results to disk is optional. However, Velocity
+Analysis cannot work with Interactive Data Access
+without saving to disk.
+
+Parameters
+Perform residual velocity analysis?
+Conﬁgure velocity analysis for residual velocity analysis in
+one of three modes:
+• None - conventional Velocity Analysis.
+• Time - T ime Residual Analysis
+• Depth - Depth Residual Analysis
+Number of CDPs to sum in supergather
+Enter the number of CDPs to sum in the gather and
+semblance panels. This value should be equal to or less than
+the number of CDPs in the supergather. Large numbers of
+CDPs increase signal to noise and lower numbers increase
+the horizontal and vertical precision of the velocity peaks. A
+lower number is sometimes preferred on marine data.
+Apply partial NMO-to-binning
+Select Yes to apply partial NMO to bin center for supergather
+smash and semblance calculation. This parameter does not
+appear if Perform residual velocity analysis? is set to Time
+or Depth. Partial NMO has its greatest effect at shallow times
+and wide offset bins where the differential moveout is
+greatest.
+Apply differential CDP mean statics
+Select Yes to apply differential statics during supergather
+smash, semblance and VFSs calculation. The difference
+between FNL_STAT of the center CDP and the other CDPs is
+applied. The center CDP is not shifted. Differential statics has
+its greatest effect in complex structure areas, wide offset
+bins, and deep times.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute60
+
+ProMAX® Reference
+
+Absolute offset of ﬁrst bin center
+Enter the absolute offset of the center of the ﬁrst offset bin.
+Bin size for vertically summing offsets
+Enter the bin size of the offsets for forming supergathers. A
+reasonable value is the receiver group spacing.
+Maximum offset
+Enter the maximum offset for creating supergathers. The
+default is the maximum offset value in the database.
+Use absolute value of offset for stacking?
+Select Yes to use the absolute value of offset to stack gathers
+for 2D data. 3D always uses absolute offset. This parameter
+affects the supergather display in 2D. Select No to separately
+see both sides of a split spread.
+Compute NMO for every velocity function?
+Select Yes to output additional gathers with NMO applied,
+using the same velocity functions that are used in producing
+the stack panels. These traces are ignored by the Velocity
+Analysis tool, but provide an optional input for ProMAGIC®
+VA Precompute to Vols modules. These traces can be sorted
+from the precomputed dataset by selecting header attribute
+VELANAL=6 and VELOCITY=1 to “n”, where “n” is the value
+of Number of stack velocity functions.
+The default of No says to output the standard gather only.
+Minimum semblance analysis value
+Enter the minimum expected stacking velocity (or residual
+parameter). This value is the lowest used in the generation of
+the semblance panel and to scale all other velocity data on
+the screen.
+Maximum semblance analysis value
+Enter the maximum expected stacking velocity (or residual
+parameter). This value is the highest used in the generation
+of the semblance panel to scale all other velocity data on the
+screen.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute61
+
+ProMAX® Reference
+
+Number of semblance calculations
+Enter the number of semblance scans to perform between the
+minimum and maximum velocity (or residual parameter)
+range. More velocities increase the lateral semblance
+resolution and time to compute semblance.
+Semblance Velocity Axis
+This appears if None is chosen for Perform residual velocity
+analysis. Select the Semblance Velocity Axis from:
+• Equal Velocity is used in the conventional velocity
+sequence where the semblances are calculated on velocity trajectories that have a constant difference in velocity. For example, if the velocity range is from 2000 to
+6000 mt/sec and the number of semblance calculations
+is 41, the semblances are calculated at velocities of
+2000, 2100, 2200...... 5800,5900 and 6000 mt/sec.
+• Slowness Squared is only used when calculating semblance panels for conventional velocity analysis via the
+Velocity Auto Picker module. Do not choose Slowness
+Squared for residual time or depth analysis. This velocity
+is not sampled linearly. It is sampled much ﬁner at the
+slower velocities than at the faster velocities. For the
+same velocity range of 2000 to 6000 mt/sec the velocity
+trajectories are computed by taking 1/2000**2 and
+1/6000**2 dividing that range into equal segments and
+then inverting the square roots of the values. This tightens the semblance peaks for the Autopicker.
+Note: Slowness Squared sampling is not valid input if
+you plan to utilize the interactive Velocity Analysis
+module. Slowness squared data should only be used for
+conventional velocity analysis input to the Velocity Auto
+Picker module.
+Semblance sample rate
+Enter the spacing, in ms, between semblance analysis
+window centers. The recommended default is about ﬁve times
+the sample rate.
+Semblance calculation window
+Enter the size of the semblance calculation window. The
+temporal smoothing increases as the semblance calculation
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute62
+
+ProMAX® Reference
+
+window gets larger and/or the semblance sample rate gets
+smaller. The recommended default is twice the semblance
+sample rate.
+Number of stack velocity functions
+Enter the number of stack velocity (or residual parameter)
+functions.
+Number of CDPs per stack strip
+Enter the number of CDPs to display in the stack panels. It
+should be equal to or less than the number of CDPs in the
+supergather.
+Scale stacks by number of live samples summed
+Select Yes to divide the stacks by the count of traces
+summed. Normalization increases the display gain of shallow
+data with respect to deep data.
+Method of computing stack velocity functions
+Select one of the following methods for computing stack
+velocity functions:
+• Top-base range interpolates velocity functions between
+minimum time velocity range and maximum time velocity range about a central guide function.
+• Delta-delta-t uses a delta-t moveout at maximum offset
+with respect to the guide function to specify a stack
+velocity function. Older versions of Velocity Analysis
+used this method to compute fan functions.
+• Percentage is a percentage of the central guide function.
+• Constant Velocity evenly interpolates constant velocities between the minimum and maximum semblance
+velocity.
+If Perform residual velocity analysis? is Time or Depth
+then this option is not displayed and is set to Constant
+Velocity.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute63
+
+ProMAX® Reference
+
+Velocity variation at time 0
+This appears if Top-base range to Method of computing
+stack velocity functions. Enter the minimum time range of
+velocity variation in the stack velocity functions.
+Velocity variation at maximum time
+This appears if Top-base range to Method of computing
+stack velocity functions. Enter the maximum time range of
+velocity variation in the stack velocity function.
+Velocity function time increment
+This appears if Delta-delta-t to Method of computing stack
+velocity. Enter the velocity function time increment in ms.
+Velocity function percent maximum
+This appears if Percentage to Method of computing stack
+velocity functions. Enter the percentage for interpolating
+stack velocity functions.
+Semblance normalization mode
+Select the semblance normalization mode from the following
+choices:
+• Scale Time Slice divides time slice of semblance values
+by the maximum in time slice. Scaling in this manner
+will help bring up the very weak reﬂections that are often
+pickable, but lost in the background.
+• Scale panel divide all semblance values by the maximum semblance in panel. Prior to division, a noise factor
+can be added to the maximum semblance.
+• No Scaling does not normalize.
+The purpose of scaling semblance values is to elevate the
+weak semblances resulting from marginal signal to noise
+ratio data to a level that yields consistent quality screen
+displays.
+Note: This option is used to prepare semblance data for the
+Velocity Auto Picker. These options are available in
+interactive Velocity Analysis, where the default is to perform
+the Scale Time Slice option. You are advised not to apply the
+Time Slice scaling twice.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute64
+
+ProMAX® Reference
+
+Get guide function from existing parameter table
+Select Yes to select a guide function from an existing
+parameter table. A guide function is used for the differential
+moveout in constructing the Gather panel for all methods of
+computing the velocity (or residual parameter) function, even
+for constant velocity.
+Velocity guide function table name
+This appears if Yes to Get guide function from existing
+parameter table. Select a velocity table to use as a guide
+function. If Perform Residual Velocity Analysis? is set to
+None, the database table is type VEL; if set to Time, table is
+type RSL; and if set to Depth, table is type RSD.
+Guide minimum time velocity
+This appears if No to Get guide function from existing
+parameter table. Enter the velocity (or residual parameter)
+at the top of the guide function.The guide function is a linear
+ramp between the top and base values.
+Guide maximum time velocity
+This appears if No to Get guide function from existing
+parameter table. Enter the velocity (or residual parameter)
+at the base of the guide function. The guide function is a
+linear ramp between the top and base values.
+Maximum stretch percentage for NMO
+Enter the maximum percentage of sample-to-sample stretch
+for NMO. The default is 30. This mute is applied at low times
+and high offsets. The larger the percentage value, the smaller
+the mute region. Enter 0.0 for no stretch mute.
+Long offset moveout correction
+This parameter does not appear if Perform residual velocity
+analysis? is set to Time or Depth. Select an option for
+increasing the accuracy of the NMO at long offsets. The
+standard two-term hyperbolic equation used in NMO
+becomes less accurate as the vertical velocity gradient
+increases, as offset becomes greater than depth, or as
+anisotropy increases. The following options add a third term
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute65
+
+ProMAX® Reference
+
+to the conventional NMO equation using higher powers of
+offset, velocity, and eta:
+• None applies only the two-term NMO equation. This is
+the normal application.
+• Alchalabi uses the simplest third term and should be
+the most efﬁcient long offset correction method.
+• Castle is normally applied as a shifted hyperbola before
+applying two-term NMO. This correction has been incorporated directly into ProMAX® NMO. This method does
+not appear to be as accurate as Al-Chalabi’s, when compared to exact results for a linear velocity gradient, and
+requires more computation time.
+• Tsvankin allows for the greatest accuracy and the inclusion of anisotropic corrections, at the expense of the
+longest run time.
+• Harlan is an alternative anisotropic correction. It
+accounts from anisotropy, but not v(z).
+If you use this long-offset correction, then stack your data
+using the same correction in the NMO tool.
+The long-offset moveout corrections are more accurate on the
+moved-out gather and VFS panels than the semblance panel
+because they use variable velocity functions instead of
+constant velocity functions. The reason is that long-offset
+moveout calculations use velocity gradient information.
+Otherwise, with ordinary NMO they are equally accurate.
+Anisotropy correction parameter eta
+This appears if Tsvankin or Harlan to Long offset
+correction. Enter the anisotropy correction parameter, eta.
+Eta is deﬁned in η = ( ε – δ ) ⁄ ( 1.0 + 2.0 × δ ) . Small positive
+values between 0.0 and 0.5 are most physically likely.
+Use a picked mute?
+Select an option for applying a time mute as a function of
+offset to the semblance and velocity function stacks. This will
+improve their appearance. The gather panel remains
+unmuted for subsequent mute pick reﬁnement. The options
+are:
+• None does not apply a mute
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis Precompute66
+
+ProMAX® Reference
+
+• Top mutes above the mute line. It is useful for erasing
+direct arrivals, refracted and converted events.
+• Base mutes below the mute line. It is useful erasing new
+offset multiple energy.
+• Both applies both mutes.
+These mute lines are edited on the interactive version of
+Velocity Analysis. For example, on a sparse CDP sampling
+rather than the full dataset.
+Note: The primary key of the mute table MUST be CDP or the
+job will fail or produce incorrect results.
+Gather offset Top mute table
+This appears if Top or Both to Use a Picked mute. Select a
+mute table (MUT) containing the top mute picks.
+Gather offset Base mute table
+This appears if Base or Both to Use a picked mute. Select a
+mute table (MUT) containing the base mute picks.
+Mute taper length
+This appears for all options except None to Use a picked
+mute. Enter the mute taper length in ms. The default is 20.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

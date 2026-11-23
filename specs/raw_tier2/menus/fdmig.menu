@@ -1,0 +1,240 @@
+; IIID IVD 1 PROSPECTOR DEV DEPTHC
+'(
+ name: FDMIG
+label: "Implicit FD Time Mig."
+value_tab: 50
+
+parameter: CDPMIN
+text: "Minimum CDP to migrate"
+type: typein:
+type_desc: ( int: 6 -999 nil )
+value: -999
+mouse_text: "Minimum CDP bin in window to migrate. If no line database exists, this parameter MUST be entered."
+
+parameter: CDPMAX
+text: "Maximum CDP to migrate"
+type: typein:
+type_desc:  ( int: 6 -999 nil )
+value: -999
+mouse_text: "Maximum CDP bin in window to migrate. If no line database exists, this parameter MUST be entered. "
+
+parameter: CDPINC
+text: "CDP interval (ft or meters)"
+type: typein:
+type_desc:  ( real: 7 0.0 nil)
+value: 999999.
+mouse_text: "CDP spacing in feet or meters (consistent with headers)."
+
+
+parameter: FMIN
+text: "Minimum frequency to migrate (in Hz)"
+type: typein:
+type_desc: (real: 5 0.001 nil)
+value: 10.0
+mouse_text: "This is the minimum coherent frequency (in Hertz) found in the 
+seismic data."
+
+
+parameter: FMXFIELD
+text: "Maximum frequency vs depth to migrate"
+type: edit:
+type_desc: (20 80 5 "  FORMAT: D1-Fmax1, D2-Fmax2, ...,Dn-Fmaxn /
+  EXAMPLE: 0-80,4500-67.5,7000-50,20000-35/" 3 )
+value: "0-80,20000-80/"
+mouse_text: "Use Mouse Button 1 to edit/define the maximum frequency as a function of depth"
+plot_label: t
+
+parameter: vel_option
+text: "Get interval velocities vs. time from DATABASE?"
+type: boolean:
+value: nil
+mouse_text: "Are velocities appropriate for migration stored in the interval vs. time database
+file?"
+plot_label: t
+
+;parameter: VELDOM
+;text: "Interval velocity versus time or depth?"
+;type: circular:
+;type_desc: (
+ ;("DEPTH" 1 "Interval velocities are vs Depth." )
+ ;("TIME"  2 "Interval velocities are vs Time." ) )
+;mouse_text: "Specify whether the input interval velocity field is a function of Depth or Time."
+
+parameter: VELNAME
+text: "  SELECT Interval vs time Velocity File"
+type: function:
+type_desc: ((parm_list "VIT") parms)
+value: "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select an interval velocity function vs time parameter file from the parameter file menu."
+plot_label: t
+
+
+parameter: VELFIELD
+text: "  SPECIFY migration interval velocity field."
+type: edit:
+type_desc: (20 80 5 " FORMAT: CDP1: T1-V1,T2-V2,...,Tn-Vn / CDP2: T1-V1,T2-V2,...,Tn-Vn /
+ EXAMPLE: 1:0-6400,1000-7625,1400-9350,3000-12370/ 101:0-6750,1200-7800,2800-9850,3800-14600/" 3 )
+ value: "1:0-6000,2000-9500,4000-14500/"
+mouse_text: "Use Mouse Button 1 to edit/define migration interval vs time velocity field (SEE EDITOR FOR EXAMPLES.)"
+plot_label: t
+
+
+parameter: VSCAL
+text: "Percent velocity scale factor"
+type: typein:
+type_desc:  ( real: 6 0.01 500.0)
+value: 100.0
+mouse_text: "All velocities will be multiplied by this percentage."
+plot_label: t
+
+parameter: DBSEC
+text: "Time attenuation factor (dB/sec)"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 2.0
+mouse_text: "Attenuation in dB/sec applied to input traces to reduce migration-generated noise caused by bottom edge effects."
+
+parameter: DZ
+text: "Migration step size (feet or meters)"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value:0.0
+mouse_text: "This is the step size to be used to migrate the data.  Default of 0 results in Vmin / (4 * max frequency)."
+ 
+parameter: DEPTH
+text: "Maximum depth to migrate (feet or meters)"
+type: typein:
+type_desc: ( int: 7 0 nil )
+value: 0
+mouse_text: "If 0.0 is entered, the program will compute a DEPTH consistent with TMAX."
+
+parameter: NITERS
+text: "Defines the largest angle to properly migrate." 
+type: pop_choose:
+type_desc: (
+ ("15" 7 "Migrate to 15 degrees." )
+ ("45" 6 "Migrate to 45 degrees." )
+ ("65" 1 "Migrate to 65 degrees." )
+ ("80" 2 "Migrate to 80 degrees." )
+ ("87" 3 "Migrate to 87 degrees." )
+ ("90" 4 "Migrate to 90 degrees." ) )
+mouse_text: "Specify the maximum angle to migrate. Choices are: 15, 45, 65, 80, 87 and 90 degrees." 
+plot_label: t
+
+parameter: OUTTYPE
+text: "Output the migration in Depth or Time?"
+type: circular:
+type_desc: (
+ ("TIME"  2 "Output the migration in Time." ) 
+ ("DEPTH" 1 "Output the migration in Depth." ) )
+mouse_text: "User may choose to have the output of the migration be in either Depth or Time."
+plot_label: t
+
+
+parameter: changeTapering
+text: "Change the default tapering?"
+type: boolean:
+value: nil
+mouse_text: "Tapering is automatically applied to the bottom and edges of the data.  Enter YES to change the amount of tapering."
+
+parameter: ms_taper
+text: "   Bottom taper (in milliseconds)"
+type: typein:
+type_desc: ( real: 6 0 nil )
+value: 200.0
+mouse_text: "The bottom of all traces is tapered to avoid data truncation artifacts when padded with zeros."
+
+parameter: taperTop
+text: "   Upper edge taper (in traces)"
+type: typein:
+type_desc: ( int: 3 0 nil )
+value: 2
+mouse_text: "Edge tapering will be varied linearly between the upper and lower parts of the section."
+
+parameter: taperBot
+text: "   Lower edge taper (in traces)"
+type: typein:
+type_desc: ( int: 4 0 nil )
+value: 20
+mouse_text: "Edge tapering will be varied linearly between upper and lower parts of section. Usually greater toward bottom of section."
+
+
+parameter: REMUTE
+text: "Re-apply trace mutes?"
+type: boolean:
+value: t
+mouse_text: "Yes: trace mutes will be re-applied after migration.  No: No re-muting after migration."
+plot_label: t
+
+parameter: REKILL
+text: "Re-kill dead traces ?"
+type: boolean:
+value: t
+mouse_text: "Yes: Dead traces before migration will be re-killed after migration.  No: Dead traces will NOT be killed after migration."
+plot_label: t
+
+
+
+exec_data: (
+	   ("MIGTAPER"
+		("GENERAL"
+			("ms_taper" implicit: (if (value 'changeTapering) (value 'ms_taper) 200. ) )
+
+			("estimateTaper" implicit: 0 )
+			("taperTop" implicit: (if (value 'changeTapering) (value 'taperTop) 2 ) )
+			("taperBot" implicit: (if (value 'changeTapering) (value 'taperBot) 20) )
+		)
+   	    )
+
+("FDMIG"
+		("GENERAL"
+                        ("version" implicit: "ProMAX $Id: fdmig.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+                        ("NITERS"   implicit: (value 'NITERS))
+			("FMIN"     implicit: (value 'FMIN))
+			("FMXFIELD" implicit: (value 'FMXFIELD))
+			("DZ"       implicit: (value 'DZ))
+			("DEPTH"    implicit: (value 'DEPTH))
+			("OUTTYPE"  implicit: (value 'OUTTYPE))
+			("CDPMIN"   implicit: (value 'CDPMIN))
+			("CDPMAX"   implicit: (value 'CDPMAX))
+			("CDPINC"   implicit: (value 'CDPINC))
+                        ("DBSEC"    implicit: (value 'DBSEC))
+                        ("REMUTE"   implicit: (if (value 'REMUTE) 1 0 ))
+                        ("REKILL"   implicit: (if (value 'REKILL) 1 0 ))
+			("VSCAL"    implicit: (value 'VSCAL))
+			("VELDOM"   implicit: 2 )
+			("VELTYPE"  implicit: 1 )
+			("VELNAME"  implicit: (if (value 'vel_option)
+                                                  (value 'VELNAME) "NONE"))
+			("VELFIELD" implicit: (value 'VELFIELD))
+		)
+	    )
+)
+
+
+rules: (
+         (ifx_default_rule (= (value 'CDPMIN) -999)
+			   (set_value 'CDPMIN (db_parmget_line "MINCDPz")))
+         (ilx_default_rule (= (value 'CDPMAX) -999)
+			   (set_value 'CDPMAX (db_parmget_line "MAXCDPz")))
+         (cdp_interval_default_rule  (AND ( = (value 'CDPINC) 999999.) (db_parmget_line "DCDPILNz"))
+				     (set_value 'CDPINC (db_parmget_line "DCDPILNz")))
+	 (rule1 (showing 'velfield) (do_not_show 'velname) (do_show 'velname))
+ 	 (rule2 (value 'vel_option) (do_not_show 'VELFIELD)  (do_show 'VELFIELD))
+
+         (rule3 (value 'changeTapering)  
+		(progn 
+		  (do_show 'ms_taper)
+		  (do_show 'taperTop)
+		  (do_show 'taperBot))
+		(progn 
+		  (do_not_show 'ms_taper)
+		  (do_not_show 'taperTop)
+		  (do_not_show 'taperBot)))
+       )
+
+
+)
+
+

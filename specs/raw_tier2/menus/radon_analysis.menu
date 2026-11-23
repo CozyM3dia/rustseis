@@ -1,0 +1,391 @@
+; IIID IVD 1 DEV DEPTHC
+'(
+ name: RDN_ANAL
+label: "Radon Analysis"
+value_tab: 43
+
+
+parameter: NP 
+text: "Number of P-values"
+type: typein:
+type_desc: ( int: 7 1 nil )
+value: 31
+mouse_text: "The number of P-values for the Radon transform."
+
+
+parameter: PMIN
+text: "Minimum P-value of interest (ms)"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: -100.
+mouse_text: "This is the minimum P-value in msecs (overcorrected)."
+
+
+parameter: PMAX
+text: "Maximum P-value of interest (ms)"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: 400.
+mouse_text: "This is the maximum P-value in msecs (undercorrected)."
+
+parameter: RDNTMIN
+text: "Minimum time of interest (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the minimum time in msecs for Radon transform."
+
+
+parameter: RDNTMAX
+text: "Maximum time of interest (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the maximum time in msecs for Radon transform. (0 = use maximum data time.)"
+
+
+parameter: FMIN
+text: "Minimum frequency of interest"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 10.0
+mouse_text: "This is the minimum coherent frequency (in Hertz) that is of interest in the data."
+
+
+parameter: FMAX
+text: "Maximum frequency of interest"
+type: typein:
+type_desc: ( real: 8 1.0e-6 )
+value: 80.0
+mouse_text: "This is the maximum coherent frequency (in Hertz) that is of interest in the data."
+
+parameter: XFORMTYP
+text: "Type of transform to perform"
+type: pop_choose:
+type_desc: ( ("Parabolic" 2 "Parabolic radon transform")
+	     ("Hyperbolic" 3 "Hyperbolic radon transform (approx)")
+             ("Linear" 1 "Linear radon transform"))
+mouse_text: "Choose whether you want to model events which are Linear,
+Parabolic, or Hyperbolic."
+
+;parameter: HPOWER
+;text: "Power to raise offset to"
+;type: typein:
+;type_desc: ( real: 8 1.0e-6 1.0e6 )
+;value: 2.0
+;mouse_text: "1: linear radon transform; 2: parabolic radon transform; ..."
+
+parameter: REF_OFFS
+text: "Reference offset for delta moveout"
+type: typein:
+type_desc: ( real: 8 1.0e-6 1.0e9 )
+value: -1.0
+mouse_text: "Reference offset at which mute parameters were picked for a particular delta moveout."
+ 
+parameter: DAMPING
+text: "Damping for radon solution"
+type: typein:
+type_desc: ( real: 8 0.0001 1.0 )
+value: 0.03
+mouse_text: "Fraction of damping to add for matrix solver. Value between 0 and 1."
+ 
+parameter: SPARSE
+text: "Perform sparse inversion?"
+type: boolean:
+value: nil 
+mouse_text: "Sparse inversion constructs a sparse Radon domain solution that also reconstructs the input data in a least-squares sense."
+ 
+parameter: LAMBDA
+text: "  Sparseness parameter"
+type: typein:
+type_desc: ( real: 8 1.0e-6 9999.0 )
+value: 0.1
+mouse_text: "Amount of sparseness in solution measured as a fraction of the main matrix diagonal. Use value between 0 and 1.0."
+ 
+parameter: B
+text: "  Sparseness stability parameter"
+type: typein:
+type_desc: ( real: 8 1.0e-4 1.0 )
+value: 0.1
+mouse_text: "This parameter (measured as a fraction of sparseness parameter) avoids division by zero. Use value between 0.0001 and 1.0."
+
+parameter: EPSILON
+text: "  Stopping parameter"
+type: typein:
+type_desc: ( real: 8 1.e-6 1.0 )
+value: 0.001
+mouse_text: "Parameter to determine when sparse solution has been reached. When change in solution is less than this amount, iterations stop." 
+
+parameter: MAXITER
+text: "  Maximum number of iterations allowed"
+type: typein:
+type_desc: ( int: 4 0 9999 )
+value: 10
+mouse_text: "Maximum number of iterations to arrive at sparse solution."
+
+ 
+  parameter: Xserver
+  text: "Select display DEVICE"
+  type: typein:
+  type_desc: (:string 32)
+  :value "This Screen"
+  mouse_text: "'This Screen' for current display or type in a display name to override the current display default."
+
+  parameter: num_display_traces
+  text: "Maximum number of TRACES/screen"
+  type: typein:
+  type_desc: ( int: 4 0 nil )
+  value: 0
+  mouse_text: "What is the maximum number of traces to be displayed on the screen at a time? (enter 0 for automatic mode)."
+ 
+  parameter: num_ensembles
+  text: "Number of ENSEMBLES(line segments)/screen"
+  type: typein:
+  type_desc: (int: 4 1 nil)
+  value: 1
+  mouse_text: "Maximum number of trace ENSEMBLES (stacked line segments) to be displayed on the screen at one time."
+
+  parameter: output_mode
+  text: "Output Mode"
+  type: :circular
+  type_desc: 
+  (
+   ("When Done" 2  "Return traces to the flow when you display the next screen.")
+   ("Immediate" 1  "Return traces to the flow as soon as they are read.")
+   )
+  selected_item: ("When Done" 2  "Return traces to the flow when you display the next screen.")
+
+  mouse_text: "Choose when to put traces back into the flow"
+
+  parameter: headboard
+  text: "Header Plot Parameter"
+  type: function:
+  type_desc: (header_list headers)
+  value: "NONE    "
+  selected_item: "No trace header selected  "
+  mouse_text: "Use MB1 to select a trace header entry to plot in the headboard."
+
+  parameter: autosave
+  text: "Automatically SAVE screens?"
+  type: boolean:
+  value: nil
+  mouse_text: "Do you want to automatically save every screen that is 'drawn'?"
+
+  parameter: maximages
+  text: "Maximum number of screen images to save."
+  type: typein:
+  type_desc: (int: 3 1 200)
+  value: 10
+  mouse_text: "Maximum number of screen images to maintain. Older images will be deleted as new ones are saved."
+
+  parameter: saveType
+  text: "Save screens in Color?"
+  type: boolean:
+  value: nil
+  mouse_text: "Do you want to save color images?"
+
+  parameter: saveWhere
+  text: "Where to save screen images"
+  type: circular:
+  type_desc: (
+	      ("Xserver" 1 "Save images in the Xserver. Faster, but may not work on Xterminals with limited memory (see helpfile).")
+	      ("Program" 0 "Save images in the program. Slower"))
+
+  parameter: nbatch
+  text: "Number of screens to collect"
+  type: typein:
+  type_desc: (int: 3 0 157)
+  value: 1
+  mouse_text: "How many screens do you want to save before reviewing them?"
+
+  parameter: direction
+  text: "DIRECTION of trace plotting"
+  type: circular:
+  type_desc: (
+	      ("Left to right" 1 "Display traces with low numbers on the LEFT-hand side of the screen.")
+	      ("Right to left" 2 "Display traces with low numbers on the RIGHT-hand side of the screen.")
+             )
+  value: 1
+  mouse_text: "Use MB1 to switch between choices for flipping the direction of the trace plot."
+
+  parameter: lmfrdata
+  text: "Get min/max amplitudes from the data?"
+  type: boolean:
+  value: t
+  mouse_text: "If set to 'Yes' the min/max amplitudes will be extracted from the data. Or you may supply the min/max amplitudes."
+
+  parameter: scrn_min
+  text: "    Specify minimum amplitude to display"
+  type: typein:
+  type_desc: (real: 8 nil nil)
+  value: -1.0
+  mouse_text: "Specify the minimum amplitude to display (without clipping)."
+
+  parameter: scrn_max
+  text: "    Specify maximum amplitude to display"
+  type: typein:
+  type_desc: (real: 8 nil nil)
+  value: 1.0
+  mouse_text: "Specify the maximum amplitude to display (without clipping)."
+
+  parameter: program
+  text: "Program executable name"
+  type: edit:
+  type_desc: (30 100 2 " Example: /usr/stof/promax/sa/my_prog
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "traceDisplay.exe"
+  mouse_text: "Type path name of program executable.  If the path doesn't start with a /, the main ProMAX executable directory is used."
+
+  parameter: DEBUG
+  text: "Debug mode?"
+  type: boolean:
+  value: nil
+  mouse_text: "To debug program, enter YES.  You will have to debug the program yourself"
+
+
+					;  The string "SOCKET_TOOL" specifies that this is a socket tool
+  exec_data:  (
+
+             ("RADON_TRANS"
+	       ("GENERAL"
+			("version" implicit: "ProMAX $Id: radon_analysis.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("TMODE"    implicit: 0 )
+			("NP"       implicit: (value 'NP))
+			("PMIN"     implicit: (value 'PMIN))
+			("PMAX"     implicit: (value 'PMAX))
+			("TMIN"  implicit: (value 'RDNTMIN))
+			("TMAX"  implicit: (value 'RDNTMAX))
+			("FMIN"     implicit: (value 'FMIN))
+			("FMAX"     implicit: (value 'FMAX))
+			("REF_OFFS" implicit: (value 'REF_OFFS))
+			("DAMPING"  implicit: (value 'DAMPING))
+			("HPOWER"   implicit: (if (= (value 'XFORMTYP) 1)
+						 1.0 
+		        (if (= (value 'XFORMTYP) 2) 2.0 1100.0)) )
+			("SPARSE"   implicit: (if (value 'SPARSE) 1 0))
+			("LAMBDA"   implicit: (value 'LAMBDA))
+			("B"        implicit: (value 'B))
+			("EPSILON"  implicit: (value 'EPSILON))
+			("MAXITER"  implicit: (value 'MAXITER))
+						     
+			("MININENS" implicit: 5 )
+			("RDNECHO"  implicit: 0 )
+			("REMUTE" implicit: 0)
+                )
+              ) 
+	      ("ST_TRACE_DISPLAY"
+	      ("GENERAL"
+	       ("version" implicit: "ProMAX $Id: radon_analysis.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+	       ("Xserver"  implicit: (if (= (value 'Xserver) "This Screen") (where_promax_displays) (value 'Xserver)))
+	       ("tstart"   implicit: (value 'rdntmin))
+	       ("tend"     implicit: (value 'rdntmax))
+	       ("n_traces" implicit: (value 'num_display_traces) )
+	       ("overlap"  implicit: 0 )
+	       ("n_ensmbl" implicit: (value 'num_ensembles))
+	       ("ens_gap"  implicit: 1.0 )
+	       ("ens_inc"  implicit: 0 )
+	       ("varspace" implicit: 0 )
+	       ("wrtmode"  implicit: (value 'output_mode))
+	       ("dispmode" implicit: 3 )
+	       ("varbias"  implicit: 0.0 )
+	       ("headplot" implicit: (value 'headboard))
+	       ("autosave" implicit: (if (value 'autosave) 1 0))
+	       ("maximage" implicit: (value 'maximages))
+	       ("savecolr" implicit: (if (value 'saveType) 1 0))
+	       ("pixmap"   implicit: (value 'saveWhere))
+	       ("nbatch"   implicit: (value 'nbatch))
+	       ("direct"   implicit: 1 )
+	       ("polarity" implicit: 1.0 )
+	       ("lkeynam1" implicit: "CDP     ")
+	       ("lkeynam2" implicit: "MOVEOUT " )
+	       ("lablmod2" implicit: 1 )
+	       ("lablinc2" implicit: 10 )
+	       ("scalmode" implicit: 2 )
+	       ("clip"     implicit: 2.0 )
+	       ("ascalar"  implicit: 0.1 )
+	       ("scaleopt" implicit: 2 )
+	       ("lmfrdata" implicit: (if (value 'lmfrdata) 1 0))
+	       ("scalemin" implicit: (value 'scrn_min) )
+	       ("scalemax" implicit: (value 'scrn_max) )
+	       ("npanel"   implicit: 1 )
+	       ("tgate"    implicit: 0.0 )
+	       ("split"    implicit: 0 )
+	       ("orient"   implicit: 0 )
+	       ("program"  implicit: (value 'program))
+	       ("DEBUG"    implicit: (if (value 'DEBUG) 2 0))
+	       )
+	      )
+
+	      )
+
+  rules: 
+  (
+   ;; Verify the Screen specification
+   (test_screen_name (NOT (= (value 'Xserver) "This Screen"))
+		     (progn
+		       (setq temp (host_valid_p (value 'Xserver)))
+		       (if temp
+			   (add_error 'Xserver temp)
+			 (set_error_list 'Xserver temp)))
+		     (set_error_list 'Xserver nil))
+					;  This rule says that the DEBUG parameter should be shown only if
+					;  the environment variable SOCKET_DEBUG is set to "t"
+   (socket_debug_rule t
+		      (if (= (printenv 'SOCKET_DEBUG) "t")
+			  (progn (do_show 'DEBUG)
+				 (do_show 'program))
+			(progn (do_not_show 'DEBUG) 
+			       (do_not_show 'program))))
+					; Turn things on/off based on Max traces/screen
+
+					; Show/do not show batch screen save
+   (batch_rule (equal (value 'autosave) t)
+	       (do_show 'nbatch) 
+	       (do_not_show 'nbatch))
+
+					; Show/do not min max screen
+   (min_max_rule (equal (value 'lmfrdata) t )
+			(progn (do_not_show 'scrn_min)
+				 (do_not_show 'scrn_max))
+			(progn (do_show 'scrn_min) 
+			       (do_show 'scrn_max)) )
+
+;
+; Do not show the sparse parameter, default to not-sparse
+; Remove this rule to activate sparse Radon transform.
+;
+	(rule_no_sparse (do_not_show 'SPARSE))
+			     
+
+	(rule6 (equal (value 'SPARSE) t)
+	       (progn 
+                 (do_show 'LAMBDA) 
+                 (do_show 'B) 
+                 (do_show 'EPSILON) 
+                 (do_show 'MAXITER)) 
+	       (progn 
+                 (do_not_show 'LAMBDA) 
+                 (do_not_show 'B) 
+                 (do_not_show 'EPSILON) 
+                 (do_not_show 'MAXITER))) 
+
+
+
+   (REF_OFFS_default_rule ( = ( value 'REF_OFFS) -1.0 )
+             (set_value 'REF_OFFS (  db_parmget_line "OFFMAXz"))) 
+
+  )
+
+)
+
+
+

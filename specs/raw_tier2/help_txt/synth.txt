@@ -1,0 +1,163 @@
+Synthetic Trace Generation636
+
+ProMAX® Reference
+
+Synthetic Trace Generation
+Synthetic Trace Generation generates synthetic shot
+records or CDP gathers. It is useful for creating model input
+data for software testing.
+
+Theory
+You can specify events with controlled amplitudes, and
+velocities at speciﬁed travel times. You can also vary the dip.
+The synthetic program can generate Ormsby, Klauder, or
+Ricker wavelets, or you can put spikes at the selected times.
+Each of the different types of wavelet will require different
+speciﬁcations, depending on how many frequency values are
+needed to deﬁne that type of wavelet.
+An Ormsby wavelet is deﬁned by a set of four frequencies in
+Hz separated by commas. The four frequencies represent
+sequentially the 0% and 100% points of the low-cut ramp,
+and the 100% and 0% points of the high-cut ramp. These
+ramps are formed by cosine tapers (Hanning Windows) in the
+frequency domain.
+A Klauder wavelet is the wavelet that has the same
+spectrum as a Vibroseis sweep of a given length and
+frequency range. To deﬁne the Klauder wavelet, you must
+describe the starting and ending frequencies and the length
+in ms of the equivalent sweep.
+The Ricker wavelet is deﬁned by a single frequency.
+Knowing the frequency, the width of the wavelet in the time
+domain can be computed.
+
+Usage
+Amplitudes may be given as positive or negative ﬂoating point
+numbers. Positive dips represent increasing time with
+increasing trace number.
+Add Random Noise can be used immediately after the
+Synthetic Trace Generation to give traces which have both
+data and noise for program testing.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Synthetic Trace Generation637
+
+ProMAX® Reference
+
+Parameters
+Synthetic trace ensemble option
+Select the synthetic trace generation option. The choices are:
+• Source generates synthetic shot records.
+• CDP generates synthetic common depth point gathers.
+Number of trace ensembles to generate
+Enter how many shot records or CDP gathers to generate.
+Number of traces per ensemble
+Enter how many traces per shot record or CDP gather to
+generate.
+Signed offset for the ﬁrst trace
+Enter the offset value for the ﬁrst trace in each ensemble.
+This may be positive or negative. For split spread data, you
+can specify a large negative offset with a positive increment
+between offsets.
+Offset increment between traces
+Enter the offset increment between traces. This value
+corresponds to the geophone group interval for shot records.
+It may be positive or negative.
+Sample Rate for the synthetic traces
+Enter the sample interval in ms for the synthetic traces. It
+may be a fractional value, such as 0.5.
+Trace Length for the synthetic traces
+Enter the trace length in ms for the synthetic traces.
+Type of synthetic wavelet
+Select type of synthetic wavelet generation. Each of the
+different types of wavelet require different speciﬁcations,
+depending on how many frequency values are needed to
+deﬁne that type of wavelet.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Synthetic Trace Generation638
+
+ProMAX® Reference
+
+• Ormsby generates wavelets with four frequency values.
+• Klauder generates wavelets with two frequency values.
+• Ricker generates wavelets with one frequency value.
+• Spike generates spikes at the requested times (no frequency values).
+PHASE of synthetic wavelet
+This appears if Ormsby, Klauder or Ricker to Type of
+synthetic wavelet. Select the phase of synthetic wavelet
+from:
+• Zero generates zero phase wavelets, centered at speciﬁed
+times.
+• Minimum generates minimum phase wavelets, beginning at speciﬁed times.
+Vibroseis sweep length
+This appears if Klauder to Type of synthetic wavelet. Enter
+the sweep length in ms to use to generate Klauder wavelets.
+Deﬁne ORMSBY synthetic seismic events
+This appears if Ormsby to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and four frequencies to specify each event with an Ormsby
+wavelet. The type is: 1 for a refractor, 2 for a reﬂector. The
+time is two way travel time in ms. The length is the length of
+the wavelet in ms. The dip is given in degrees. Each Ormsby
+ﬁlter is speciﬁed by a set of four frequencies in Hz separated
+by commas. The four frequencies represent sequentially the
+0% and 100% points of the low-cut ramp, and the 100% and
+0% points of the high-cut ramp. The ramps are formed by
+cosine tapers (Hanning Windows) in the frequency domain.
+The speciﬁcations for each event are separated by slashes.
+Deﬁne KLADUER synthetic seismic events
+This appears if Klauder to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and two frequencies to specify each event with a Klauder
+wavelet. The type is: 1 for a refractor, 2 for a reﬂector. The
+time is two way travel time in ms. The length is the length of
+the wavelet in ms. The dip is given in degrees. The two
+Other Docs
+
+Search Page
+
+Known Problems
+
+Synthetic Trace Generation639
+
+ProMAX® Reference
+
+frequencies in Hz represent the start and end frequencies of
+the equivalent Vibroseis sweep. The speciﬁcations for each
+event are separated by slashes.
+Deﬁne RICKER synthetic seismic events
+This appears if Ricker to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and one frequency to specify each event with a Ricker
+wavelet. The type is: 1 for a refractor, 2 for a reﬂector. The
+time is two way travel time in ms. The length is the length of
+the wavelet in ms. The dip is given in degrees. The frequency
+in Hz represents the central frequency of the Ricker wavelet.
+The speciﬁcations for each event are separated by slashes.
+Deﬁne SPIKE synthetic seismic events
+This appears if Spike to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and 1 frequency to specify each event as a spike. The type is:
+1 for a refractor, 2 for a reﬂector. The time is two way travel
+time in ms. The length is the length of the wavelet in ms.
+(The length of the wavelet is required even when a spike is
+chosen for the output data.) The dip is given in degrees. The
+speciﬁcations for each event are separated by slashes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

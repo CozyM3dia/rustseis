@@ -1,0 +1,215 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+  name: DISKREAD2
+  label: "Disk Data Input"
+  value_tab: 40
+  plot_label: nil
+
+  parameter: FOREIGN
+  text: "Read data from other lines/surveys?"
+  type: boolean:
+  value: nil
+  mouse_text: "Selecting 'Yes' will change the behavior of the menus that are used to select datasets."
+
+  parameter: LABEL
+  text: "Select dataset"
+  type: function:
+  type_desc: (dataset_list datasets)
+  value: "no entry"
+  selected_item: "INVALID"
+  mouse_text: "Use Mouse Button 1 to select a dataset from the datasets menu."
+
+  parameter: LABEL_AL
+  text: "Select dataset"
+  type: action:
+  type_desc: ("INVALID")
+  mouse_text: "Use Mouse Button 1 to select a dataset from another line/survey."
+
+  :parameter HISTPROP
+  :text "Propagate input file history"
+  :type :boolean
+  :value t
+  :mouse_text "Selecting 'No' will exclude the history of this dataset from that attributed to any dataset output in this flow"
+
+  parameter: SORTOPT
+  text: "Trace read option"
+  type: circular:
+  type_desc: (
+			  ("Get All" -1 "Read in all traces in the dataset sequentially. (In their current sort order.)" )
+			  ("Sort   "  1 "Input traces will be sorted to the requested order, based on one or more header entries." ) )
+  value: -1
+  selected_item: 	("Get all " -1 )
+  mouse_text: "Input traces can be sorted using header entries, or ALL traces in the dataset can be sequentially read in."
+
+  parameter: IDA_OPT
+  text: "Interactive Data Access?"
+  type: boolean:
+  value: nil
+  mouse_text: "Interactive Data Access may be used for certain processing modules to select new input traces on the fly."
+
+
+  parameter: PKEYNAM
+  text: "  Select primary trace header entry"
+  type: function:
+  type_desc: (header_list headers)
+  value: "SIN     "
+  selected_item: 	"Source index number"
+  mouse_text: "Use MB1 to select a header entry from the HEADERS menu to use as the primary key for specifying 'Sort' traces."
+
+  parameter: SKEYNAM
+  text: "  Select secondary trace header entry"
+  type: function:
+  type_desc: (header_list headers)
+  value: "NONE    "	
+  selected_item: 	"No trace header entry selected"
+  mouse_text: "Use MB1 to select a header entry from the headers menu to use as the secondary key for specifying 'Sort' traces."
+
+  parameter: TKEYNAM
+  text: "  Select tertiary trace header entry"
+  type: function:
+  type_desc: (header_list headers)
+  value: "NONE    "	
+  selected_item: 	"No trace header entry selected"
+  mouse_text: "Use MB1 to select a header entry from the headers menu to use as the tertiary key for specifying 'Sort' traces."
+
+  parameter: KEYLIST
+  text: "  Sort order list for dataset"
+  type: edit:
+  type_desc: (25 80 5 " FORMAT: Primary Header Entry Value: Secondary Value: Tertiary Value /
+ EXAMPLES: 1-10;  11-20(2):1,60,61,120 / 21,25:1-120;  101.5:101-200:-3300--55/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  value: "*/"
+  mouse_text: "Use MB1 to access the editor and define the input trace list. Use an asterisk (*) to default any header's values ( Ex: FFID,CHAN; *:*/ )"
+
+  parameter: MEM_SORT
+  text: "  Presort in memory or on disk?"
+  type: circular:
+  type_desc: (
+			  ("Memory" 1 "Presort traces in memory (faster, but may exhaust memory resources)." )
+			  ("Disk"   0 "Presort traces on disk (slower, but capable of very large sorts)" )
+			  )
+  value: 1
+  selected_item: 	("Memory" 1 )
+  mouse_text: "The input presort list can be created in memory or on disk, depending on resource requirements."
+
+  parameter: iterate
+  text: "Read the data multiple times?"
+  type: boolean:
+  value: nil
+  mouse_text: "Do you wish to read the data multiple times, from beginning to end?"
+
+  parameter: DISKITER
+  text: "  Number of iterations"
+  type: typein:
+  type_desc: ( int: 6 1 nil )
+  value: 2
+  mouse_text: "Enter the number of times that you wish to read the data."
+
+  parameter: THDRONLY
+  text: "Process trace headers only?"
+  type: boolean:
+  value: nil
+  mouse_text: "Do you wish to process trace headers only (for header math, loading geometry info, etc.)?"
+
+  parameter: sr_option
+  text: "Override input data's sample interval?"
+  type: boolean:
+  value: nil
+  mouse_text: "Set to 'Yes' if your input data's sample interval is NOT correct on disk and you need to OVERRIDE it to continue!"
+
+  parameter: SAMPRATE
+  text: "  Correct sample interval"
+  type: typein:
+  type_desc: ( real: 6 0.0 nil )
+  value: 0.0
+  mouse_text: "Enter the correct sample interval (in milliseconds) of your input data."
+
+  exec_data: ("DISKREAD2"
+			  ("SPECIAL"
+			   ("TOOLTYPE"     implicit: "INPUT")
+			   )
+			  ("GENERAL"
+			   ("version"  :implicit "ProMAX $Id: diskread2.menu 44577 2009-07-29 16:44:43Z David Johnston $  $Revision: 44577 $  $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			   ("MEDIA"    :implicit 0)
+			   ("HISTPROP" :implicit (if (value 'HISTPROP) 0 1))
+			   ("1ST_TOOL" :implicit 1)
+			   ("FOREIGN"  :implicit (if (value 'FOREIGN) 1 0))
+			   ("LABEL"    :implicit (value 'LABEL))
+			   ("LABEL_AL" :implicit (if (and (selected_item 'LABEL_AL)
+											  (listp (selected_item 'LABEL_AL)))
+										 (first (selected_item 'LABEL_AL)) "INVALID" ))
+			   ("SORTOPT"  :implicit (value 'SORTOPT))
+			   ("IDA_OPT"  :implicit (if (value 'IDA_OPT) 1 0 ))
+			   ("PKEYNAM"  :implicit (value 'PKEYNAM))
+			   ("SKEYNAM"  :implicit (value 'SKEYNAM))
+			   ("TKEYNAM"  :implicit (value 'TKEYNAM))
+			   ("KEYLIST"  :implicit (value 'KEYLIST))
+			   ("MEM_SORT" :implicit (value 'MEM_SORT))
+			   ("DISKITER" :implicit (if (value 'iterate) (value 'DISKITER) 1))
+			   ("THDRONLY" :implicit (if (value 'THDRONLY) 1 0))
+			   ("SAMPRATE" :implicit (if (value 'sr_option) (value 'SAMPRATE) 0.0 ) )
+			   )
+			  )
+
+  rules: 
+  (
+   (rule1 ( = (value 'SORTOPT) -1 ) 
+		  (progn (do_not_show 'PKEYNAM)
+				 (do_not_show 'SKEYNAM)
+				 (do_not_show 'KEYLIST)
+				 (do_not_show 'MEM_SORT)
+				 (do_not_show 'IDA_OPT)
+				 (set_value 'IDA_OPT nil))
+		  (progn (do_show 'PKEYNAM)
+				 (do_show 'SKEYNAM)
+				 (do_show 'KEYLIST)
+				 (do_show 'IDA_OPT)
+				 (do_show 'MEM_SORT)))
+
+   (rule2 ( or ( = (value 'SORTOPT) -1 ) ( = (value 'SKEYNAM) "NONE    " ) )
+		  (do_not_show 'TKEYNAM) (do_show 'TKEYNAM)  )
+
+   (rule3 (value 'iterate) (do_show 'DISKITER)  (do_not_show 'DISKITER) ) 
+
+   (rule4 (value 'sr_option) (do_show 'SAMPRATE)  (do_not_show 'SAMPRATE) ) 
+
+   (show_foreign_rule (= (printenv 'RUNNING_SEISSPACE) "t")
+		      (do_not_show 'FOREIGN)
+		      (do_show 'FOREIGN))
+   
+
+   (rule5 (value 'FOREIGN) 
+		  (progn (do_show 'LABEL_AL)
+				 (do_not_show 'LABEL))
+		  (progn (do_not_show 'LABEL_AL)
+				 (do_show 'LABEL)))
+
+   (rule6 (value 'LABEL_AL)
+		  (let ((res (path_to_dataset_new))
+				(cir (list " "))
+				base lab dsc)
+			(nconc cir cir);; warning circular list
+			(if (and res (not (= (first res) "INVALID" ))) 
+				(progn
+				  (setq base (mapcar 'string_concatinate (list (first res) (second res)) cir))
+				  (setq lab (append base (list (third res)))
+						dsc (append base (list (fourth res))))
+				  (setq lab (apply 'string_concatinate lab)
+						dsc (apply 'string_concatinate dsc)))
+			  (setq lab res
+					dsc res))
+			(set_value 'LABEL_AL nil)
+			(set_selected_item 'LABEL_AL (if (listp lab) lab (list lab) ))
+			(set_type_desc 'LABEL_AL (if (listp dsc) dsc (list dsc)))))
+
+   )
+  )

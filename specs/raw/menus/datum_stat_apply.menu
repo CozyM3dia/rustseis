@@ -1,0 +1,64 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC BHSS
+'(
+ name: DATUM_STAT_APPLY
+label: "Datum Statics Apply"
+value_tab: 45
+
+parameter: S_STATIC
+text: "  Source datum statics database parameter"
+type: action:
+type_desc: ("SIN GEOMETRY  S_STAT01")
+mouse_text: "Use MB1 to specify the SOURCE elevation/refraction datum statics parameter to read from the database and apply to the input traces."
+
+
+parameter: R_STATIC
+text: "  Receiver datum statics database parameter"
+type: action:
+type_desc: ("SRF GEOMETRY  R_STAT01")
+mouse_text: "Use MB1 to specify the RECEIVER elevation/refraction datum statics parameter to read from the database and apply to input traces."
+
+
+parameter: C_STATIC
+text: "  CDP datum statics database parameter"
+type: action:
+type_desc: ("CDP GEOMETRY  C_STAT01")
+mouse_text: "Use MB1 to specify the CDP elevation/refraction datum statics parameter to read from the database and apply to input traces."
+
+
+
+
+exec_data: ("DATUM_STAT_APPLY"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: datum_stat_apply.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("S_STATIC" implicit: (first (type_desc 'S_STATIC)))
+			("R_STATIC" implicit: (first (type_desc 'R_STATIC)))
+			("C_STATIC" implicit: (first (type_desc 'C_STATIC)))
+
+		)
+	    )
+
+rules: (
+
+ (rule1_call_dbparm (value 'S_STATIC)
+             ( progn
+                   (set_value 'S_STATIC nil)
+		   (set_selected_item 'S_STATIC nil)
+	           (set_type_desc 'S_STATIC (list (choose_old_db_parm)))))
+
+ (rule2_call_dbparm (value 'R_STATIC)
+             ( progn
+                   (set_value 'R_STATIC nil)
+		   (set_selected_item 'R_STATIC nil)
+	           (set_type_desc 'R_STATIC (list (choose_old_db_parm)))))
+
+ (rule2_call_dbparm (value 'C_STATIC)
+             ( progn
+                   (set_value 'C_STATIC nil)
+		   (set_selected_item 'C_STATIC nil)
+	           (set_type_desc 'C_STATIC (list (choose_old_db_parm)))))
+
+       )
+
+)
+
+

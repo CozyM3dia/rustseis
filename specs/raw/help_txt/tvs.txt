@@ -1,0 +1,148 @@
+Time-Variant Scaling2088
+
+ProMAX® Reference
+
+Time-Variant Scaling
+Time-Variant Scaling computes and applies a time variant
+scaling function.
+
+Theory
+This process uses several time gates for each trace, which
+may be spatially varied by a primary and a secondary key
+and are interactively picked from the screen and stored as
+database ﬁles. The amplitude in the gate is computed and a
+scalar calculated to convert this amplitude to a constant
+value of 1.0. The scalar can also be raised to a user-supplied
+power exponent prior to application. The scalars are
+interpolated between time gates prior to application. In this
+way, variations in amplitude are reduced. It is also possible
+to directly specify the scalars to use, rather than computing
+them from the trace sample data.
+
+Parameters
+Basis for scaling
+Select values as a basis for the trace equalization scalar from
+either:
+• RMS uses the root mean square value in the deﬁned
+gate to determine the scalar.
+• Mean uses the average value in the deﬁned gate to determine the scalar.
+• Max uses the maximum value in the deﬁned gate to
+determine the scalar.
+• User-Vals allows you to supply scalars that are multiplied times the trace samples in each time gate.
+Root power for scalar adjustment
+This appears if any option, except User-Vals to Basis for
+scaling. Enter a power exponent for adjusting computed gain
+scalars. A value of 1.0 provides traditional TVS scaling, that
+is no extra adjustment, while a value of 0.5 softens the
+amount of TVS scaling so the data retains more of its original
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time-Variant Scaling2089
+
+ProMAX® Reference
+
+amplitude relationships. A value of 0.0 would result in no
+change to the data, and a value of 2.0 would make the
+originally higher energy time gates lower amplitude than the
+originally low amplitude gates. The multiplicative gain scalars
+are adjusted as follows:
+New scalar = ( Old scalar ) Power exponent
+Select Primary User Value Header WORD
+This appears if User-vals to Basis for scaling. Select a
+primary header word for specifying TVS user supplied gain
+values. A typical choice is SIN or CDP. Time variant scalars
+may be interpolated spatially by using primary and
+secondary keys.
+Select Secondary User Value Header WORD
+This appears if User-vals to Basis for scaling. Select a
+secondary header word for specifying TVS user supplied gain
+values. A typical choice is AOFFSET. Time variant scalars
+may be interpolates spatially by using primary and secondary
+keys.
+USER TVS Gain Values
+This appears if User-vals to Basis for scaling. Enter the
+scalar values. The program expects groups of primary key,
+secondary key, and a list of scalars for each gate. The format
+is:
+pkey1:skey1:11, ..., s1n/pkey2:skey2:s21, ..., s2n/
+
+For example:
+1:0:.2,.4,.1,.7,.01/1:5280:.25,.44,.05,.6,.02/
+
+Note: The number of scalars must match the number of time
+gates speciﬁed below. Also, this process dismisses any
+window where your scalar is 0.0. If you require a value such
+as 0.0, use a small number such as 0.000000001.
+Basis for application
+Select how the scalars should be interpolated. The scalars are
+computed at the center of each gate on the trace. They can be
+applied and interpolated in either of two ways:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time-Variant Scaling2090
+
+ProMAX® Reference
+
+• Center interpolates and applies scalar from gate center
+to gate center.
+• Edge applies a constant scalar within the gate and interpolates between gate edges.
+Minimum samples per gate
+This appears if any option, except User-Vals to Basis for
+scaling. Enter the minimum number of samples per TVS
+gate. If fewer samples are available, the gate is removed. For
+example, at far offsets after muting, some of the shallow gates
+may not contain enough samples to properly estimate the
+amplitude of the data.
+Get TVS time gates from database
+Select Yes to retrieve a ﬁle from the database. There may be
+more than one list of time gates in the database for this line.
+Select No to manually enter the values.
+SELECT Time Gate Parameter FILE
+This appears if Yes to Get TVS time gates from database.
+Select a time variant scaling time gate parameter ﬁle.
+SELECT Primary Time Gate Header WORD
+This appears if No to Get TVS time gates from database.
+Select a header word as the Primary key for specifying the
+time variant scaling time gates. You may select from the main
+list of header words or the alternate list.
+SELECT Secondary Time Gate Header WORD
+This appears if No to Get TVS time gates from database.
+Select a header word from the Headers menu as the
+Secondary key for specifying the time variant scaling time
+gates.
+SPECIFY TVS time gates
+This appears if No to Get TVS time gates from database.
+Enter the time gates. The time gate values are interpolated for
+each trace, ﬁrst by primary key and then by secondary key.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time-Variant Scaling2091
+
+ProMAX® Reference
+
+Type of output
+Select output of scaled traces or constant scalar values as
+traces.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

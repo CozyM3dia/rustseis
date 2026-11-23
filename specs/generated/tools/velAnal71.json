@@ -1,0 +1,1219 @@
+{
+  "menu_id": "velAnal71",
+  "tool_name": "velAnal",
+  "label": "Velocity Analysis",
+  "parameter_count": 157,
+  "parameters": [
+    {
+      "name": "Xserver",
+      "prompt": "Select display DEVICE",
+      "kind": "typein",
+      "default": null,
+      "help": "'This Screen' for current display or type in a display name to OVERRIDE the current display default."
+    },
+    {
+      "name": "NEWTABLE",
+      "prompt": "Table to store velocity picks",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a velocity file from the menu."
+    },
+    {
+      "name": "PRECOMP",
+      "prompt": "Is the incoming data Precomputed?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Incoming data has been precomputed using the vaprecom tool."
+    },
+    {
+      "name": "RMO",
+      "prompt": "Perform residual velocity analysis?",
+      "kind": "int",
+      "default": "0",
+      "help": "Configure parameters for residual velocity analysis"
+    },
+    {
+      "name": "OLDRMO",
+      "prompt": "Previous value of RMO",
+      "kind": "int",
+      "default": "0",
+      "help": ""
+    },
+    {
+      "name": "SPACE0",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "SETPARMS",
+      "prompt": "Set the values for the computation variables?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Change all of the necessary parameters when running in interactive mode."
+    },
+    {
+      "name": "SPACE1",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "LANDDATA",
+      "prompt": "LANDDATA",
+      "kind": "integer",
+      "default": "1",
+      "help": ""
+    },
+    {
+      "name": "NSMASH",
+      "prompt": "Number of CDPs to sum into gather",
+      "kind": "typein",
+      "default": "99999999",
+      "help": "Enter the number of CDPs to use to build the commom offset stacked supergather."
+    },
+    {
+      "name": "SMASHNMO",
+      "prompt": "Apply partial NMO-to-binning",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Apply partial NMO before summing trace to offset bin center for supergather."
+    },
+    {
+      "name": "SMASHSTA",
+      "prompt": "Apply differential CDP mean statics?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Apply differential CDP mean statics prior to offset  super gather stack generation."
+    },
+    {
+      "name": "INITDIST",
+      "prompt": "Absolute offset of first bin center",
+      "kind": "typein",
+      "default": "50.0",
+      "help": "Enter the center of the first offset bin."
+    },
+    {
+      "name": "BINSIZE",
+      "prompt": "Bin size for vertically summing offsets",
+      "kind": "typein",
+      "default": "100.0",
+      "help": "Enter the offset bin size for summing offsets for supergather generation."
+    },
+    {
+      "name": "MAXOFFS",
+      "prompt": "Maximum offset",
+      "kind": "typein",
+      "default": "-1.0",
+      "help": "Enter the maximum offset for creating common offset stacked supergather."
+    },
+    {
+      "name": "USEAOFF",
+      "prompt": "Use absolute value of offset for stacking?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If YES absolute value of offset is used to stack gathers for 2D data.  Otherwise, signed offset is used.  3D always uses absolute offset."
+    },
+    {
+      "name": "MINVEL",
+      "prompt": "Minimum semblance analysis value",
+      "kind": "typein",
+      "default": "99999999.",
+      "help": "Minimum expected stacking value - value of first semblance scan."
+    },
+    {
+      "name": "MAXVEL",
+      "prompt": "Maximum semblance analysis value",
+      "kind": "typein",
+      "default": "99999999.",
+      "help": "Maximum expected stacking value - value of last semblance scan."
+    },
+    {
+      "name": "NVELS",
+      "prompt": "Number of semblance calculations",
+      "kind": "typein",
+      "default": "50",
+      "help": "Number of semblance scans to perform between the minimum and maximum velocity range."
+    },
+    {
+      "name": "VELSPACE",
+      "prompt": "Semblance velocity axis",
+      "kind": "circular",
+      "default": "2",
+      "help": "Method of spacing velocities along semblance axis.",
+      "choices": [
+        {
+          "label": "Equal Velocity",
+          "value": "2",
+          "help": "Semblance velocity spacing and display is logrithmic between minimum and maximum velocity."
+        },
+        {
+          "label": "Slowness Squared",
+          "value": "4",
+          "help": "Spacing proportional to slowness squared. Use this option ONLY to create semblances for Velocity Auto Picker."
+        }
+      ]
+    },
+    {
+      "name": "WINSIZE",
+      "prompt": "Semblance sample rate",
+      "kind": "typein",
+      "default": "20.0",
+      "help": "Enter the semblance sample rate in milliseconds - distance between analysis window centers."
+    },
+    {
+      "name": "RSMOOTH",
+      "prompt": "Semblance calculation window",
+      "kind": "typein",
+      "default": "40.0",
+      "help": "Enter size of window over which semblance will be calculated."
+    },
+    {
+      "name": "NVFS",
+      "prompt": "Number of stack velocity functions",
+      "kind": "typein",
+      "default": "11",
+      "help": "Number of velocity functions and the number of stack strips."
+    },
+    {
+      "name": "NSTACK",
+      "prompt": "Number of CDPS per stack strip",
+      "kind": "typein",
+      "default": "99999999",
+      "help": "Number of CDPS to stack for each of the velocity function stacks."
+    },
+    {
+      "name": "NORMSTK",
+      "prompt": "Scale stacks by number of live samples summed",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Divide function velocity stacks, dynamic stacks, and flip stacks by number of live samples summed into stacks."
+    },
+    {
+      "name": "VFSTYPE",
+      "prompt": "Method of computing velocity functions",
+      "kind": "pop_choose",
+      "default": "1",
+      "help": "Method of computing velocity function from guide velocity function."
+    },
+    {
+      "name": "VFDELTA",
+      "prompt": "Velocity function time increment",
+      "kind": "typein",
+      "default": "10.0",
+      "help": "Change in moveout (delta t) between the velocity functions at the farthest offset."
+    },
+    {
+      "name": "VFCENT",
+      "prompt": "Velocity function percent maximum",
+      "kind": "typein",
+      "default": "30.0",
+      "help": "Maximum percent change of the fan relative to the guide function (minimum and maximum)."
+    },
+    {
+      "name": "VFMINVEL",
+      "prompt": "Velocity variation at time 0",
+      "kind": "typein",
+      "default": "99999999.",
+      "help": "The fan at time 0 will be the this value (in units/sec) wide centered at the guide function velocity"
+    },
+    {
+      "name": "VFMAXVEL",
+      "prompt": "Velocity variation at maximum time",
+      "kind": "typein",
+      "default": "99999999.",
+      "help": "The fan at maximum time will be the this value (in units/sec) wide centered at the guide function velocity"
+    },
+    {
+      "name": "SPACE2",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "VIEWFLAG",
+      "prompt": "Set which items are visible?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Set on/off the various panels and displays in Velocity Analysis."
+    },
+    {
+      "name": "SPACE3",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "SHOWSEMB",
+      "prompt": "Display semblance panel?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display the semblance plot."
+    },
+    {
+      "name": "SHOWVF",
+      "prompt": "Display stack velocity functions?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display the velocity functions on the semblance panel."
+    },
+    {
+      "name": "SHOWCONT",
+      "prompt": "Display semblance contours?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display the semblance contours on the semblance panel."
+    },
+    {
+      "name": "SHOWINT",
+      "prompt": "Display interval velocity function?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Display the interval velocity function on the semblance panel as the stacking velocity function is picked."
+    },
+    {
+      "name": "SHOWGUID",
+      "prompt": "Display guide function?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display the guide function."
+    },
+    {
+      "name": "SHOWGAT",
+      "prompt": "Display gather panel?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display the smashed super gather."
+    },
+    {
+      "name": "PLOTTYPE",
+      "prompt": "Seismic traces plotted as?",
+      "kind": "choose",
+      "default": "WIGGLES",
+      "help": "Plot seismic data in the form of wiggly lines or grayscale.",
+      "choices": [
+        {
+          "label": "WIGGLES",
+          "value": "WIGGLES",
+          "help": "Plot seimsic data as wiggly lines"
+        },
+        {
+          "label": "GRAYSCALE",
+          "value": "GRAYSCALE",
+          "help": "Plot seimsic data as grayscale density"
+        }
+      ]
+    },
+    {
+      "name": "APPLYNMO",
+      "prompt": "Apply NMO on gather panel?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Normal moveout correct the gather panel according to the current pick velocity function"
+    },
+    {
+      "name": "ANIMNMO",
+      "prompt": "Animate NMO on gather panel?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Normal moveout correct a slice of the gather panel according to the velocity coordinate of the dragged mouse location"
+    },
+    {
+      "name": "SHOWDYN",
+      "prompt": "Display dynamic stack panel?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display a stack that represents the stack with the current picked velocity function."
+    },
+    {
+      "name": "SHOWFLIP",
+      "prompt": "Display flip stacks panel?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Display the flip stacks - (the function stacks displayed as a movie)."
+    },
+    {
+      "name": "SHOWSTK",
+      "prompt": "Display velocity function stacks panel?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Display the velocity function stacks."
+    },
+    {
+      "name": "SHOWVEL",
+      "prompt": "Display velocity color background?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Display the velocity color background under the function stacks and dynamic stack."
+    },
+    {
+      "name": "SHOWKEY",
+      "prompt": "Display velocity color key?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Display the velocity color key beneath the semblance panel."
+    },
+    {
+      "name": "SHOWGHOR",
+      "prompt": "Show horizons on gather panel?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Select YES to display previously picked horizon(s) in the gather."
+    },
+    {
+      "name": "SHOWVHOR",
+      "prompt": "Show horizons on velocity function stacks panel?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display previously picked horizon(s) in the velocity function stacks."
+    },
+    {
+      "name": "SHOWDHOR",
+      "prompt": "Show horizons on dynamic stack panel?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Select YES to display previously picked horizon(s) in the dynamic stack."
+    },
+    {
+      "name": "SHOWFHOR",
+      "prompt": "Show horizons on flip stacks panel?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display previously picked horizon(s) in the flip stacks."
+    },
+    {
+      "name": "SHOWPRES",
+      "prompt": "Show current CDP guide function?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display current CDP guide function on Semblance and Function Velocity Stacks"
+    },
+    {
+      "name": "SHOWAVE",
+      "prompt": "Show average CDP guide function?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display average-of-all-CDPs guide function on Semblance and Function Velocity Stacks"
+    },
+    {
+      "name": "SHOWPREV",
+      "prompt": "Show previous CDP guide function?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display previous CDP guide function on Semblance and Function Velocity Stacks"
+    },
+    {
+      "name": "SHOWNEXT",
+      "prompt": "Show next CDP guide function?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display next CDP guide function on Semblance and Function Velocity Stacks"
+    },
+    {
+      "name": "SHOWLAST",
+      "prompt": "Show last-viewed CDP guide function?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to display last-viewed CDP guide function on Semblance and Function Velocity Stacks"
+    },
+    {
+      "name": "TRACEWID",
+      "prompt": "Equalize displayed trace width?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Equalize the displayed trace width in the gather and stack panels."
+    },
+    {
+      "name": "SEMBWID",
+      "prompt": "Relative width of semblance panel",
+      "kind": "typein",
+      "default": "100",
+      "help": "Relative width of semblance panel compared to other panels."
+    },
+    {
+      "name": "GATWID",
+      "prompt": "Relative width of gather panel",
+      "kind": "typein",
+      "default": "75",
+      "help": "Relative width of gather panel compared to other panels. Zero selects trace equalization default."
+    },
+    {
+      "name": "DYNWID",
+      "prompt": "Relative width of dynamic stack panel",
+      "kind": "typein",
+      "default": "30",
+      "help": "Relative width of dynamic stack panel compared to other panels. Zero selects trace equalization default."
+    },
+    {
+      "name": "FLIPWID",
+      "prompt": "Relative width of flip stacks panel",
+      "kind": "typein",
+      "default": "30",
+      "help": "Relative width of flip stacks panel compared to other panels. Zero selects trace equalization default."
+    },
+    {
+      "name": "VFWID",
+      "prompt": "Relative width of velocity function stack panel",
+      "kind": "typein",
+      "default": "200",
+      "help": "Relative width of velocity function stack panel compared to other panels. Zero selects trace equalization default."
+    },
+    {
+      "name": "SPACE4",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "SEMBPARM",
+      "prompt": "Set semblance scaling and autosnap parameters?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Configure scaling and autosnap parameters for the semblance display"
+    },
+    {
+      "name": "SPACE5",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "NORM",
+      "prompt": "Semblance normalization mode",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose method of normalizing semblances."
+    },
+    {
+      "name": "RPOWER",
+      "prompt": "Contrast power factor",
+      "kind": "typein",
+      "default": "1.0",
+      "help": "Raise each semblance sample power to this power before plotting.  A value greater/less than 1.0 increases/decreases the contrast."
+    },
+    {
+      "name": "RNOISE",
+      "prompt": "Contrast noise factor",
+      "kind": "typein",
+      "default": "0.1",
+      "help": "Add this value to maximum semblance before scaling (not used if no scaling applied).  Recommend 0.0 to 0.4"
+    },
+    {
+      "name": "AUTOSNAP",
+      "prompt": "Automatically snap",
+      "kind": "pop_choose",
+      "default": "0",
+      "help": "Options to automatically snap velocity function for new ensemble."
+    },
+    {
+      "name": "HOR_DIST",
+      "prompt": "Maximum velocity % change for snapping",
+      "kind": "typein",
+      "default": "5",
+      "help": "Horizontal search distance (in percent) for the neighboring highest semblance."
+    },
+    {
+      "name": "VER_DIST",
+      "prompt": "Maximum vertical change for snapping",
+      "kind": "typein",
+      "default": "40",
+      "help": "Vertical search distance (in msec) for the neighboring highest semblance."
+    },
+    {
+      "name": "SPACE6",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "MUTEMODE",
+      "prompt": "Pick/apply a mute?",
+      "kind": "choose",
+      "default": "0",
+      "help": "Use top and/or base mutes picked on the Gather panel and/or a mute file.",
+      "choices": [
+        {
+          "label": "NONE",
+          "value": "0",
+          "help": "Do not apply picked mute."
+        },
+        {
+          "label": "TOP",
+          "value": "1",
+          "help": "Mute from top mute upward and make top mute editable."
+        },
+        {
+          "label": "BASE",
+          "value": "2",
+          "help": "Mute from base mute downward and make base mute editable."
+        },
+        {
+          "label": "BOTH",
+          "value": "3",
+          "help": "Mute from top mute upward and base mute downward. Top mute initially editable."
+        }
+      ]
+    },
+    {
+      "name": "TOPMUTE",
+      "prompt": "Gather offset Top mute table",
+      "kind": "function",
+      "default": "INVALID",
+      "help": "Use Mouse Button 1 to select a mute table from the menu."
+    },
+    {
+      "name": "BASEMUTE",
+      "prompt": "Gather offset Base mute table",
+      "kind": "function",
+      "default": "INVALID",
+      "help": "Use Mouse Button 1 to select a mute table from the menu."
+    },
+    {
+      "name": "MUTETAPE",
+      "prompt": "Mute taper length",
+      "kind": "typein",
+      "default": "20.0",
+      "help": "Taper length of end of mute in vertical units."
+    },
+    {
+      "name": "SHOWHOR",
+      "prompt": "Select/Display horizons?",
+      "kind": "choose",
+      "default": "0",
+      "help": "Methods to select horizon display and color.",
+      "choices": [
+        {
+          "label": "NONE",
+          "value": "0",
+          "help": "Don't show any horizons, but remember selections."
+        },
+        {
+          "label": "POP-MENU",
+          "value": "1",
+          "help": "Select using a pop-up menu. Faster, but no color."
+        },
+        {
+          "label": "EXPLICIT",
+          "value": "2",
+          "help": "Select each horizon and color explicitly."
+        },
+        {
+          "label": "RESET-EXPLICIT",
+          "value": "3",
+          "help": "Erase all explicit entries."
+        }
+      ]
+    },
+    {
+      "name": "SPACE7",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "HORDATUM",
+      "prompt": "To which datum are the horizons referenced?",
+      "kind": "circular",
+      "default": "-1",
+      "help": "Velocity Analysis will shift horizons picked at final datum to floating datum so that horizons picked on conventional stacks can be used for analysis.",
+      "choices": [
+        {
+          "label": "Final Datum",
+          "value": "-1",
+          "help": "Horizons were picked from a stack referenced to final datum (F_DATUM)."
+        },
+        {
+          "label": "Floating Datum",
+          "value": "1",
+          "help": "Horizons were picked from a stack referenced to floating datum (N_DATUM)"
+        },
+        {
+          "label": "Final Datum",
+          "value": "-1",
+          "help": ""
+        }
+      ]
+    },
+    {
+      "name": "H_TABLES",
+      "prompt": "Horizon tables",
+      "kind": "action",
+      "default": "nil",
+      "help": "Use MB1 to pop up a window and select Horizon Tables to display."
+    },
+    {
+      "name": "HOR1",
+      "prompt": "Select horizon #1",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR1",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "red",
+      "help": "Select a color for horizon #1 from the pop up menu."
+    },
+    {
+      "name": "HOROK2",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR2",
+      "prompt": "Select horizon #2",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR2",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "orange",
+      "help": "Select a color for horizon #2 from the pop up menu."
+    },
+    {
+      "name": "HOROK3",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR3",
+      "prompt": "Select horizon #3",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR3",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "yellow",
+      "help": "Select a color for horizon #3 from the pop up menu."
+    },
+    {
+      "name": "HOROK4",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR4",
+      "prompt": "Select horizon #4",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR4",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "green",
+      "help": "Select a color for horizon #4 from the pop up menu."
+    },
+    {
+      "name": "HOROK5",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR5",
+      "prompt": "Select horizon #5",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR5",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "blue",
+      "help": "Select a color for horizon #5 from the pop up menu."
+    },
+    {
+      "name": "HOROK6",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR6",
+      "prompt": "Select horizon #6",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR6",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "violet",
+      "help": "Select a color for horizon #6 from the pop up menu."
+    },
+    {
+      "name": "HOROK7",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR7",
+      "prompt": "Select horizon #7",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR7",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "brown",
+      "help": "Select a color for horizon #7 from the pop up menu."
+    },
+    {
+      "name": "HOROK8",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR8",
+      "prompt": "Select horizon #8",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR8",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "gray",
+      "help": "Select a color for horizon #8 from the pop up menu."
+    },
+    {
+      "name": "HOROK9",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR9",
+      "prompt": "Select horizon #9",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR9",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "white",
+      "help": "Select a color for horizon #9 from the pop up menu."
+    },
+    {
+      "name": "HOROK10",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR10",
+      "prompt": "Select horizon #10",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR10",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "black",
+      "help": "Select a color for horizon #10 from the pop up menu."
+    },
+    {
+      "name": "HOROK11",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR11",
+      "prompt": "Select horizon #11",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR11",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "red",
+      "help": "Select a color for horizon #11 from the pop up menu."
+    },
+    {
+      "name": "HOROK12",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR12",
+      "prompt": "Select horizon #12",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR12",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "orange",
+      "help": "Select a color for horizon #12 from the pop up menu."
+    },
+    {
+      "name": "HOROK13",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR13",
+      "prompt": "Select horizon #13",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR13",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "yellow",
+      "help": "Select a color for horizon #13 from the pop up menu."
+    },
+    {
+      "name": "HOROK14",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR14",
+      "prompt": "Select horizon #14",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR14",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "green",
+      "help": "Select a color for horizon #14 from the pop up menu."
+    },
+    {
+      "name": "HOROK15",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR15",
+      "prompt": "Select horizon #15",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR15",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "blue",
+      "help": "Select a color for horizon #15 from the pop up menu."
+    },
+    {
+      "name": "HOROK16",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR16",
+      "prompt": "Select horizon #16",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR16",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "violet",
+      "help": "Select a color for horizon #16 from the pop up menu."
+    },
+    {
+      "name": "HOROK17",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR17",
+      "prompt": "Select horizon #17",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR17",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "brown",
+      "help": "Select a color for horizon #17 from the pop up menu."
+    },
+    {
+      "name": "HOROK18",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR18",
+      "prompt": "Select horizon #18",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR18",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "gray",
+      "help": "Select a color for horizon #18 from the pop up menu."
+    },
+    {
+      "name": "HOROK19",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR19",
+      "prompt": "Select horizon #19",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR19",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "white",
+      "help": "Select a color for horizon #19 from the pop up menu."
+    },
+    {
+      "name": "HOROK20",
+      "prompt": "Another horizon?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select yes whether to select another horizon file and color."
+    },
+    {
+      "name": "HOR20",
+      "prompt": "Select horizon #20",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+    },
+    {
+      "name": "HCOLOR20",
+      "prompt": "Color",
+      "kind": "pop_choose",
+      "default": "black",
+      "help": "Select a color for horizon #20 from the pop up menu."
+    },
+    {
+      "name": "SPACE8",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "PD_OPT",
+      "prompt": "Interact with other processes using PD?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "If set to yes, a PD connection will be initiated to communicate with VVE and/or the 3D Viewer"
+    },
+    {
+      "name": "GUIDTYPE",
+      "prompt": "Guide file type",
+      "kind": "typein",
+      "default": "VEL",
+      "help": "Guide file type."
+    },
+    {
+      "name": "GUIDEOPT",
+      "prompt": "Get guide function from an existing parameter table?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Get the guide function from the list of RMS velocity parameter tables"
+    },
+    {
+      "name": "GUIDETBL",
+      "prompt": "Velocity guide function table name",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Guide function for fan function stacks, and picking. Use Mouse Button 1 to select a velocity file from the menu."
+    },
+    {
+      "name": "MINGDVEL",
+      "prompt": "Guide minimum value",
+      "kind": "typein",
+      "default": "99999999.",
+      "help": "Semblance analysis value at minimum time/depth to use as guide."
+    },
+    {
+      "name": "MAXGDVEL",
+      "prompt": "Guide maximum time value",
+      "kind": "typein",
+      "default": "99999999.",
+      "help": "Semblance analysis value at maximum time/depth to use as guide."
+    },
+    {
+      "name": "STRETCH",
+      "prompt": "Maximum stretch percentage for NMO",
+      "kind": "typein",
+      "default": "30.0",
+      "help": "Any trace stretched more than this factor will be excluded from the semblance analysis. Enter 0.0 to turn off this option"
+    },
+    {
+      "name": "LONGOFFS",
+      "prompt": "Long offset moveout correction?",
+      "kind": "choose",
+      "default": "0",
+      "help": "Choose desired method for long-offset moveout correction.",
+      "choices": [
+        {
+          "label": "NONE",
+          "value": "0",
+          "help": "Apply only two term NMO (normal application)."
+        },
+        {
+          "label": "ALCHALABI",
+          "value": "1",
+          "help": "Apply Al-Chalabi's third term (fastest)."
+        },
+        {
+          "label": "CASTLE",
+          "value": "2",
+          "help": "Apply Castle's shifted hyperbola (slow, least accurate)."
+        },
+        {
+          "label": "HARLAN",
+          "value": "4",
+          "help": "Apply Harlan's anisotropic third term (slower, good accuracy)."
+        },
+        {
+          "label": "TSVANKIN",
+          "value": "3",
+          "help": "Apply Tsvankin and Thomsen's third term (slowest, most accurate)."
+        }
+      ]
+    },
+    {
+      "name": "ETA",
+      "prompt": "Anisotropy correction parameter eta",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Value of zero means no anisotropy correction. Normally nonnegative and less than 0.1"
+    },
+    {
+      "name": "LASTINT",
+      "prompt": "Interval velocity below last knee",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Constant interval velocity used to phantom in unpicked velocity at time max. Use a a value of 0.0 to turn this option off"
+    },
+    {
+      "name": "PICKTYPE",
+      "prompt": "Pick file type",
+      "kind": "typein",
+      "default": "VEL",
+      "help": "Pick file type"
+    },
+    {
+      "name": "COPYPICK",
+      "prompt": "Copy picks to next location",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Select YES to copy the picks at one location to the next location if no function previously exists."
+    },
+    {
+      "name": "SPACE14",
+      "prompt": "-------------------------------------------------",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "DEBUG",
+      "prompt": "Debug mode?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "To debug program, enter YES."
+    },
+    {
+      "name": "program",
+      "prompt": "Program executable name",
+      "kind": "edit",
+      "default": "velAnal71.exe",
+      "help": "Type path name of program executable."
+    },
+    {
+      "name": "INIT",
+      "prompt": "INIT",
+      "kind": "int",
+      "default": "1",
+      "help": ""
+    },
+    {
+      "name": "PATH",
+      "prompt": "PATH",
+      "kind": "string",
+      "default": "nil",
+      "help": ""
+    }
+  ]
+}

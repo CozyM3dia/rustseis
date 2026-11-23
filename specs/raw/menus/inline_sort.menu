@@ -1,0 +1,207 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: INLINE_SORT
+label: "Inline Sort"
+value_tab: 36
+
+parameter: SORTKEY1
+text: "Select new PRIMARY sort key"
+type: function:
+type_desc: (header_list headers)
+value: "CDP     "
+selected_item: "CDP bin number"
+mouse_text: "Use MB1 to select a header entry from the headers menu as the new PRIMARY sort key."
+plot_label: t
+
+parameter: S_ORDER1
+text: "PRIMARY sort order"
+type: circular:
+type_desc: (  
+ ("Ascending "  1 "Output ensembles in ASCENDING order." )
+ ("Descending" -1 "Output ensembles in DESCENDING order." ))
+mouse_text: "This dictates the order of the output ensembles."
+
+parameter: SORTKEY2
+text: "Select new SECONDARY sort key"
+type: function:
+type_desc: (header_list headers)
+value: "OFFSET  "
+selected_item: "Signed source-receiver offset"
+mouse_text: "Use MB1 to select a header entry from the headers menu as the new SECONDARY sort key."
+plot_label: t
+
+parameter: S_ORDER2
+text: "SECONDARY sort order"
+type: circular:
+type_desc: (  
+ ("Ascending "  1 "Output ensembles in ASCENDING order." )
+ ("Descending" -1 "Output ensembles in DESCENDING order." ))
+mouse_text: "This dictates the order of the output ensembles."
+
+parameter: SORTKEY3
+text: "Select new TERTIARY sort key"
+type: function:
+type_desc: (header_list headers)
+value: "NONE    "
+selected_item: "No trace header entry selected"
+mouse_text: "Use MB1 to select a header entry from the headers menu as the new TERTIARY sort key."
+plot_label: t
+
+parameter: S_ORDER3
+text: "TERTIARY sort order"
+type: circular:
+type_desc: (  
+ ("Ascending "  1 "Output traces with the secondary key in ASCENDING order." )
+ ("Descending" -1 "Output traces with the secondary key in DESCENDING order." ))
+mouse_text: "This dictates the order of traces within each output ensemble."
+
+parameter: SORTKEY4
+text: "Select new QUATERNARY sort key"
+type: function:
+type_desc: (header_list headers)
+value: "NONE    "
+selected_item: "No trace header entry selected"
+mouse_text: "Use MB1 to select a header entry from the headers menu as the new QUATERNARY sort key."
+plot_label: t
+
+
+parameter: S_ORDER4
+text: "QUATERNARY sort order"
+type: circular:
+type_desc: (  
+ ("Ascending "  1 "Output traces with the secondary key in ASCENDING order." )
+ ("Descending" -1 "Output traces with the secondary key in DESCENDING order." ))
+mouse_text: "This dictates the order of traces within each output ensemble."
+
+
+parameter: MAX_DTRZ
+text: "Maximum traces per output ensemble"
+type: typein:
+type_desc: ( int: 5 1 nil )
+value: -1
+mouse_text: "What is the maximum number of traces per ensemble AFTER sorting?  For a CDP sort, this is the maximum fold."
+plot_label: t
+
+parameter: N_BUFFER
+text: "Number of traces in buffer"
+type: typein:
+type_desc: ( int: 8 nil nil )
+value: -1
+mouse_text: "How many traces must be buffered?  For a normal CDP sort, this is max fold multiplied by chans per record."
+
+;parameter: MAXPRINT
+;text: "Maximum number of lost traces to print"
+;type: typein:
+;type_desc: ( int: 8 1 1000000 )
+;value: 1000
+;mouse_text: "Maximum number of lines of print for lost and unsorted traces."
+
+parameter: MEDIA
+text: "Buffer type"
+type: circular:
+type_desc: (
+ ("Disk"   1 "Buffer traces on disk" )
+ ("Memory" 2 "Buffer traces in memory" ) )
+value: 1
+mouse_text: "Use MB1 to rotate between choices for buffering traces to disk (large but slow) or memory (small but fast)."
+
+parameter: ENDENSKY
+text: "Sort key which controls End-Of-Ensemble"
+type: circular:
+type_desc: (
+ ("Primary"   1 "End-Ensemble set when PRIMARY key changes" )
+ ("Secondary" 2 "End-Ensemble set when SECONDARY key changes" ) 
+ ("Tertiary" 3 "End-Ensemble set when TERTIARY key changes" ) 
+ ("Quaternary" 4 "End-Ensemble set when QUATERNARY key changes" )
+; ("None"   0 "No End-Ensemble flag set" ) 
+ )
+value: 1
+mouse_text: "Use MB1 to rotate between choices for End-Of-Ensemble key.  Line-Segment-End will be the key above the End-Of-Ensemble key."
+
+
+parameter: COMPRESS
+text: "Compress data before sorting?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to reduce storage requirements by compressing the data before sorting."
+
+parameter: MULTPASS
+text: "Multiple pass?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' if buffer is not big enough for sort. Refer to help file for procedure."
+
+parameter: AUTOTEST
+text: "Run in AUTOTEST mode?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' if sort should stay the same as input primary/secondary keys and add DS_SEQNO as tertiary sort key"
+
+parameter: AUTOTERT
+text: "AUTOTEST tertiary sort key"
+type: typein:
+type_desc: (string: 9)
+value: "TLIVE_S"
+mouse_text: "Enter tertiary sort key name for autotests"
+plot_label: t
+
+exec_data: ("INLINE_SORT"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: inline_sort.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("SORTKEY1" implicit: (value 'SORTKEY1))
+			("SORTKEY2" implicit: (value 'SORTKEY2))
+			("SORTKEY3" implicit: (value 'SORTKEY3))
+			("SORTKEY4" implicit: (value 'SORTKEY4))
+			("S_ORDER1" implicit: (value 'S_ORDER1))
+			("S_ORDER2" implicit: (value 'S_ORDER2))
+			("S_ORDER3" implicit: (value 'S_ORDER3))
+			("S_ORDER4" implicit: (value 'S_ORDER4))
+			("MAX_DTRZ" implicit: (value 'MAX_DTRZ))
+			("N_BUFFER" implicit: (value 'N_BUFFER))
+			("ENDENSKY" implicit: (value 'ENDENSKY))
+			("MAXPRINT" implicit: 1000)
+			("MEDIA"    implicit: (value 'MEDIA))
+			("COMPRESS" implicit: (if (value 'COMPRESS) 1 0) )
+			("MULTPASS" implicit: (if (value 'MULTPASS) 1 0) )
+			("AUTOTEST" implicit: (if (value 'AUTOTEST) 1 0) )
+			("AUTOTERT" implicit: (value 'AUTOTERT))
+		)
+	    )
+
+rules: (
+  (rule_N_BUFFER_def ( = (value 'N_BUFFER) -1 )
+  	     (set_value 'N_BUFFER ( * (db_parmget_line "MAXCPSz")  
+		(db_parmget_line "NTRCDPz") ) ) )
+  (rule_MAX_DTRZ_def ( = (value 'MAX_DTRZ) -1 )
+	     (set_value 'MAX_DTRZ ( * (db_parmget_line "NTRCDPz") 1 )))
+  
+  (rule_key2_none ( = (value 'SORTKEY2) "NONE    ")
+		  (progn
+		    (set_value 'SORTKEY3 "NONE    ")
+		    (do_not_show 'SORTKEY3)
+		    (do_not_show 'S_ORDER2))
+		  (progn
+		    (do_show 'SORTKEY3)
+		    (do_show 'S_ORDER2) ))
+
+  (rule_key3_none ( = (value 'SORTKEY3) "NONE    ")
+		  (progn
+		    (set_value 'SORTKEY4 "NONE    ")
+		    (do_not_show 'SORTKEY4)
+		    (do_not_show 'S_ORDER3))
+		  (progn
+		    (do_show 'SORTKEY4)
+		    (do_show 'S_ORDER3) ))
+
+  (rule_key4_none ( = (value 'SORTKEY4) "NONE    ")
+		    (do_not_show 'S_ORDER4)
+		    (do_show 'S_ORDER4) )
+
+  (rule_autotest  ( progn
+		    (do_not_show 'AUTOTEST)
+		    (do_not_show 'AUTOTERT)))
+
+     )
+)
+
+

@@ -1,0 +1,97 @@
+{
+  "menu_id": "tvw",
+  "tool_name": "TVW",
+  "label": "TV Spectral Whitening",
+  "parameter_count": 11,
+  "parameters": [
+    {
+      "name": "FLT_TYPE",
+      "prompt": "TYPE of filter",
+      "kind": "circular",
+      "default": null,
+      "help": "Whitening parameters can be constant or vary as a function of time.",
+      "choices": [
+        {
+          "label": "Time-Invariant Parameters",
+          "value": "1",
+          "help": "Whitening parameters do not vary as a function of time"
+        },
+        {
+          "label": "Time-Variant Parameters",
+          "value": "2",
+          "help": "Whitening parameters vary as a function of time."
+        }
+      ]
+    },
+    {
+      "name": "AGC_OPER",
+      "prompt": "Spectral balancing scalar LENGTH",
+      "kind": "typein",
+      "default": "250.0",
+      "help": "The length in millisecs. of the AGC-like scalar used to perform time-variant scaling of frequency-sliced traces."
+    },
+    {
+      "name": "FILT_PAD",
+      "prompt": "Percent zero padding for FFT's",
+      "kind": "typein",
+      "default": "25.0",
+      "help": "The percentage of the input trace length to pad with zeroes (to avoid 'wrap-around' effects of circular FFT's)."
+    },
+    {
+      "name": "AUTOMODE",
+      "prompt": "Automatic filter panel design?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "With this option, only 4 corner frequencies are supplied and the panels are automatically designed."
+    },
+    {
+      "name": "NUM_PANL",
+      "prompt": "Number of frequency panels",
+      "kind": "typein",
+      "default": "-1",
+      "help": "The number of equal size filter panels to automatically calculate over the supplied spectrum"
+    },
+    {
+      "name": "F_SLICE1",
+      "prompt": "SPECIFY spectral balancing frequencies",
+      "kind": "edit",
+      "default": "",
+      "help": "These four frequencies define the beginning and ending slopes for the automated filter design."
+    },
+    {
+      "name": "F_SLICE2",
+      "prompt": "SPECIFY spectral balancing frequencies",
+      "kind": "edit",
+      "default": "",
+      "help": "These frequencies define overlapping filter panels (high end slope of one panel defines low end slope of next panel)."
+    },
+    {
+      "name": "F_SLICE3",
+      "prompt": "SPECIFY Time-variant spectral balancing frequencies",
+      "kind": "edit",
+      "default": "",
+      "help": "These four frequencies define the beginning and ending slopes for the automated filter design."
+    },
+    {
+      "name": "F_SLICE4",
+      "prompt": "SPECIFY Time-variant spectral balancing frequencies",
+      "kind": "edit",
+      "default": "",
+      "help": "These frequencies define overlapping filter panels (high end slope of one panel defines low end slope of next panel)."
+    },
+    {
+      "name": "SCALMODE",
+      "prompt": "Mode for amplitude restoration",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose method of averaging agc scalars to back out of balanced trace."
+    },
+    {
+      "name": "remute_option",
+      "prompt": "Re-apply trace mute after spectral whitening?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Trace mutes (such as first break suppression mutes) may be re-applied after whitening."
+    }
+  ]
+}

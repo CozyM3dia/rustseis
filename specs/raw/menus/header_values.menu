@@ -1,0 +1,45 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: HEADER_VALUES
+label: "Header Values"
+value_tab: 24
+plot_label: nil
+
+parameter: OUT_DEVC
+text: "Output device"
+type: choose:
+;type: circular:
+type_desc: ( ("Output"  "SCREEN"  "Send resulting output to JOB.OUTPUT.")
+             ("File"    "FILE"    "Send resulting output to a FILE.")
+             ("Printer" "PRINTER" "Send resulting output to the PRINTER.")
+           )
+mouse_text: "This is where any output created by this process is sent."
+
+parameter: IENDENS
+text: "List only last trace in ensemble?"
+type: boolean:
+value: t
+mouse_text: "If 'YES', only the header values for the last trace in the ensemble are listed."
+plot_label: t
+
+parameter: HDR_LIST
+text: "SPECIFY header entries"
+type: edit:
+type_desc: (24 80 4
+"FORMAT: Header_1, Header_2, Header_3, ...
+List up to 20 header entries. Use a comma, blank or / to separate names.
+EXAMPLE: SOURCE,SIN,FFID,CHAN,OFFSET,AOFFSET,CDP,REC_SLOC,SOU_SLOC,TR_FOLD"
+4)
+value: "SOURCE,CHAN,OFFSET,CDP"
+mouse_text: "List the header entries that you wish to 'dump' (up to 20)."
+
+exec_data: ("HEADER_VALUES"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: header_values.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("OUT_DEVC" implicit: (value 'OUT_DEVC))
+			("HDR_LIST" implicit: (value 'HDR_LIST))
+			("IENDENS" implicit:  (if (value 'IENDENS) 1 0 ))
+		)
+	    )	
+
+)

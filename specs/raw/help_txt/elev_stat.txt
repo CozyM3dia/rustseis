@@ -1,0 +1,130 @@
+Apply Elevation Statics2282
+
+ProMAX® Reference
+
+Apply Elevation Statics
+Apply Elevation Statics uses elevation and uphole data to
+compute ﬂoating and ﬁnal datum trace statics.
+
+Theory
+In order to understand how statics are computed and
+applied, refer to the Statics Overview.
+To learn how to manipulate the *_stat_math ﬁles or create
+your own math ﬁle to interact with the database, refer to
+Database Math Manipulation.
+
+Usage
+You must specify the ﬁnal datum elevation, datum velocity
+and elevation smoother length for the ﬂoating datum
+calculation.
+
+Parameters
+Final datum elevation
+Enter the ﬁnal datum elevation. This may be a real number
+or the name of a parameter existing in the SRF-GEOMETRY
+database. This is one method of using a laterally variable
+ﬁnal datum.
+Note: Use care in deﬁning this as a parameter in 3D.
+Replacement velocity
+Enter the replacement velocity to correct the traces to the
+ﬁnal datum. This may be a real number or the name of a
+parameter in the SRF-GEOMETRY database. This is one way
+of using a laterally varying replacement velocity in datum
+computations. Caution: Use care in deﬁning this as a
+parameter in 3D.
+Database math method
+Select the method to use for the calculation of the elevation
+statics. The choices are:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Apply Elevation Statics2283
+
+ProMAX® Reference
+
+• Shot Holes Using Uphole Info: This is the default and is
+already set up as the database math ﬁle, elev_stat_math.
+• Shot Holes Ignoring Uphole Times: This method
+ignores the uphole times if you consider them unreliable.
+It requires keyboard input of weathering velocity estimate. The ﬁle noup_stat_math is used to estimate
+uphole times based upon weathering velocity input plus
+shot depths.
+• Surface Source: No weather stripping will be done.
+Shots are assumed to be at or near the surface. Uphole
+times and shot depths are not used. The ﬁle
+surf_stat_math is used for this option.;
+• Other (User-deﬁned): Build your own math ﬁle.
+Specify Weathering Velocity
+This appears if Shot Holes Ignoring Uphole Times to
+Database math method. Enter the weathering velocity
+estimates in the form of Station,WVelocity pairs.
+Example: 101:3300/205:3100/.../506:2800/
+
+Database math ﬁle
+This appears if Other to Database math method. Enter the
+name of the ﬁle used for database math to generate elevation
+statics. This has the format:
+/ ‘path’ / ‘ﬁlename’
+Example: /usr/johndoe/elev_stat_method2
+Default: /advance/port/misc/promax/elev_stat_math
+
+NMO static method
+Select from the following two methods to compute C_STATIC
+and N_DATUM:
+• Elevations: Smooth N_DATUM and then compute
+C_STATIC based on the difference between N_DATUM
+and F_DATUM using Replacement Velocity.
+• Mean: Compute the mean of the source and receiver
+statics for each CDP, smooth and load into C_STATIC,
+then recompute the N_DATUM based on C_STATIC,
+F_DATUM and replacement velocity.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Apply Elevation Statics2284
+
+ProMAX® Reference
+
+Length of smoother
+Enter the odd number of CDPs over which to smooth the
+datum. The smoothing operation is performed in the CDP
+domain in order to achieve a regularly sampled grid in 3D.
+Elevations of surface locations in either 2D or 3D are
+projected into CDP (Dulaney triangles) and then smoothed
+using this value. For 2D, they are smoothed with a box car
+ﬁlter along the CDP direction. For 3D, they are smoothed
+ﬁrst in the inline direction and then in the crossline direction.
+Processing DATUM
+Select the NMO datum or the ﬁnal datum for processing.
+The second option implies C_STATIC is zero for all CDPs.
+Note: Select NMO datum to shift traces to a ﬂoating datum.
+Subsequent processing is referenced to this datum. When the
+data is stacked, the traces are shifted by default to the ﬁnal
+datum. If ﬁnal datum is selected, the data is shifted to the
+ﬁnal datum immediately.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Apply Elevation Statics2285
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

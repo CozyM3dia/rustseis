@@ -1,0 +1,313 @@
+Spiking/Predictive Deconvolution27
+
+ProMAX® Reference
+
+Spiking/Predictive Deconvolution
+Spiking/Predictive Deconvolution designs and applies
+spiking or predictive deconvolution operators using the
+Wiener-Levinson, least square algorithm. As an option these
+ﬁlters can be applied in a phase or amplitude only mode.
+
+Theory
+The recorded seismic signal may be considered as the
+convolution of the source signal with the instruments, the
+geophones, and the response of the Earth. The Earth
+response includes some undesirable effects, such as
+reverberation, attenuation, and ghosting. The objective of
+deconvolution is to estimate these effects as linear ﬁlters, and
+then design and apply inverse ﬁlters.
+After deconvolution the data may be optionally ﬁltered with a
+bandpass ﬁlter. However, unless you have chosen phase only
+or amplitude only ﬁlter application, bandpass ﬁltering can be
+applied subsequently with Bandpass Filter more efﬁciently.
+
+Usage
+Design windows are interpolated between locations and
+extrapolated, as constant, outside speciﬁed location ranges.
+With multiple deconvolution operators, the ﬁrst is applied
+from the beginning of the trace to the end of the ﬁrst design
+window, then with decreasing linear taper to the beginning of
+the second design window. If two design windows overlap, the
+operator designed for the ﬁrst window is applied in the ﬁrst
+window down to the zone of overlap. The operator designed
+from the second window will be applied in the second window
+below the zone of overlap. Within the zone of overlap, an
+operator is interpolated between the operator designed in the
+ﬁrst window and the operator designed in the second
+window. We recommend that any gap between adjacent
+windows or overlap zones between windows be at least 100
+ms in length to avoid abrupt changes in operator
+characteristics.
+You can specify up to ten different deconvolution design
+windows. The number of design windows must match the
+number of operators. You must specify the desired
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution28
+
+ProMAX® Reference
+
+deconvolution design window parameters using the selected
+deconvolution primary header word. For example, if the
+primary header word is SOURCE, then you must specify the
+deconvolution time gate locations by source locations. You
+can also specify a secondary header word to use with the
+primary header word.
+Prior to operator design, a Hanning taper is applied to both
+taper on and taper off the input data derived from the time
+gate. Beginning and ending tapers are equal to one-half the
+operator length. In the case of multiple decon operators, onehalf the minimum operator length is used.
+Gates can be picked in Trace Display relative to the water
+bottom time of the trace’s CDP. To use this feature, the CDP
+water bottom time must be in the header named WB_TIME. If
+water bottom relative gates are picked, actual gate times will
+be the sum of the time interpolated from the gate table
+(relative time) plus the time from the WB_TIME header for
+that trace. Water relative gate ﬁles will have WBG rather than
+GAT as the ending.
+Prediction distance(s) now may be speciﬁed relative to Water
+Bottom Time or Time 0.
+
+References
+Claerbout, J. F., 1976, Fundamentals of geophysical data processing: McGrawHill Book Co.
+Robinson, E. A., 1967, Multichannel time series analysis with digital computer
+programs: Holden-Day.
+Robinson, E. A., and Treitel, S., 1980, Geophysical signal analysis: Prentice- Hall,
+Inc.
+Sheriff, R. E., and Geldart, L. P., 1983, Exploration Seismology Vol 2: Data Processing 40-47. Cambridge University Press.
+Telford, W. M., Geldart, L. P., Sheriff, R. E., and Keys, D.A., 1976: Applied geophysics, 379-380, 389-390.
+Yilmaz, O., 1987, Seismic data processing: Society of Exploration Geophysicists,
+83-153.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution29
+
+ProMAX® Reference
+
+Parameters
+Type of deconvolution
+Select how the deconvolution operators will be designed and
+applied. These choices include:
+• Minimum phase spiking applies a traditional WienerLevinson spiking deconvolution.
+• Minimum phase predictive applies a traditional
+Wiener-Levinson predictive deconvolution.
+• Phase connection only applies a Wiener-Levinson
+decon without spectral whitening. Mute zones will be ﬁltered by the phasing correction.
+• Zero phase spiking applies a Wiener-Levinson decon
+without phase.
+Decon operator length(s)
+Enter the deconvolution operator length, in ms. The operator
+length determines how much of the autocorrelation to use. If
+more than one deconvolution operator is used, separate the
+operators by commas.
+Operator prediction distance(s)
+This appears if Minimum phase predictive to Type of
+deconvolution. Enter the operator prediction distance(s) to
+apply to the input data. The prediction length is the length of
+the prediction window, in ms. If more than one deconvolution
+operator is used, separate the operators by commas.
+Is prediction distance water relative?
+This appears if Minimum phase predictive to Type of
+deconvolution. Select Yes if the prediction distance(s) are
+relative to water bottom time. Select No if the prediction
+distance(s) are absolute.
+Apply prediction ﬁlter correction?
+This appears if Minimum phase predictive to Type of
+deconvolution. Select Yes to make a correction for a
+prediction window that contains the ﬁrst period peg-leg
+multiple. This correction is only appropriate for shot and
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution30
+
+ProMAX® Reference
+
+receiver water bottom multiples of nearly equal water depths.
+For these conditions the standard (single bounce) predictive
+ﬁlter has an incorrect ratio between the primary and ﬁrst
+peg-leg. By scaling the predictive window of the
+autocorrelation such that autocorrelation zero-lag and ﬁrst
+peg-leg lag have the following ratio,
+Ratio = 2*R / (1 + R**2)
+R = strength of water bottom reﬂection coefﬁcient
+the prediction ﬁlter will more effectively attack the ﬁrst pegleg.
+This technique was a generously contributed by British
+Petroleum.
+Apply user speciﬁed taper?
+Select Yes to enter a user speciﬁed taper length. This taper is
+applied to the design gate prior to autocorrelation. Select No
+to use a taper of 1/2 the minimum operator length.
+Taper length in ms
+This appears if Yes to Apply user speciﬁed taper. Enter the
+taper length in ms. This taper is applied to the design gate
+prior to autocorrelation.
+Operator ’white noise’ level(s)
+Enter the white noise value, in percent for each design gate.
+This operator speciﬁes what percentage of white noise is
+added to the original spike response. If more than one
+deconvolution operator is to be used, separate the operators
+by commas.
+Example: 0.1,0.1, 0.1 or
+0.1(3)
+
+The third example shows the repeat notation.
+Window rejection factor
+Enter a window rejection factor to eliminate design windows
+with fewer live samples than this factor times the operator
+length. This factor prevents using gates containing fewer
+than an acceptable number of data points for the operator
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution31
+
+ProMAX® Reference
+
+design. Since this deconvolution is a single-trace process,
+short traces must be zeroed in the application phase.
+Time gate reference
+Select TIME 0 or Water Bottom for gate reference times.
+Water Bottom is only applicable to data with the WB_TIME
+header.
+Get decon gates from the DATABASE?
+Select Yes if a parameter ﬁle containing deconvolution
+operator design time gates exists. Select No to enter
+deconvolution gate parameters.
+SELECT decon gate parameter ﬁle
+This appears if Time 0 for Time gate reference and Yes to
+Get decon gate parameter ﬁle. Select a deconvolution
+design time gate parameter ﬁle.
+SELECT water relative decon gate parameter ﬁle
+This appears if Water bottom for Time gate reference and
+Yes to Get decon gate parameter ﬁle. Select a
+deconvolution design time gate parameter ﬁle that is relative
+to the water bottom.
+SELECT Primary decon gate header word
+This appears if No to Get decon gates from database.
+Select a header word for specifying decon design time gate
+values. Time gates can be speciﬁed without a primary header
+selection.
+SELECT Secondary decon gate header word
+This appears if No to Get decon gate from database. Select
+a header word for specifying decon design time gate values. A
+secondary header word selection is not required.
+SPECIFY decon gate parameters
+This appears if No to Get decon gate from database. Enter
+values for the primary header word, the secondary header
+word (if one was selected), and the time gate(s) for
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution32
+
+ProMAX® Reference
+
+deconvolution operator design. Deﬁne multiple time gates by
+separating them with commas.
+A wild character * is supported for entire trace time window
+speciﬁcation. For example:
+CDP:Time gate/
+101:0-4000/ is the same as 101:*/
+
+where 4000 ms is equal to the trace length. If you speciﬁed
+Water Bottom for the time gate reference above, all times are
+relative to trace water bottom time from the WB_TIME
+header.
+Output traces or ﬁlters
+This appears if either Traditional Wiener-Levinson Spiking
+or Predictive Decon to Type of deconvolution. Select an
+option to output the ﬁlter operator for application to an
+alternate dataset or for diagnostics. The choices are:
+• Normal decon output outputs deconvolved traces. This
+is the normal mode of operation.
+• Filter operator output outputs ﬁlter operators instead
+of deconvolved traces. The ﬁlter output is a normal trace
+dataset with the same headers as the input traces.
+• Autocorrelation output outputs autocorrelations computed over the decon design gate(s) instead of deconvolved traces. The autocorrelation output is a normal
+trace dataset with the same headers as the input traces.
+This option allows the derived ﬁlters or autocorrelations
+for each input window to be output instead of the ﬁltered
+traces. The ﬁlter/autocorr output is a normal trace
+dataset with the same headers as the input traces. If
+there is only one design window, the ﬁlter/autocorr is
+output starting at the ﬁrst sample. If there are more than
+one design windows, then the ﬁlter/autocorr is output
+starting at the ﬁrst sample of each window.
+This option allows for derivation of ﬁlters on a specially
+conditioned dataset. You can apply the ﬁlters to the
+original dataset by using Filter Application. The
+number and sort of traces must agree.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution33
+
+ProMAX® Reference
+
+Apply a bandpass ﬁlter after decon?
+This appears if Normal decon output to Output traces or
+ﬁlters. Select Yes to frequency limit data following the
+application of deconvolution
+Bandpass ﬁlter frequency values
+This appears if Yes to Apply a bandpass ﬁlter after decon.
+Enter the frequency bandpass ﬁlter. The ﬁlter is speciﬁed by
+a set of four corner frequencies separated by dashes. The
+values may be integers or real numbers. They represent
+sequentially the 0% and 100% points of the low-cut ramp,
+and the 100% and 0% points of the high-cut ramp, in Hz.
+These ramps are formed by Hanning (cosine) tapers in the
+frequency domain. The Hanning taper is deﬁned by the
+formula:
+cos φ 1
+----------- + -- if – π < ϕ < π , or 0 if ϕ < – π or ϕ > π .
+-2
+2
+Reapply trace mute after decon?
+This appears if Normal decon output to Output traces or
+ﬁlters. Select Yes to reapply previously applied trace mutes
+automatically after deconvolution. Select No to leave the data
+as it is output.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Spiking/Predictive Deconvolution34
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

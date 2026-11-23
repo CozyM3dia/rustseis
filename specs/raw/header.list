@@ -1,0 +1,121 @@
+C  RCS:  $Id: header.list 39880 2006-09-20 14:45:22Z djohnston $
+
+
+C******************************************************************************
+C ..... Description of header entries.  DON'T MESS WITH THIS LIST UNLESS YOU
+C ..... REALLY KNOW WHAT YOU ARE DOING (THE SOFTWARE READS THIS LIST).  If you
+C ..... do change something, be aware that the order matters.  CHANGES THAT
+C ..... YOU MAKE HERE HAVE TO MATCH header.inc AND cglobal.h.
+C .....                                                                     
+C ..... You should also update the copy of this file in the SeisSpace tree
+C ..... if you change this file.  (Also be sure any new header names exist
+C ..... in the SeisSpace port/com/lgc/prodesk/hdr/HdrEntry.java source.)
+C .....
+C ..... The B/E basic/extended flags control where the standard headers appear
+C ..... (if at all) on popup lists of header words in ProMAX menus.  The B
+C ..... entries show up on the Primary header word list, with B1 at the top,
+C ..... B2 immediately below it, and so forth.  The E entries are used to
+C ..... populate the Alternate header word list.  These should appear in column
+C ..... 62 for ProMAX, ProMAX 3D, ProMAX 4D, ProMAX ESP, ProMAGIC, etc.  The
+C ..... columns starting at 66 are for the no-longer-supported ProMAX Prospector
+C ..... product.
+C .....
+C ..... NOTE: Be sure to use spaces and not TAB characters in this file.
+C******************************************************************************
+C
+C---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+C                                                            (B=basic, E=extnd)
+C                                                            (col 62 promax)
+C                                                            (col 66 prospector)
+C     name     description                  length format    position
+CNAME=SOURCE   Live source number (usr-defined)  1 INT4pz    B1    
+CNAME=CDP      CDP bin number                    1 INT4pz    B7  B1
+CNAME=REC_SLOC Receiver index number             1 INT4pz    B4
+CNAME=OFFSET   Signed source-receiver offset     1 IREAL4pz  B9
+CNAME=CHAN     Recording channel number          1 INT4pz    B11
+CNAME=FB_PICK  First break pick time             1 IREAL4pz  B18
+CNAME=AOFFSET  Absolute value of offset          1 IREAL4pz  B10
+CNAME=SEQNO    Sequence number in ensemble       1 INT4pz    E26
+CNAME=FFID     Field file ID number              1 INT4pz    B2
+CNAME=SIN      Source index number (internal)*   1 INT4pz    B3
+CNAME=SOU_SLOC External source location number   1 INT4pz    B5
+CNAME=SOU_X    Source X coordinate               1 IREAL4pz  E3
+CNAME=SOU_Y    Source Y coordinate               1 IREAL4pz  E4
+CNAME=SOU_ELEV Source elevation                  1 IREAL4pz  E5
+CNAME=NCHANS   Number of channels of source      1 INT4pz    
+CNAME=REC_X    Receiver X coordinate             1 IREAL4pz  E7
+CNAME=REC_Y    Receiver Y coordinate             1 IREAL4pz  E8
+CNAME=REC_ELEV Receiver elevation                1 IREAL4pz  E9
+CNAME=REC_NFLD Receiver fold                     1 INT4pz    E12
+CNAME=CDP_SLOC External CDP location number      1 INT4pz    B23 B2
+CNAME=CDP_X    X coordinate of CDP               1 IREAL4pz  E13 E6
+CNAME=CDP_Y    Y coordinate of CDP               1 IREAL4pz  E14 E7
+CNAME=CDP_ELEV Elevation of CDP                  1 IREAL4pz  E15 B3
+CNAME=CDP_NFLD Number of traces in CDP bin       1 INT4pz    
+CNAME=TOT_STAT Total static for this trace*      1 IREAL4pz  
+CNAME=NA_STAT  Portion of static not applied*    1 IREAL4pz  
+CNAME=SKEWSTAT Multiplex skew static             1 IREAL4pz  
+CNAME=REC_STAT Total static for receiver         1 IREAL4pz  
+CNAME=SOU_STAT Total static for source           1 IREAL4pz  
+CNAME=END_ENS  End-of-ensemble flag*             1 INT4pz    
+CNAME=EOJ      End of job flag*                  1 INT4pz    
+CNAME=TRACENO  Trace number in seismic line*     1 INT4pz    E18 E1
+CNAME=TRC_TYPE Trace type (data, aux, etc.)      1 INT4pz    E19
+CNAME=TLIVE_S  Start time of live samples        1 IREAL4pz  
+CNAME=TFULL_S  Start time of full samples        1 IREAL4pz  
+CNAME=TFULL_E  End time of full samples          1 IREAL4pz  
+CNAME=TLIVE_E  End time of live samples          1 IREAL4pz  
+CNAME=LEN_SURG Length of surgical mute taper     1 IREAL4pz  
+CNAME=AMP_NORM Amplitude normalization factor    1 IREAL4pz  E20 E8
+CNAME=TR_FOLD  Actual trace fold                 1 IREAL4pz  B19 B6
+CNAME=DEPTH    Source depth                      1 IREAL4pz  E21
+CNAME=UPHOLE   Source uphole time                1 IREAL4pz  E22
+CNAME=SR_AZIM  Source to receiver azimuth        1 IREAL4pz  
+CNAME=PAD_TRC  Artificially padded trace         1 INT4pz    
+CNAME=GEO_COMP Geophone component (x,y,z)        1 INT4pz    E1
+CNAME=RCDP     Real/alias CDP bin number         1 IREAL4pz  
+CNAME=REC_H2OD Water depth at receiver           1 IREAL4pz  
+CNAME=SOU_H2OD Water depth at source             1 IREAL4pz  
+CNAME=NMO_STAT NMO datum static (don't apply)    1 IREAL4pz  E16
+CNAME=FNL_STAT Static to move to final datum     1 IREAL4pz  E17
+CNAME=SEQ_DISK Trace sequence number from disk   1 INT4pz    E27 E2
+CNAME=REPEAT   REPEATED data copy number         1 INT4pz    B12 B7
+CNAME=FK_WAVEN Wavenumber of F-K domain "trace"  1 IREAL4pz  E23
+CNAME=FK_WAVEL Wavelength of F-K domain "trace"  1 IREAL4pz  E24
+CNAME=FT_FREQ  Frequency of F-T domain "trace"   1 IREAL4pz  E25
+CNAME=CS_STAT  Corr. autostatics source static   1 IREAL4pz  B13
+CNAME=CR_STAT  Corr. autostatics recvr static    1 IREAL4pz  B14
+CNAME=PS_STAT  Power autostatics source static   1 IREAL4pz  B15
+CNAME=PR_STAT  Power autostatics recvr static    1 IREAL4pz  B16
+CNAME=TRIMSTAT Trim static                       1 IREAL4pz  B17
+CNAME=LSEG_END Line segment end*                 1 INT4pz        E3
+CNAME=LSEG_SEQ Line segment sequence number*     1 INT4pz        E4
+CNAME=DMOOFF   Offset bin for DMO                1 IREAL4pz  B20
+CNAME=R_LINE   Receiver line number              1 INT4pz    E10
+CNAME=REC_DEP  Receiver depth below surface      1 IREAL4pz  E11
+CNAME=SOU_COMP Source component (x,y,z)          1 INT4pz    E2
+CNAME=DS_SEQNO Input dataset sequence number*    1 INT4pz    E28 E5
+CNAME=N_DATUM  Elevation of floating datum       1 IREAL4pz 
+CNAME=OFB_CNTR Offset bin center                 1 IREAL4pz  E30
+CNAME=OFB_NO   Offset bin number                 1 INT4pz    E29
+CNAME=LINE_NO  Line number (hashed line name)*   1 INT4pz    E32 B4
+CNAME=FRN_TRNO Foreign trace-number-within line  1 INT4pz    E33 B5
+CNAME=ILINE_NO 3D inline number                  1 INT4pz    B21
+CNAME=XLINE_NO 3D crossline number               1 INT4pz    B22
+CNAME=DISKITER Disk Data Input iteration*        1 INT4pz    E31 B8
+CNAME=SRF_SLOC External receiver location no.    1 INT4pz    B6
+CNAME=S_LINE   Swath or sail line number         1 INT4pz    E6
+CNAME=RILINE_N Real/alias 3d inline number       1 IREAL4pz 
+CNAME=RXLINE_N Real/alias 3d crossline number    1 IREAL4pz 
+CNAME=WB_TIME  Water bottom time at mid-point    1 IREAL4pz  B24 
+CNAME=AVO_ATTR AVO Attribute number              1 INT4pz    E34
+CNAME=SG_CDP   Supergather Bin Number            1 INT4pz    B8
+CNAME=SLC_TIME Time of time slice                1 IREAL4pz  B25
+CNAME=ANG_VALU AVO Angle of incidence            1 IREAL4pz  E35
+CNAME=TZERO    Time of zero of time series       1 IREAL4pz  E36
+CNAME=CDP_XD   X coordinate of CDP (double)      2 IREAL8pz  
+CNAME=CDP_YD   Y coordinate of CDP (double)      2 IREAL8pz  
+CNAME=REC_XD   Receiver X coordinate (double)    2 IREAL8pz  
+CNAME=REC_YD   Receiver Y coordinate (double)    2 IREAL8pz  
+CNAME=SOU_XD   Source X coordinate (double)      2 IREAL8pz  
+CNAME=SOU_YD   Source Y coordinate (double)      2 IREAL8pz  

@@ -1,0 +1,332 @@
+53
+
+Developer’s Programming Guide
+
+Executive
+
+This chapter describes the architecture and functions of the
+Executive system.
+
+Topics covered in this chapter:
+
+➲
+➲
+➲
+➲
+➲
+➲
+➲
+➲
+
+Other Docs
+
+System Architecture
+Headers and Global Variables
+Input Tools
+Re-entrancy
+Common Blocks and Parms Structures
+Executive Functions
+Communication between Tools
+OPF Database
+
+Search Page
+
+Known Problems
+
+System Architecture54
+
+Developer’s Programming Guide
+
+System Architecture
+The ProMAX Executive is a pipeline system. In this system,
+traces are dropped into the ﬂow one at a time by the input tool
+(see the Processing Pipeline illustration at the end of the System
+Overview chapter). Individual traces continue to drop through
+the ﬂow until they encounter a multi-trace processing tool. The
+trace executive collects all of the necessary traces for the
+multi-trace processing tool and returns the traces back to the
+ﬂow when the tool is ﬁnished.
+There are a variety of tool types; each type is designed to
+minimize the coding required to implement the necessary trace
+handling. These tool types range from simple, single-trace
+input/output tools, to multi-trace input/output tools of a variety
+of natural trace groupings, and ﬁnally to complex tools that
+facilitate the ultimate user control of trace buffering. Please see
+the Tool Types chapter for a description of each tool.
+The Executive creates an essentially isolated environment for
+each tool. It manages most of the tedious duties of trace and
+trace header I/O, data buffering, initialization of global
+variables, and other miscellaneous tasks. The following sections
+describe these duties.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Headers and Global Variables55
+
+Developer’s Programming Guide
+
+Headers and Global Variables
+At run time, each tool is presented with a list of active headers
+and a set of initialized global variables. The header list contains
+the description, format, and size of all headers that are valid at
+that step in the ﬂow. The global parameters can be categorized
+as static or volatile. The static type of global parameters are
+typically geometry-related: the number of CDP’s, minimum and
+maximum station number, maximum offset in data, etc. The
+volatile type of globals, named global run time or run time
+variables, refer to variables that can change from step to step
+within the ﬂow: sample rate, trace length, sort order, maximum
+ensemble size, etc.
+Headers can be added or deleted and run time variables changed
+at any step in the ﬂow; for example, resampling changes the
+sample rate and trace length. Because of this, the Executive
+actually keeps a separate copy of headers and run time globals
+for every step in the ﬂow. In a sense, then, the environment
+changes dynamically as traces pass from tool to tool. Please see
+the Global Parameters and Trace Headers chapters for details
+on these subjects.
+It is important to note, however, that the global run time
+attributes cannot change within a process or tool. In other
+words, while the sample rate, sort, trace length, and maximum
+ensemble size can all change from tool to tool, they can not
+change from trace to trace, such as by shot position within a
+tool. Please review the list of run times in the Global
+Parameters chapter.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Input Tools56
+
+Developer’s Programming Guide
+
+Input Tools
+The primary responsibility for setting the globals and
+establishing the current header list is assigned to the ﬁrst tool in
+the ﬂow, which by deﬁnition is an input tool. All input tools
+must retrieve the current state of headers and run time variables
+from the input ProMAX dataset and must make these available
+to subsequent tools. The input tool must also retrieve the
+remaining static global variables from the Ordered Parameter
+Files (geometry). If your input tool is reading a non-ProMAX
+(foreign) dataset or creating data, you are responsible for
+retrieving the necessary data from whatever source and creating
+all possible header and global values. See the Input Tool
+Examples in the Appendix for code examples.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Re-entrancy57
+
+Developer’s Programming Guide
+
+Re-entrancy
+Another related issue that the Executive manages is the issue of
+re-entrancy. As mentioned above, the Executive attempts to
+isolate each tool in such a way that the programmer codes his
+tool as if it is the only one in the ﬂow. There is no need to worry
+about a ProMAX user putting your tool in the ﬂow multiple
+times, which could create confusion over which set of
+parameters goes with which instance of the tool. Nor is there
+need to worry about two tools coincidentally sharing identical
+menu parameters or internal local variables. The Executive
+assures that each tool can only access menu parameters from its
+corresponding menu in the ﬂow; it offers protection for
+duplicate variables.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Blocks and Parms Structures58
+
+Developer’s Programming Guide
+
+Common Blocks and Parms Structures
+The Executive manages a SAVED_PARMS COMMON block
+for each tool for FORTRAN code, or a parms structure for C
+code. The n FORTRAN COMMON block or C parms structure
+stores variables that need to be passed from the initialization
+routine to the execution routine, or local variables that must
+retain their values between each call of the Executive routine.
+Clearly this must be accomplished by swapping a separate
+COMMON block in and out of memory for each step in the
+ﬂow. Again, the application programmer can develop a routine
+as if it is the only tool and with a single COMMON block. The
+FORTRAN SAVED_PARMS COMMON block must be ﬁxed
+in size to accommodate memory swapping. Currently the size is
+limited to 1000 4-byte words. If your application requires more
+than a small fraction of this, you are probably misusing the
+space by passing arrays instead of pointers or indexes to the
+FORTRAN RSPACE memory array.
+Because the size of the SAVED_PARMS common block in
+Fortran, and parms structure in C needs to be 1000 4-byte
+words, and your tool parameters may one be a few tens of bytes
+long, there are macros which pad out your allocation to the full
+4000 byte size. In Fortran, this padding is accomplished using
+SAVE1z and END1z parameters in the /SAVED_PARMS/
+common block. Here is an example from the amp_ratio.inc ﬁle:
+&
+&
+&
+
+COMMON /SAVED_PARMS/ SAVE1z, NGATE, IX_SCRATCH, IH_RATIO_MAX,
+IH_RATIO_TIME, LOAD_HDR, LOAD_DB, ID_MAX, ID_TIME,
+IKEY_TRC, USE_GATE, ITBL_HANDLE, IH_PKEY,
+IH_SKEY, IFORMAT_PKEY, IFORMAT_SKEY, END1z
+
+Not only do you need to use the SAVE1z and END1z variables,
+you also need to get the size of your saved parameters
+computed, and this is accomplished at the end of your
+initialization phase. Here is an example:
+C ..... Set the number of words that need to be saved for re-entrancy.
+C ..... Note that CALC_LENSAV is a macro that uses END1z and SAVE1z
+C ..... to calculate the common block length
+LEN_SAV = CALC_LENSAV
+
+Here is a C programming example from ampRatio.c ﬁle:
+/* define saved parameters */
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Common Blocks and Parms Structures59
+
+Developer’s Programming Guide
+
+BEGINPARMS
+int
+ngate, use_gate, ih_ratio_max, ih_ratio_time, load_hdr, load_db,
+ih_pkey, ih_skey, iformat_pkey, iformat_skey;
+float
+*scratch;
+void
+*gate_tbl;
+void *db_trc, *dbPtr1,*dbPtr2;
+ENDPARMS(parms)
+.
+.
+.
+/* Set the number of words that need to be saved for re-entrancy. */
+*len_sav = NPARMS (parms);
+
+As described in the Executive section of the System Overview
+chapter, each tool consists of two FORTRAN or C routines: the
+initialization (or init) routine, and the execution (or exec)
+routine. The Executive runs each of the init routines in the ﬂow
+once. The exec routines are cycled through many times until all
+of the traces are processed through the pipe. The init routine is
+responsible for reading menu parameters, making any one-time
+calculations, resetting run time parameters (for example,
+changing the maximum ensemble size to one if stacking), and
+creating/deleting headers entries. Remember, changing the
+status of the headers or global run time parameters must be
+done in the init routine in order for other init routines to be
+aware of the change. This is one of the few situations where you
+must consider what happens before or after your application.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Executive Functions60
+
+Developer’s Programming Guide
+
+Executive Functions
+The exec routine does the actual trace processing. The
+Executive passes traces and headers to the exec routine in
+buffers and expects the processed traces to be in the same
+buffers when exiting the routine. If the tool is a multi-trace type,
+the Executive will allocate the memory necessary to accumulate
+the proper trace grouping, then free the memory after that group
+of traces is processed and passed to the next tool. This memory
+management is done automatically without any coding at the
+tool level. Often you will need to dynamically allocate
+additional memory within the tool to hold temporary results.
+This is supported both in FORTRAN and C, but it is assumed
+that such memory will be de-allocated upon exiting the exec
+routine. Remember that many tools could comprise a ﬂow: your
+tool could be repeated many times. After exiting your
+multi-trace exec routine, it might be some time before the
+remaining ﬂow is executed and traces are again accumulated
+and passed to your exec routine. This is another situation where
+you must consider the entire ﬂow instead of simply your
+application. It is assumed system-wide that two ensembles will
+ﬁt comfortably in memory. However, tools that require many
+ensembles, multiple copies of ensembles, or large collections of
+stacked traces should buffer traces on disk or process panels of
+traces.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Communication between Tools61
+
+Developer’s Programming Guide
+
+Communication between Tools
+As previously discussed, tool-to-tool isolation makes the
+programming environment simple, and the Executive does this
+task well. However, inter-tool or inter-process communication
+is necessary. Tools that change the sample rate, trace length, kill
+a trace, statically shift a trace, etc., need to communicate this
+change to processes later in the ﬂow or in a subsequent ﬂow.
+Trace headers move with the data, and are an excellent way to
+tag traces with information that may be required for a future
+process. Headers move through the ﬂow and are stored on disk
+or tape upon output. Run time global parameters are also an
+excellent vehicle for communicating global changes in the data.
+As with headers, they move through the ﬂow and are stored
+with the traces upon output. However, these global parameters
+cannot change from one trace to the next within a tool.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+OPF Database62
+
+Developer’s Programming Guide
+
+OPF Database
+The Ordered Parameter Files database is another form of
+inter-tool communication. Refer to the Ordered Parameter Files
+chapter for a deﬁnition of this database. It is typically used to
+communicate information that is global to all datasets within
+the line; ﬁeld geometry data is a good example. Convenience is
+a governing factor in choosing the form of communication that
+is used. For example, geometry information that is placed in the
+Ordered Parameter Files database can be conveniently accessed
+by stand-alone programs that do not wish to read trace data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

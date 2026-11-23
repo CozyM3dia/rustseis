@@ -1,0 +1,447 @@
+; IIID IVD 1 BSI DEV DEPTHC BHSS
+'(
+ name: SCDECON
+label: "Surface Consistent Decon"
+value_tab: 48
+
+
+parameter: version
+text: "Choose version"
+type: pop_choose:
+type_desc: (
+ ("Memory Version (small datasets)" 1 "Use the fast memory version for small datasets (.5M traces or less).")
+ ("Disk Version (large datasets)" 2 "Use the slower disk version for large datasets (.5M traces or more)."))
+mouse_text: "Choose the faster memory version for small datasets or the slower disk version for large datasets."
+
+
+parameter: IDIS_OPT
+text: "Display spectra and autocorrelations ?"
+type: boolean:
+value: nil
+mouse_text: "Display spectra of components and their autocorrelations ?"
+
+
+parameter: X_SERVER
+text: "  Select display DEVICE"
+type: :typein
+type_desc: (:string 32)
+:value "This Screen"
+mouse_text: "'This Screen' for current display or type in a display name to override the current display default."
+
+parameter: MIN_CDP
+text: "Start CDP "
+type: typein:
+type_desc: ( int: 8 -1 nil )
+value: -1
+mouse_text: "Start CDP number for decon"
+
+
+parameter: MAX_CDP
+text: "End CDP "
+type: typein:
+type_desc: ( int: 8 -1 nil )
+value: -1
+mouse_text: "End CDP number for decon"
+
+
+parameter: db_option
+text: "Get decon gates from the DATABASE?"
+type: boolean:
+value: t
+;mouse_text: "Set this to 'YES' if the decon design time gates were entered interactively."
+mouse_text: "Set this to 'NO' if a decon design time gate parameter file was not created interactively. (Enter manually.)"
+plot_label: t
+
+parameter: GATELIST
+text: "SELECT Time Gate Parameter FILE"
+type: function:
+type_desc: ((parm_list "GAT") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select an analysis time gate parameter file from the parameter file menu."
+
+
+parameter: PRIM_KEY
+text: "  SELECT Primary decon gate header word"
+type: function:
+type_desc: (header_list headers)
+value: "SOURCE  "
+selected_item: "Live source number"
+mouse_text: "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying decon design gate parms."
+plot_label: t
+
+
+parameter: SCND_KEY
+text: "  SELECT Secondary decon gate header word"
+type: function:
+type_desc: (header_list headers)
+value: "AOFFSET "
+selected_item: "Absolute value of offset"
+mouse_text: "Use MB1 to select another header word as the optional SECONDARY key for specifying decon design gate parameters."
+plot_label: t
+
+
+parameter: DCN_GATE
+text: "  SPECIFY decon gate parameters"
+type: edit:
+type_desc: (30 80 5 " FORMAT: Primary Gate Location Value: (Secondary Gate Loc. Value):Time Gate(s)/
+ EXAMPLE: 101:0.0:700-2000 / 101:5280.0:1200-2200 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "1:0:700-2500/1:2640:1000-2800/1:5280:1500-3000/"
+mouse_text: "Use MB1 to define the time gate in which to design decon operator (example: '1:0:350-2500/1:5280:1200-2800/')."
+plot_label: t
+
+
+parameter: DCN_TYPE
+text: "TYPE of deconvolution"
+;type: choose:
+type: pop_choose:
+type_desc: (  
+ ("Spiking"                 1 "Apply Wiener-Levinson Spiking Decon." ) 
+ ("Phase correction only"   2 "Apply Weiner-Levinson Spiking Decon without spectral whitening.")
+ ("Spectral whitening only" 3 "Apply Weiner-Levinson Spiking Decon without phase correction.")
+ ("Predictive"              4 "Apply Weiner-Levinson Predictive Decon.")
+           )
+mouse_text: "Use MB1 to pop up a menu of option choices dictating how the decon operators will be designed and applied."
+
+
+parameter: DCN_PRED
+text: "  Prediction distance (ms)"
+type: typein:
+type_desc: (real: 5 0. nil)
+value: "100."
+mouse_text: "Enter prediction distance in milliseconds"
+
+
+
+parameter: COMPONENTS
+text: "Components of spectral decomposition:"
+type: multiple_choose:
+type_desc: (  
+ ("SHOT"    :shot "Include source component in spectral decomposition." ) 
+ ("RCVR"    :rcvr "Include receiver component in spectral decomposition" ) 
+ ("OFFSET"  :offset "Include offset component in spectral decomposition.")
+ ("CDP"     :cdp "Include cdp component in spectral decomposition.") )
+:selected_item (
+ ("SHOT"    :shot "Include source component in spectral decomposition." ) 
+ ("RCVR"    :rcvr "Include receiver component in spectral decomposition" ) 
+ ("OFFSET"  :offset "Include offset component in spectral decomposition.")
+ ("CDP"     :cdp "Include cdp component in spectral decomposition.") )
+ 
+mouse_text: "Use MB1 to pop up a menu of option choices dictating how the decon operators will be designed and applied."
+
+
+parameter: APPLICATION
+text: "Spectral decompositions used in Application:"
+type: :multiple_choose
+type_desc: (  
+ ("SHOT"    :shot "Include source component in spectral decomposition." ) 
+ ("RCVR"    :rcvr "Include receiver component in spectral decomposition" ) 
+ ("OFFSET"  :offset "Include offset component in spectral decomposition.")
+ ("CDP"     :cdp "Include cdp component in spectral decomposition.") )
+:selected_item (
+ ("SHOT"    :shot "Include source component in spectral decomposition." ) 
+ ("RCVR"    :rcvr "Include receiver component in spectral decomposition" ) )
+:mouse_text "The application mouse text"
+
+
+parameter: OFFS_RES
+text: "Limit offsets in decomposition?"
+type: boolean:
+value: nil
+mouse_text: "Use only a restricted range of offsets in the decomposition ?"
+
+
+parameter: OFFS_MIN
+text: "  Minimum absolute offset"
+type: typein:
+type_desc: (real: 7 0. nil )
+value: 1000.
+mouse_text: "Enter desired minimum absolute offset. Example: 1000.0"
+
+
+parameter: OFFS_MAX
+text: "  Maximum absolute offset"
+type: typein:
+type_desc: (real: 7 2. nil )
+value: 3000.
+mouse_text: "Enter desired maximum absolute offset. Example: 3000.0"
+
+
+parameter: DCN_OPER
+text: "Decon operator length (ms)"
+type: typein:
+type_desc: (real: 5 2. nil )
+value: 120.
+mouse_text: "Enter operator length in milliseconds. Example: 120.0"
+
+
+parameter: DCN_WHTN
+text: "Operator 'white noise' level"
+type: typein:
+type_desc: (real: 8 0. 100.)
+value: 0.1
+mouse_text: "Enter 'white noise' level in PERCENT.  Example: 0.1"
+
+
+
+parameter: TAPEROPT
+text: "Apply user specified taper?"
+type: boolean:
+value: nil
+mouse_text: "Select YES for user specified taper length. Select NO for old default of 1/2 operator length."
+
+
+
+parameter: TAPERLEN
+text: "  Taper length in msec"
+type: typein:
+type_desc: ( real: 7 0. nil )
+value: 50.
+mouse_text: "A taper of this length will be applied to EACH end of the design window prior to autocorrelation (0. for no taper)."
+
+
+
+parameter: TWIN_MIN
+text: "Window rejection factor"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 2.0
+mouse_text: "Eliminate design windows with fewer LIVE samples than this factor times the operator length."
+
+
+parameter: filter_option
+text: "Apply a bandpass filter after decon?"
+type: boolean:
+value: nil
+mouse_text: "A bandpass filter may be applied following the decon application."
+
+
+parameter: FLT_FREQ
+text: "  Bandpass filter frequency values"
+type: typein:
+type_desc: ( string: 25 )
+value: "4-8-90-120"
+mouse_text: "Enter four 'corner' frequencies: F1(0%) - F2(100%) - F3(100%) - F4(0%).  Hanning tapers are used for ramps."
+
+
+parameter: AMORTOPT
+text: "Amortize the operator spectrum?"
+type: boolean:
+value: nil
+mouse_text: "If YES, the the operator spectrum will be amortized at the high and low frequencies."
+
+
+
+parameter: AMOFREQL
+text: "  Low-end amortization frequency (Hz)"
+type: typein:
+type_desc: ( real: 4 0.0001 nil )
+value: 8.0
+mouse_text: "Enter the low-end frequency value at which you wish to start the operator amortization."
+plot_label: t
+
+
+parameter: AMOROLLL
+text: "  Low-end amortization slope (dB/oct)"
+type: typein:
+type_desc: ( real: 4 0.0 nil )
+value: 30.0
+mouse_text: "Enter the low-end amortization operator slope in decibals/octave."
+plot_label: t
+
+
+parameter: AMOFREQH
+text: "  High-end amortization frequency (Hz)"
+type: typein:
+type_desc: ( real: 4 0.0001 nil )
+value: 100.0
+mouse_text: "Enter the high-end frequency value at which you wish to start the operator amortization."
+plot_label: t
+
+
+parameter: AMOROLLH
+text: "  High-end amortization slope (dB/oct)"
+type: typein:
+type_desc: ( real: 4 0.0 nil )
+value: 72.0
+mouse_text: "Enter the high-end amortization operator slope in decibals/octave."
+plot_label: t
+
+
+parameter: NITER
+text: "Number of Gauss-Siedel iterations"
+type: typein:
+type_desc: ( int: 2 1 nil )
+value: 3
+mouse_text: "Number of desired Gauss-Siedel iterations to perform in spectral decomposition"
+
+
+;parameter: NFRQ
+;text: "Vertical Tile size in samples"
+;type: typein:
+;type_desc: ( int: 4 1 nil )
+;value: 10
+;mouse_text: "Number of samples for the vertical size of a memory tile. Larger sizes are faster but use more RAM memory."
+
+
+parameter: remute_option
+text: "Re-apply trace mute after decon?"
+type: boolean:
+value: t
+mouse_text: "Trace mutes (such as first break suppression mutes) may be re-applied after decon."
+
+
+
+;exec_data: ("SCDECON"
+exec_data: 
+(eval (let ((type ( if ( = (value 'version) 1 ) "SCDECON" "SCDECON2" ))
+	    (body (list '("GENERAL"
+			  ("version" implicit: "ProMAX $Id: scdecon.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			  ("IDIS_OPT"   implicit: ( if (value 'IDIS_OPT) 1 0 ))
+			  ("X_SERVER" implicit:
+			   (if (= (value 'X_SERVER) "This Screen")
+                               (where_promax_displays)
+			     (value 'X_SERVER)))
+			  ("GATELIST" implicit: (if (value 'db_option)(value 'GATELIST) "NONE"))
+
+			  ("PRIM_KEY" implicit: (value 'PRIM_KEY))
+			  ("SCND_KEY" implicit: (value 'SCND_KEY))
+			  ("DCN_GATE" implicit: (value 'DCN_GATE))
+
+
+			  ("DCN_TYPE" implicit: (value 'DCN_TYPE))
+			  ("MIN_CDP" implicit: (value 'MIN_CDP))
+			  ("MAX_CDP" implicit: (value 'MAX_CDP))
+			  ("DCN_PRED" implicit: (value 'DCN_PRED))
+			  ("TAPEROPT" implicit: ( if (value 'TAPEROPT) 1 0 ))
+			  ("TAPERLEN" implicit: (value 'TAPERLEN))
+			  ("DCN_OPER" implicit: (value 'DCN_OPER))
+			  ("DCN_WHTN" implicit: (value 'DCN_WHTN))
+			  ("TWIN_MIN" implicit: (value 'TWIN_MIN))
+			  ("FLT_FREQ" implicit: (if (value 'filter_option) (value 'FLT_FREQ) "    ")) 
+			  ("AMORTOPT" implicit: ( if (value 'AMORTOPT) 1 0 ))
+			  ("AMOFREQL" implicit: (value 'AMOFREQL))
+			  ("AMOROLLL" implicit: (value 'AMOROLLL))
+			  ("AMOFREQH" implicit: (value 'AMOFREQH))
+			  ("AMOROLLH" implicit: (value 'AMOROLLH))
+			  ("REMUTE"   implicit: ( if (value 'remute_option) 1 0 ))
+
+			  ("S_DECOMP"   implicit: ( if (member :shot (value 'COMPONENTS)) 1 0 ))
+			  ("R_DECOMP"   implicit: ( if (member :rcvr (value 'COMPONENTS)) 1 0 ))
+			  ("O_DECOMP"   implicit: ( if (member :offset (value 'COMPONENTS)) 1 0 ))
+			  ("C_DECOMP"   implicit: ( if (member :cdp (value 'COMPONENTS)) 1 0 ))
+
+
+			  ("SHOT_COM"   implicit: ( if (member :shot (value 'APPLICATION)) 1 0 ))
+			  ("RCVR_COM"   implicit: ( if (member :rcvr (value 'APPLICATION)) 1 0 ))
+			  ("OFFS_COM"   implicit: ( if (member :offset (value 'APPLICATION)) 1 0 ))
+			  ("CDPD_COM"   implicit: ( if (member :cdp (value 'APPLICATION)) 1 0 ))
+
+			  ("OFFS_RES"   implicit: ( if (value 'OFFS_RES) 1 0 ))
+			  ("OFFS_MIN"   implicit: (value 'OFFS_MIN ))	
+			  ("OFFS_MAX"   implicit: (value 'OFFS_MAX ))	
+			  ("NITER"      implicit: (value 'NITER ))
+;			("NFRQ"       implicit: (value 'NFRQ ))
+			  ("NFRQ"       implicit: 10 )
+	
+			  )
+			)))
+	  (push type body)
+	)
+      )
+
+
+rules: (
+
+
+	(ifx_default_rule (= (value 'MIN_CDP) -1)
+		(set_value 'MIN_CDP (db_parmget_line "MINCDPz")))
+	(ilx_default_rule (= (value 'MAX_CDP) -1)
+		(set_value 'MAX_CDP (db_parmget_line "MAXCDPz")))
+
+        (components (value 'COMPONENTS)
+	    (progn
+	      (set_type_desc 'APPLICATION (selected_item 'COMPONENTS))
+	      (if (not (eq (car (selected_item 'APPLICATION)) :none))
+		  (do ((item (selected_item 'COMPONENTS) (cdr item))
+		       (collect nil))
+		      ((not item) 
+		        (if collect (set_selected_item 'APPLICATION collect)
+				(set_selected_item 'APPLICATION '( :none ))))
+		      (do ((tok (selected_item 'APPLICATION) (cdr tok)))
+			  ((not tok))
+			  (if (equal (car tok) (car item)) 
+			      (setq collect (pushend (car tok) collect))
+			    )
+			  )
+		      )
+		)
+	      (do_show 'APPLICATION))
+	    (progn
+	      (do_not_show 'APPLICATION)
+	      (set_selected_item 'APPLICATION '( :none )))
+	    )
+
+	(reset_application (not (eq (car (selected_item 'APPLICATION))
+				    :none))
+			   (do ((item (selected_item 'APPLICATION) (cdr item))
+				(collect nil))
+			       ((not item)
+				(set_value 'APPLICATION collect))
+			       (setq collect (pushend (second (first item)) collect))))
+
+	(application_warning (eq (car (selected_item 'APPLICATION)) :none)
+			     (add_error 'APPLICATION "No decon component selected for application")
+			     (delete_error 'APPLICATION "No decon component selected for application"))
+	
+	(rule0 (value 'IDIS_OPT)(do_show 'X_SERVER)(do_not_show 'X_SERVER))		     
+	(test_host_name (NOT (= (value 'X_SERVER) "This Screen"))
+			(progn
+			  (setq temp (host_valid_p (value 'X_SERVER)))
+			  (if temp 
+			      (add_error 'X_SERVER temp)
+			    (set_error_list 'X_SERVER temp)))
+			(set_error_list 'X_SERVER nil)
+			)
+        (rule1 (value 'filter_option) (do_show 'FLT_FREQ) (do_not_show 'FLT_FREQ))
+	(rule2 ( = (value 'DCN_TYPE) 4 ) (do_show 'DCN_PRED) (do_not_show 'DCN_PRED))
+	(rule3 (value 'OFFS_RES)( progn (do_show 'OFFS_MIN) (do_show 'OFFS_MAX))
+                     (progn (do_not_show 'OFFS_MIN) (do_not_show 'OFFS_MAX))    )
+
+
+
+        (rule_time_gate (value 'db_option) (progn (do_show 'GATELIST)
+				    (do_not_show 'PRIM_KEY)
+				    (do_not_show 'SCND_KEY)
+				    (do_not_show 'DCN_GATE))
+			     (progn (do_not_show 'GATELIST)
+				    (do_show 'PRIM_KEY)
+				    (do_show 'SCND_KEY)
+				    (do_show 'DCN_GATE)))
+
+	(rule_taper_opt (value 'TAPEROPT)
+		(do_show 'TAPERLEN)
+		(do_not_show 'TAPERLEN))
+	
+	(rule_amort_opt (value 'AMORTOPT)
+		(do_show '(AMOFREQL AMOROLLL AMOFREQH AMOROLLH ))
+		(do_not_show '(AMOFREQL AMOROLLL AMOFREQH AMOROLLH )))
+
+
+	)
+
+)
+
+
+
+

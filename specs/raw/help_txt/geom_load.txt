@@ -1,0 +1,183 @@
+Inline Geometry Header Load1522
+
+ProMAX® Reference
+
+Inline Geometry Header Load
+Inline Geometry Header Load automatically loads geometry
+information from the database to trace headers in a
+processing ﬂow.
+
+Theory
+This process uses two or three trace headers to match to
+corresponding database parameters. When a match is found,
+geometry information is loaded into the trace header. If traces
+can not be matched to the database, they are excluded from
+the ﬂow. Traces identiﬁed in geometry, but not found in the
+data, are simply considered missing. There are no
+requirements for sort or ordering of the seismic data because
+of this matching technique. Geometry can be loaded on
+subsets of data as it is being acquired.
+When building the database with the Geometry Spreadsheet,
+we assume that the combination of survey or navigation data,
+and observer logs contain sufﬁcient information to uniquely
+tie the database to trace headers of the ﬁeld data. An example
+would be the standard matching FFID and channel numbers
+between the trace headers and geometry database. However,
+if two such headers are not sufﬁcient to uniquely identify a
+trace, this matching can be done using three headers, such
+as sail line number, shot point number, and channel.
+
+Usage
+Channel numbers are always one of the matching parameters
+and must be unique within the shot. If they are not, use the
+Renumber and resequence ensembles option in Geometry
+Header Preparation. With this option, only live traces
+(header TRC_TYPE=1) are processed; all other traces are
+dropped from the ﬂow.
+For marine data, the shift to sea level is performed by this
+process, replacing the functionality of Apply Elevation
+Statics, which is required for land data. The gun and cable
+depths from the DEPTH and REC_DEP headers in the SIN
+and TRC OPFs are used to shift the data to sea level. These
+parameters must be correctly entered for all shots and
+channels during geometry building.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Inline Geometry Header Load1523
+
+ProMAX® Reference
+
+The WB_TIME header represents the two-way water bottom
+time at the trace midpoint position for marine data. To
+calculate this time, the water depths at shot locations are
+spatially interpolated at each CDP location and then
+converted to two-way time. This header is used to pick special
+time gates and mutes. These picks can be interpolated along
+the water bottom for adjusting the gap in predictive decon,
+and for setting the start time for the exponential ramp in
+True Amplitude and Offset Amplitude Gain Recovery.
+For marine data, this process removes existing statics before
+applying new datum statics. There is no option to disable this
+function. However, to preserve previously applied static
+corrections, such as a shot delay static, use Trace Header
+Math and set TOT_STAT=0 prior to running Inline Geometry
+Header Load.
+Note: Applying statics to marine data is optional.
+
+Parameters
+Primary header to match the database
+Select one other trace header to uniquely match each trace to
+the geometry SIN database. This required primary header can
+be chosen from one of the following:
+• FFID matches FFID from the trace header to the SIN
+database.
+• SOU_SLOC matches SOU_SLOC, external source location number, from the trace header to the SIN database.
+• SIN matches SIN from the trace header to the SIN database.
+• SOURCE matches Source from the trace header to the
+SIN database.
+• S_LINE matches sail/swath from the trace header to the
+SIN database. Usually this header requires a secondary
+header to uniquely match the trace.
+• DAY_SHOT matches day of shot from trace header to
+SIN database. This assumes that the date captured for
+each shot by both the seismic recording instrument and
+the navigation system are identically matched.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Inline Geometry Header Load1524
+
+ProMAX® Reference
+
+• TIM_SHOT matches time of shot from trace header to
+SIN database. This assumes that the time of day captured for each shot by both the seismic recording instrument and the navigation system are identically matched.
+Secondary header to match database
+Select an optional secondary header from the following:
+• None is the default condition. No secondary header
+match is required.
+• S_LINE matches sail/swath from the trace header to the
+SIN database.
+• FFID matches FFID from the trace header to the SIN
+database.
+• SOU_SLOC matches SOU_SLOC, external source location number, from the trace header to the SIN database.
+• SOURCE matches Source from the trace header to the
+SIN database.
+• DAY_SHO matches day of shot from trace header to SIN
+database. This assumes that the date captured for each
+shot by both the seismic recording instrument and the
+navigation system are identically matched.
+• TIM_SHOT matches time of shot from trace header to
+SIN database. This assumes that the time of day captured for each shot by both the seismic recording instrument and the navigation system are identically matched.
+Time shift
+This appears if TIM_SHOT to Primary or Secondary header
+to match the database. Enter a positive or negative value, in
+seconds, to apply to the trace header for matching the
+database entry. A time shift is necessary if the recording
+system clock and navigation system clocks are not exactly
+synchronized.
+Time tolerance
+This appears if TIM_SHOT to Primary or Secondary header
+to match the database. Enter a tolerance, in sec, to allow for
+garbage between the recording instrument time value and the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Inline Geometry Header Load1525
+
+ProMAX® Reference
+
+navigation time value. The range used for matching the
+header to the database is then:
+(TIM_SHOT+Time shift -Time tolerance), (TIM_SHOT+Time shift+Time tolerance)
+
+Note: It is critical to keep this value sufﬁciently small so
+TIM_SHOT is still a unique identiﬁer. If this value becomes
+too large, Inline Geometry Header Load uses the ﬁrst
+ensemble meeting the matching criteria. Therefore, a good
+strategy is use the Time Shift parameter to get a close match,
+and ensure that Time tolerance << 1/2 the shot interval.
+Swaths with differing time shifts between the clocks should
+be treated separately.
+Match by valid trace number?
+Select Yes to use valid trace numbers from the header to
+match the database. These headers have been previously
+assigned. In this case, no trace header matching is required,
+and the above header parameters are not shown.
+Drop traces with NULL CDP headers?
+Select Yes to discard traces which have a null CDP header.
+Null headers usually occur if traces fall outside the deﬁned
+bin space. It is recommended that null headers be removed if
+you are not rebinning output data.
+Drop traces with NULL receiver headers?
+Select Yes to discard traces which have a null receiver bin or
+REC_SLOC header. Null headers usually occur if traces were
+not assigned a receiver position in any of the source pattern
+deﬁnitions. It is recommended that these be removed from
+the ﬂow.
+Verbose diagnostics?
+Select Yes to list shot and channel numbers for every trace
+that had a null parameter loaded into the header. This option
+is designed to catch odd errors that can occur in a few traces
+or shots. If there is a severe geometry error, this could create
+a huge job history.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

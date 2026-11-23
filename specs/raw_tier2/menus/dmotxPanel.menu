@@ -1,0 +1,128 @@
+; IIID IVD 1 DEV DEPTHC
+'(
+ name: DMOTX
+label: "Ensemble DMO in T-X Domain"
+value_tab: 50
+
+parameter: dcdp
+text: "CDP interval"
+type: typein:
+type_desc:  ( real: 10 0.001 nil)
+value: 999999.
+mouse_text: "Actual CDP spacing in ft or m (consistent with headers)."
+plot_label: t
+
+parameter: dtrace
+text: "Typical CDP spacing in ensembles"
+type: typein:
+type_desc:  ( real: 6)
+value: 25.0
+mouse_text: "Typical CDP spacing in the input/output ensembles, in ft or m (consistent with headers)."
+plot_label: t
+
+parameter: maxOffset
+text: "Maximum offset of data"
+type: typein:
+type_desc:  ( real: 6 0.0 nil )
+value: -1.0
+mouse_text: "What is the maximum absolute value of the offsets in your data"
+
+parameter: tmute
+text: "Typical mute time at largest offset"
+type: typein:
+type_desc:  ( real: 6)
+value: 1000.0
+mouse_text: "Approximate!  In ms."
+
+parameter: vmute
+text: "Typical RMS velocity at early times"
+type: typein:
+type_desc:  ( real: 6)
+value: 0.0
+mouse_text: "Approximate!  In ft/s or m/s (consistent with headers)."
+
+parameter: remute_b
+text: "Re-apply old trace mutes after DMO?"
+type: boolean:
+value: t
+mouse_text: "If 'Yes', old trace mutes (such as mutes of first arrivals) will be re-applied after DMO."
+
+parameter: rekill_b
+text: "Re-kill old dead traces after DMO?"
+type: boolean:
+value: t
+mouse_text: "If 'Yes', traces that were dead (all zeros) before DMO will be killed after DMO."
+
+parameter: offset
+text: "Header entry to use for offsets"
+type: function:
+type_desc:  (header_list headers)
+value: "DMOOFF  "
+selected_item: "DMO binned offset               "
+mouse_text: "The default is for DMO binned offsets.  You might alternately want to use true offset."
+plot_label: t
+
+parameter: change_mem
+text: "Change maximum memory usage?"
+type: boolean:
+value: nil
+mouse_text: "Set to 'YES' to change the maximum memory the DMO can use."
+
+parameter: max_memory
+text: "   Maximum memory reserved for DMO (in megabytes)"
+type: typein:
+type_desc:  ( real: 4 0. nil )
+value: 16.
+mouse_text: "When the DMO requires more memory than this limit, the DMO is done in overlapping panels."
+
+exec_data: ( 
+	     ("DMOTX_PANEL"
+		("GENERAL"
+                        ("version" implicit: "ProMAX $Id: dmotxPanel.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("dcdp" implicit: (value 'dcdp))
+			("dtrace" implicit: (value 'dtrace))
+			("tmute" implicit: (value 'tmute))
+			("vmute" implicit: (value 'vmute))
+			("remute" implicit: (if (value 'remute_b) 1 0))
+			("rekill" implicit: (if (value 'rekill_b) 1 0))
+			("offset"   implicit: (value 'offset))
+			("maxMem"   implicit: (value 'max_memory))
+			("maxOffset"   implicit: (value 'maxOffset))
+		)
+	   )
+	((if (value 'remute_b) "MUTE" "VOID")
+		("GENERAL"
+			("REMUTE"   implicit: 2)
+		)
+	    )
+	)
+
+rules: 
+(
+ (cdp_interval_default_rule  
+  ( = (value 'dcdp) 999999.) 
+  (set_value 'dcdp (db_parmget_line "DCDPILNz")))
+
+ (offset_default_rule  
+  ( = (value 'maxOffset) -1.0)
+  (let ((val (db_parmget_line "OFFMAXz")))
+	(set_value 'maxOffset val)))
+
+ (vels_default_rule1 
+  ( and (equal (value 'vmute) 0.0 )	(= (db_parmget_line "IUNITSz") 1))
+  (set_value 'vmute 7000.0 ))
+
+ (vels_default_rule2 
+  (equal (value 'vmute) 0.0 )
+  (set_value 'vmute 2500.0 ))
+
+ (rule3 
+  (value 'change_mem)
+  (do_show 'max_memory) 
+  (do_not_show 'max_memory))
+ )
+)
+
+
+
+	

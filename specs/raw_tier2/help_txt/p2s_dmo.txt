@@ -1,0 +1,233 @@
+Converted Wave DMO1646
+
+ProMAX® Reference
+
+Converted Wave DMO
+Converted Wave DMO applies a time-domain convertedwave DMO to the input data.
+
+Theory
+P-S DMO responses are formed for each individual input
+trace, and then summed to give the total DMO-corrected
+output plane. The mapping from NMO-corrected time (tn) to
+DMO time (tau) at offset (X) away from the source-receiver
+midpoint is done using the following equation:
+
+τ2
+
+ [ α2( h – xo ) + β2( h + xo ) ] 2
+ α + β 2
+(h 2 – x 2)
+= ----------------------------------------------------------  ---------------------------------- t n + ( x – x o ) ( α 2 – β 2 )  ------  
+-------------------------------- αβ  
+[ α2( h – x ) + β2( h + x ) ] 
+(h 2 – xo 2 )
+
+where (Xo) is the midpoint offset of the zero-dip conversion
+point, and alpha and beta are the average P- and S-wave
+velocities down to time (tn).
+Amplitude and phase corrections along the DMO curves are
+based upon the width of the ﬁrst Fresnel zone along the
+tangent to the curve at any point. The size of the phase
+correction varies from 45 degrees for large offset-to-depth
+ratios, to 0 degrees for small offset-to-depth values.
+Both the phase and amplitude corrections should be
+frequency dependent, as well as time- and spatially-variant
+within the DMO response. Applying these corrections
+properly is not tractable; in this implementation, a single
+phase/amplitude correction is computed at each point, based
+on the average frequency of the input data. Because the
+amplitude correction is not done in a frequency dependent
+manner, the DMO-corrected output may appear to be shifted
+toward lower frequencies. If so, a post-DMO zero-phase
+decon can be used to renormalize the frequency spectrum.
+Spatial aliasing of the DMO response is controlled by
+constraining the dip aperture using the input velocity ﬁelds
+and a maximum frequency to preserve without aliasing. The
+dip aperture of the output response is reduced, if necessary,
+in order to prevent aliasing of the given frequency at all times.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Converted Wave DMO1647
+
+ProMAX® Reference
+
+The overall maximum DMO dip aperture can be constrained.
+The edges of the response can also be tapered across some
+range of dip, usually 10 degrees, in order to reduce edge
+artifacts.
+
+Usage
+The input data must have been previously binned by nominal
+offset and have normal moveout applied. Use Trace Binning
+to create the header word DMOOFF. The output from Trace
+Binning should then be sorted by DMOOFF and CDP as
+primary and secondary parameters prior to being input to
+this program.
+In order to obtain the conversion-point offset for a given
+sample, the average P-wave and S-wave velocities down to the
+sample's time are ﬁrst computed. These velocities are then
+used in the quartic equation derived by Tessmer and Behle
+for the vertical half-space case. This equation is solved to give
+the horizontal offset at which conversion occurs. Results
+obtained using this method versus true ray-tracing indicate
+that it is generally adequate.
+Because each input trace will be summed across a horizontal
+range of output stack traces, it is necessary to static-correct
+the trace to the ﬁnal processing datum prior to applying
+DMO. This can optionally be done within this program. If it is
+not done here, it must be done elsewhere before inputting the
+data to this program.
+Although the input dataset must be gathered by header word
+CDP, it does not necessarily have to be midpoint gathered. If
+P-S Asymptotic Binning* has been run prior to stacking,
+then the CDP header values will actually be asymptotic
+conversion point values. This program checks for the header
+parameter VPVS. If it is found, then the input data are
+assumed to have been binned using this Vp/Vs value;
+otherwise, the data are assumed to be midpoint-gathered.
+The input trace CDP values must correspond to the value of
+VPVS in the trace headers, or incorrect stacking will result.
+
+References
+Deregowski, S.M., and Rocca, F., 1981, Geometrical optics and wave theory of
+constant offset sections in layered media: Geophys. Prosp., 29, 384-406.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Converted Wave DMO1648
+
+ProMAX® Reference
+
+Deregowski, S.M., 1985, An integral implementation of dip moveout: Presented at
+the 47th Ann. Mtg., EAEG.
+Eaton, D. W. S., Slotboom, R. T., Stewart, R. R., and Lawton, D. C., 1990, Depthvariant converted-wave stacking: 60th Ann. Internat. Mtg., Soc. Expl. Geophys.,
+Expanded Abstracts, 1107-1110.
+Hale, I.D., 1988, Dip moveout processing: Soc. Expl. Geophys. course notes.
+Harrison, M. P., 1992, Processing of P-SV surface-seismic data: anisotropy analysis, dip moveout, and migration: Ph.D. dissertation, Univ. of Calgary.
+Tessmer, G. and Behle, A., 1988, Common reﬂection point data-stacking technique for converted waves: Geophys. Prosp., 36, 661-688.
+
+Parameters
+Maximum offset for stack
+Enter the maximum absolute offset to sum into the output
+stack. This value determines the size of the stack buffer to
+hold in memory, and must be properly speciﬁed.
+Header entry to use for offset planes
+Select a header word from the Headers menu to determine
+which output stack plane the input data are stacked into.
+The input data must have primary sort order equal to this
+header word and secondary sort CDP.
+Shift data to ﬁnal datum?
+Select Yes to apply the statics in header words NA_STAT and
+FNL_STAT to each trace before stacking. Select No to only
+apply values in NA_STAT. Each input trace will be summed
+by the DMO process into a horizontal range of stack traces.
+Because the ﬁnal datum statics may vary across this range, it
+is necessary that the trace be at the ﬁnal datum before it is
+added to the stack.
+Note: If you select Yes, sample values of NaNQ can be left at
+the bottom of the trace. Therefore, apply a bottom mute to
+remove those samples.
+Maximum dip aperture (deg)
+Enter the maximum dip aperture of the output DMO
+responses. The actual aperture can be less than this
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Converted Wave DMO1649
+
+ProMAX® Reference
+
+maximum at a given time, depending upon the stack trace
+spacing, the input data frequency, and the velocity function.
+Dip aperture taper (deg)
+Enter the aperture taper in degrees that is applied to the
+DMO responses. The output response for a given input
+sample will have it's amplitude tapered by a factor ranging
+from 0.0 for the maximum dip to 1.0 for dips less than or
+equal to the maximum minus the taper. The scalar for dips
+between these limits is determined by linear interpolation by
+dip.
+Average frequency of the input data
+Enter the average frequency of the input data. The phase and
+amplitude corrections incorporated into the output DMO
+responses are computed for this value.
+Maximum frequency to preserve
+Enter the maximum frequency to preserve. Rather than
+compute a dip-limit at each point in the output DMO
+response for every frequency, which requires a time-variant
+ﬁltering operation, the maximum dip aperture is set to pass
+dips up to the aliasing dip-limit of this value. If the computed
+dip limit exceeds the maximum dip aperture value, it is
+reduced to the input aperture limit.
+Poststack mute ramp
+Enter the ramp to apply to the ﬁnal DMO stack traces after
+summation. Enter 0 for no ramping.
+Get P-P RMS velocities from database?
+Select Yes to get an RMS velocity ﬁle from the database.
+Select No to enter the velocity function into a text editor
+window.The conversion point locations depend upon the Pwave velocities. These are input to the program as RMS
+values versus two-way vertical P-wave time, which are
+internally converted to interval values using the DIX
+equation.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Converted Wave DMO1650
+
+ProMAX® Reference
+
+SELECT P-P RMS velocity ﬁle
+This appears if Yes to Get P-P RMS velocities from
+database. Select the P-wave RMS velocity ﬁle from the
+database. The NMO velocity ﬁle used for stacking the verticalcomponent (P-wave) data is appropriate.
+P-P RMS velocities for stacking
+This appears if No to Get P-P RMS velocities from
+database. Enter the P-wave RMS velocity function in CDP
+and time-velocity pairs. Multiple CDP locations may be input.
+Get Vp/Vs ratios from database?
+Select Yes to select a Vp/Vs ﬁle from the time-interval
+database. Select No to enter the Vp/Vs function into a text
+editor window. The conversion point locations also depend
+upon the S-wave velocities. These are input to the program
+as Vp/Vs values versus two-way vertical P-wave time.
+SELECT Vp/Vs values parameter ﬁle
+This appears if Yes to Get Vp/Vs ratios from database.
+Select the Vp/Vs ﬁle from the database.
+Vp/Vs ratios for stacking
+This appears if No to Get Vp/Vs ratios from database. Enter
+the Vp/Vs function in CDP and two- way P-wave time Vp/Vs pairs. Multiple CDP locations may be input.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Converted Wave DMO1651
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

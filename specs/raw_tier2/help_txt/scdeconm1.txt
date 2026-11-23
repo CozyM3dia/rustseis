@@ -1,0 +1,217 @@
+Gated SC Decon 1: Estimation53
+
+ProMAX® Reference
+
+Gated SC Decon 1: Estimation
+Gated SC (Surface Consistent) Decon 1: Estimation
+computes the log-amplitude spectrum for each gate of each
+input trace. The spectra for the trace are added to other
+spectra with the same shot, receiver, offset, CDP or userdeﬁned indexes. The result is a series of ensemble spectral
+estimates in which the spectra for all traces with common
+shot, receiver, offset, CDP or user-deﬁned indexes have been
+stacked. The ensemble spectra are output to a ﬁle for use in
+later stages of Gated SC Decon.
+
+Theory
+For an introduction to Gated SC Decon and how Stage 1:
+Estimation ﬁts in, refer to Gated SC Decon Introduction.
+
+Usage
+Input traces may be in any order. Output traces are
+unchanged.
+Output
+Stage 1: Estimation writes ensemble spectral estimates to
+$PROMAX_SCRATCH_HOME/area_line_INI-xxxx. The spectrum
+ﬁle is opened during the initialization phase and ﬁlled with
+zeroes. If No to Conserve memory, then ensemble spectra
+are stored in memory during execution. They are not written
+to the spectrum ﬁle until after all traces have been read. If
+Yes to Conserve memory, then ensemble spectra are stored
+in the spectrum ﬁle during execution. After the gate spectra
+for a trace have been calculated, the appropriate ensemble
+spectra are read from the ﬁle, summed with the trace
+spectrum, and then written back to the ﬁle.
+Stage 1: Estimation adds a new attribute, SCD_xxxx, to the
+TRC order of the database. This attribute contains a one for
+each trace that contributes to the spectral estimates.
+If OTHER is a component of the spectral decomposition, then
+Stage 1: Estimation writes maps of SRC, RCVR, OFFSET
+and CDP indexes for each OTHER value to
+$PROMAX_SCRATCH_HOME/area_line_MAP-xxxx. The map ﬁle
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 1: Estimation54
+
+ProMAX® Reference
+
+is opened during the initialization phase and ﬁlled with
+zeroes. The maps are stored in memory during execution.
+They are not written to the map ﬁle until after all traces have
+been read.
+
+Parameters
+Get ESTIMATION gates from the DATABASE?
+Select Yes if a table containing estimation time gates exists.
+Select No to enter the gate parameters.
+SELECT Primary gate header word
+This appears if No to Get ESTIMATION gates from the
+DATABASE. Select the primary header word for the
+estimation gates.
+SELECT Secondary gate header word
+This appears if No to Get ESTIMATION gates from the
+DATABASE. Select the secondary header word for the
+estimation gates.
+Specify ESTIMATION gate parameters
+This appears if No to Get ESTIMATION gates from the
+DATABASE. Enter the gate pattern for up to 10 gates. The
+format is Primary Gate location: Secondary Gate location:
+Time Gate(s). For example, 101:0.0:700-2000 /
+101:5280.0:1200-2200.
+Note: Different gate parameters can be speciﬁed here and in
+Stage 3: Application. The only requirement is that the
+number of gates remain the same.
+Select ESTIMATION Time Gate Parameter FILE
+This appears if Yes to Get ESTIMATION gates from the
+DATABASE. Select a time gate parameter ﬁle from the
+database.
+Note: Different gate ﬁles can be selected here and in Stage 3:
+Application. The only requirement is that the number of
+gates remain the same.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 1: Estimation55
+
+ProMAX® Reference
+
+Components of spectral decomposition
+Select the components to use in the spectral decomposition.
+A multi-value menu appears with ﬁve possible components
+for the spectral decomposition: SHOT, RCVR, OFFSET, CDP
+and OTHER. Select your choices and click Accept. Click
+Help to display a description of the functionality of this
+menu. Exit without performing any update by clicking Abort.
+SELECT header word for OTHER component
+This appears if OTHER to Components of spectral
+decomposition. Select the header word to use as the OTHER
+component of spectral decomposition. The selected word
+must have INTEGER format.
+Minimum value for OTHER
+Maximum value for OTHER
+These appear if OTHER to Components of spectral
+decomposition. Enter the minimum and maximum values
+for the OTHER component header word. If any input trace
+has a value outside this range, the job aborts.
+Increment for OTHER
+This appears if OTHER to Components of spectral
+decomposition. Enter the increment for the OTHER
+component header word values. If the increment is too large,
+the job does not abort, but spectra for adjoining OTHER
+values are combined.
+Maximum fold for OTHER
+This appears if OTHER to Components of spectral
+decomposition. Enter the maximum number of traces in an
+OTHER gather. The job aborts if the maximum fold is
+exceeded for any OTHER value. If maximum fold is too large,
+then memory and disk space allocated for storage of maps of
+SRC, RCVR, OFFSET and CDP indexes for each OTHER
+value are larger than needed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 1: Estimation56
+
+ProMAX® Reference
+
+Limit offsets?
+Select Yes to use a restricted range of offsets in the
+estimation. It is possible to better approximate the seismic
+wavelet spectrum by restricting the offsets because of the
+effects of ground roll or high amplitude ambient noise.
+Minimum absolute offset
+Maximum absolute offset
+These appear if Yes to Limit offsets. Enter the minimum and
+maximum absolute offsets to use in the estimation. Any trace
+with AOFFSET outside this range does not contribute to the
+spectral estimation.
+Decon operator length(s)
+Enter the deconvolution operator length, in ms, for each gate.
+The operator length determines how much of the
+autocorrelation function is used to calculate the spectrum.
+The number of values must equal the number of gates.
+Operator white noise level(s)
+Enter the white noise value, in percent, for each gate. This
+value represents the percentage of white noise to add to the
+zero lag of the autocorrelation function. The number of values
+must equal the number of gates.
+Apply user speciﬁed taper?
+Select Yes to apply a user-speciﬁed taper length to the gate
+prior to autocorrelation. Select No to use a taper length equal
+to 1/2 the minimum operator length.
+Taper length in ms
+This appears if Yes to Apply user speciﬁed taper. Enter the
+taper length in ms to apply to each end of the gate prior to
+autocorrelation. Enter 0 for no taper.
+Gate rejection factor
+Enter the factor by which to multiply the operator length. Any
+gate that contains fewer live samples than the product of
+Gate rejection factor * Decon operator length does not
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 1: Estimation57
+
+ProMAX® Reference
+
+contribute to the spectral estimation. The number of gates
+with too few live samples, if any, is printed to job.output.
+4-character ﬁle ID
+Enter 4 characters (letters or numbers) for identifying the
+output ﬁles.
+Overwrite existing ﬁle?
+Select Yes to overwrite existing spectrum and map ﬁles.
+Select No to abort if either output ﬁle exists.
+Conserve memory?
+Select No to store all ensemble spectra in memory during the
+execution phase of the job. Select Yes to conserve memory by
+storing spectra in the spectrum ﬁle during the execution
+phase.
+Elapsed time for the job is usually shorter when spectra are
+stored in memory. Select Yes only when the ensemble spectra
+will not ﬁt in memory or when the job spends a signiﬁcant
+amount of time swapped out.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 1: Estimation58
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

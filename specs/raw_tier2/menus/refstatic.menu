@@ -1,0 +1,255 @@
+; 1 FIELD
+'(
+ name: REFSTATIC
+label: "Refraction Statics*"
+value_tab: 47
+
+
+parameter: X_SERVER
+text: "Select display DEVICE"
+type: typein:
+type_desc: (:string 32)
+value: "This Screen"
+mouse_text: "'This Screen' for current display or type in a display name to override the current display default."
+
+
+parameter: FBPICK
+text: "Select First Break Times file"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a First Break Data file description from the TRC database."
+
+
+parameter: RP_DB
+text: "Get LAYER Picks from DATABASE ?"
+type: boolean:
+value: nil
+mouse_text: "Set this to 'YES' if LAYER Picks output from a previous execution are input from SIN GEOMETRY Database."
+
+
+parameter: REFPICK
+text: " Select Layer Picks file"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a LAYER PICK file description (LST, LED, RST, RED)from the SIN GEOMETRY database."
+
+
+parameter: VEL_DB
+text: "Get Refractor Velocities from DATABASE ?"
+type: boolean:
+value: nil
+mouse_text: "Set this to 'YES' if Velocities output from a previous execution are input from SRF GEOMETRY Database."
+
+
+parameter: VELOCITY
+text: " Select Refractor Velocities file"
+type: action:
+type_desc: ("INVALID")
+mouse_text: "Use Mouse Button 1 to select a REFRACTOR VELOCITY file description (VEL1)from the SRF GEOMETRY database."
+
+
+parameter: DATASET
+text: "Select TRACE data file"
+type: function:
+type_desc: (dataset_list datasets)
+value: "no entry"
+selected_item: "* No Datasets Found *"
+mouse_text: "Use Mouse Button 1 to select a trace data file description from the datasets menu."
+
+parameter: V0_OPT
+text: "Compute V0 from UPHOLE data?"
+type: boolean:
+value: t
+mouse_text: "If YES, V0 is computed from SHOT depths and UPHOLE times loaded with geometry, if NO, V0 is specified by user."
+
+parameter: V0_PARM
+text: "  Specify V0"
+type: edit:
+type_desc: (30 80 5 " FORMAT: Groups of 'STATION:V0 /' values
+ EXAMPLE: 101:3500 / 242:3800 / 440:4400 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "101:3000/201:3500/351:4000/"
+mouse_text: "Enter groups of STATION-V0 values. **SEE EXAMPLE!!!**"
+
+parameter: CU_OPT
+text: "Compute uphole time using V0?"
+type: boolean:
+value: t
+mouse_text: "If YES, use V0 and shot depth to compute the uphole time for sub-surface sources."  
+
+
+parameter: LAYERS
+text: "Number of layers"
+type: typein:
+type_desc: ( int: 2 1 8 )
+value: 1
+mouse_text: "Number of layers to model? (5 Layers Maximum)"
+
+parameter: DT_OPT
+text: "Use Delay Times in velocity / depth model ?"
+type: boolean:
+value: t
+mouse_text: "If YES, use Delay Times to compute the depth model. GRM plus Delay Times may be used if data were acquired split_spread."  
+
+
+parameter: DH_OPT
+text: "  Use Deep Hole delay time algorithm?"
+type: boolean:
+value: nil
+mouse_text: "If YES, use deep hole delay times algorithm to compute the depth model. Use when sources are very near bottom of weathering."
+
+
+parameter: GRM_OPT
+text: "Use GRM in velocity / depth model ?"
+type: boolean:
+value: t
+mouse_text: "If YES, use Generalized Reciprocal Method to compute the depth model. GRM should NOT be used if data is NOT split_spread."  
+
+parameter: GRMPARM1
+text: "  Specify GRM minimum XY distance"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.
+mouse_text: "Enter minimum XY distance value in GRM time-depth solution. 0.0 is best default (see Help)"
+
+parameter: GRMPARM2
+text: "  Specify GRM maximum XY distance"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.
+mouse_text: "Enter maximum XY distance value in GRM time-depth solution. 0.0 is best default (see Help)"
+
+parameter: GRMPARM3
+text: "  Specify GRM XY distance increment"
+type: typein:
+type_desc: ( real: 8 1.0e-6 nil )
+value: 55.
+mouse_text: "Enter XY distance increment value - usually set to the group interval"
+
+
+parameter: EDATUM
+text: "Final datum elevation"
+type: typein:
+type_desc: (:string 16)
+:value "0.00000"
+mouse_text: "Enter final datum elevation constant value (like -800.) or PARAMETER from the SRF GEOMETRY DataBase."
+plot_label: t
+
+parameter: VDATUM
+text: "Replacement velocity"
+type: typein:
+type_desc: (:string 16)
+:value "0.00000"
+mouse_text: "Enter replacement velocity constant value or PARAMETER from the SRF GEOMETRY DataBase."
+plot_label: t
+
+
+parameter: SU_OPT
+text: "Use Uphole Time in source statics algorithm?"
+type: boolean:
+value: nil
+mouse_text: "If YES, uphole times are used in source statics computations."
+
+
+parameter: db_option
+text: "Create a NEW database entry for each run?"
+type: boolean:
+value: nil
+mouse_text: "If this is set to NO, if a previous database entries is present it will be overwritten."
+
+
+parameter: DB_NUM
+text: "  Enter 4 digit ID number"
+type: typein:
+type_desc: ( string: 4 )
+value: "0001"
+mouse_text: "Enter a 4 digit number (characters) identifying the database output parameters( blanks NOT acceptable!)."
+
+
+exec_data: ("REFSTATIC"
+		("SPECIAL"
+			("version" implicit: "ProMAX $Id: refstatic.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+			("TOOLTYPE"     implicit: "STAND_ALONE")
+			("PATHNAME"     implicit: "refstatic.exe")
+			("X_SERVER" implicit: 
+			 (if (= (value 'X_SERVER) "This Screen")
+			     (where_promax_displays)
+			   (value 'X_SERVER)))
+			("FBPICK"      implicit: (first (type_desc 'FBPICK)))
+			("DATASET"     implicit: (value 'DATASET))
+			("LAYERS"      implicit: (value 'LAYERS))
+			("V0_OPT"      implicit: ( if (value 'V0_OPT) 1 0 ))
+			("CU_OPT"      implicit: ( if (value 'CU_OPT) 1 0 ))
+		        ("RP_DB"       implicit: ( if (value 'RP_DB) 1 0 ))
+			("REFPICK"     implicit: (first (type_desc 'REFPICK)))
+		        ("VEL_DB"      implicit: ( if (value 'VEL_DB) 1 0 ))
+			("VELOCITY"     implicit: (first (type_desc 'VELOCITY)))
+			("V0_PARM"     implicit: (value 'V0_PARM))
+			("DT_OPT"      implicit: ( if (value 'DT_OPT) 1 0 ))
+			("GRM_OPT"     implicit: ( if (value 'GRM_OPT) 1 0 ))
+			("GRMPARM1"    implicit: (value 'GRMPARM1))
+			("GRMPARM2"    implicit: (value 'GRMPARM2))
+			("GRMPARM3"    implicit: (value 'GRMPARM3))
+			("DH_OPT"      implicit: ( if (value 'DH_OPT) 1 0 ))
+			("SU_OPT"      implicit: ( if (value 'SU_OPT) 1 0 ))
+			("EDATUM"      implicit: (value 'EDATUM))
+			("VDATUM"      implicit: (value 'VDATUM))
+			("NEW_DB  " implicit: (if (value 'db_option) 1 0 ))
+			("DB_NUM  " implicit: (value 'DB_NUM))
+		)
+	   )
+
+
+rules: (
+
+  (test_host_name (NOT (= (value 'X_SERVER) "This Screen"))
+		  (progn
+		    (setq temp (host_valid_p (value 'X_SERVER)))
+		    (if temp 
+			(add_error 'X_SERVER temp)
+		      (set_error_list 'X_SERVER temp)))
+		  (set_error_list 'X_SERVER nil)
+		  )
+
+  (rule1_call_dbparm ( value 'FBPICK) (progn
+	(set_value 'FBPICK nil)
+	(set_selected_item 'FBPICK nil)
+	(set_type_desc 'FBPICK (list (choose_old_db_parm)))))
+
+  (rule_rp (value 'RP_DB)(do_show 'REFPICK)(do_not_show 'REFPICK))
+
+
+  (rule2_call_dbparm ( value 'REFPICK) (progn
+	(set_value 'REFPICK nil)
+	(set_selected_item 'REFPICK nil)
+	(set_type_desc 'REFPICK (list (choose_old_db_parm)))))
+
+  (rule_rv (value 'VEL_DB)(do_show 'VELOCITY)(do_not_show 'VELOCITY))
+
+  (rule3_call_dbparm ( value 'VELOCITY) (progn
+	(set_value 'VELOCITY nil)
+	(set_selected_item 'VELOCITY nil)
+	(set_type_desc 'VELOCITY (list (choose_old_db_parm)))))
+
+ (rule2   (value 'V0_OPT)  (do_not_show '(V0_PARM CU_OPT))(do_show '(V0_PARM CU_OPT)))
+ (rule3a  (value 'DT_OPT)  (do_show 'DH_OPT) (do_not_show 'DH_OPT)) 
+ (rule3   (value 'GRM_OPT)  (do_show 'GRMPARM1) (do_not_show 'GRMPARM1)) 
+ (rule4  (value 'GRM_OPT)  (do_show 'GRMPARM2) (do_not_show 'GRMPARM2))
+ (rule5  (value 'GRM_OPT)  (do_show 'GRMPARM3) (do_not_show 'GRMPARM3))
+ (rule6  ( > (value 'LAYERS) 5 )(set_value 'LAYERS 5))	
+
+ (rule7 (value 'db_option) (do_show 'DB_NUM) (do_not_show 'DB_NUM))
+
+       )
+
+)
+

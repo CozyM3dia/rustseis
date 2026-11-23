@@ -1,0 +1,136 @@
+Resample/Desample47
+
+ProMAX® Reference
+
+Resample/Desample
+Resample/Desample resamples data to a ﬁner or coarser
+sample interval.
+
+Theory
+Sample intervals can be a fractional value, and need not be
+integer values. Data is generally resampled to a coarser
+sample rate to make data processing quicker and decrease
+the amount of disk space required to store data. This does
+not have a signiﬁcantly adverse effect on ﬁnal data quality,
+unless the data’s frequency content is unusually high.
+
+Usage
+Aliasing is a distortion of data that occurs whenever the
+period of sampling is greater than half the average period of
+the seismic data. The effect of this phenomenon can be
+minimized by the use of an appropriate anti-alias ﬁlter. When
+desampling, the data which was correctly sampled at the
+input sample interval may be aliased at the new sample
+interval. Because it is more common to desample the
+data,this process automatically inserts the anti-alias ﬁlter
+appropriate to the new, output sample interval. You can turn
+off the anti-alias ﬁlter, for example, if you have already
+ﬁltered the data with a suitable high cut frequency limit. The
+general anti-alias ﬁlters applied in this process are recursive
+(IIR) Butterworth ﬁlters.
+A special case is considered for the common 2-to-1 resample,
+that is 2ms to 4ms sample rate. This case uses conventional
+(FIR) convolutional ﬁlters which are equivalent to the
+Butterworth ﬁlters used for the general case. This application
+method allows for improved performance on some
+computers.
+Low-ﬁdelity ﬁlters are shorter for the convolution code and
+have fewer coefﬁcients for the recursive (IIR) implementation.
+The low-ﬁdelity ﬁlters give about -30 dB attenuation from the
+new Nyquist to the old Nyquist frequency.
+However, if you are not worried about runtime, always use a
+high-ﬁdelity ﬁlter. You can do a 4-to-1 resample, but we
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Resample/Desample48
+
+ProMAX® Reference
+
+advise doing two 2-to-1 resamples back-to-back. This will be
+much more efﬁcient than doing a single 4-to-1, and should
+give at least equivalent ﬁdelity.
+You can remove the large apparent time delay which is
+inherent in minimum phase ﬁlters with a very large slope at
+the high frequencies. This slope will cause a great deal of
+phase lag, which shows up as a bulk time delay of the
+dominant energy of the ﬁlter. To remove this time delay,
+search for the maximum sample amplitude of the ﬁlter, then
+back up the ﬁlter to ﬁnd the ﬁrst sample with one percent of
+the maximum amplitude. The time to this 1% amplitude is
+then removed.
+Data is rarely sampled to a ﬁner sample rate. However, this
+can be used to avoid the effect of linear interpolation
+performed for trace display or plotting when a large display
+scale is used. Resample/Desample inserts the anti-alias ﬁlter
+since it does not know the input sample interval. If you are
+resampling the data more ﬁnely, the anti-alias ﬁlter will not
+be applied.
+
+Parameters
+Output sample rate
+Enter the output sample interval for the data in ms. This may
+be larger or smaller than the input sample rate.
+Apply Anti-Alias ﬁlter?
+Select Yes to apply an anti-alias ﬁlter to the data before
+resampling. If the sample interval is decreasing, the ﬁlter is
+not applied.
+Use a high-ﬁdelity Anti-Alias ﬁlter?
+This appears if Yes to Apply Anti-alias ﬁlter. Select Yes to
+use a high-ﬁdelity ﬁlter. Select No to use a lower ﬁdelity ﬁlter.
+The lower ﬁdelity ﬁlters will run about 30% faster than the
+high-ﬁdelity ﬁlters, but do not attenuate high frequencies as
+effectively as the high-ﬁdelity ﬁlters.
+Use a zero-phase Anti-Alias ﬁlter?
+This appears if Yes to Apply Anti-alias ﬁlter. Select Yes to
+use a zero-phase ﬁlter. Select No to use a minimum-phase
+Other Docs
+
+Search Page
+
+Known Problems
+
+Resample/Desample49
+
+ProMAX® Reference
+
+ﬁlter. The minimum-phase ﬁlter introduces a time delay to
+the data due to the large amount of attenuation and phase
+associated with the ﬁlter at the high frequencies.
+Remove minimum-phase ﬁlter time delay?
+This appears if No to a Use a zero-phase Anti-alias ﬁlter.
+Select Yes to estimate the bulk time delay as the one percent
+amplitude level of the leading samples of the ﬁlter. The time
+delay from the ﬁrst sample to the one percent amplitude level
+is removed. Select No to preserve the time delay of the ﬁlter.
+Minimum phase ﬁlters have a signiﬁcant apparent time delay
+due to the large amount of phase in the high frequency
+portion of the ﬁlter. This time delay is actually very small
+amplitudes over the ﬁrst several samples of the ﬁlter.
+Reapply trace mute after resample?
+Select Yes to reapply previous mutes after the resample
+process. It is good to reapply the mutes after applying a
+resample ﬁlter so that zeroed trace amplitudes may be
+recognized by other programs.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Resample/Desample50
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,653 @@
+35
+
+Developer’s Programming Guide
+
+System Overview
+
+This chapter provides an overview of ProMAX. It describes the
+directory structure of the system and the User Interface.
+
+Topics covered in this chapter:
+
+➲
+➲
+➲
+➲
+➲
+➲
+
+Other Docs
+
+ProMAX Organization: Areas, Lines, and Flows
+The User Interface: The Flow Builder
+Menu Files
+Flow Execution
+Super Executive
+Executive
+
+Search Page
+
+Known Problems
+
+ProMAX Organization: Areas, Lines, and Flows36
+
+Developer’s Programming Guide
+
+ProMAX Organization: Areas, Lines, and Flows
+The primary function of ProMAX is to create, modify, and
+execute processing ﬂows. The program is built upon three levels
+of organization: areas, lines, and ﬂows. An area can represent
+any grouping of seismic lines, but it is usually used as a
+prospect level collection of seismic lines. A line (in 2D) or
+survey (in 3D) usually represents a single seismic line or survey
+in the traditional sense. A ﬂow is a sequence of processes which
+are used to manipulate seismic data. Flows are built by selecting
+processes from a Processes list. A typical ﬂow contains an input
+process, one or more data manipulation processes, and a display
+and/or output process.
+Before we describe the system software any further, it is useful
+if we ﬁrst describe the directory structure of the system,
+particularly the data ﬁles (see the ProMAX Directory Structure
+illustration at the end of this chapter). The ProMAX home
+directory is set by the environmental variable
+$PROMAX_HOME. Beneath the ProMAX home directory is a
+subdirectory named data/, which you can also be re-specify
+with the environmental variable $PROMAX_DATA_HOME
+(see the ProMAX Data Directory Structure illustration at the
+end of this chapter).
+Any directory or symbolic link within the data/ subdirectory is,
+by deﬁnition, an area. Any subdirectory or symbolic link
+beneath an area subdirectory is, by deﬁnition, a line or a survey.
+ProMAX expects a line to be a collection of data that can be
+described by a single geometry. Most of the actual data ﬁles
+reside at the line or survey directory level (see the Dataset
+Components, Ordered Database Files, and Parameter Tables
+illustrations at the end of this chapter). Traces, trace headers,
+Ordered Parameter Files, and Parameter Tables, such as
+velocities, ﬁrst break picks, mutes, gates, trace kills, also reside
+at this level.
+Any subdirectory beneath a line or survey subdirectory
+represents a further subgrouping, namely a ﬂow. The ﬂow
+subdirectory contains all of the ﬁles related to a particular
+processing ﬂow, such as the saved binary job ﬂow and the
+runtime job output (see the Flow Components illustration at the
+end of this chapter).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+ProMAX Organization: Areas, Lines, and Flows37
+
+Developer’s Programming Guide
+
+There is an exception to the rules that govern the existence of
+areas, lines, and ﬂows in the database: any subdirectory with a
+period in the name is ignored to facilitate the customization of
+the database to contain non-ProMAX ﬁles.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+The User Interface: The Flow Builder38
+
+Developer’s Programming Guide
+
+The User Interface: The Flow Builder
+What people have come to know as ProMAX is sometimes
+called the User Interface, but is more correctly called the ﬂow
+builder. This is the very top level of the system (see the System
+Overview illustration at the end of this chapter). If you are
+familiar with the previous generations of the processing system,
+the ﬂow builder is analogous to the editor that was used to build
+jobs in those previous generations. In fact, the ﬂow builder is
+just a very specialized editor; it actually has no notion of
+geophysics built into it. Its primary purpose is to present menus
+and accumulate a collection of parameters, write those
+parameters to disk, and then launch programs that will use the
+parameters. The ProMAX Flow Builder Window Map
+illustration (at the end of this chapter) sketches the various ﬂow
+builder menus, and the Flow Builder illustration (at the end of
+this chapter) shows an screen image of the Flow Menu where
+jobs are actually built and executed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Menu Files39
+
+Developer’s Programming Guide
+
+Menu Files
+In order for the ﬂow builder to know how to present parameters
+to the user, it must read menu speciﬁcation ﬁles, which are also
+called menu ﬁles. Menu ﬁles are closely integrated with the
+underlying processing tools; both are usually written by the
+same author. Within the menu ﬁles, programmers specify what
+parameters should exist, what their properties are—such as
+parameter type, default value, and description—and how they
+interrelate. Experience has shown that good menu parameter
+speciﬁcation evolves to the point of approaching a language; at
+Landmark, we use Lisp, a language with suitable features. The
+resulting menu speciﬁcation is extremely well-suited to
+handling traditional problems, such as context-sensitive hiding
+of unused parameters, and is clearly one of the cornerstones of
+ProMAX’s success. Please refer to the Menus chapter for
+further discussion of ProMAX menu speciﬁcations.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution40
+
+Developer’s Programming Guide
+
+Flow Execution
+When a user clicks on the Execute button on the Flow Menu,
+the ﬁrst step that the ﬂow builder performs is to write all of the
+parameters to disk in the form of a packet ﬁle. A packet ﬁle is
+analogous to the ASCII job deck that existed in older systems,
+except that it is binary in form and cannot be modiﬁed by any
+editor except the ﬂow builder. This protects the integrity of the
+contents. The ﬂow builder writes the packet ﬁle into the ﬂow
+directory that was created when the user constructed a new ﬂow
+or copied an existing ﬂow. After the ﬂow builder writes the
+packet ﬁle, it executes the following shell command:
+superExec packet_ﬁle host_name
+
+Super Executive
+The preceeding shell command launches the Super Executive,
+or superExec for short. The ﬂow builder executes this Super
+Executive shell immediately, unless the job was submitted to a
+queue. The Super Executive supplies the command line with the
+path to the packet ﬁle and the name of the host on which the
+ﬂow builder is running. The Super Executive is, in a sense,
+similar to the ﬂow builder—it is restricted in purpose and has no
+notion of geophysics built into it. It is responsible for seeing
+that the intended processing actually happens so the ﬂow
+builder can go off and do something else, like build another
+ﬂow.
+The Super Executive ﬁrst checks for the presence of multiple
+tasks within the packet ﬁle. For example, if there are multiple
+serial input steps in a ﬂow, the Super Executive subdivides the
+packet ﬁle and executes the separate jobs sequentially. In
+addition, the Super Executive checks to see if a job should be
+run on another host. It also performs other tasks, such as
+expanding certain macros—for example, the Parameter Test—
+in what we could loosely describe as ﬁltering the packet ﬁle.
+The Super Executive knows how to do most of these things
+because it receives instructions from programmers via special
+parameters that are included in the menu ﬁles, and are therefore
+included in the packet ﬁle.
+Some of the functionality within the Super Executive could be
+included in the ﬂow builder without changing the behavior of
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution41
+
+Developer’s Programming Guide
+
+the system. The exception is that the Super Executive waits on
+the completion of the tasks that it spawns, rather than spawning
+them in the background. This enables it to spawn processes
+sequentially if required, and makes the spawning of one
+subprocess contingent on completion of the previous one. It
+also allows the Super Executive to report the completion status
+of any process back to the ﬂow builder—even processes that are
+not strictly part of the ProMAX product.
+After the Super Executive modiﬁes the packet ﬁle, it writes a
+new packet ﬁle in a scratch directory and launches the process
+that does the actual work. In a normal processing ﬂow, the form
+of this command is:
+exec.exe packet_ﬁle host_name PID
+
+Executive
+The preceeding command launches the Executive, or exec for
+short. The Executive supplies the command line with the path to
+the packet ﬁle, the name of the host on which the ﬂow builder is
+running, and the process ID of the Super Executive. If the
+processing ﬂow contains stand-alone or other special tools, the
+correct path to the process which was speciﬁed in the menu ﬁle
+is substituted for exec.exe. The full path to the process can vary
+with release and may also be controlled by the user via the
+Alternate Executive directive.
+The Executive includes the actual processing tools, such as
+gain, decon, ﬁlter, etc. Ordinary processing tools are not
+separate programs, but are rather a set of routines that are linked
+together in the Executive. Tools can be single trace input and
+output types or one of a number of multi-trace types (see the
+Processing Pipeline illustration at the end of this chapter). The
+primary function of this manual is to provide you with
+information on how to add functionality to the Executive.
+You will see the terms exec and Executive used frequently in
+this document. They are often used interchangeably, but we will
+restrict the term exec to refer literally to the program named
+exec.exe, and the term Executive to refer to the body of
+software that surrounds the actual processing tools and handles
+the ﬂow of data within the pipeline.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution42
+
+Developer’s Programming Guide
+
+Each processing tool that is linked into the Executive must have
+two parts: an initialization routine and an execution routine. The
+initialization routine checks the input parameters for validity,
+sets global parameters (if appropriate), creates header entries,
+allocates memory, and other miscellaneous tasks that must be
+performed before traces can be processed. The execution
+routine is ideally a narrow-minded routine that simply processes
+the traces and headers. Both routines are surrounded by the
+Executive, which does everything it can to make life easy for
+the initialization and execution routines.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution43
+
+$PROMAX_HOME
+
+Developer’s Programming Guide
+
+/sys
+
+/bin
+promax
+promax3d
+promaxvsp
+/exe
+exec.exe
+superExec
+*.exe
+
+/sdi
+/(3rd party )
+
+/lib
+libxxxxx.so
+
+/help
+promax2d.pdf
+promax3d.pdf
+(Manuals)
+
+/port
+
+/promax
+*.pdf (Adobe)
+*.help (ASCII)
+/promax3d
+/promaxvsp
+
+/menu
+promax
+promax3d
+promaxvsp
+/misc
+*.rgb (colormaps)
+ProMAX defaults
+/etc
+conﬁg_ﬁle
+product
+pvmhosts
+qconﬁg
+
+ProMAX Directory Structure
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution44
+
+Developer’s Programming Guide
+
+PROMAX_DATA_HOME
+Area
+
+/data
+
+/area1
+DescName
+Project
+
+Parameter Tables
+
+Trace Headers
+
+Line
+
+/line1
+DescName
+12345678CIND
+12345678CMAP
+
+17968042TVEL
+317490267TGAT
+22783694TFBP
+36247238TMUT
+
+/12345678
+HDR1
+HDR2
+TRC1
+TRC2
+/ﬂow1
+DescName (ASCII)
+TypeName (ASCII)
+job.output (ASCII)
+packet.job (Binary)
+job.output (Binary)
+/ﬂow2
+
+Flow
+
+/OPF.CDP (CDP)
+#s0_OPF_CDP.GEOMETRY.C_S
+#s0_OPF_CDP.GEOMETRY.ELE
+
+/OPF.CHN (Channel)
+
+Ordered Parameter
+Files database
+
+OPF60_CHN
+OPF60_CHN.GEOMETRY.FOLD
+OPF60_CHN.GEOMETRY.SLOOKUP
+
+/OPF.ILN (Inline-3D)
+/OPF.LIN (Line)
+/OPF.OFB
+/OPF.PAT (Pattern)
+/OPF.SIN (Source)
+/OPF.SRF (Surface Station)
+/OPF.TRC (Trace)
+/OPF.XLN (Crossline)
+/OPF.XLN (Crossline-3D)
+
+ProMAX Data Directory Structure
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution45
+
+Developer’s Programming Guide
+
+Traces
+
+Trace
+Headers
+
+Misc.
+Map
+
+Dataset Components
+
+Line
+Units
+X Ref
+Y Ref
+Lo Cut
+Hi Cut
+Total # of CDP’s
+etc.
+Source
+X Coord
+Y Coord
+Chans
+Uphole
+Static
+Elevation
+etc.
+
+Trace
+FB Pick
+Offset
+Static
+etc.
+Surface Location
+Fold
+X Coord
+Y Coord
+Static
+Datum Vel
+etc.
+
+Channel
+Static
+Amplitude Com
+etc.
+
+CDP
+Fold
+X Coord
+Y Coord
+Elev
+Nearest SRF
+Elev Static
+etc.
+
+Other Docs
+
+Search Page
+
+Offset
+Bin Center
+Mean Offset
+etc.
+
+Known Problems
+
+Flow Execution46
+
+Developer’s Programming Guide
+
+Mutes
+
+Gates
+
+Surg Mutes
+
+Kills
+
+Reversals
+
+Horizons
+
+Velocities
+
+Etc....
+
+Ordered Database Files
+Parameter Tables
+
+Flow
+Directory
+
+Packet File
+(packet.job)
+
+Job Output
+(job.output)
+
+DescName
+
+TypeName
+
+Flow Components
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution47
+
+Developer’s Programming Guide
+
+Job Builder
+(promax.exe)
+Batch
+Queue
+Super Executive
+(superExec)
+
+Stand-alone
+Programs
+
+Executive
+(exec.exe)
+Tool Caller
+
+IPC Tool
+
+AGC
+
+Diskread
+
+NMO
+
+Line Database
+Information
+(datasets, parameter tables,
+ordered database ﬁles, etc.)
+
+Mute
+Filter
+
+Packet File
+
+System Overview
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution48
+
+Developer’s Programming Guide
+
+ProMAX Flow Builder Window Map
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution49
+
+Developer’s Programming Guide
+
+Windows
+Overlap
+
+Area: XXXXXX
+Line: YYYYYY
+Flow: ZZZZZZ
+
+Edit Flow
+
+Seismic Datasets
+
+Other Docs
+
+Processes
+
+Window
+Overlay
+Parameter Tables
+
+Search Page
+
+Known Problems
+
+Flow Execution50
+
+Developer’s Programming Guide
+
+Processing Flow
+Global Options
+
+Flow Builder
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution51
+
+Developer’s Programming Guide
+
+Input
+Data
+
+FK Filter
+Gain
+Running Mix
+Mute
+Stack
+NMO
+
+Output
+Data
+
+Single Trace Processes
+
+Multi-Trace Processes
+
+Processing Pipeline
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Flow Execution52
+
+Other Docs
+
+Developer’s Programming Guide
+
+Search Page
+
+Known Problems
+
+

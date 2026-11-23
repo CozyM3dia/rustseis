@@ -1,0 +1,265 @@
+Compare Autostatics Stack2382
+
+ProMAX® Reference
+
+Compare Autostatics Stack
+Compare Autostatics Stack creates two CDP stacks, with
+and without applied residual statics.
+Note: This process requires an Xserver capable of providing
+an 8-bit Pseudo-color display to run. Please see section titled
+Running Older Pseudo-color Tools in the Display Color
+section of the System Administration Guide.
+
+Theory
+Stacks are written to a temporary scratch ﬁle to display. You
+can use the screen swap facility in Trace Display to compare
+the stacks and evaluate the improvement resulting from the
+residual statics solution.
+
+Usage
+The processing steps included in this macro are as follows:
+Disk Input
+Reproduce (by ensembles, 2 copies)
+IF (Ensemble #1)
+Trace Header Math (PARMTEST=Without Autostatics)
+ELSE
+Trace Header Math (PARMTEST=With Autostatics)
+Database/Header Transfer (input statics to headers)
+Header Statics (apply residual statics)
+ENDIF
+CDP/Ensemble Stack (Mean sum)
+Disk Output (to scratch ﬁle)
+Disk Input (sort by REPEAT number)
+Stack Display
+Delete Scratch File (optional)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Compare Autostatics Stack2383
+
+ProMAX® Reference
+
+The following list deﬁnes the autostatics database statics
+parameter naming conventions:
+Database Entries
+Order
+
+Infotype
+
+Parameter
+
+Description
+
+SIN
+
+STATICS
+
+SCORXXXX
+
+Source Correlation Autostatics values
+
+SIN
+
+STATICS
+
+SPWRXXXX
+
+Source Maximum Power Autostatics
+values
+
+SIN
+
+STATICS
+
+SDF1XXXX
+
+Source Differential Autostatics values
+
+SIN
+
+STATICS
+
+SDF2XXXX
+
+Source Summed Differential
+Autostatics values
+
+SIN
+
+STATICS
+
+S_GAXXXX
+
+Source pure Genetic Algorithm
+Autostatics values
+
+SIN
+
+STATICS
+
+S_SAXXXX
+
+Source pure Steepest Ascent
+Autostatics values
+
+SIN
+
+STATICS
+
+SHYBXXXX
+
+Source Hybrid GA/SA Autostatics
+values
+
+SRF
+
+STATICS
+
+RCORXXXX
+
+Receiver Correlation Autostatics
+values
+
+SRF
+
+STATICS
+
+RPWRXXXX
+
+Receiver Maximum Power Autostatics
+values
+
+SRF
+
+STATICS
+
+RDF1XXXX
+
+Receiver Differential Autostatics
+values
+
+SRF
+
+STATICS
+
+RDF2XXXX
+
+Receiver Summed Differential
+Autostatics values
+
+SRF
+
+STATICS
+
+R_GAXXXX
+
+Receiver pure Genetic Algorithm
+Autostatics values
+
+SRF
+
+STATICS
+
+R_SAXXXX
+
+Receiver pure Steepest Ascent
+Autostatics values
+
+SRF
+
+STATICS
+
+RHYBXXXX
+
+Receiver Hybrid GA/SA Autostatics
+values
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Compare Autostatics Stack2384
+
+ProMAX® Reference
+
+Parameters
+SELECT input trace data ﬁle
+Select an input dataset ﬁle from the Datasets menu. This
+should contain NMO corrected data with elevation statics
+applied. Regardless of the trace order of this ﬁle, it will be
+sorted to CDP order by this process.
+SPECIFY the input CDP range(s)
+Enter the CDP range(s) for residual statics stack
+comparisons.
+Temporary SCRATCH data ﬁle
+Select the dataset ﬁle for temporary storage of the autostatics
+comparison stack results. This ﬁle will remain on the system
+unless you choose to delete upon completion.
+Automatically delete this ﬁle upon completion?
+Select No to save a ﬁle after the job completes in order to
+produce a hardcopy plot of the results. Select Yes, the
+default, to automatically delete the scratch ﬁle.
+Normal database entry naming mode?
+Select Yes if the database entry ends in 0000. Otherwise, you
+must select the statics solution database entry to use.
+Type of residual statics to apply
+This appears if Yes to Normal database entry naming
+mode. Select one of the following autostatics algorithms to
+compute residual statics:
+• Maximum Power Autostatics: Apply residual statics
+computed using Power Maximization Residual Statics.
+• Correlation Autostatics: Apply residual statics computed using Correlation Residual Statics.
+• Differential Autostatics: Apply residual statics computed using Differential Autostatics.
+• Summed Differential Autostatics: Apply residual statics computed using Summed Differential Autostatics.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Compare Autostatics Stack2385
+
+ProMAX® Reference
+
+• Pure Steepest Ascent Autostatics: Apply residual statics computed using the pure steepest ascent option in
+Hybrid GA/SA Autostatics.
+• Hybrid Genetic Algorithm/Steepest Ascent Autostatics: Apply residual statics computed using Hybrid
+Genetic/Steepest Ascent Autostatics.
+Source residual statics database parameter
+This appears if No to Normal database entry naming mode.
+Select the Source Residual Statics database entry. This will
+normally be Order=SIN, Infotype=STATICS, and
+Parameter=SCOR, SPWR, SDF1, SDF2, S_GA, S_SA, or
+SHYB, depending on the type of residual statics run. Each
+parameter ends with the XXXX unique four digit number.
+Receiver residual statics database parameter
+This appears if no to Normal database entry naming mode.
+Select the Receiver Residual Statics database entry. This will
+normally be Order=SRF, Infotype=STATICS, and
+Parameter=RCOR, RPWR, RDF1, RDF2, R_GA, R_SA, or
+RHYB, depending on the type of residual statics run. Each
+parameter ends with the XXXX unique four digit number.
+Select display DEVICE
+Select This Screen for current display or type in a display
+name to override the current display default.
+Number of traces per display screen
+Enter the number of traces to display on a screen at a time.
+Each stack will be a trace ensemble, so that if the entire
+stack doesn’t ﬁt on the screen, extra traces will be displayed
+on a partially full screen and the next stack will start on a
+new screen.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

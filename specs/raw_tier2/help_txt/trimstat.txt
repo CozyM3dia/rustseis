@@ -1,0 +1,102 @@
+CDP Trim Statics2380
+
+ProMAX® Reference
+
+CDP Trim Statics
+CDP Trim Statics optimizes trace alignments within a CDP
+gather.
+
+Theory
+After all efforts have been made to obtain the optimum
+surface-consistent statics and velocity solutions, a ﬁnal pass
+of non-surface consistent CDP trim statics may be applied to
+prestack data.
+For a general discussion of input requirements, database
+entries, and how residual statics are applied, refer to the
+Residual Statics Overview.
+Time gates are selected interactively from the initial stack
+display. The traces within a CDP gather are cross-correlated
+against a smoothed version of the corresponding pilot trace.
+The smoothed pilot trace is the sum of the Smash number of
+CDPs speciﬁed by you when selecting the autostatics
+horizons. The cross-correlations are used to pick time shifts
+which will best align the CDP gather traces with the reference
+stack trace. Correlation Autostatics is used for this
+application, so most of that program’s options and ﬂexibility
+are available for use in computing trim statics.
+
+Usage
+Successful execution of CDP Trim Statics will create the
+following database entries. These attributes may be viewed
+and edited in the Ordered Database. It is necessary to run
+Apply Residual Statics, to apply these database entries.
+Database Entries
+Order
+
+Parameter
+
+Description
+
+TRC
+
+STATICS
+
+TRIM0000
+
+Trim Statics for each Trace
+
+TRC
+
+Other Docs
+
+Info Type
+
+STATICS
+
+TR_Q0000
+
+Quality measure of Trim Static
+
+Search Page
+
+Known Problems
+
+CDP Trim Statics2381
+
+ProMAX® Reference
+
+Parameters
+Select Trace data ﬁle
+Select a seismic data ﬁle for the autostatics computation.
+Select trim statics horizon ﬁle
+Select a trim statics horizon ﬁle. This ﬁle contains the
+previously chosen time gates for the autostatics reference
+horizons.
+Minimum live samples in a gate (percent)
+Enter the percentage of live sample for any gate. If more than
+100% minus this percentage of samples in any gate are
+zeroes, the trace is excluded from statics estimates.
+Maximum static allowed (ms)
+Enter the maximum static to limit the magnitude of the
+computed statics.
+Create a new database entry for each run
+Select No to overwrite a previous database entry. This will
+save space on the disk. Select Yes to write new database
+values for each run. This allows the option of returning to a
+previous set of trim static values, but uses more storage
+space.
+Enter 4 digit ID number
+This appears if Yes to Create a new database entry for each
+run. Enter a 4 digit number to identify the database output
+parameters, such as TRIMXXXX. Where XXXX is a character
+or number.
+Caution: This job will not run if you use a blank for one of
+the digits.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

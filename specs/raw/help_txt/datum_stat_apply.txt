@@ -1,0 +1,51 @@
+Datum Statics Apply
+Datum Statics Apply computes and applies a static shift to
+processing datum for each input trace.
+
+Theory
+This process reads three static values from the OPF
+database; a total source static from the SIN OPF, a total
+receiver static from the SRF OPF, and a CDP mean static
+from the CDP OFP. It then computes and applies NMO_STAT
+which is the static applied before NMO.
+In order to understand how statics are computed and
+applied, refer to the Statics Overview.
+
+Usage
+The static value is SIN GEOMETRY S_STATXX+ SRF
+GEOMETRY R_STATXX +CDP GEOMETR C_STATXX. These
+statics parameters are generated with Datum Statics
+Calculation*. The XX deﬁnes a 2 character speciﬁed
+identiﬁcation number.
+
+Parameters
+Source datum statics database parameter
+Select the Source Datum Statics database entry. Normally,
+Order=SIN, Infotype=GEOMETRY, and Parameter=
+S_STATXX..
+Receiver datum statics database parameter
+Select the Receiver Datum Statics database entry. Normally,
+Order=SRF, Infotype=GEOMETRY, and Parameter=
+R_STATXX.
+CDP datum statics database parameter
+Select the CDP Datum Statics database entry. Normally
+Order=CDP, Infotype=GEOMETRY, and Parameter=
+C_STATXX.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Datum Statics Apply2295
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

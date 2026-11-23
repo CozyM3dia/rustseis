@@ -1,0 +1,14 @@
+{
+  "name": "Prepare_Parity_Input_And_RustSeis_Outputs",
+  "steps": [
+    { "tool": "segd_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik\\00001000.segd", "live_only": true } },
+    { "tool": "trace_len", "params": { "length_ms": 4000.0 } },
+    { "tool": "debias", "params": {} },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy", "comment": "Parity input NIAS shot 1000" } },
+    { "tool": "filter", "params": { "spec_type": "Ormsby", "phase": "Zero", "freqs": [10.0, 20.0, 60.0, 80.0], "pad_pct": 25.0 } },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_bp.sgy", "comment": "RustSeis Ormsby 10-20-60-80 Zero Phase" } },
+    { "tool": "segy_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy" } },
+    { "tool": "agc", "params": { "operator_ms": 500.0, "basis": "Rms", "anchor": "Center", "target_amp": 1.0 } },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_agc.sgy", "comment": "RustSeis AGC 500ms RMS Center" } }
+  ]
+}

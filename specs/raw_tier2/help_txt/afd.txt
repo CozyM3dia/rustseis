@@ -1,0 +1,540 @@
+Finite Difference Modeling360
+
+ProMAX® Reference
+
+Finite Difference Modeling
+Finite Difference Modeling provides an accurate, but
+compute intensive method of forward modeling the earth’s
+response.
+
+Theory
+A highly complex velocity and density ﬁeld is easily built
+using the Interactive Velocity Editor. Finite Difference
+modeling then divides the ﬁeld into a very ﬁne twodimensional grid. Within each rectangular grid point, velocity
+and density values are approximately constant, and a
+compressional wave can be accurately propagated through
+the grid point. As long as the rectangular grid points remain
+sufﬁciently small, rapid lateral velocity and/or density
+variations are easily accounted for, and propagation of the
+wave ﬁeld across the grid point becomes a simple
+mathematical process.
+Finite difference modeling offers two modes of modeling:
+• Exploding Reﬂector is a poststack, zero-offset form of
+modeling.
+• Point Source simulates the ﬁring of a shot into an array
+of receivers with ﬁnite offsets.
+Both modeling modes will produce synthetic data or a series
+of time snapshots that can be replayed using Finite
+Difference Movie.
+Exploding Reﬂector modeling
+In Exploding Reﬂector mode, points along reﬂectors
+simultaneously begin propagating a pressure wave outward
+in all directions beginning at time zero. The amplitude of each
+portion of the wave ﬁeld at time zero is a function of the
+velocity and density contrasts on either side of the reﬂector.
+Along a linear reﬂector, all outward moving waves from each
+point along the reﬂector cancel except a wave front that
+moves outward away from the linear reﬂector. If the reﬂector
+terminates abruptly, there will be no cancellation of waves
+moving outward from the end of the reﬂector, and a
+diffraction event will be produced. For each time increment,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling361
+
+ProMAX® Reference
+
+the wave ﬁeld is stepped through every grid within the model,
+and a new wave ﬁeld is produced for the next time sample. As
+pressure waves intersect the surface of the model, they are
+recorded at that particular time as a seismic event. To model
+two-way time, all wave fronts move at half the actual velocity
+of the model. This way it takes twice as long for an event to
+propagate upward from a reﬂector to the surface, which is
+the same time it would have taken for the wave ﬁeld to
+propagate downward from the surface, bounce off the
+reﬂector, and propagate back up to the surface traveling at
+the true velocity of the medium. This assumption works for
+reﬂected energy because, in the case of a shot and receiver
+being coincident, the wave ﬁeld propagates downward to the
+reﬂector and then back upward to the shot-receiver pair
+along exactly the same path. Moving upward from the
+reﬂector to the shot-receiver pair at half the true velocity is
+therefore equivalent to propagating a wave downward and
+back upward at the true velocity.
+Advantages of Exploding Reﬂector modeling
+The Exploding Reﬂector mode produces an unmigrated time
+stacked section that would have been created if the seismic
+data had been recorded with coincident shot-receiver pairs,
+that is everything at zero offset. It provides an excellent look
+at how events will be created in the vicinity of localized
+velocity variations such as near-surface low-velocity lenses,
+karsted topography, buried channels, and how the time
+arrival of deeper events will be distorted in the presence of
+shallower lateral velocity variations or complex structures
+such as thrust belts or overhanging salt domes. When
+modeling high-fold lines, Exploding Reﬂector runs orders of
+magnitude faster than the shot mode.
+Disadvantages of Exploding Reﬂector modeling
+No attempt is made to model the effect of separating the shot
+and receiver (non-zero offsets). When a velocity ﬁeld has no
+lateral variation, reﬂections exhibit a hyperbolic moveout
+pattern that is easily corrected with the Dix Equation. Shots
+and receivers are easily moved back to zero offset, where their
+responses can then be stacked. With non-zero offsets,
+receivers near the shot encounter a different velocity ﬁeld
+than those at far offsets. Moveout becomes non-hyperbolic.
+Further, in the case of dipping reﬂectors, CDP smear
+becomes a problem as the actual reﬂection point moves
+updip along the reﬂector at larger offsets. These offsetOther Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling362
+
+ProMAX® Reference
+
+dependent effects can only be modeled using the Point
+Source mode.
+Also, multiples are modeled incorrectly. In the Exploding
+reﬂector mode, wave ﬁelds propagate at half the true interval
+velocity, so if an upgoing event were to be reﬂected from the
+surface back to the original event, and then back up to the
+surface, this multiple would take twice as long to traverse the
+path as it should have. Thus, peg-leg and interbed multiples
+all exhibit twice their correct periodicity. Multiples can only
+be properly modeled using the Point Source mode.
+Point Source modeling
+To accurately model acquisition of a seismic line, you must
+use the Point Source mode. A point source is ﬁred into a
+receiver array having ﬁnite, non-zero offsets. Waves
+propagate downward from the shot and upward, if the shot is
+buried, at the true interval velocity of the medium. When the
+wave ﬁeld encounters a reﬂector, it propagates back up
+through the medium. When the wave ﬁeld hits the receivers,
+the wave ﬁeld is recorded at that particular time. Direct
+arrivals and multiples are also produced.
+During Finite Difference Modeling, input seismic traces are
+replaced with synthetic data, producing a synthetic dataset
+that has the same geometry and headers as the original
+dataset. You may want to create a new line for modeling.
+Note: This option only works if a shot is on a receiver location
+and the receiver spacing is exactly twice the CDP spacing.
+Note: Amplitude variation with offset due to variations in
+Poisson’s ratio are not modeled with this acoustic
+(compressional wave only) code. Modeling of AVO effect
+requires elastic (compressional and shear wave) code, which
+increases computer run-times by at least another order of
+magnitude.
+Advantages of Point Source modeling
+Since wave ﬁelds traverse the same path as during seismic
+acquisition, offset-dependent effects such a non-hyperbolic
+moveout, ray kinking, and CDP smear are accurately
+modeled. Also, multiples, refractions and direct arrivals are
+modeled properly. The wave ﬁeld is propagating everywhere
+at true interval velocity, so peg-leg and inter-bed multiples
+have proper periodicity. Rayleigh wave modeling requires
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling363
+
+ProMAX® Reference
+
+knowledge of shear wave velocities, therefore, no ground roll
+is produced within this process.
+Disadvantages of Point Source modeling
+The Point Source mode will typically require several orders
+of magnitude more compute time than an Exploding
+reﬂector model of the same velocity ﬁeld. Each shot must be
+modeled as a single propagation through the entire medium
+for the trace length of the shot record. In high-fold shooting,
+you will have to model many shots to produce a stacked
+section. With the Exploding Reﬂector mode, you propagate
+a wave ﬁeld through the medium only one time to produce
+the equivalent stacked section.
+Also, the Point Source mode generates a large prestack
+dataset, while the exploding reﬂector mode generates a
+relatively small poststack data volume.
+
+Usage
+You can model complex geometry, such as large skips in the
+data or topography by using the geometry of an existing
+dataset. The shot and receiver locations are taken from the
+headers of the input dataset but the data on the traces is
+replaced by the modeled data. The shot and receiver locations
+are determined by taking the x,y locations from the headers
+and projecting them to CDP location using the database; the
+database must have geometry deﬁned. If you specify to use
+elevation, the header REC_ELEV & SOU_ELEV deﬁnes the
+receiver and source elevations.
+If you do not have an existing dataset with geometry, create
+one. Start by creating a dummy dataset using Null Data File
+or Synthetic Trc Generation. Then install geometry into
+that dataset using standard ProMAX® geometry methods.
+To yield an approximate comparison of run times, an
+Exploding Reﬂector model measuring 7000 m by 2000 m
+requires 12 minutes to produce three seconds of data with a
+peak frequency of 20 Hz when running on an IBM RS/6000
+Model 350.
+To generate a single shot for that same model requires
+approximately 3 CPU minutes. Therefore, a reﬂection survey
+containing 160 shots requires 8 hours. Larger reﬂection
+surveys can be run overnight or during a weekend.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling364
+
+ProMAX® Reference
+
+Run times increase approximately as the cube of frequency,
+and increase as the ratio of maximum velocity to minimum
+velocity in the model.
+Run times increase as the inverse cube of the grid
+adjustment factor. Cutting the grid adjustment factor in half
+increases the run time eight-fold.
+
+References
+Kelly, K.R., Ward, R. W., Treitel, S., and Alford, R. M., 1976, Synthetic seismograms: a ﬁnite-difference approach: Geophysics, 41, 2-27.
+Kelly, K.R. and Marfurt, K. J., 1990, Numerical modeling of seismic wave propagation, Geophysics reprint series no. 13: Society of Geophysics.
+
+Parameters
+Velocity ﬁeld
+Select the interval-velocity-versus-depth ﬁeld from the
+parameter ﬁles list. This ﬁeld can be created within the
+Interactive Velocity Editor or by converting another type of
+ﬁeld such as interval-velocity-versus-time using Velocity
+Manipulation. The sampling of this velocity ﬁeld for the ﬁnite
+difference grid depends on the peak frequency used in the
+modeling.
+Note: The velocity ﬁeld is linearly interpolated. If a shot or the
+receivers are outside the limits of the deﬁned locations of the
+ﬁeld, the velocity ﬁeld is extrapolated using the last points
+encountered at the edges of the ﬁeld.
+Do you want to input a density ﬁeld?
+Select Yes to input a density ﬁeld. One modeling trick is to
+generate reﬂectors within a homogeneous velocity ﬁeld by
+just using density contrasts. These simple, density-derived
+reﬂectors can be migrated accurately with time migration
+routines. The density ﬁeld can easily be created by the
+Interactive Velocity Editor.
+Note: The density ﬁeld is linearly interpolated. If a shot or the
+receivers are outside the limits of the deﬁned locations of the
+ﬁeld, the density ﬁeld is extrapolated using the last points
+encountered at the edges of the ﬁeld.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling365
+
+ProMAX® Reference
+
+Density ﬁeld
+This appears if Yes to Do you want to input a density ﬁeld.
+Select a density-versus-depth ﬁeld from those listed in the
+parameter ﬁles list.
+Generate synthetic data or produce movie snapshots?
+Select to generate:
+• Synthetic data creates synthetic data as output with
+normal trace data.
+• Movie snapshots produces a series of snapshots to display using Finite Difference Movie. It is not possible to
+use one modeling run to produce both movie snapshots
+and synthetic data.
+Time interval (ms) to take snap shots for movie
+This appears if Movie snapshots to Generate synthetic
+data or produce movie snapshots. Enter the time interval in
+ms, between frames of the ﬁnite difference movie. Larger time
+intervals produce a less continuous movie than smaller
+intervals.
+Is this a point source or an exploding reﬂector run?
+Select the type of run:
+• Exploding reﬂector produces a stacked seismic section
+by using the reﬂector locations as sources. This is the
+principle used by almost all poststack migration
+schemes.
+• Normal point source simulates an explosion at a speciﬁed location.
+Depth of ﬁeld for modeling
+Enter the maximum depth of ﬁeld to model in ft. or m. If this
+depth is greater than the velocity ﬁeld, velocities are
+extrapolated downward using the last points found at the
+bottom of the ﬁeld. If this value is less than the depth of the
+velocity ﬁeld, the velocity ﬁeld is truncated at the shallower
+depth.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling366
+
+ProMAX® Reference
+
+If you are getting geometry from the headers and putting
+source and receiver locations on topography, this parameter
+speciﬁes the depth below the datum.
+Length of time (ms) to run modeling per shot
+Enter the length in ms to produce a seismic trace length or
+ﬁnite difference movie.
+Approximate peak frequency to be modeled
+Enter the dominant frequency that will be contained in the
+wavelet produced by this model. Frequency amplitudes will
+fall off rapidly above this value.
+For an exploding reﬂector run, this peak frequency parameter
+can be very approximate; the reﬂectors in the lower velocity
+portion of the ﬁeld will have a lower frequency than those in
+the higher velocity portion.
+Note: Run time is extremely sensitive to this parameter.
+Increasing peak frequency by a factor of 2 increases run time
+by a factor of 8.
+Type of Source Wavelet
+This appears if Normal Point Source to Is this a normal
+point source or an exploding reﬂector run. Select the type
+of source wavelet from:
+• Zero Phase Ricker uses the classical zero phase ricker
+wavelet.
+• Minimum Phase Ricker uses a minimum phase ricker
+wavelet.
+• Zero Phase Klauder uses a zero phase klauder wavelet
+which simulates a correlated sweep.
+• Minimum Phase Klauder uses a minimum phase
+Klauder wavelet.
+• Zero Phase Ormsby uses a zero phase Ormsby wavelet
+for the source.
+• Minimum Phase Ormsby uses a minimum phase
+Ormsby wavelet for the source.
+• Gaussian wavelet uses a Gaussian is a band-limited
+(zero phase) impulse which can be later convolved with
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling367
+
+ProMAX® Reference
+
+another wavelet. This wavelet contains zero Hz. The
+Exploding Reﬂector models with this wavelet.
+If you are producing move snapshots, we recommend you use
+a gaussian wavelet or a zero phase ricker wavelet.
+Grid adjustment factor
+Enter the grid adjustment factor to change the grid spacing
+and time steps. Run times increase as the inverse cube of the
+grid adjustment factor. Cutting the grid adjustment factor in
+half increases the runtime eight-fold. Sensible values for this
+parameter range between 0.5 and 1.5.
+The default value strikes a compromise between computer
+runtimes and freedom from numerical noise. As a rule of
+thumb, there should be an average of seven grid points per
+wavelength, with an absolute minimum being 5 grid points
+per wavelength for the lowest velocities in the model. The
+wavelength at any point in the model is the local velocity at
+that point divided by the peak frequency parameter. The grid
+adjustment factor is calculated in a linear fashion. For
+example, a grid adjustment factor of 0.8 will reduce the grid
+spacing by 0.8 and therefore increase the points per
+wavelength by 1.0/0.8=1.25. This selection will also reduce
+the time step by a factor of 0.8, thereby increasing the
+number of time steps by a factor of 1.25. Using a grid
+adjustment factor greater than 1.0 will produce a coarser grid
+sampling, which reduces run time and increases numerical
+noise. A value less than 1.0, has the opposite effect.
+CDP spacing, in feet or meters
+Enter the distance in ft. or m between adjacent CDPs. If
+geometry was derived from an input dataset, the velocity
+ﬁeld, source positions, and receiver positions are deﬁned with
+reference to those CDPs.
+Number of CDPs to buffer the edges for the modeling
+ﬁeld
+This appears if Normal Point Source to Is this a point
+source, or an exploding reﬂector run. The horizontal extent
+of the ﬁeld in which the modeling occurs ranges from the leftmost source or receiver position minus this buffer value and
+to the right-most source or receiver position plus this buffer
+value. This buffer value is important for capturing high angle
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling368
+
+ProMAX® Reference
+
+reﬂections that do not come from beneath the sources and
+receivers.
+Note: The velocity ﬁeld is interpolated using the standard
+ProMAX® velocity interpolation routines. If a shot or the
+receivers are outside the limits of the deﬁned locations of the
+ﬁeld, the velocity ﬁeld is extrapolated using the last points
+encountered at the edges of the ﬁeld.
+Reﬂecting or absorbing boundary condition at the surface?
+Select boundary condition at the surface:
+• Reﬂecting boundary is a more realistic state.
+• Absorbing boundary eliminates surface multiples and
+reduces the amplitude of compressional waves moving
+out along the surface as trapped waves. The sides and
+bottom of the ﬁeld always have the absorbing boundary
+condition in order to avoid spurious edge effects.
+If you are placing the source and receivers at elevation, you
+should specify absorbing boundary condition at the surface.
+The effects of a reﬂecting surface with a varying topography is
+not properly modeled.
+CDP of left edge of modeling ﬁeld
+This appears if Movie snapshots to Generate synthetic
+data or produce movie snapshots or Exploding reﬂector to
+Is this a normal point source or an exploding reﬂector
+run. Enter the CDP to appear at the left edge of the model.
+CDP of right edge of modeling ﬁeld
+This appears if Movie snapshots to Generate synthetic
+data or produce movie snapshots or Exploding reﬂector to
+Is this a normal point source or an exploding reﬂector
+run. Enter the CDP to appear at the right edge of the model.
+Take geometry from the headers of an input data set?
+This appears if Synthetic to Generate synthetic data or
+produce movie snapshots and Normal Point Source to Is
+this a normal point source or an exploding reﬂector run.
+Select No to deﬁne a geometry for the model. Select Yes to
+extract geometry information from the headers of an existing
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling369
+
+ProMAX® Reference
+
+dataset. The traces of the input dataset will be replaced with
+modeled synthetic data. You can also use this option to input
+synthetic dataset created by Synthetic trace generation.
+Use elevations from trace headers
+This appears if Yes to Take geometry from the headers of
+an input dataset. Select Yes to model a varying topography.
+Select No to place the source and receiver locations at the
+surface. If you specify yes, the receiver locations are speciﬁed
+with the header word REC_ELEV and the source locations
+are speciﬁed with the header words SOU_ELEV minus
+DEPTH (SOU_ELEV-DEPTH).
+Datum for top of velocity ﬁeld
+This appears if Yes to Use elevations from trace headers.
+Enter the datum elevation that corresponds to zero depth of
+the velocity ﬁeld if you are placing source and receiver
+locations at a varying topography.
+Number of shots
+This appears if No to Take geometry from the headers of
+an input dataset. Each shot is a separate modeling run. The
+lateral extent of each shot is a function of that shot’s source
+and receiver locations.
+CDP of the ﬁrst shot
+This appears if No to Take geometry from the headers of
+an input dataset. Enter the CDP location of the ﬁrst shot.
+CDP increment between shots
+This appears if Number of shots is greater than 1. Enter the
+shot move-up in units of CDP increments.
+Depth of the ﬁrst Shot
+This appears if No to Take geometry from the headers of
+an input dataset. Enter the depth of the ﬁrst shot beneath
+the surface of the model, in ft. or m. Depths are positive
+downward. Negative depths will not be accepted. The rest of
+the shots will be at the same depth unless the VSP/cross-well
+option is used.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling370
+
+ProMAX® Reference
+
+Number of receiver stations
+This appears if No to Take geometry from the headers of
+an input dataset. Enter the number of channels recorded for
+each shot.
+Receiver X locations absolute, or relative to the shot?
+This appears if No to Take geometry from the headers of
+an input dataset. Select location of receivers:
+• Absolute, in which receiver positions are ﬁxed and do
+not move with the shots.
+• Relative, in which receiver locations are positioned relative to the shots and move with them.
+CDP of the ﬁrst receiver
+This appears if Absolute to Receiver locations absolute, or
+relative to the shot. Enter the location of the ﬁrst receiver in
+terms of the CDP geometry.
+Distance (in CDPs) between shot and ﬁrst group
+This appears if Relative to Receiver locations absolute, or
+relative to the shot. Enter the distance between the shot
+and the closest receiver to the shot. This distance is speciﬁed
+in CDP increments and can be a negative value.
+Receiver location increment (in CDPs)
+This appears if No to Take geometry from the headers of
+an input dataset. Enter the distance between adjacent
+receivers in CDP increments. Normal geometry produces a
+receiver station every 2 CDPs.
+Is the modeling for VSP/cross-hole data?
+Select Yes to vary the source or receiver depths.
+Depth increment of source locations in feet or meters
+This appears if Yes to Is the modeling for VSP/cross-hole
+data, and more than one source location is used. Enter the
+depth interval between successive down-hole shots with this
+entry.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Finite Difference Modeling371
+
+ProMAX® Reference
+
+Receiver depths absolute, or relative to the shot?
+Select Relative to move receiver depths along with the shots.
+Depth of ﬁrst receiver in feet or meters
+This appears if Yes to Is the modeling for VSP/cross-hole
+data. SPs can be modeled with a surface source, and a series
+of down-hole receivers. Enter the shallowest of the geophone
+depths. Depths are positive downward. Negative depths will
+not be accepted.
+Receiver depth increment in feet or meters
+This appears if Yes to Is the modeling for VSP/cross-hole
+data. Enter the distance between adjacent geophones in the
+down hole direction in ft. or m.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

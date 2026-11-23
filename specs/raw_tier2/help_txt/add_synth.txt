@@ -1,0 +1,150 @@
+Add Synthetic Data254
+
+ProMAX® Reference
+
+Add Synthetic Data
+Add Synthetic Data adds synthetic data to input traces or
+overwrites them. It is useful for creating model data for
+testing.
+
+Theory
+You can specify events with controlled amplitudes and
+velocities at speciﬁed travel times. You can also vary the dip.
+Amplitudes may be given as positive or negative ﬂoating point
+numbers. Positive dips represent increasing time with
+increasing trace offset.
+The program can generate Ormsby, Klauder, or Ricker
+wavelets, or you can put spikes at the selected times. Each of
+the different types of wavelet will require different
+speciﬁcations, depending on how many frequency values are
+needed to deﬁne that type of wavelet.
+An Ormsby wavelet is deﬁned by a set of four frequencies in
+Hz separated by commas. The four frequencies represent
+sequentially the 0% and 100% points of the low-cut ramp,
+and the 100% and 0% points of the high-cut ramp. These
+ramps are formed by cosine tapers (Hanning Windows) in the
+frequency domain.
+A Klauder wavelet is the wavelet that has the same spectrum
+as a Vibroseis sweep of a given length and frequency range.
+To deﬁne the Klauder wavelet, you must describe the starting
+and ending frequencies and the length in ms of the
+equivalent sweep.
+A Ricker wavelet is deﬁned by a single frequency. Knowing
+the frequency, the width of the wavelet in the time domain
+can be computed.
+
+Usage
+Input ensembles must be shot gathers (primary sort key SIN,
+FFID or SOURCE) or CDP gathers (primary sort key CDP).
+OFFSET must be deﬁned in the input trace headers.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Add Synthetic Data255
+
+ProMAX® Reference
+
+Additive Noise and Spikes can be used immediately after
+Add Synthetic Data to give traces which have both signal
+and noise for testing.
+
+Parameters
+Add to or overwrite input traces
+Select how to handle the input seismic data. The choices are:
+• Overwrite zeroes input traces before generating synthetic data. All traces are live on output.
+• Add to adds synthetic data to input traces. Dead input
+traces remain dead on output.
+Type of synthetic wavelet
+Select type of synthetic wavelet generation. Each of the
+different types of wavelet require different speciﬁcations,
+depending on how many frequency values are needed to
+deﬁne that type of wavelet.
+• Ormsby generates wavelets with four frequency values.
+• Klauder generates wavelets with two frequency values.
+• Ricker generates wavelets with one frequency value.
+• Spike generates spikes at the requested times (no frequency values).
+PHASE of synthetic wavelet
+This appears if Ormsby, Klauder or Ricker to Type of
+synthetic wavelet. Select the phase of synthetic wavelet
+from:
+• Zero generates zero phase wavelets, centered at speciﬁed
+times.
+• Minimum generates minimum phase wavelets, beginning at speciﬁed times.
+Vibroseis sweep length
+This appears if Klauder to Type of synthetic wavelet. Enter
+the sweep length in ms to use to generate Klauder wavelets.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Add Synthetic Data256
+
+ProMAX® Reference
+
+Deﬁne ORMSBY synthetic seismic events
+This appears if Ormsby to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and four frequencies to specify each event with an Ormsby
+wavelet. The type is: 1 for a refractor, 2 for a reﬂector. The
+time is two way travel time in ms. The length is the length of
+the wavelet in ms. The dip is given in degrees. Each Ormsby
+ﬁlter is speciﬁed by a set of four frequencies in Hz separated
+by commas. The four frequencies represent sequentially the
+0% and 100% points of the low-cut ramp, and the 100% and
+0% points of the high-cut ramp. The ramps are formed by
+cosine tapers (Hanning windows) in the frequency domain.
+The speciﬁcations for each event are separated by slashes.
+Deﬁne KLAUDER synthetic seismic events
+This appears if Klauder to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and two frequencies to specify each event with a Klauder
+wavelet. The type is: 1 for a refractor, 2 for a reﬂector. The
+time is two way travel time in ms. The length is the length of
+the wavelet in ms. The dip is given in degrees. The two
+frequencies in Hz represent the start and end frequencies of
+the equivalent Vibroseis sweep. The speciﬁcations for each
+event are separated by slashes.
+Deﬁne RICKER synthetic seismic events
+This appears if Ricker to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and one frequency to specify each event with a Ricker
+wavelet. The type is: 1 for a refractor, 2 for a reﬂector. The
+time is two way travel time in ms. The length is the length of
+the wavelet in ms. The dip is given in degrees. The frequency
+in Hz represents the central frequency of the Ricker wavelet.
+The speciﬁcations for each event are separated by slashes.
+Deﬁne SPIKE synthetic seismic events
+This appears if Spike to Type of synthetic wavelet. Enter
+for each event the type, time, velocity, amplitude, length, dip,
+and 1 frequency to specify each event as a spike. The type is:
+1 for a refractor, 2 for a reﬂector. The time is two way travel
+time in ms. The length is the length of the wavelet in ms.
+(The length of the wavelet is required even when a spike is
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Add Synthetic Data257
+
+ProMAX® Reference
+
+chosen for the output data.) The dip is given in degrees. The
+speciﬁcations for each event are separated by slashes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

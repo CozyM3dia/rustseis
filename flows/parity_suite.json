@@ -1,0 +1,11 @@
+{
+  "name": "RustSeis_Parity_Suite",
+  "steps": [
+    { "tool": "segy_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy" } },
+    { "tool": "filter", "params": { "spec_type": "Butterworth", "phase": "Zero", "freqs": [15.0, 18.0, 60.0, 24.0], "pad_pct": 25.0 } },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_butt_zero.sgy" } },
+    { "tool": "segy_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\input_nias_shot1000.sgy" } },
+    { "tool": "filter", "params": { "spec_type": "Ormsby", "phase": "Minimum", "freqs": [10.0, 20.0, 60.0, 80.0], "rnoise_pct": 1.0, "pad_pct": 25.0 } },
+    { "tool": "segy_write", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\rustseis\\out\\promax_parity\\rustseis_ormsby_minp.sgy" } }
+  ]
+}

@@ -1,0 +1,264 @@
+; IIID IVD 1 DEV DEPTHC
+'(
+ name: MIGET2_SHOT
+label: "Prestack FD Shot Mig."
+value_tab: 52
+
+parameter: parallel
+text: "Perform parallel processing?"
+type: boolean:
+value: nil
+mouse_text: "The migration can be run in parallel on several remote machines simultaneously."
+
+parameter: nprocs
+text: "   Number of parallel processes to spawn"
+type: typein:
+type_desc:  ( int: 5 1 nil)
+value: 1
+mouse_text: "Specify on which machines to spawn the processes below."
+
+
+parameter: machines
+text: "   Specify the machines to run processes on"
+type: edit:
+type_desc: (30 80 3 " Format: machine1,machine2,machine3,machine4
+ Example: silver,packhorse.advance.com,sunpony, monolith, mustang
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 5 )
+value: "XXX"
+mouse_text: "You must specify at least as many machines as the number of processes to spawn.  Extra machines are ignored."
+
+parameter: dx
+text: "Surface location interval (feet or meters)"
+type: typein:
+type_desc:  ( real: 5 nil nil)
+value: 110.0
+mouse_text: "Surface location spacing in feet or meters (consistent with headers).  This is generally twice the CDP interval."
+
+parameter: surf_flag
+text: "Initial migration surface?"
+type: pop_choose:
+type_desc: (
+   ("datum" 0 "No account is taken of surface elevation or shot depths.")
+   ("surface elevation" 1 "Surface elevation is used as initial migration surface.")
+   ("true elevation" 2 "Surface elevation AND shot depths are used as initial migration surface.")
+)
+value: 0
+mouse_text: "Choose how to handle elevation for migration."
+
+parameter: v_datum
+text: "  Reference datum for the velocity field"
+type: typein:
+type_desc:  ( real: 8 nil nil )
+value: -9999.0
+mouse_text: "The velocity reference datum is the elevation that marks zero depth for the velocity field. If input as -9999.0, the reference datum is set to final datum from the database."
+plot_label: t
+
+parameter: fmin
+text: "Minimum frequency (in Hz)"
+type: typein:
+type_desc:  ( real: 5 0.001 nil )
+value: 10.0
+mouse_text: "Frequencies below this value will not be migrated."
+plot_label: t
+
+parameter: fmax
+text: "Maximum frequency (in Hz)"
+type: typein:
+type_desc:  ( real: 5 0.001 nil )
+value: 50.0
+mouse_text: "Frequencies above this value will not be migrated."
+plot_label: t
+
+parameter: time_padding
+text: "Percent to pad trace length"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 17.0
+mouse_text: "Pad the time axis sufficiently to avoid wrap-around."
+plot_label: t
+
+parameter: dz
+text: "Depth sampling interval of output data"
+type: typein:
+type_desc:  ( real: 5 0.0 nil )
+value: 0.0
+mouse_text: "If value equals 0.0, the output depth sampling interval is computed.  "
+
+parameter: depth
+text: "Maximum depth to migrate"
+type: typein:
+type_desc:  ( real: 6 0.0 nil )
+value: 0.0
+mouse_text: "If 0.0, the maximum depth is computed."
+
+parameter: tpad
+text: "Padding beyond first and last group for migration"
+type: typein:
+type_desc:  ( int: 6 0 nil )
+value: 0
+mouse_text: "For a single ended cable or steeply dipping reflectors, padding may be necessary to avoid losing energy off the edges."  
+
+parameter: solver
+text: "What maximum dip would you like to migrate to?"
+type: pop_choose:
+type_desc: (
+   ("70 degrees" 20 "This is the slowest option that uses either a 25 point filter")
+   ("50 degrees" 10 "This option uses a 11 point filter")
+   ("30 degrees" 5 "This is the fastest option that uses a 7 point filter")
+)
+value: 20
+mouse_text: "Different algorithms trade speed for accuracy."
+
+parameter: vel_b
+text: "Get interval velocities from database?"
+type: boolean:
+value: t
+mouse_text: "This migration uses interval velocities in depth.  Do you want to get these velocities from the database?"
+plot_label: t
+
+parameter: velf
+text: "  Select interval vs. depth velocity file"
+type: function:
+type_desc:  ((parm_list "VID") parms)
+value: "no entry"
+selected_item: "No velocity file has been selected!"
+mouse_text: "Use Mouse Button 1 to select an file in depth from the interval velocity vs. depth database."
+plot_label: t
+
+parameter: vels
+text: "Interval velocities in depth for migration"
+type: edit:
+type_desc: (20 80 5 " FORMAT: CDP1: T1-V1,T2-V2,...,Tn-Vn / CDP2: T1-V1,T2-V2,...,Tn-Vn /
+ EXAMPLE: 1:0-5000,900-6725,1500-8571,2000-9670/ 101:0-5100,860-6690,2000-9852/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+ value: "XXX"
+mouse_text: "Use Mouse Button 1 to edit velocities for migration. (See editor for examples.)"
+plot_label: t
+ 
+parameter: changeTapering
+text: "Change the default tapering?"
+type: boolean:
+value: nil
+mouse_text: "Tapering is automatically applied to the bottom and edges of the data.  Enter YES to change the amount of tapering."
+ 
+parameter: ms_taper
+text: "   Bottom taper (in milliseconds)"
+type: typein:
+type_desc: ( real: 6 0 nil )
+value: 200.0
+mouse_text: "The bottom of all traces is tapered to avoid data truncation artifacts when padded with zeros."
+
+parameter: taperTop
+text: "   Upper edge taper (in traces)"
+type: typein:
+type_desc: ( int: 3 0 nil )
+value: 2
+mouse_text: "Edge tapering will be varied linearly between the upper and lower parts of the section."
+
+parameter: taperBot
+text: "   Lower edge taper (in traces)"
+type: typein:
+type_desc: ( int: 4 0 nil )
+value: 20
+mouse_text: "Edge tapering will be varied linearly between upper and lower parts of section. Usually greater toward bottom of section."
+
+exec_data: (
+
+	   ("MIGTAPER"
+		("GENERAL"
+                ("ms_taper" implicit: (if (value 'changeTapering) (value 'ms_taper) 200. ) )
+                ("estimateTaper" implicit: 0 )
+                ("taperTop" implicit: (if (value 'changeTapering) (value 'taperTop) 2 ) )
+                ("taperBot" implicit: (if (value 'changeTapering) (value 'taperBot) 20) )
+	)
+   )
+
+	   ("PARALLEL_TOOL"
+		("GENERAL"
+; The following are parameters for the stand alone capability
+		   	("program"   implicit: "miget2shot.exe" )
+; if no machine name is given, it means execute on this machine. 
+		   	("machines"     implicit: (if (value 'parallel) (value 'machines) " " ))  
+		   	("communication_protocal" implicit: 0 )  
+			("nProcesses" implicit: (if (value 'parallel) (value 'nprocs) 1) )
+
+; Normal program parameters
+                ("version" implicit: "ProMAX $Id: miget2shot.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+		("dx" implicit: (value 'dx))
+		("surf_flag" implicit: (value 'surf_flag))
+		("v_datum" implicit: (value 'v_datum))
+		("fmax" implicit: (value 'fmax))
+		("fmin" implicit: (value 'fmin))
+		("time_padding" implicit: (value 'time_padding))
+		("tpad" implicit: (value 'tpad))
+		("dz" implicit: (value 'dz))
+		("depth" implicit: (value 'depth))
+		("velf" implicit: (if (value 'vel_b) (value 'velf) "NONE"))
+		("vels" implicit: (value 'vels))
+		("solver" implicit: (value 'solver))
+	)
+   )
+         ((if ( = (value 'dz) 0.0) "VOID" "RESAMP")
+                ("GENERAL"
+; resample to desired output
+                        ("SAMPRATE"   implicit: (value 'dz))
+                )
+            )
+)
+
+
+rules: (
+
+	(rule1 (showing 'vels) (do_not_show 'velf) (do_show 'velf))
+	(rule2 (value 'vel_b) (do_not_show 'vels) (do_show 'vels))
+	(vels_default_rule1 (and 
+		(equal (value 'vels) "XXX")
+		(= (db_parmget_line "IUNITSz") 1))
+		(set_value 'vels 
+"1:0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000/"))
+	(vels_default_rule2 (equal (value 'vels) "XXX")
+		(set_value 'vels
+"1:0-1480,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000/"))
+
+	(rule4 (value 'parallel) (do_show 'nprocs) (do_not_show 'nprocs))
+	(rule5 (value 'parallel) (do_show 'machines) (do_not_show 'machines))
+	(rule6 (= (value 'surf_flag) 0) (do_not_show 'v_datum) (do_show 'v_datum))
+ (machine_default_rule1 
+      (equal (value 'machines) "XXX") 
+ 	  (if (equal (printenv 'PROMAX_MACHINES) "")
+;;; xxx will not work on windows
+ 		(set_value 'machines (system "hostname") )
+ 	  (set_value 'machines (printenv 'PROMAX_MACHINES) )
+			) )
+
+ (rule3 (value 'changeTapering)    (progn
+                                    (do_show 'ms_taper)
+                                    (do_show 'taperTop)
+                                    (do_show 'taperBot))
+                             (progn
+                                    (do_not_show 'ms_taper)
+                                    (do_not_show 'taperTop)
+                                    (do_not_show 'taperBot)) )
+)
+
+)
+
+

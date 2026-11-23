@@ -1,0 +1,517 @@
+F-K Filter151
+
+ProMAX® Reference
+
+F-K Filter
+F-K ﬁlter works with F-K Analysis to apply F-K ﬁlters in
+batch mode to a large volume of traces.
+
+Theory
+The ProMAX® processing system applies a frequency-wave
+(F-K) ﬁlter to data which is internally converted to the F-K
+domain. The data is converted from time and space (T-X)
+sampled traces to the F-K domain by a two-dimensional
+Fourier Transform. Once the F-K ﬁlter is applied, the data is
+converted back to the T-X domain by the inverse Fourier
+Transform. Trace mutes, such as ﬁrst break suppression
+mutes, can be reapplied automatically after F-K ﬁltering.
+Conventional vs. ProMAX® F-K FIlters
+A conventional method for controlling impulse responses of
+an F-K ﬁlter is to apply a taper to the ﬁlter in F-K space.
+These ﬁlters are typically a linear ramp or a cosine taper
+within the keep zone of the velocity ﬁlter. The values in the
+center of the keep zone are scaled by 100% and the values at
+the velocity cut lines are scaled by 0%. The ﬁlter is usually
+not scaled to absolute zero; the F-K plane is placed on an
+amplitude pedestal to prevent hard zeros.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter152
+
+ProMAX® Reference
+
+.
+F
+- V1
+
+V1
+
+A
+
+A’
+
++Kn
+
+-Kn
+
+F-K Spectrum of fan ﬁlter velocity range -V1 to V1 accept
+> 90% Attenuation
+
+No Attenuation
+
+25% ﬂat
+A
+
+-V1
+
+V1
+
+A’
+
+100%
+Cross section view of Line A-A’
+Old Style F-K Plane Tapering
+
+In the same manner that abrupt amplitude discontinuities in
+T-X space, such as high amplitude spikes, transform over the
+entire F-K plane, amplitude discontinuities in the F-K plane
+transform over the entire T-X space upon inverse transform.
+The intent of the taper is to prevent abrupt amplitude
+discontinuities in the F-K plane. This method has been used
+in the past to help control the spatial extent of the F-K ﬁlter
+impulse response in the T-X domain.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter153
+
+ProMAX® Reference
+
+No F-K Plane taper --------------------------------Full F-K Plane Taper
+
+As shown above, the F-K plane taper is fairly successful at
+limiting the impulse response. However, the problem of this
+technique is the keep zone of the ﬁlter actually results in a
+region of additional attenuation over the ramp zone. This
+generally leads to overspecifying the keep zone so that the
+desired range of velocities remains at full amplitude.
+ProMAX® F-K Filter
+The F-K ﬁlter used in the ProMAX® processing system takes
+a different approach to control the spatial extent of the
+impulse response in the T-X domain. ProMAX® F-K ﬁlters are
+designed by explicitly specifying the limits of the impulse
+response in the T-X domain and then converting this to a
+mask of F-K coordinate scalers. This mask can then be
+overlaid on the F-K transform of a seismic record. Our ﬁlters
+are designed by using Green’s Theorem to compute an exact
+T-X ﬁlter for a given keep or reject region of the F-K plane.
+This T-X ﬁlter is then spatially and temporally tapered and
+transformed to the F-K domain with a 2-dimensional FFT to
+create the mask.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter154
+
+ProMAX® Reference
+
+In this technique, a pass or reject range is speciﬁed in the FK plane. Because there is no tapering of this ﬁlter in the F-K
+plane, that is keep=1 and reject=0, the impulse response of
+this ﬁlter tends to spread over the entire T-X plane. This ﬁlter
+is computed for a speciﬁc extent in the T-X domain, thus
+limiting the allowed T-X extent of the impulse.
+
+ProMAX® F-K Filter - Full Spatial and Time Aperture - no taper
+
+In the above diagram, the impulse response is generated from
+the speciﬁed keep and kill zones. Note that after the F-K ﬁlter
+mask is generated, the keep zone is full on instead of varying
+from full on to full off.
+In the following diagram the effect of applying a 100% taper
+over all time and all space to this impulse is shown. Note the
+impulse has less spatial and time extent.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter155
+
+ProMAX® Reference
+
+ProMAX® F-K Filter - Full Spatial and Time Aperture - full taper
+
+The ProMAX® F-K ﬁlter explicitly limits the number of traces
+and time samples any input sample can affect. The
+parameters specify the spatial and temporal limits of the ﬁlter
+and how the amplitudes of the impulse response are tapered.
+Typical parameters are: extents are limited to 50 traces and
+500 ms with a 90% ﬂat taper.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter156
+
+ProMAX® Reference
+
+ProMAX® F-K Filter - 500 ms. x 50 trace and 90% ﬂat taper
+
+When the spatial and temporal extents of the ﬁlter decrease,
+the percent ﬂat should probably decrease. The highest
+amplitudes of the impulse are near the origin of the impulse.
+The smaller the extents of the ﬁlter, the larger the
+amplitudes. Thus the need for the longer tapers.
+For large spatial and temporal extents of the ﬁlter, the taper
+length becomes less important because the amplitudes tend
+to fall off naturally as the distance from the impulse
+increases. For short spatial and temporal extents of the ﬁlter,
+the taper has a large effect on the dB separation between the
+keep and kill zones. For smaller extents, use smaller% ﬂats
+(or more tapering) to increase the separation between the
+keep and kill zones.
+
+Usage
+Three options are available for designing the F-K ﬁlters: fan
+ﬁlter, power exponent, and aribtrary polygon.
+The fan ﬁlters are speciﬁed by frequency and velocity limits.
+You have the option of entering an unlimited number of
+frequency-velocity zones to ﬁlter within the F-K domain. If the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter157
+
+ProMAX® Reference
+
+fan regions are allowed to extend beyond the Nyquist
+wavenumber (K-nyquist), only one fan ﬁlter can be speciﬁed.
+Velocity fan ﬁlter speciﬁcations are converted to polygons
+inside the program.
+The power exponent option transforms the data to the F-K
+domain, raises all of the values to a given power, and then
+transforms the data back to the T-X domain. This procedure
+has the effect of enhancing the continuity of the data. As with
+all such techniques, it should be used with care and
+moderation. A power of 1.2 to 1.5 is recommended.
+The arbitrary polygon option speciﬁes a ﬁlter as a polygonal
+region of the F-K plane. Parameters for such polygonal
+regions are input as text F-K pairs, but using F-K Analysis is
+much easier. If using the text input option, be sure that
+polygons do not overlap.
+Filters determined by polygons can vary spatially along the
+line. If polygons vary, F-K ﬁlters are interpolated from one
+location to the next. Filter polygons are not interpolated, but
+the computed F-K ﬁlter masks, designed at each location, are
+interpolated. This interpolation computes a different mask for
+each input ensemble by linearly interpolating the
+surrounding masks on a per F-K sample basis.
+Filters used in the fan or polygon options are designed as T-X
+domain ﬁlters. These ﬁlters can be designed for a speciﬁc size
+and then windowed using elliptical Hanning tapers. The
+smaller the T-X ﬁlter, the less attenuation and smoother the
+response of the resulting F-K ﬁlter. Remember, the larger the
+ﬁlter, the longer the required execution time. T-X data is
+padded with zeros, half the ﬁlter size in each direction prior
+to transformation to F-K to prevent wraparound of
+amplitudes. Windowing the T-X ﬁlter results in a smoother FK response with some reduction in attenuation. F-K Analysis
+should be used to optimize ﬁlter size and windowing
+parameters.
+Filters are designed as either Pass or Reject ﬁlters in the F-K
+plane. Pass ﬁlters gives little attenuation of the data within
+the speciﬁed polygon or fan, while strongly attenuating the
+data outside of this region. A reject ﬁlter strongly attenuates
+the data in the speciﬁed region, while leaving the data outside
+this region relatively unaffected.
+We recommend applying gain corrections before applying F-K
+ﬁlter to the data. If the data have highly variable amplitudes,
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter158
+
+ProMAX® Reference
+
+the highest amplitudes will dominate the F-K spectrum.
+Filtering will cause artifacts of these high amplitudes to be
+spread to other regions of the data in T-X. It is possible to
+compress amplitudes before F-K ﬁlter and decompress
+afterwards by using AGC before F-K ﬁlter and saving the
+scalars to the trace headers, then removing the AGC scalars
+after F-K ﬁlter. The actual picking of the polygon is done
+interactively with F-K Analysis.
+
+Parameters
+TYPE of F-K ﬁlter
+Select one of three types of ﬁlters to be applied in F-K space:
+• Fan Filters ﬁlters pie slice(s) in the F-K domain.
+• Power Exponent raises the F-K domain to a ﬁxed power.
+• Arbitrary Polygon ﬁlters an arbitrary polygon in F-K
+space.
+Units of pie slice parameterization
+This appears if Fan Filters to Type of F-K ﬁlter. Select units
+of either Velocity or Ms per trace. The default for Fan Filter
+parameters change depending on this option.
+Distance between input traces
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. Enter 0.0 to automatically calculate the trace
+spacing. Input ensembles must be shot, receiver, or CDP
+ordered. The trace spacing is calculated by:
+[[current fold/shot fold] x shot interval] for CDP and receiver ordered ensembles
+the receiver interval for shot ordered ensembles
+the CDP interval for stack data
+
+Otherwise, enter the actual trace spacing.
+Panel width in traces
+Enter the number of traces to process at one time. Enter the
+number of traces per ensemble for prestack data. The
+minimum allowable number of traces in a panel is 5.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter159
+
+ProMAX® Reference
+
+Test the ﬁlter impulse response?
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. Select Yes to output the result of applying the F-K
+ﬁlter to a spike. This result shows the impulse response of
+the ﬁlter which you have designed. Select No, the default, to
+output the result of the application of the ﬁlter to the data.
+Percent ﬂat for time ramping
+This appears if No to Test the ﬁlter impulse response.
+Enter the percent ﬂat for time ramping. A value of 100.0
+means that no ramp is applied. A value of 90.0 will result in
+a ramp on each end of each trace equivalent to 5% of the
+maximum time length of the traces.
+The shallow and deep ends of each trace can be tapered
+before the T-F transform in order to minimize the FFT edge
+effects. The process attempts to remove the effect of this
+ramp after the F-K ﬁltering and inverse transform. High
+amplitudes may result on output along the ﬁrst and last time
+samples since the ramping is removed after ﬁltering.
+Percent ﬂat for offset ramping
+This appears if No to Test the ﬁlter impulse response.
+Enter the percent ﬂat for offset ramping. A value of 100.0
+means that no ramp is applied. A value of 90.0 will result in
+a ramp on each end of the data equivalent to 5% of the input
+panel width value.
+The edge traces can be tapered before the K-space transform
+in order to minimize the FFT edge effects. The process
+attempts to remove the effect of this ramp after the F-K
+ﬁltering and inverse transform. High amplitudes may result
+on output along the ﬁrst and last traces since the ramping is
+removed after ﬁltering.
+Get polygon mute ﬁle from the database?
+This appears if Arbitrary Polygon to Type of F-K ﬁlter.
+Select Yes to get a polygon mute parameter ﬁle from the
+database. Select No to specify an arbitrary polygon manually.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter160
+
+ProMAX® Reference
+
+Select mute parameter ﬁle
+This appears if Yes to Get polygon mute ﬁle from the
+Database. Select a polygon mute parameter ﬁle from the list
+of parameter ﬁles.
+Polygon mute parameters are speciﬁed at primary key
+locations and the ﬁlters are linearly interpolated between
+these locations.
+Specify arbitrary polygon
+This appears if No to Get polygon mute ﬁle from the
+Database. Enter the polygon corners as F-K pairs in the
+following format:
+K1
+K_Nyquist
+
+K2
+K_Nyquist
+
+KEY: Frequency1- ------------------------- , Frequency2- ------------------------- ,
+K3
+K_Nyquist
+
+K4
+K_Nyquist
+
+Frequency3 - ------------------------- , Frequency4, ------------------------- /
+
+EXAMPLE: 1:10-0.0, 20-0.4, 30-1.0,50-1.0,10-0.0 /
+
+Remember that the values must loop form a complete
+polygon. Frequencies are input in units of Hz, while
+wavenumber (K) values are input as fractions of K-nyquist.
+Mode of F-K ﬁlter operation
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. The choices are:
+• Reject attenuates the speciﬁed F-K region(s).
+• Accept passes the speciﬁed F-K region(s), attenuates
+elsewhere.
+Percent ﬂat for F-K ﬁlter windowing
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. The T-X ﬁlter used to design the F-K ﬁlter may be
+windowed to give a smoother response which will result in
+fewer artifacts on the output data. This may be at the
+expense of some attenuation in selected regions of the ﬁlter.
+This windowing is implemented by an elliptical Hanning
+taper window applied to the T-X ﬁlter. This ﬁlter will be a full
+Hanning taper if a value of 0.0 is used, or may only apply to
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter161
+
+ProMAX® Reference
+
+the outside edge of the ﬁlter if a value of 90.0 is used. A value
+of 100.0 results in no tapering of the ﬁlter.
+Time length of F-K ﬁlter (ms)
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. Enter the time length of the desired T-X ﬁlter in
+ms to use in designing the F-K ﬁlter. A longer T-X ﬁlter will
+result in greater attenuation of noise, but will give a longer
+execution time. The ﬁlter will have a maximum time length
+equal to the maximum time of the input data, even if
+speciﬁed longer.
+Spatial extent of F-K ﬁlter (traces)
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. Enter the number of X-samples (traces) of the
+desired T-X ﬁlter to use in designing the F-K ﬁlter. A longer
+T-X ﬁlter will result in greater attenuation of noise, but will
+give a longer execution time. The ﬁlter will have a maximum
+number of traces equal to the number of traces of input data,
+even if speciﬁed larger.
+Power to raise F-K space to
+This appears if Power Exponent to Type of F-K ﬁlter. Enter
+a power to raise the F-K transform values, and then inverse
+transform. If the power is greater than 1.0, the output traces
+could have noticeably larger amplitudes than the input
+traces.
+Reapply T-X trace mute after ﬁlter
+Select Yes to automatically reapply previously applied trace
+mutes after F-K ﬁltering. Select No to leave the data as it is
+output from the F-K ﬁlter.
+Fan ﬁlter parameters
+This appears if Fan Filters to Type of F-K ﬁlter. Enter the
+settings for the F-K ﬁlter slices. The velocities can be positive
+or negative. You can specify a slice which spans from a
+negative velocity to a positive velocity. That is, the ﬁlter can
+include the zero wavenumber axis. However, problems can
+occur if one of the velocities in the fan is very low. For
+example, a value less than 500 ft/s. Any number of fans or
+slices can be entered.
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter162
+
+ProMAX® Reference
+
+This parameter can also be entered in units of ms/trace dip
+depending on the Units of pie slice parameterization. In
+this case the slices are speciﬁed in the following format:
+dip1, dip2, freq1, freq2 / dip1, dip2, freq1, freq2 /
+
+Wrap fan in K-space past Nyquist?
+This appears if Fan Filters to Type of F-K ﬁlter. Select No to
+not wrap in K-space past K-Nyquist, the spatial aliasing
+wavenumber. This prevents the fans crossing or overlapping
+which gives either double response of no response in the in
+the overlap areas due to the integration around the polygons.
+The default Yes wraps past the spatial Nyquist. If Yes, only a
+single fan or slice may be speciﬁed and this fan cannot
+include K=0. If more than one fan is speciﬁed or a single fan
+that includes K=0 is speciﬁed, this option is automatically set
+to NO regardless of the menu input value.
+Percent K-space restricted for fan
+This appears if Fan Filters to Type of F-K ﬁlter. Enter a
+percentage of the K-space Nyquist, or aliasing value. The F-K
+velocity ﬁltering is restricted to this limit in order to prevent
+spreading at higher frequencies. The effect of this restriction
+is to give a corridor region with parallel sides at a velocity
+which is the harmonic mean of V1 and V2.
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter163
+
+ProMAX® Reference
+
+Time ﬁlter padding in percent
+This appears if Power Exponent to Type of F-K ﬁlter. Enter
+a percentage of the trace length. This value calculates the
+number of zero-valued samples to add to each trace before
+the F-K transform. For normal data, with gain corrections
+applied, a value of 25% is suitable. If the data is poorly gain
+corrected and still shows signiﬁcant amplitude variation with
+time, a value of 100% might be more appropriate. Adding
+more samples will increase the computation time.
+Space ﬁlter padding in percent
+This appears if Power Exponent to Type of F-K ﬁlter. Enter
+the percentage of zero padding for the FFT in the spatial
+domain. For normal data with gain corrections applied, a
+value of 25% is suitable. If the data is poorly gain corrected, a
+value of 100% might be more appropriate. Adding more
+samples will increase the computation time for this process.
+Percentage of K-space to keep around K=0
+This appears if Fan Filters or Arbitrary Polygon to Type of
+F-K ﬁlter. Enter the percentage of K-space to leave unﬁltered
+in a corridor around K=0.
+Caution: This parameter is not incorporated in the design of
+the T-X ﬁlter. It is applied to the F-K ﬁlter before application.
+Therefore, the effective T-X ﬁlter may extend beyond the trace
+and time boundaries.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+F-K Filter164
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

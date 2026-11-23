@@ -1,0 +1,121 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC BHSS
+'(
+ name: STACK
+label: "CDP/Ensemble Stack"
+value_tab: 44
+
+
+parameter: SRT_ORDR
+text: "Sort order of input ensembles"
+type: pop_choose:
+type_desc: (
+   ( "CDP"      "CDP     " "The input trace ensembles' sort order is CDP." )
+   ( "SHOT"     "SOURCE  " "The input trace ensembles' sort order is SHOT." )
+   ( "RECEIVER" "RECEIVER" "The input trace ensembles' sort order is RECEIVER." )
+   ( "OTHER"    "OTHER   " "The input trace ensembles' sort order is something other than the above three.") )
+mouse_text: "Use MB1 to pop up a menu of choices for the input traces' primary sort order (normally CDP)."
+plot_label: t
+
+
+parameter: SUM_MODE
+text: "METHOD for trace summing"
+type: pop_choose:
+type_desc: (
+   ("Mean" "MEAN_SUM" "Average sample value.")
+   ("Straight" "STRAIGHT" "Sum sample value, no recovery scaling.")
+   ("Weighted" "WEIGHTED" "Multiply traces by a user-selected header value before summing.") 
+   ("Sign Bit" "SIGN_BIT" "Sum +1.0 if sample is positive or zero, sum -1.0 if sample is negative." )
+   ("Min/Max Exclude"  "MIN_MAX" "Exclude the largest sample and smallest sample from the stack sum.") 
+   ("Div-power"  "DIV_POWR" "Diversity stack based on the power within a sliding time gate.")
+   ("Div-amplitude"  "DIV_AMPL" "Diversity stack based on the amplitude within a sliding time gate.") 
+   ("Median"  "MEDIAN" "Take the median of the samples at each trace time.")
+   ("Alpha-trimmed Mean"  "ALPHA_TR" "Exclude a percentage of the smallest and largest value samples." ) ) 
+mouse_text: "This parameter specifies the method for estimating the output 'stack' trace."
+plot_label: t
+
+
+parameter: SUM_ROOT
+text: "Root power scalar for stack normalization"
+type: typein:
+type_desc: ( real: 5 1.0e-5 nil )
+value: 0.5
+mouse_text: "This is the power exponent for contributing sample normalization (use 0.5 for square root scaling)."
+plot_label: t
+
+
+parameter: DIVR_AGC
+text: "Diversity scalar operator length"
+type: typein:
+type_desc: ( real: 7 1.0e-5 nil )
+value: 50.0
+mouse_text: "This is the sliding gate operator length (similar to an AGC) used to compute the diversity scalars."
+plot_label: t
+
+
+parameter: WGHT_HDR
+text: "SELECT Header Word for Trace Weighting"
+type: function:
+type_desc: (header_list headers)
+value: "USR_WGHT"
+selected_item: 	"User trace weighting header word"
+mouse_text: "Use MB1 to select a header word to multiply its value times the trc samples before summing. See Header Weighting."
+plot_label: t
+
+
+parameter: PERCENT
+text: "PERCENT of samples to exclude"
+type: typein:
+type_desc: ( real: 6 0.0 100.0 )
+value: 25.0
+mouse_text: "For Alpha-trimmed Mean stk, a 25% exclusion would reject the largest 12.5% and the smallest 12.5% of the samples."
+plot_label: t
+
+
+parameter: DO_STAT
+text: "Apply final datum statics after stack?"
+type: boolean:
+value: t
+mouse_text: "If 'Yes', the data will be shifted to the final datum after stacking, using header entry FNL_STAT."
+plot_label: t
+
+
+parameter: NMO_APLD
+text: "Has NMO been applied?"
+type: boolean:
+value: t
+mouse_text: "Normally, you will want to have applied NMO before stacking, but some exceptions may exist."
+
+
+exec_data: ("STACK"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: stack.menu 44916 2009-10-05 17:47:09Z Ted Shuck $ $Revision: 44916 $ $Date: 2009-10-05 11:47:09 -0600 (Mon, 05 Oct 2009) $")
+			("SRT_ORDR" implicit: (value 'SRT_ORDR))
+			("SUM_MODE" implicit: (value 'SUM_MODE))
+			("SUM_ROOT" implicit: (value 'SUM_ROOT))
+			("DIVR_AGC" implicit: (value 'DIVR_AGC))
+			("WGHT_HDR" implicit: (value 'WGHT_HDR))
+                        ("PERCENT"  implicit: (value 'PERCENT))
+			("DO_STAT"  implicit: ( if (value 'DO_STAT) 1 0 ))
+			("NMO_APLD" implicit: ( if (value 'NMO_APLD) 1 0 ))
+		)
+	    )	
+
+rules: (
+ (rule1 ( equal ( value 'SUM_MODE ) "ALPHA_TR" ) (do_show 'PERCENT) 
+                                        (do_not_show 'PERCENT)) 
+ (rule2 ( equal ( value 'SUM_MODE ) "WEIGHTED" ) (do_show 'WGHT_HDR) 
+                                        (do_not_show 'WGHT_HDR)) 
+ (rule3 ( or ( equal ( value 'SUM_MODE ) "DIV_POWR" ) 
+            ( equal ( value 'SUM_MODE ) "DIV_AMPL" )  )
+            (do_show 'DIVR_AGC) (do_not_show 'DIVR_AGC) )
+ (rule4 ( equal ( value 'SRT_ORDR ) "CDP     " ) (do_show 'DO_STAT) 
+                                                 (do_not_show 'DO_STAT)) 
+ (rule5 (or ( or ( equal ( value 'SUM_MODE ) "MEAN_SUM" ) 
+	     ( equal ( value 'SUM_MODE ) "DIV_AMPL" )  )
+	    ( equal ( value 'SUM_MODE ) "DIV_POWR" )  )
+	(do_show 'SUM_ROOT) 
+	(do_not_show 'SUM_ROOT)) 
+ )
+
+
+)

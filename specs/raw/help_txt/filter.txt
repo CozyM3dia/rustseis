@@ -1,0 +1,347 @@
+Bandpass Filter23
+
+ProMAX® Reference
+
+Bandpass Filter
+Bandpass Filter applies a frequency ﬁlter(s) to each input
+trace.
+
+Theory
+The ﬁlter algorithm operates in the frequency domain. You
+can specify one or more sets of bandpass ﬁlter frequencies,
+and a set of notch ﬁlter parameters. Filters are fourfrequency Ormsby or Butterworth, and can be zero phase or
+minimum phase.
+This process allows you to perform three types of bandpass
+ﬁltering:
+• Single bandpass ﬁlter applies a single ﬁlter to all traces
+at all times. This ﬁlter is input via the keyboard. Only
+the four corner frequencies need be speciﬁed for the
+Ormsby ﬁlter or only one group of (freq-slope-freq-slope)
+for the Butterworth ﬁlter.
+• Time variant ﬁlter allows you to specify a time-varying
+ﬁlter, which is then applied to all traces. This ﬁlter is
+input via the keyboard. The ﬁrst ﬁlter is applied from the
+beginning of the trace to the end of the ﬁrst window,
+then with decreasing linear taper to the beginning of the
+second window. The second ﬁlter is applied with increasing linear taper from the end of the ﬁrst window to the
+beginning of the second window, and so on. The last ﬁlter is then held constant through the last window to the
+end of the record. Filter windows may overlap.
+Avoid using ﬁlter windows which abut one-another since
+this provides no opportunity for interpolation between
+windows and may create artifacts.
+• Time and spatially variant ﬁlter applies a series of
+time varying ﬁlters that vary along the seismic line.
+
+Usage
+You can specify the percent of the input trace to pad with
+zeroes for FFT considerations.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter24
+
+ProMAX® Reference
+
+A notch ﬁlter can be applied in addition to the bandpass
+ﬁlter. You can control the center frequency and width of the
+notch. The notch ﬁlter can also be centered at the maximum
+spectral amplitude within a speciﬁed frequency range by
+using the automatic notch frequency search option.
+Each ﬁlter is speciﬁed by a set of four integers separated by
+dashes. The numbers sequentially represent the 0% and
+100% points of the low-cut ramp, and the 100% and 0%
+points of the high-cut ramp in Hz for the Ormsby ﬁlter, and 3dB low frequency - low slope - -3dB high frequency -high
+slope for the Butterworth ﬁlter. The ramps for the Ormsby
+ﬁlter are formed by cosine tapers (Hanning windows) in the
+frequency domain. The Butterworth ramps are formed by:
+
+1
+----------------------------------------2P
+F
+1 +  ---------------
+ FMID
+where FMID is the center frequency of the pass band and P is
+computed for the lower and upper slopes to get the correct
+dB/octave rolloff.
+
+References
+Oppenheim A. V., and Schafer, R. W., 1975, Digital signal processing, 211-218:
+Prentice-Hall.
+Robinson E. A., and Treitel, S., 1964. Principles of digital ﬁltering: Geophysics, 29,
+395-404.
+Yilmaz. O., 1987, Seismic data processing: Society of Exploration Geophysicists,
+20-26.
+
+Parameters
+TYPE of ﬁlter
+Select the type of ﬁlter to apply to input data from the
+following choices:
+• Single Filter applies a single bandpass ﬁlter, speciﬁed
+as four corner frequency values.
+• Time and Space-Variant Filter applies time and space
+variant ﬁlters in space variant time windows.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter25
+
+ProMAX® Reference
+
+Type of ﬁlter speciﬁcation
+Select the type of ﬁlter from:
+• Ormsby bandpass speciﬁes ﬁlters using four frequencies.
+• Butterworth bandpass speciﬁes ﬁlters using (F1db/Octave1) - (F2-db/Octave 2).
+PHASE of ﬁlter
+Select the phase of your bandpass ﬁlter(s) from: Zero phase
+or Minimum phase.
+Percent additive noise factor
+This appears if Minimum phase to Phase of ﬁlter. Enter the
+percentage of the maximum frequency to add to the spectrum
+prior to conversion to minimum phase.
+Domain for ﬁlter application
+This appears if Single Filter to Type of ﬁlter. Select either
+Frequency or Time domain ﬁlter application.
+Tapered ﬁlter length in ms
+This appears if Time domain to Domain of ﬁlter
+application. Enter a Hanning tapered length in ms. Accepted
+values are between 20-1000 ms. The resulting time domain
+ﬁlter will not have the same rejection as those applied in the
+frequency domain unless the ﬁlter length is quite long, such
+as 300-600 ms. However, a modest 160 ms ﬁlter is often
+accurate enough for most prestack applications and may be
+considerably faster on some machines.
+Beyond performance issues, a truncated time domain ﬁlter
+can be desirable due to its limited temporal effects. For
+example, large amplitude events or noise bursts can only
+affect the trace a half ﬁlter length above and below the
+offensive sample.
+Percent zero padding for FFTs
+This appears if Frequency to Domain of ﬁlter application.
+Enter the percentage of the input trace length to pad with
+zeroes to avoid wrap-around effects of circular FFTs.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter26
+
+ProMAX® Reference
+
+Apply a notch ﬁlter?
+Select Yes to apply a notch ﬁlter to all input traces. A notch
+ﬁlter may be applied at virtually any frequency.
+Notch ﬁlter frequency
+This appears if Yes to Apply a notch ﬁlter. Enter the center
+frequency of the notch ﬁlter to apply in Hz.
+Example: 60.0
+
+Width of notch ﬁlter
+This appears if Yes to Apply a notch ﬁlter. Enter the width
+of the notch ﬁlter to be applied, in Hz. A notch ﬁlter at 60 Hz
+with a width of 2 Hz will provide a 59 - 61 Hz notch, with
+exponential edge tapers. A wider ﬁlter will produce more
+attenuation at the central frequency than a narrower ﬁlter.
+Automatic notch frequency search?
+This appears if Yes to Apply a notch ﬁlter. Select Yes to
+center the notch at the maximum spectral amplitude.
+Maximum notch frequency variation
+This appears if Yes to Automatic notch frequency search.
+Enter the maximum notch frequency variation. This is the
+frequency range on either side of the spectral maximum
+where the notch is centered. A value of 3.0 based on a 50 Hz
+notch will center the notch on the maximum spectral
+magnitude found between 47 and 53 Hz.
+Ormsby ﬁlter frequency values
+This appears if Single Filter to Type of ﬁlter and Ormsby
+bandpass to Type of ﬁlter speciﬁcation. Enter a set of four
+Ormsby corner frequencies separated by dashes. The values
+may be integers or real numbers. They represent sequentially
+the 0% and 100% points of the low-cut ramp, and the 100%
+and 0% points of the high-cut ramp, in Hz. These ramps are
+formed by Hanning (cosine) tapers in the frequency domain.
+For example, the entry
+0-0-40-60
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter27
+
+ProMAX® Reference
+
+creates a 20 Hz wide high-cut ramp. For high-cut ﬁlters the
+ﬁrst two frequencies are set to zero. And similarly, for low-cut
+ﬁlters the third and forth frequencies are set to Nyquist.
+The entry
+5-10-Nyq- Nyq
+
+creates a 5 Hz wide low-cut ramp.
+Butterworth ﬁlter freq-slope values
+This appears if Single Filter to Type of ﬁlter and
+Butterworth bandpass to Type of ﬁlter speciﬁcation.
+Enter a set of freq - slope - freq - slope values separated by
+dashes, where frequency values represent the -3dB points of
+the amplitude spectrum. For example, the entry
+10-18-40-36 /
+
+creates a 10 to 40 Hz pass-band ﬁlter with an 18 dB/octave
+low roll-off and a 36 dB/octave high roll-off. The 10 and 40
+Hz value correspond to the -3 dB points of the ﬁlter.
+Space-variant ﬁlter parameters
+This appears if Time and Space-Variant to Type of ﬁlter.
+Enter each time gate value. The editor window contains both
+the generic format for value entry, and an example. If you are
+using a time gate parameter ﬁle, then the primary and
+secondary location keys must be the same as the data sort
+order when the parameter ﬁle was created. If no header word
+values are speciﬁed, either a 1: or a 1:1: is automatically
+inserted for header word values.
+Ormsby bandpass
+For a single time-invariant ﬁlter, only a single ﬁlter should be
+entered. For example, the entry
+6-10-40-60/
+
+creates a 10 to 40 Hz pass-band ﬁlter with a 4 Hz wide lowcut ramp and a 20 Hz wide high-cut ramp.
+Multiple frequency bandpass ﬁlter speciﬁcations are
+separated by commas. For example, the entry
+5-10-40-60,8-12-80-120/
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter28
+
+ProMAX® Reference
+
+creates two Ormsby ﬁlters, the ﬁrst with a 10 to 40 Hz passband with a 5 Hz wide low-cut ramp and a 20 Hz wide highcut ramp. The second ﬁlter will be a 12 to 80 Hz pass-band
+with a 4 Hz wide low-cut ramp and a 40 Hz wide high-cut
+ramp.
+Butterworth bandpass
+The entry
+10-18-40-36,12-24-80-72/
+
+creates two Butterworth frequency bandpass ﬁlters, the ﬁrst
+with a 10 to 40 Hz pass-band with a 18 db/octave low-cut
+roll-off and a 36 db/octave high-cut roll-off. The second ﬁlter
+will be a 12 to 80 Hz pass-band with a 24 db/octave low rolloff and a 72 db/octave high roll-off.
+Note: The number of ﬁlters and time gates must match
+exactly. You should be warned that this is a much slower
+process than a simple bandpass ﬁlter.
+Get time gates from the DATABASE?
+This appears if Time and Space-Variant to Type of ﬁlter.
+Select Yes if you interactively created a parameter ﬁle
+containing spatially varying time gates. Enter No to enter a
+single time-invariant bandpass ﬁlter, or a spatially varying
+bandpass ﬁlter from the keyboard.
+Note: Avoid using time gates which abut one another since
+this provides no margin for interpolation between windows.
+SELECT time gate parameter ﬁle
+This appears if Yes to Get time gates from the Database.
+Select a ﬁlter time gate parameter ﬁle.
+SELECT Primary time gate header word
+This appears if No to Get time gates from database. Select a
+header word to use as the primary key for specifying time
+gate values. Time gates can be speciﬁed without a primary
+header word selection.
+SELECT Secondary time gate header word
+This appears if No to Get time gates from database. Select
+another header word to use as the secondary header word
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter29
+
+ProMAX® Reference
+
+key for specifying time gate values. A secondary header word
+selection is not required.
+SPECIFY ﬁlter time gate parameters
+This appears if No to Get time gates from database. Enter
+values for the primary header word, the secondary header
+word, and the time gate(s) for a time- variant ﬁlter, each value
+separated from the previous one by a colon. The editor
+window contains both the generic format for value entry, and
+examples. For example:
+Primary header word:
+Source(1):
+1:
+
+Secondary header word:
+Aoffset(1):
+0:
+
+Time gate/
+Time gate(1)/
+700-2000/
+
+Source(1):
+1:
+
+Aoffset(2):
+5280:
+
+Time gate(2)/
+1200-2200/
+
+You can deﬁne multiple time gates per primary:secondary
+header word location by separating them with commas. You
+may deﬁne additional time gate location changes by
+specifying more Source or CDP values farther along your
+dataset, with corresponding secondary values and time gates.
+Examples:
+1:10560:1500-2400/
+1:0:700-2000,2500-4000/
+20:0.0:800-2100/20:2640:1200-2400/20:5280:1500-2500/
+
+Design windows are interpolated between locations and
+extrapolated as constant outside speciﬁed location ranges. If
+no primary location key is speciﬁed, then one set of windows
+is used for the entire dataset, and only time ranges are
+entered.
+A wildcard character * is supported for entire trace time
+window speciﬁcation. For example:
+CDP:Time gate/
+101:0-4000/ is the same as 101:*/
+where 4000 ms is equal to the trace length
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Bandpass Filter30
+
+ProMAX® Reference
+
+Reapply trace mute after ﬁlter?
+Select Yes to reapply a trace mute to your data after ﬁltering.
+Select No to leave the data as output. You will probably want
+to reapply mutes after ﬁltering stacked data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

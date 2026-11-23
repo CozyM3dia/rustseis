@@ -1,0 +1,248 @@
+Explicit FD Depth Migration367
+
+ProMAX® Reference
+
+Explicit FD Depth Migration
+Explicit FD Depth Migration performs poststack depth
+migration using explicit ﬁnite-difference extrapolators. As a
+ﬁnite-difference scheme, the approach can handle fullyvariable interval velocity ﬁelds in depth.
+
+Theory
+This is an algorithm which uses explicit F-X spatially-variant
+extrapolators to perform depth migration. This migration is
+designed to be accurate up to approximately 70 degrees of
+dip. This migration uses a vertical and laterally-variant
+interval velocity ﬁeld in depth, VINT(x,z), for input. Refer to the
+Migration Overview for more information on this process.
+To reduce run times for this algorithm, you can specify a
+maximum dip of either 30 or 50 degrees, rather than 70
+degrees. Note also that run times are dependent upon the
+maximum frequency for migration, so choose this value
+accordingly.
+The primary advantages of this approach are good handling
+of vertical and laterally variant velocities and relatively steep
+dips.
+The following are sample impulse responses:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration368
+
+ProMAX® Reference
+
+70 degree option
+
+50 degree option
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration369
+
+ProMAX® Reference
+
+30 degree option
+
+Usage
+Trace padding should be speciﬁed to reduce wrap-around
+effects in the frequency domain. Note that prime-factor FFT
+libraries are used for this and other migrations, so that
+minimal FFT padding will occur. Consequently, the amount
+of padding you specify will be very close to the total amount
+of trace padding applied prior to transforming from time to
+frequency. Values in the range of 30 to 50 percent are
+generally adequate for normal amplitude-balanced datasets.
+Data input to this migration is corrected to a ﬂat datum. If
+your data is referenced to a ﬂoating datum you will need to
+apply datum statics, or use Poststack Wave Equation
+Datuming to move your data to a ﬂat datum. If your velocity
+ﬁeld is referenced to a ﬂoating datum, you may need to
+modify the velocity ﬁeld with Velocity Field Manipulation.
+
+References
+Soubaras, R., 1992, Explicit 3D migration using equiripple polynomial expansion
+and Laplacian synthesis: SEG annual meeting, New Orleans, Expanded
+Abstracts, 905-908.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration370
+
+ProMAX® Reference
+
+Parameters
+CDP interval (ft. or m)
+Enter the CDP spacing in ft. or m, whichever is consistent
+with the headers.
+Maximum frequency (in Hz)
+Enter the maximum coherent frequency of interest, in Hz.
+Frequencies above this value will not be migrated. Run times
+are directly related to the frequency range of migration. If the
+input data has frequencies above this maximum, the data
+should be bandpass ﬁltered before migration to avoid
+artifacts caused by abruptly truncating the frequency band.
+Depth sampling interval of output data
+Enter the depth sampling interval for the migrated output
+data, in ft. or m. To prevent aliasing in depth, this parameter
+should be less than (minimum velocity)/(4*maximum
+frequency). Enter 0.0 to have the output depth sampling
+interval automatically computed. Because precomputed
+extrapolation tables are used, the actual size of the migration
+step may be smaller than the requested output sample
+interval.
+Maximum depth to migrate
+Enter the maximum depth to migrate. Enter 0.0 to compute
+the maximum depth. If a maximum depth exceeds the data
+length, the output will have a dead zone followed by
+migration artifacts.
+What maximum dip would you like to migrate to?
+Enter the maximum depth to migrate. The choices are:
+• 30 degrees, which is the fastest option, uses a 7 point
+ﬁlter.
+• 50 degrees uses a 11 point ﬁlter.
+• 70 degrees, which is the slowest option, uses a 25 point
+ﬁlter.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration371
+
+ProMAX® Reference
+
+Percent to pad trace length
+Enter a percent to pad the trace length to eliminate the FFT
+wrap around effects. 30% padding should generally be
+sufﬁcient, but if spikes exist in the shallow part of the data,
+you may want to increase padding some more. Padding will
+linearly increase run time.
+Get interval velocities from database?
+Select Yes to get interval velocities in depth from the
+database.
+Select interval vs. depth velocity ﬁle
+This appears if Yes to Get interval velocities from
+database. Select a ﬁle in depth from the interval velocity vs.
+depth database.
+Interval velocities in depth for migration
+This appears if No to Get interval velocities from database.
+Enter velocities for migration. Refer to the editor for
+examples.
+Change paneling parameters?
+Select Yes to change paneling parameters.
+Maximum Memory for migration to use in megabytes
+This appears if Yes to Change paneling parameters. Enter
+the maximum memory. When the migration requires more
+memory than this limit, the migration is done in overlapping
+panels. Paneling generally only happens with very large
+(>2000 CDPs) datasets with long trace length.
+Migration aperture to use for panel overlap
+This appears if Yes to Change paneling parameters. Enter a
+migration aperture in ft. or m. Enter 0.0 to automatically
+calculate the aperature.The migration aperture is how far
+data will move horizontally during the migration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration372
+
+ProMAX® Reference
+
+Change the default tapering?
+Select No to apply a bottom taper of 200 ms. Select Yes to
+change this default. The default prevents migration artifacts
+due to the abrupt truncation at the bottom of the input
+section. The edge taper will vary from 2 traces at the top of
+the section to 20 traces at the bottom of the section. The
+magnitude of the edge taper should normally increase with
+depth, as migration artifacts originating deeper in the section
+tend to move a longer distance.
+Upper edge
+taper
+
+Bottom
+taper
+Lower edge
+taper
+
+A Hamming taper is used, which consists of a cosine
+weighting that varies from 100% to 8% over the length of the
+taper.
+Bottom taper (in ms)
+This appears if Yes to Change the default tapering. Enter
+the bottom taper in ms. The bottom of each trace will be
+tapered to 0 over this number of ms. This tapering will
+prevent the creation of migration artifacts caused by the
+abrupt truncation at the last live sample of each input trace.
+Upper edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the width of edge taper in traces at top of seismic section.
+Both edges of the seismic section will have their outermost
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration373
+
+ProMAX® Reference
+
+traces tapered to 0 over this number of traces. The width of
+the taper zone can be made to vary linearly between the top
+and bottom of the seismic section. Because migration
+artifacts generally move a greater lateral distance when they
+originate deeper in the section, it is usually desirable to
+increase edge taper width toward the bottom of the section.
+Note: If the speciﬁed taper width is more than half the total
+number of traces in the seismic section, taper width will be
+set to half the total number of traces.
+Lower edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the width of edge taper in traces at bottom of seismic section.
+Note: If the speciﬁed taper width is more than half the total
+number of traces, taper width will be set to half the total
+number of traces.
+Reapply trace mutes in depth?
+Select Yes to reapply trace mutes in depth after migration.
+Select No to adjust mutes as necessary.
+Rekill dead traces?
+Select Yes to rekill dead traces after DMO. Select No to leave
+previously dead traces alive, and mutes will be determined
+from the ﬁrst and last non-zero samples.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Explicit FD Depth Migration374
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

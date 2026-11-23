@@ -1,0 +1,322 @@
+Forward/Inverse Radon Transform181
+
+ProMAX® Reference
+
+Forward/Inverse Radon Transform
+Forward/Inverse Radon Transform Radon Transform is
+commonly used to transform data to the Radon domain for
+suppression of multiples by muting or deconvolution in the
+Radon domain. The inverse transform is then run to convert
+the data back to the time-space domain.
+
+Theory
+Forward/Inverse Radon Transform Radon Transform
+transforms the data to time-moveout space so that a suitable
+mute can be picked to eliminate the primary energy. The
+multiple energy is left, which can then be subtracted from the
+input data. Radon ﬁlters can also be applied such that they
+pass the primary energy, but in practice this has tended to
+produce an artiﬁcial and wormy appearing result.
+The Radon transform distinguishes between primaries and
+multiples based on the residual moveout from near to far
+offset. A parabolic form of the Radon transform is used since
+multiples have an approximately parabolic form after NMO.
+An approximately hyperbolic form may also be used. This
+hyperbolic approximation is more accurate at times around
+offset=depth, but is not as accurate for shallower events as
+the parabolic method.
+If deconvolution is applied between the forward and inverse
+transforms, it should be noted that events which were
+hyperbolic in time-offset space will be approximately
+parabolic after the linear radon transform. Deconvolution
+gates must be designed appropriately.
+Sparse Transform Option
+Conventional Radon Filtering has limitations on the
+discrimination possible between multiples and primaries.
+These limitations stem from the fact that events in T-X space
+do not transform to points in Tau-P space, but exhibit a
+“butterﬂy” shape. The sparse transform option will reduce
+the size of the butterﬂy in the Moveout (P) direction, but can
+cause dispersion of energy in the time (Tau) direction. The
+sparse transform does this by concentrating energy on the
+Moveout samples which have the most energy. This
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform182
+
+ProMAX® Reference
+
+discrimination against weak events tends to reduce the effect
+of aliased events as well as enhance those which are desired.
+In order for the sparse option to be most effective, the
+primaries should be ﬂattened by applying NMO before Radon
+Filter or Analysis. This will align all of the primary energy
+near P=0, giving greatest weight to the primary reﬂections in
+the sparse transform. Multiple energy should be expected to
+fall on a variety of P-values, so the sparse solution does not
+reconstruct it as well as the aligned primaries. Incoherent
+noise and aliased energy should be diminished for this same
+reason.
+Testing should be done to determine the optimum amount of
+sparseness to use for each dataset. There is a tradeoff
+between the ﬁdelity of data reconstruction and the separation
+of events which can be obtained.
+
+Usage
+Input/Output
+Radon Transform should almost always be used on CDP
+domain data. NMO must ﬁrst be applied using the primary
+velocities, plus an appropriate mute to eliminate ﬁrst break
+refractions and NMO stretch.
+The output from Radon Transform is ﬂagged as Not
+matching the database for both forward and inverse
+transform.
+Method
+A Radon space is then computed for each CDP. Radon
+Analysis may be used to display the data as time versus
+residual moveout. Primaries map from offset space to zero
+residual moveout in Radon space. Multiples map to the
+positive residual moveout zone. Events that have been
+overcorrected are in the negative residual moveout portion of
+Radon space. This is why the typical range of minimum to
+maximum p-values for a Radon transform are biased toward
+the positive values that is, typically something like 100 to
++400 ms.
+The beneﬁts of this method are that it requires no knowledge
+of the multiple generating mechanism, and unlike the F-K
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform183
+
+ProMAX® Reference
+
+demultiple processes, it attenuates multiples at all offsets
+equally. It also works fairly well with non-uniform geometries.
+A minimum moveout of 30 ms from near trace to far trace is
+required for this algorithm to be effective on real data. The
+greater the moveout differential, the more effective the Radon
+Filter will be. However large moveout differentials may
+require more p-values over a greater range to be adequately
+sampled. The run time for this process increases with the
+square of the number of p-values, so choose this parameter
+with care. Radon ﬁltering is a computationally intensive
+process which may require several minutes for a high fold
+CDP.
+To remove multiples, follow these steps:
+1. Apply NMO with the primary velocity function.
+2. Run Radon Analysis on a representative set of CDPs. Pick
+mutes in Radon space which pass the multiples by
+removing the primaries, that is, a top mute should
+normally be picked.
+3. Run the Radon Filter using the mute picked in Step 2.
+Note: You must use the same number of p-values, start and
+end times, reference offset, and upper and lower frequency
+limits for this process as you used in the Radon Analysis. If
+you do not, the mutes will not be the correct mutes for the
+data input to this step.
+The program offers the option of frequency band-limiting the
+data during the transform process. The run time is
+proportional to the bandwidth processed.
+Multiple time gates are available with the Radon Filter tool,
+but only time-invariant transforms are possible with this
+tool.
+
+References
+Cary, P., 1998. The simplest discrete Radon transform. SEG Expanded Abstracts,
+Vol. II, p. 1999-2002.
+Foster, D.J., and Mosher, C.C., 1992, Suppression of multiple reﬂections using the
+Radon transform: Geophysics, 57, 386-395.
+Hampson, D., 1986, Inverse velocity stacking for multiple elimination: Journal of
+the Canadian Society of Exploration Geophysicists, 22, 44-55.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform184
+
+ProMAX® Reference
+
+Kabir, M. M. Nurul, and Marfurt, Kurt J., 1999, Toward true amplitude multiple
+removal: The Leading Edge, 18, 66-73.
+Sacchi, M.D. and Ulrych, T. J., 1995. High resolution velocity gathers and offsetspace reconstruction: Geophysics, 60, 1169-1177.
+Sacchi, M.D., 1999. Fast high resolution parabolic Radon transform. SEG
+Expanded Abstracts, Vol. II, p. 1477-1480.
+Thorson, J. R., and Claerbout, J. F., 1985, Velocity-stack and slant-stack stochastic inversion: Geophysics, 50, 2727-2741.
+
+Parameters
+Direction of transform
+Select the desired direction for radon transform:
+• Forward radon transform
+• Inverse radon transform
+Number of p-values
+This appears if Forward to Direction of transform. Enter
+the number of traces in the radon transform space. A typical
+value might be in the range of 20 to 40. The number of pvalues should be at least as large as the maximum fold of the
+input ensembles. Too low a value will generate streaks on the
+output. Too large a value may greatly increase runtime.
+Minimum p-value of interest (ms)
+Enter the minimum p-value of interest representing the
+largest likely overcorrection on the data at the far offset. A
+value of around -100 ms is recommended as a starting point.
+You should allow for slight irregularities in the velocity
+functions. In other words, the primaries may show a slight
+overcorrection. The primary reﬂection wavelet has a ﬁnite
+length, which must also be accounted for by this value.
+Maximum p-value of interest (ms)
+Enter the maximum p-value of interest representing the
+largest likely undercorrection on the data at the far offset. A
+value of around 400 ms is recommended as a starting point.
+The actual value will depend on the geographical location of
+the survey, the velocities of the multiple energy, and the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform185
+
+ProMAX® Reference
+
+offsets used in recording the data. Select the maximum value
+seen on the data for undercorrected multiples, and add about
+100 ms margin.
+Note: All coherent events on the data should fall between the
+minimum and maximum p-values of interest. If coherent
+energy falls outside of this range the least-squares ﬁt will
+attempt to model it into the range of p-values supplied and
+this will result in artifacts on the output.
+Minimum time of interest (ms)
+Enter the start time of the window on the input data. The
+transform will only be performed at times greater than this
+minimum time. The output data at time less than this will be
+zero.
+Maximum time of interest (ms)
+Enter the end time of the window on the input data. The
+transform will only be performed at times less than this
+maximum time. The output data at times greater than this
+will be zero.
+Minimum frequency of interest
+Enter the minimum coherent frequency, in Hz. Frequencies
+less than this value will not be modeled in radon space.
+Maximum frequency of interest
+Enter the maximum coherent frequency, in Hz. Frequencies
+greater than this value will not be modeled in radon space.
+Type of transform to perform
+Select the type of radon transform by setting the power that
+offset is raised to. Options are:
+• Parabolic approximates a hyperbola.
+• Hyperbolic uses a hyperbola for events at depths equal
+to the reference offset.
+• Linear is used to attack linear noise or to make reverberations peridodic by angle of incidence, p. This is a
+method of computing what has been called a slant stack.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform186
+
+ProMAX® Reference
+
+Parabolic and Hyperbolic are normally used for multiple
+rejection. Hyperbolic has greater error than Parabolic for
+shallower events, but less error for deeper events.
+Reference offset for delta moveout
+Enter the reference offset to which the minimum and
+maximum p-values and mutes have been referenced. A larger
+residual moveout is expected for larger offsets, hence the
+need to deﬁne a reference which is used for deﬁnition of the
+mutes in this process and in Radon Analysis. P-values are
+expected to vary with the square of the change in reference
+offset.
+Minimum number of traces/ensemble to transform
+Enter the minimum number of traces per ensemble to
+transform. Transformed traces are set to zero if number of
+traces per ensemble is less than this number. The default is
+5.
+Damping for radon solution
+This appears if Forward to Direction of transform. Enter a
+fractional amount of damping to stabilize the matrix solution
+of radon space from input data space. For typical datasets,
+set the damping to a value between 0.01 and 0.1. Higher
+values are appropriate for noisier data.
+If the damping is set less than 0.01, it is assumed that the
+data are very clean, such as synthetics. An alternative matrix
+solution may be used depending on the stability of the matrix
+at each frequency. Results may be signiﬁcantly different
+compared with higher levels of noise.
+Time gate length for Radon solution (ms)
+Enter a time gate length in ms for sparse radon.
+Compute a sparse (Hi-res) radon solution?
+Select Yes to compute a sparse radon transform. The sparse
+solution is an iterative solution which will take more time to
+compute, but can give sharper deﬁnition of events along the
+moveout axis. Sparse inversion constructs a sparse Radon
+domain solution that also reconstructs the input data in a
+least-squares sense.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform187
+
+ProMAX® Reference
+
+Sparseness parameter
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. Enter the amount of sparseness in the solution
+measured as a fraction of the main matrix diagonal. Use
+values between 0 and 1.0. A larger value will give a solution
+which is sparser in the moveout axis. Values between 0.05
+and 0.2 should be tested.
+Sparseness stability parameter
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. Enter a value between 0.0001 and 0.1. Test the
+values until you ﬁnd a correct solution for your data. A
+smaller value allows a sparser solution to be computed. This
+parameter (measured as a fraction of sparseness parameter)
+avoids division by zero. It has a similar, but opposite, effect
+to the Sparseness parameter.
+Reapply trace mute after ﬁlter?
+This appears if Inverse to Direction of transform. Select
+Yes to reapply any top and bottom mutes that were applied
+prior to the radon transform. Select Yes to avoid artifacts of
+the ﬁltering from extending into zones that should be zero.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Forward/Inverse Radon Transform188
+
+Other Docs
+
+Search Page
+
+ProMAX® Reference
+
+Known Problems
+
+

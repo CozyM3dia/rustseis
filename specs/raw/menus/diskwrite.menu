@@ -1,0 +1,74 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: DISKWRITE
+label: "Disk Data Output"
+value_tab: 50
+plot_label: nil
+
+parameter: DESCRIPT
+text: "Output Dataset Filename"
+type: function:
+type_desc: (dataset_list datasets)
+value: "no entry"
+selected_item: "INVALID"
+mouse_text: "Use MB1 to select/add the dataset file description for the output dataset you wish to create. (Up to 35 chars.)"
+
+parameter: STATUS
+text: "New, or Existing, File?"
+;type: choose:
+type: pop_choose:
+type_desc: ( 
+ ("New"  1 "Create an entirely new file. Delete an old file with this name if it exists. *DO NOT USE IF OUTPUT = INPUT FILE!*")
+ ("Overwrite"  2 "This file already exists. Overwrite the traces in the original sort with this newer version of the 'same' data.") 
+ ("Append" 3 "This file already exists. Add these new traces to the end of this file.") )
+mouse_text: "Create a new file, write over an existing file with a new version of the 'same' data, or add new data to the end."
+
+parameter: TMAX
+text: "Record length to output"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 0.0
+mouse_text: "The trace length in milliseconds to output. The default of 0.0 means to output all available data samples."
+
+parameter: COMPRESS
+text: "Trace sample format"
+type: pop_choose:
+type_desc: ( 
+ ("16 bit" 1 "Write trace samples as 16-bit integers with scalars every 100 samples.")
+ ("32 bit" 0 "Write trace samples as 32-bit IEEE floating point numbers.")
+ ("8 bit"  2 "Write trace samples as 8-bit integers with scalars every 100 samples.")
+; ("WPC 4-to-1"  3 "WPC format with 4:1 compression ratio.")
+; ("WPC 8-to-1"  4 "WPC format with 8:1 compression ratio.")
+; ("WPC 12-to-1"  5 "WPC format with 12:1 compression ratio.")
+; ("WPC 16-to-1"  6 "WPC format with 16:1 compression ratio.")
+           )
+mouse_text: "Select a format for trace samples.  Samples in memory are always represented as floating point number."
+
+parameter: ALTSTORE
+text: "Skip primary disk storage?"
+type: boolean:
+value:  nil
+mouse_text: "Do you wish to use secondary disk storage to store the data (rather than filling the primary storage area)?"
+
+exec_data:
+		("DISKWRITE"
+		    ("GENERAL"
+			("version" implicit: "ProMAX $Id: diskwrite.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("VERSION"  implicit: 0.1)
+			("LABEL"    implicit: (value 'DESCRIPT))
+			("DESCRIPT" implicit: (selected_item 'DESCRIPT))
+			("STATUS"   implicit: (value 'STATUS))
+			("TMAX"     implicit: (value 'TMAX))
+			("ALTSTORE" implicit: (if (value 'ALTSTORE) 1 0))
+			("COMPRESS" implicit: (value 'COMPRESS))
+		     )
+	   	)
+
+rules: (
+
+ (show_compress ( = (value 'STATUS) 1 ) (do_show 'COMPRESS)  (do_not_show 'COMPRESS))
+	)
+
+)
+
+

@@ -1,0 +1,714 @@
+Interactive Spectral Analysis1119
+
+ProMAX® Reference
+
+Interactive Spectral Analysis
+Interactive Spectral Analysis computes and displays
+spectral estimates for interactively selected subsets of traces.
+The spectral displays can be conﬁgured both interactively
+and from menu.
+
+Theory
+Interactive Spectral Analysis uses Fourier Transforms to
+compute the average power spectrum, the F-X power
+spectrum, and the average phase spectrum of an interactively
+selected subset of the data.
+
+Usage
+While you are using Interactive Spectral Analysis, you can
+dynamically change the trace sort by using the Interactive
+Data Access (IDA) tool. This tool must be turned on in Disk
+Data Input.
+Power
+The average power spectra is calculated by performing an
+FFT on the input traces. The sum of the amplitude spectrum
+samples is equal to the mean squared sum of the input data
+values, thereby normalizing the spectra. The amplitude
+spectra is then squared to obtain the power spectra for
+display purposes.
+The power spectra can be displayed as raw values, as a
+percentage of the deﬁned reference power, or as dB down
+from the reference power. If you set the reference power to a
+negative number, it will be reset to the maximum power
+sample in the spectrum.
+dB is deﬁned by:
+dB = 10 log (P/PREF) where:
+PREF = reference power
+P = measured power
+All Logarithms are to base 10.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1120
+
+ProMAX® Reference
+
+Signal
+The signal spectra for the input dataset is calculated by using
+each trace of the amplitude spectra calculated above, and
+cross-correlating adjacent traces. These signal traces are
+summed, then normalized to the number of input signal
+traces. and the square root is calculated.
+The algorithm for the signal spectra calculation assumes ﬂat
+reﬂectors. For example, at zero lag, the cross-correlation of
+the amplitude spectra represents the signal spectra.
+The signal traces are normalized according to the display
+used for the power spectra. For example, if raw power equals
+amplitude spectra squared, the signal spectra is also squared
+before display to view traces relative to the power spectra.
+Noise
+Noise is the result of subtracting the signal trace from the
+amplitude trace.
+Phase
+Various options to shift the zero time of the transformed
+samples are available. A time shift of the input data is
+equivalent to a linear phase shift of the spectrum. This is how
+the program applies the time shift. You can also specify the
+linear phase shift slope.
+The program offers the option to unwrap the phase values.
+The phase unwrapping algorithm adds multiples of 360
+degrees to the phase values to make the phase spectrum as
+continuous as possible.
+Pre-Fourier Transform Taper
+You have the option of applying a tapered time window prior
+to the Fourier Transform. This tapering is recommended,
+since tapering the time window reduces edge effects from the
+Fourier transform. The choice of taper methods includes
+Hanning, Bartlett, Boxcar and Hamming. You can specify the
+percentage of the window which is to be ﬂat.
+The Hanning window is deﬁned by:
+11
+-- – -- cos ϕ
+-22
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1121
+
+ProMAX® Reference
+
+The Hamming window is deﬁned by:
+0.54 – 0.46 cos ϕ where
+ϕ = π ( current ramp length/total taper length )
+The Bartlett window puts a linear slope on each end of the
+window over the taper zone.
+
+References
+Press, W. H., Teukolsky, S. A., Vetterling, W. T., and Flannery, B. P., 1992, Numerical Recipes in C: Cambridge University Press.
+
+Parameters
+Most parameters can be changed or set interactively from the
+Spectral Analysis pulldown menus under View or Data. The
+trace selection parameters can be changed or set interactively
+from the Data pulldown menu.
+Data selection method
+Select a method to choose the data to be analyzed from:
+• Simple accepts traces directly for analysis. A single window appears with the input data panel, along with spectral analysis results. You have the option to zoom any
+portion of the input data, but not to select a subset for
+separate analysis.
+• Single Subset interactively selects a single rectangular
+subset of the data from the Data Selection panel for
+analysis. The spectral displays are automatically
+updated for each new selection.
+• Multiple Subsets interactively selects multiple subsets
+for analysis from the Data Selection window. A new
+Spectral Analysis window for the current selection
+appears by selecting Spectral Analysis from the Analysis Options menu.
+Freeze the selected subset?
+This appears if Multiple Subsets to Data selection method.
+Select Yes to freeze windows; they will not update themselves
+when new subsets are selected. This allows you to produce
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1122
+
+ProMAX® Reference
+
+multiple analysis windows: one for each input ensemble.
+Select No, the default, for the windows to update themselves
+with each new selection. A single analysis window is updated
+for each input ensemble.
+Display data by traces or ensembles?
+Select to display data by:
+• Traces controls data by number of traces. Allows for a
+subset of traces to be analyzed.
+• Ensembles controls data display by number of ensembles. For example, if input is shot records, then each
+record is analyzed.
+Number of traces per analysis location
+This appears if Traces to Display data by traces or
+ensembles. Enter the number of traces to display for each
+analysis location. For simple data selection, this is the
+number of traces contributing to Spectral Analysis.
+Number of traces between analysis locations
+This appears if Traces to Display data by traces or
+ensembles. Enter the number of traces between successive
+analysis locations. If this parameter is larger than the
+Number of traces per analysis location, traces are skipped.
+If it is less than the number of traces per analysis location,
+successive displays overlap. Enter 0 to automatically set the
+number of traces per analysis location and Next Data
+displays the next set of traces without skip or overlap.
+Number of ensembles per analysis location
+This appears if Ensembles to Display data by traces or
+ensembles. Enter the number of ensembles to display for
+each analysis location. For simple data selection, this is the
+number of ensembles contributing to Spectral Analysis.
+Number of ensembles between analysis locations
+This appears if Ensembles to Display data by traces or
+ensembles. Enter the number of ensembles between
+successive analysis locations. If this parameter is larger than
+the Number of ensembles per analysis location, ensembles
+are skipped. If it is less than the number of ensembles per
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1123
+
+ProMAX® Reference
+
+analysis location, successive displays overlap. Enter 0 to
+automatically set the number of ensembles per analysis
+location and Next Ensembles displays the next set of
+ensembles without skip or overlap.
+Primary header for sorting and trace label
+Select the primary header for analysis. Select None for the
+primary trace label to depend on the choice of secondary
+trace label. The header is set to Trace Number or Ensemble
+Number if None is selected for the secondary trace label.
+Note: For poststack data, you must select CDP for the
+primary header and None for the secondary header. The
+traces are sorted and located by this header value, so the
+header label should be unique for each trace. Traces with
+non-unique labels are overlain in the trace and F-X displays,
+but their Spectra is still correct.
+Secondary header for sorting and trace label
+Select the secondary header for analysis. Select None to not
+display a secondary trace label.
+For poststack data, the secondary header label should be set
+to None. Traces with non-unique labels are overlain in the
+trace and F-X displays, but their Spectra is still correct.
+Display the average power spectrum?
+Select Yes, the default, to display the average power
+spectrum. Select No to not display the average power
+spectrum. However this can be dislayed later with
+Show/Hide.
+Note: These headers must exist in the input dataset.
+Type of scaling for power spectrum
+Select the type of scaling to use for the power spectrum
+displays. This can be interactively changed during the
+analysis session. The choices are:
+• dB Power displays power in dB down from the reference
+power. This is the default.
+• Percent Power displays power spectra as percentage of
+the reference power.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1124
+
+ProMAX® Reference
+
+• Raw Power displays the raw power values.
+Type of mapping for power spectrum
+Select the type of mapping to use for the power spectrum
+frequency axis displays. The choices are:
+• Linear displays frequency with a linear scale.
+• Logarithmic displays frequency with a logarithmic
+scale.
+Reference power
+This appears if dB Power or Percent Power to Type of
+scaling for power spectrum. Enter the reference power.
+Enter a negative value to set the reference power to the
+maximum power. The reference power may be changed
+during the analysis session.
+Display the average phase spectrum?
+Select Yes, the default, to initially display the average phase
+spectrum. Select No to not initially display the average phase
+spectrum, although this can be subsequently displayed using
+Show/Hide.
+Time, sample or linear or no phase shift?
+Select the type of shift to apply to the phase spectrum. The
+options are:
+• None applies no shift. Phase spectrum time zero is ﬁrst
+sample of selected data. This is the default.
+• Linear Phase Shift applies a linear phase shift of the
+speciﬁed slope.
+• Time Shift shifts time zero by the speciﬁed time.
+• Sample Shift shifts time zero by a speciﬁed number of
+samples.
+Linear phase shift slope (degrees/Hz)
+This appears if Linear Phase Shift to Time, sample or
+linear or no phase shift. Enter the slope of the linear phase
+shift to apply to the phase spectrum in degrees per Hz.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1125
+
+ProMAX® Reference
+
+Time Shift
+This appears if Time Shift to Time, sample or linear or no
+phase shift. Enter the time to shift the data in ms.
+Number of samples to shift
+This appears if Sample Shift to Time, sample or linear or
+no phase shift. Enter the number of samples to shift the
+data. A negative value shifts data up, a positive value shifts
+data down.
+Unwrap the phase spectrum?
+Select Yes to unwrap the phase. Select No to leave the phase
+display limited to +/- 180 degrees. Unwrapping the phase
+spectrum removes the discontinuities at +/- 180 degrees. It
+will make the phase curve continuous. If the phase spectrum
+is the average of many traces, the unwrapped phase
+spectrum will be the average of the individually unwrapped
+phases.
+Display the selected trace data?
+Select Yes to display the selected trace data. Select No to not
+display the selected trace data at this time. However, you can
+display trace data later with Show/Hide.
+Display the F-X power spectrum?
+Select Yes, the default, to display the F-X power spectrum.
+The F-X power spectrum is a color contour plot of the power
+spectra of the individual traces. Select No to not display the
+F-X power spectrum at this time. However, you can display FX power spectrum later with Show/Hide.
+Note: The color scale used to display the F-X Power spectrum
+can be customized using Color Editor from the Spectral
+Analysis Window menu.
+Display the Pre-FFT time window?
+Select Yes to display the pre-FFT. Select No, the default, to
+not display the average phase spectrum at this time.
+However, you can display the average phase spectrum later
+with Show/Hide.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1126
+
+ProMAX® Reference
+
+Pre-FFT time window TAPER type
+Select the type of taper to apply to the window before the FFT.
+Using a taper reduces FFT edge effects. The choices are:
+• Hanning applies a cosine taper with edge value = 0.0.
+This is the default.
+• Bartlett applies a linear taper with edge = 0.0.
+• Hamming applies a cosine taper with edge value = 0.0.
+• Boxcar merely truncates the window.
+Percent ﬂat for the pre-FFT time window
+Enter the percentage of the pre-FFT time window which is not
+tapered. For example, if you set this value to 80%, then the
+window is tapered over the ﬁrst 10% and the last 10% of its
+length. Enter 100.0 for no taper.
+Set frequency display ranges automatically?
+Select Yes, the default, to automatically set the frequency
+power ranges from zero to the Nyquist frequency
+corresponding to the trace sampling. Select No to enter the
+frequency range. The frequency display range cannot be
+interactively changed.
+Minimum frequency
+This appears if No to Set frequency display ranges
+automatically. Enter the minimum frequency in Hz for
+spectral displays.
+Maximum frequency
+This appears if No to Set frequency display ranges
+automatically. Enter the maximum frequency in Hz for
+spectral displays.
+Set power display ranges automatically?
+Select Yes, the default, to automatically set the power display
+ranges. Select No to enter the minimum and maximum power
+to display. The power display ranges cannot be interactively
+changed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1127
+
+ProMAX® Reference
+
+Minimum Power
+This appears if No to Set power display ranges
+automatically. Enter the minimum power displays in dB,
+percentage. or raw power depending on type of power scaling.
+Maximum Power
+This appears if No to Set power display ranges
+automatically. Enter the maximum power displays in dB,
+percentage. or raw power depending on type of power scaling.
+Set phase display ranges automatically?
+Select Yes, the default, to automatically set the phase ranges.
+Select No to enter the minimum and maximum phase. The
+phase display ranges cannot be interactively changed.
+Minimum Phase
+This appears if No to Set phase display ranges
+automatically. Enter the minimum phase in degrees on
+phase displays.
+Maximum Phase
+This appears if No to Set phase display ranges
+automatically. Enter the maximum phase in degrees on
+phase displays.
+
+Interactive Display
+Interactive Spectral Analysis computes spectra from
+subsets of the data which you can select interactively. There
+are three ways to select subsets of the data: simple selection,
+single subset selection and multiple subset selection. The
+layout of the spectral analysis window is different for each of
+these methods. Most of the displays in the Spectral Analysis
+window can be shown or hidden from both the ﬂow menu and
+interactively using Visibility under the View pulldown menu.
+The best method and window layout depends on the task you
+perform.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1128
+
+ProMAX® Reference
+
+Simple Selection
+The Simple selection method directly inputs traces from the
+ﬂow into Spectral Analysis. Only the traces being analyzed
+are displayed and all displayed traces are analyzed at one
+time.
+When Simple is selected for the Data Selection Method and
+the ﬂow is executed, the Simple Spectral Analysis window
+appears.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1129
+
+ProMAX® Reference
+
+Single Subset Selection
+When Single Subset is selected for the Data Selection
+Method and the ﬂow is executed, the Single Subset Spectral
+Analysis window appears.
+
+You can select a single rectangular subset of the data for
+analysis. Click on the Selection icon
+and drag MB1 in the
+Data Selection window (the left-most window) to select the
+rectangular subset. When you release and click MB1 again,
+the selected subset appears in the Analyzed Data Window.
+The spectral displays are automatically updated for each new
+selection. The spectral displays are automatically updated for
+each new selection. You can bring new traces into the
+selection window, as for simple selection. The current
+selection contains only data visible in the data selection
+window. It is updated when new traces are brought in. If the
+old selection does not fall within the new range of traces, the
+entire new set of traces is automatically selected.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1130
+
+ProMAX® Reference
+
+Multiple Subset Selection
+When Multiple Subsets is selected for the Data Selection
+Method and the ﬂow is executed, the Spectral Analysis Data
+Selection window appears.
+
+For multiple subset selection, Spectral Analysis displays at
+least two windows, a Data Selection Window and one or more
+Spectral Analysis windows. Subsets for Spectral Analysis are
+chosen from the Data Selection Window, using the Selection
+icon. A Spectral Analysis window for the current selection is
+made by selecting Spectral Analysis from the Data Analysis
+menu. By default, the Spectral Analysis window updates
+itself for each new selection. The subset in the Spectral
+Analysis window can be frozen so that it does not update with
+new selections. Any number of Spectral Analysis windows
+can be opened for any selection. By freezing each spectrum
+after it is created, spectra for different subsets can be
+compared. By creating multiple spectra for the same subset,
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1131
+
+ProMAX® Reference
+
+but with different parameters, the dependence of the spectra
+on their parameters can be compared.
+Menu Bar
+The menu bar for each type of selection contains three
+pulldown menus plus the Help menu. When commands are
+not appropriate, they are grayed out.
+File menu
+The ﬁle menu commands are:
+• Hardcopy > (Simple and Single Subset methods only)
+presents two options to generate prints/plots of the display. Parameters for these options rely on the conﬁg_ﬁle.
+See Trace Display for more details.
+Printer prints the screen image to a printer, speciﬁed in
+the conﬁg_ﬁle.
+Plotter generates a screendump cgm ﬁle of the screen
+image and submits it to plotting software speciﬁed in the
+conﬁg_ﬁle.
+• Next Screen displays the next screenful of data. The
+next data can be the next group of traces or the next
+ensemble depending on menu parameterization.This
+works the same as the
+icon.
+• Previous Screen moves backward on groups of data.
+This option is only active if IDA is enabled in the Disk
+Data Input feeding the ISA. This works the same as the
+icon.
+• Rewind moves back to the ﬁrst data available from the
+current sort list provided by IDA. This option is only
+active if IDA is enabled in the Disk Data Input feeding
+the ISA. This works the same as the
+icon.
+• Exit/Continue Flow exits Spectral Analysis stopping
+the analysis tool only. The ﬂow continues to run.
+• Exit/Stop Flow exits Spectral Analysis stopping the
+entire ﬂow.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1132
+
+ProMAX® Reference
+
+Data Menu
+The Data pulldown menu has three options. Each option
+generates a dialog box as follows:
+• Data Region controls how many traces are displayed
+and the parameters for the next screen. The Next Screen
+Controls dialog box appears:
+
+• Trace Scaling changes the polarity and amplitude
+scaling of the data being displayed. The Trace Scaling
+Controls dialog box appears:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1133
+
+ProMAX® Reference
+
+• Trace Display changes how traces are dislayed. For
+example, are traces displayed as wiggles or as pixels. The
+Display Controls dialog box appears:.
+
+View Menu (Simple and Single Subset methods only)
+The choices to change the data window, phase, or power
+options are:
+• FFT Weighting:
+Hanning applies a cosine taper. Edge sample = 0.0.
+Bartlett applies a linear taper. Edge sample = 0.0.
+Hamming applies a cosine taper. Edge sample =.08
+Boxcar applies 1.0 in the ﬂat zone, 0.0 in the taper.
+Window Percent Flat displays the current percent ﬂat
+for the FFT time window.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1134
+
+ProMAX® Reference
+
+• Phase Spectrum presents the Phase Options dialog
+box.:
+
+The dialog box contains three parameters.
+Phase shift type toggles between:
+Linear Phase Shift allows you to enter the slope of the
+linear phase shift in deg/Hz.
+Time Shift allows you to enter the time shift in ms.
+Sample shift allows you to enter the number of samples
+to shift. A negative value shifts up and a positive value
+shifts down.
+Phase Shift Amount is the value associated with the
+above options.
+Phase wrapping toggles between Unwrap Phase
+spectrum or Wrap Phase spectrum.
+• Power Scaling allows you to set scaling type or reference
+power for power spectrum display.When you click on
+Power Scaling the Power Options dialog box appears.
+
+The dialog box contains four parameters.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1135
+
+ProMAX® Reference
+
+Display Type toggles between:
+dB Power displays power in dB down from reference
+power. For raw dB, set reference power to 1.0.
+Percent Power displays power as a percentage of
+reference power.
+Raw Power selects average power. Spectrum displayed
+in raw power.
+Signal/Noise options allows you to select data only,
+overlay signal, or overlay noise. The Slope icon can be
+used to calculate db/Octave for the amplitude spectra.
+The options are:
+Data Only displays one power spectra of the average of
+all data.
+Overlay Noise displays the same power spectrum as
+Data Only with an overlay of a spectrum representing
+the spectrum of the noise present in the data.
+Overlay Signal displays the same power spectrum as
+Data Only with an overlay of a spectrum that represents
+the spectrum of the coherent signal in the data.
+Smooth Signal applies a 5 Hz smoothing function to the
+signal.
+Reference Power allows you to enter a new reference
+power dB or % displays. A negative value uses maximum
+amplitude of the spectra as reference. For dBPower, set
+reference to 1.0.
+• Colormap displays the Color Editor.
+• Visibility toggles on/off the Data Window, Selected
+Data, F-X power, Average Power, Average Phase. Click
+on Close to exit.
+Options Menu (Multiple Subsets method only)
+The Spectral Analysis option presents the Spectral Analysis
+window. The menu bar on this window contains three
+pulldown menus. The options are as follows:
+• File presents the Hardcopy and Close options as
+described for the main menu bar.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1136
+
+ProMAX® Reference
+
+• Data presents the Freeze Selection option which
+freezes the selected data for comparing to different subsets.
+• View presents the same options as described for the
+main menu bar.
+Icons
+The Icon Bar on the left contains the following icons:
+
+• Forward shows the next screen full of data.
+
+• Back single steps backward to previous screens. If there
+is no previous data available, this icon is grayed out.
+
+• Rewind steps backward to the ﬁrst screen full of data. If
+there is no previous data available, this icon is grayed
+out.
+
+• Zoom Tool zooms a selected area by clicking and dragging MB1. If you release MB1 outside the window, the
+zoom operation is canceled. If you click MB1 without
+dragging, this tool will unzoom. You can use the zoom
+tool in the axis area to zoom in one direction only.
+
+• Annotation Tool allows you to add, change, and delete
+text annotation in the trace and header plot areas. The
+pointer changes to a circle when it is over text annotation. You can move an annotation by clicking and dragging MB1, or add new annotation by clicking MB1 when
+the pointer is not over an existing annotation. When the
+pointer is over an existing annotation, click MB2 to
+delete the text or MB3 to edit the text or change its color.
+The annotation remains when you move to the next
+resemble.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1137
+
+ProMAX® Reference
+
+• Selection Tool selects a rectangular region of the data
+as described above. (Single Subset and Multiple Subsets
+only).
+
+• Slope allows you to estimate the amortization rate of the
+spectra in db/octave by drawing a line on the power
+spectrum display. (Simple and Single Subset only)
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Interactive Spectral Analysis1138
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

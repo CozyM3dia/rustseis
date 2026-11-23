@@ -1,0 +1,276 @@
+; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+ name: TAR
+
+label: "True Amplitude Recovery"
+
+
+
+value_tab: 45
+
+parameter: APPLY_SD
+text: "Apply spherical divergence corrections?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to compute corrections to compensate for loss of amplitudes due to spherical wavefront spreading."
+
+
+parameter: SDV_TYPE
+text: "  Basis for spherical spreading"
+type: circular:
+type_desc: (
+("1/dist         " 1 "Corrections based on the reciprocal of the distance that the wavefront has travelled." )
+("1/(time*vel**2)" 2 "Corrections based on a function of travel time and velocity (assuming a layered earth)."))
+mouse_text: "Select between the 2 choices for spherical spreading corrections. (See P. Newman, Geophysics v. 38-03, p. 481.)"
+plot_label: t
+
+
+parameter: APPLY_IE
+text: "Apply inelastic attenuation corrections?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' to compute corrections to compensate for loss of amplitudes due to inelastic attenuation."
+
+
+parameter: INLS_ATN
+text: "  Inelastic attenuation correction constant"
+type: typein:
+type_desc: ( real: 8 1.0e-6 .01 )
+value: .0002
+mouse_text: "Constant inelastic attenuation value (alpha) used in: e**(alpha*x), where x = velocity * time."
+plot_label: t
+
+
+parameter: db_bool
+text: "Get TAR velocity function from database?"
+type: boolean:
+value: t
+mouse_text: "A velocity function can either be retrieved from the database or specified by hand."
+
+
+parameter: VELVARYS
+text: "  Are velocities spatially variant?"
+type: boolean:
+value: nil
+mouse_text: "Velocities may be spatially variant by CDP, but this will cause a longer run time."
+plot_label: t
+
+
+parameter: DB_VEL
+text: "  Select velocity parameter file"
+type: function:
+type_desc: ((parm_list "VEL") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select an RMS velocity function parameter file from the parameter file menu."
+plot_label: t
+
+
+parameter: TAR_VEL
+text: "  Specify TAR velocity function"
+type: edit:
+type_desc: (31 80 5 " FORMAT: T1-V1,T2-V2,T3-V3,...,Tn-Vn
+ EXAMPLE: 0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "XXX"
+mouse_text: "Use MB1 to define the AVERAGE velocity function for true amplitude corrections (2-way time[in ms]-vel, time-vel, etc)."
+plot_label: t
+
+
+
+parameter: TAR_VEL2
+text: "  Specify TAR velocity functions"
+type: edit:
+type_desc: (31 80 5 " FORMAT: CDP1:T1-V1,...,Tn-Vn/CDP2:T1-V1,...,Tn-Vn/.../
+ EXAMPLE: 1:0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "XXX"
+mouse_text: "Use MB1 to define the velocity functions for true amplitude corrections (2-way time[in ms]-vel, time-vel, etc)."
+plot_label: t
+
+
+
+parameter: APPLY_DB
+text: "Apply dB/sec corrections?"
+type: boolean:
+value: t
+mouse_text: "Compute corrections by a simple deciBels per second amplitude adjustment function."
+
+
+
+parameter: TAR_REF
+text: "  dB/sec correction start time"
+type: circular:
+type_desc: (
+("Time zero"    0 "dB/sec correction starts at time zero.")
+("Water bottom" 1 "dB/sec correction starts at the water-bottom time.")
+           )
+mouse_text: "Select dB/sec correction start time."
+plot_label: t
+
+
+
+parameter: DB_PER_S
+text: "  dB/sec correction constant"
+type: typein:
+type_desc: ( real: 6 -120.0 nil )
+value: 6.0
+mouse_text: "This is the constant dB/sec value used to compute amplitude corrections."
+plot_label: t
+
+
+parameter: APPLY_PW
+text: "Apply time raised to a power corrections?"
+type: boolean:
+value: nil
+mouse_text: "Compute corrections by raising the time to a power and multiplying it by the sample value."
+
+
+parameter: T_POWER
+text: "  Time-Power constant"
+type: typein:
+type_desc: ( real: 6 -10.0 nil )
+value: 2.0
+mouse_text: "This is the constant to raise time to before multiplying by the trace samples."
+plot_label: t
+
+
+parameter: TAR_MODE
+text: "APPLY or REMOVE amplitude corrections?"
+type: circular:
+type_desc: ( 
+("Apply" 1 "This is the normal mode wherein seismic data are corrected for loss of signal strength.")
+("Remove" 2 "This mode can be used to introduce Earth amplitude effects to synthetic data."))
+mouse_text: "Normally, gain is APPLIED, but for synthetic data you may wish to REMOVE amplitude effects."
+plot_label: t
+
+
+parameter: TIME_MAX
+text: "Maximum application TIME"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 0.0
+mouse_text: "Maximum time in ms for computing TAR corrections. Beyond this time a constant scalar is applied. Use 0.0 for whole trace."
+plot_label: t
+
+
+parameter: NORM_SRC
+text: "Normalization source"
+type: pop_choose:
+type_desc: ( 
+	("Calculate"	1 "Calculate normalization constant from menu parameters.")
+	("Menu"		2 "Get normalization constant from menu.")
+	("Header"	3 "Get normalization constant from trace header entry TAR_NORM.")
+	   )
+mouse_text: "Computed gain curves are divided by normalization constant so that trace amplitudes are relatively unchanged."
+plot_label: t
+
+
+parameter: REF_TIME
+text: "Normalization reference TIME"
+type: typein:
+type_desc: ( real: 6 0.0 nil )
+value: 0.0
+mouse_text: "Reference time in ms for normalizing TAR corrections. Must not exceed length of trace. 0.0 defaults to middle of trace."
+plot_label: t
+
+
+parameter: TAR_NORM
+text: "Normalization constant"
+type: typein:
+type_desc: ( real: 14 1.2E-38 nil )
+value: 1.0
+mouse_text: "Enter normalization constant. Must be > 0."
+plot_label: t
+
+
+exec_data: ("TAR"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: tar.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+
+			("NUM_WAYS" implicit: 2 )
+			("VELVARYS" implicit: (if (value 'VELVARYS) 1 0 ))
+			("TAR_VEL " implicit: (if (value 'VELVARYS) (value 'TAR_VEL2) (value 'TAR_VEL) ))
+			("TAR_REF " implicit: (value 'TAR_REF))
+
+
+
+
+
+
+			("APPLY_SD" implicit: (if (value 'APPLY_SD) 1 0 ))
+			("APPLY_IE" implicit: (if (value 'APPLY_IE) 1 0 ))
+			("APPLY_DB" implicit: (if (value 'APPLY_DB) 1 0 ))
+			("APPLY_PW" implicit: (if (value 'APPLY_PW) 1 0 ))
+			("DB_PER_S" implicit: (value 'DB_PER_S))
+			("INLS_ATN" implicit: (value 'INLS_ATN))
+			("SDV_TYPE" implicit: (value 'SDV_TYPE))
+			("TAR_MODE" implicit: (value 'TAR_MODE))
+			("DB_VEL  " implicit: (if (value 'db_bool) (value 'DB_VEL) "NONE    "))
+			("T_POWER " implicit: (value 'T_POWER))
+			("TIME_MAX" implicit: (value 'TIME_MAX))
+			("NORM_SRC" implicit: (value 'NORM_SRC))
+			("REF_TIME" implicit: (value 'REF_TIME))
+			("TAR_NORM" implicit: (value 'TAR_NORM))
+		)
+	    )	
+
+rules: (
+
+ (rule1 ( value 'APPLY_DB )
+	(do_show '(TAR_REF DB_PER_S))
+	(do_not_show '(TAR_REF DB_PER_S))
+ )
+
+
+
+
+ (rule2 ( value 'APPLY_IE ) (do_show 'INLS_ATN) (do_not_show 'INLS_ATN)) 
+ (rule3 ( value 'APPLY_SD ) (do_show 'SDV_TYPE) (do_not_show 'SDV_TYPE))
+
+ (rule4 ( or (value 'APPLY_IE) (value 'APPLY_SD) )
+        (do_show '(db_bool VELVARYS)) 
+                  (do_not_show '(db_bool VELVARYS)))
+
+
+
+
+ (rule5 ( value 'APPLY_PW ) (do_show 'T_POWER) (do_not_show 'T_POWER)) 
+ (VEL_default_rule1 (and ( equal ( value 'TAR_VEL) "XXX" )
+    		  	  ( = ( db_parmget_line "IUNITSz") 1 ) ) (set_value 'TAR_VEL "0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000/" ) )
+ (VEL_default_rule2 ( equal ( value 'TAR_VEL) "XXX" ) (set_value 'TAR_VEL "0-1480,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000/" ) )
+
+ (VEL2_default_rule1 (and ( equal ( value 'TAR_VEL2) "XXX" )
+    		  	  ( = ( db_parmget_line "IUNITSz") 1 ) ) (set_value 'TAR_VEL2 "1:0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000/" ) )
+ (VEL2_default_rule2 ( equal ( value 'TAR_VEL2) "XXX" ) (set_value 'TAR_VEL2 "1:0-1480,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000/" ) )
+
+ (db_bool_show_1 (and (value 'db_bool) (showing 'db_bool)) (do_show 'DB_VEL) (do_not_show 'DB_VEL))
+
+ (TAR_VEL_show (and (not (value 'db_bool)) (showing 'db_bool) (not (value 'VELVARYS)) (showing 'VELVARYS)) (do_show 'TAR_VEL) (do_not_show 'TAR_VEL))
+ (TAR_VEL2_show (and (not (value 'db_bool)) (showing 'db_bool) (value 'VELVARYS) (showing 'VELVARYS)) (do_show 'TAR_VEL2) (do_not_show 'TAR_VEL2))
+
+
+
+ (NORM_rule1 (= (value 'NORM_SRC) 1) (do_show 'REF_TIME) (do_not_show 'REF_TIME))
+ (NORM_rule1 (= (value 'NORM_SRC) 2) (do_show 'TAR_NORM) (do_not_show 'TAR_NORM))
+
+      )
+)

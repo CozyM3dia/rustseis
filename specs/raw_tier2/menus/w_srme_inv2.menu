@@ -1,0 +1,53 @@
+;; 1 IIID IVD DEV DEPTHC
+'(
+name: W_SRME_INV2
+label: "SRME Init"
+value_tab: 50
+
+parameter: MULT_LIN
+text: "Process multiple lines?"
+type: boolean:
+value: nil
+mouse_text: "The SRME can be run on multiple lines, restarting at the beginning of each."
+plot_label: t
+
+parameter: HDR_VAL0
+text: "  Header entry for line change"
+type: function:
+type_desc: (header_list headers )
+value: "NONE    "
+selected_item: "INVALID"
+mouse_text: "Use MB1 to specify the trace header entry to indicate a change."
+plot_label: t
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', you must execute this program yourself using a debugger."
+
+exec_data: (
+	("ST_W_SRME_INV2"
+		("GENERAL"
+			("program"   implicit: "w_srme_inv2.exe" )
+			("DEBUG"     implicit: (if (value 'DEBUG) 2 0 ) )
+			("version"   implicit: "ProMAX $Id: w_srme_inv2.menu 43993 2009-02-26 17:51:37Z David Johnston $ $Revision: 43993 $ $Date: 2009-02-26 10:51:37 -0700 (Thu, 26 Feb 2009) $")
+;  variables after here are user parameters
+			("MULT_LIN"  implicit: ( if (value 'MULT_LIN) 1 0 ) )
+			("HDR_VAL0"  implicit: (value 'HDR_VAL0))
+		)
+	)
+
+)
+
+rules: 	(
+(socket_debug_rule t
+		(if (= (printenv 'SOCKET_DEBUG) "t")
+			(do_show 'DEBUG)
+			(do_not_show 'DEBUG) )  )
+
+(rule1 (value 'MULT_LIN) (do_show 'HDR_VAL0) (do_not_show 'HDR_VAL0))
+
+	)
+
+)

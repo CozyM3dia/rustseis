@@ -1,0 +1,210 @@
+{
+  "menu_id": "filter",
+  "tool_name": "FILTER",
+  "label": "Bandpass Filter",
+  "parameter_count": 22,
+  "parameters": [
+    {
+      "name": "FLT_TYPE",
+      "prompt": "TYPE of filter",
+      "kind": "circular",
+      "default": null,
+      "help": "Bandpass filters can be applied as a single filter, or both the filters and application gates may spatially vary.",
+      "choices": [
+        {
+          "label": "Single Filter",
+          "value": "1",
+          "help": "Apply a single bandpass filter."
+        },
+        {
+          "label": "Time and Space-Variant Filter",
+          "value": "2",
+          "help": "Apply time and space-variant filters in space-variant time windows."
+        }
+      ]
+    },
+    {
+      "name": "FLT_SPEC",
+      "prompt": "Type of filter specification",
+      "kind": "circular",
+      "default": null,
+      "help": "A bandpass filter can be specified as a group of 4 frequency values, or as a group of F1-SLOPE1-F2-SLOPE2 values.",
+      "choices": [
+        {
+          "label": "Ormsby bandpass",
+          "value": "1",
+          "help": "Specify filters using 4 frequencies."
+        },
+        {
+          "label": "Butterworth bandpass",
+          "value": "2",
+          "help": "Specify filters using F1-DB/OCTAVE1-F2-DB/OCTAVE2."
+        }
+      ]
+    },
+    {
+      "name": "PHASE",
+      "prompt": "PHASE of filter",
+      "kind": "circular",
+      "default": null,
+      "help": "Bandpass filters can be applied as zero phase filters, or as minimum phase filters.",
+      "choices": [
+        {
+          "label": "Zero",
+          "value": "1",
+          "help": "Apply a ZERO phase filter."
+        },
+        {
+          "label": "Minimum",
+          "value": "2",
+          "help": "Apply a MINIMUM phase filter."
+        }
+      ]
+    },
+    {
+      "name": "RNOISE",
+      "prompt": "Percent additive noise factor",
+      "kind": "typein",
+      "default": "1.0",
+      "help": "Enter the percentage of the maximum frequency value to 'floor' the spectrum prior to conversion to minimum phase."
+    },
+    {
+      "name": "IDOMAIN",
+      "prompt": "Domain for filter application",
+      "kind": "circular",
+      "default": null,
+      "help": "Single gate filters can be applied in either the TIME domain or the FREQUENCY domain.",
+      "choices": [
+        {
+          "label": "Frequency",
+          "value": "2",
+          "help": "Apply the filter in the FREQUENCY domain."
+        },
+        {
+          "label": "Time",
+          "value": "1",
+          "help": "Apply the filter in the TIME domain."
+        }
+      ]
+    },
+    {
+      "name": "FILT_LEN",
+      "prompt": "Tapered filter length in ms",
+      "kind": "typein",
+      "default": "160.0",
+      "help": "Enter Hanning tapered filter length for time domain filter application (20-1000 ms)."
+    },
+    {
+      "name": "PCT_PAD",
+      "prompt": "Percent zero padding for FFT's",
+      "kind": "typein",
+      "default": "25.0",
+      "help": "The percent of input trace length to pad with zeroes: 100% is always safe (but slow);10% may be OK for AGC'd data."
+    },
+    {
+      "name": "notch_option",
+      "prompt": "Apply a notch filter?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "A notch filter may be applied at virtually any frequency and notch filter width."
+    },
+    {
+      "name": "F_NOTCH",
+      "prompt": "Notch filter frequency",
+      "kind": "typein",
+      "default": "60.0",
+      "help": "Enter the center frequency of the notch filter you wish to apply."
+    },
+    {
+      "name": "N_F_WIDE",
+      "prompt": "Width of notch filter",
+      "kind": "typein",
+      "default": "4.0",
+      "help": "A 4 Hertz wide, 50 Hertz notch filter will zero frequencies from 48 to 52 Hz and apply exponential edge tapers."
+    },
+    {
+      "name": "nsearch_option",
+      "prompt": "Automatic notch frequency search?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "This program can automatically scan around the specified notch frequency for the maximum energy to set the notch filter."
+    },
+    {
+      "name": "FREQSCAN",
+      "prompt": "Maximum notch frequency variation",
+      "kind": "typein",
+      "default": "3.0",
+      "help": "A 60 Hertz, 3 Hertz wide notch search will set the notch to the maximum spectral energy between 57 and 63 Hertz."
+    },
+    {
+      "name": "FLT_FREQ1",
+      "prompt": "Ormsby filter frequency values",
+      "kind": "typein",
+      "default": "8-12.5-40-50",
+      "help": "Enter four 'corner' frequencies: F1(0%) - F2(100%) - F3(100%) - F4(0%).  Hanning (cosine) tapers are used for ramps."
+    },
+    {
+      "name": "FLT_FREQ2",
+      "prompt": "Butterworth filter freq-slope values",
+      "kind": "typein",
+      "default": "8-18-40-72",
+      "help": "Enter F1(-3dB) - DB/OCTAVE1(slope) - F2(-3dB) - DB/OCTAVE2(slope). Butterworth tapers are used for ramps"
+    },
+    {
+      "name": "FLT_PARM1",
+      "prompt": "Space-variant filter parameters",
+      "kind": "edit",
+      "default": "1:0:5-10-40-50,10-14-70-90/1:5280:5-10-35-42,8-12-60-75/",
+      "help": "Use MB1 to edit/define the SPACE-variant filters and locations to apply to each time gate. (SEE EDITOR EXAMPLE.)"
+    },
+    {
+      "name": "FLT_PARM2",
+      "prompt": "Space-variant filter parameters",
+      "kind": "edit",
+      "default": "1:0:10-18-40-72,14-18-70-72/1:5280:10-18-35-72,12-18-60-72/",
+      "help": "Use MB1 to edit/define the SPACE-variant filters and locations to apply to each time gate. (SEE EDITOR EXAMPLE.)"
+    },
+    {
+      "name": "db_option",
+      "prompt": "Get time gates from the DATABASE?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Set to 'NO' if a time-variant filter time gate parameter file was not created interactively.(Will enter manually.)"
+    },
+    {
+      "name": "GATENAME",
+      "prompt": "SELECT time gate parameter file",
+      "kind": "function",
+      "default": "no entry",
+      "help": "Use Mouse Button 1 to select a spatially-variant time gate parameter file from the parameter file menu."
+    },
+    {
+      "name": "PRIM_KEY",
+      "prompt": "SELECT Primary time gate header word",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the PRIMARY key for specifying filter design parameters."
+    },
+    {
+      "name": "SCND_KEY",
+      "prompt": "SELECT Secondary time gate header word",
+      "kind": "function",
+      "default": "OFFSET  ",
+      "help": "Use MB1 to select a header word from the HEADERS menu as the SECONDARY key for specifying filter design parms."
+    },
+    {
+      "name": "FLT_GATE",
+      "prompt": "SPECIFY filter time gate parameters",
+      "kind": "edit",
+      "default": "1:0:0-1500,2000-4000/1:5280:0-2500,3000-4000/",
+      "help": "Define time gates in which to apply requested filters (example: '1:0:0-1500,2000-4000/1:5280:0-2500,3000-4000/')."
+    },
+    {
+      "name": "remute_option",
+      "prompt": "Re-apply trace mute after filter?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Trace mutes (such as first break suppression mutes) may be re-applied after filtering."
+    }
+  ]
+}

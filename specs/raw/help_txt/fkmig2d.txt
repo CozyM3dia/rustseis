@@ -1,0 +1,618 @@
+Stolt or Phase Shift 2D Migration713
+
+ProMAX® Reference
+
+Stolt or Phase Shift 2D Migration
+Stolt or Phase Shift 2D Migration migrates or demigrates
+2D stacked seismic sections or common-offset gathers using
+Stolt’s f-k method or a variation of Gazdag’s phase-shift
+method. It is a 2D companion to Stolt or Phase Shift 3D
+Migration, providing consistent geophysical treatment of the
+input data. By applying the migration to moveout-corrected
+common-offset gathers, a prestack time migration may be
+achieved.
+
+Theory
+Migration Methods
+Stolt Migration
+Stolt migration is computationally efﬁcient and very accurate
+for constant velocity, but has difﬁculty imaging steep dips in
+areas where there are large vertical or lateral velocity
+variations. This algorithm uses a method analogous to Stolt’s
+stretching technique to account for vertical and spatial
+velocity variations.
+For steep dips, a further improvement is obtained via the
+stretch factor, often simply referred to as W. This factor is
+used, after time stretching and Fourier transforming, to alter
+the Stolt mapping of frequencies. When this factor is omitted
+(equivalent to letting W = 1.0), simple time stretching tends to
+over-migrate steeply dipping reﬂectors. Decreasing this factor
+to, for example, W = 0.6 may more accurately position steeply
+dipping reﬂectors. As you experiment with this W parameter,
+remember that fast Stolt migration, even with this stretch
+factor, may not be a substitute for a more costly and more
+accurate migration method.
+For fairly constant velocity media, the primary advantage of
+Stolt’s method is speed. In typical Gulf Coast variable velocity
+settings, where a signiﬁcant amount of trace stretching is
+required to precondition the data for Stolt applications, the
+difference in speed between Stolt and Phase Shift migration
+can be insigniﬁcant.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration714
+
+ProMAX® Reference
+
+Phase Shift Migration
+Phase Shift migration handles steeply dipping, even
+overturned, reﬂectors when velocity varies with depth. Like
+all time migration methods, it cannot properly image steep
+reﬂectors when velocity signiﬁcantly varies laterally.
+To image turning rays, which typically require longer
+migration apertures and recording times, you need an
+accelerating interval velocity ﬁeld. Do not select this option if
+you do not have the potential for imaging turning rays, as
+you will only cause additional noise to be incorporated into
+your migrated section.
+The computational efﬁciency of the Phase Shift migration
+method originates from the assumption that velocity is
+laterally invariant. Using a method analogous to Stolt’s
+stretch technique, the program attempts to handle lateral
+velocity variations by time stretching seismic traces to
+approximate traces with laterally invariant velocity. Once the
+algorithm is applied to the migrated traces, they are
+unstretched. This simple time stretching is most accurate for
+reﬂectors with moderate dip.
+A Rule of Thumb: any velocity change should be subtle. In
+the case of a gentle lateral velocity gradient, it has been
+observed that the effect of this internal stretch is to image
+fault-plane reﬂectors closer to their true lateral location than
+most other time migration methods.
+Refer to the Migration Overview for more information.
+Applying NMO and DMO
+In prestack usage, Stolt or Phase Shift 2D Migration is
+applied to common-offset gathers that have had NMO and
+DMO applied. After migration, the NMO corrections can be
+removed and a ﬁnal velocity analysis performed for stack.
+Note: This approach approximates a prestack time migration,
+but it is not equivalent.
+Reversing the Migration Process
+There are circumstances in which it can be useful to reverse
+the migration process.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration715
+
+ProMAX® Reference
+
+• You want to forward model a synthetic stacked section in
+order to test some processing ﬂow or analysis tool.
+• After aligning and stacking common-offset time migrations, you want to generate a zero-offset section suitable
+for poststack depth migration. In effect the Stolt or
+Phase Shift 3D Migration is used to generate a better
+stack to avoid the expense of 3D prestack depth migration.
+Stolt or Phase Shift 2D Migration provides the following
+two options for reversing the migration process:
+• demigration is the classic zero-offset exploding reﬂectors forward modeling algorithm upon which the corresponding migration, either Phase Shift or Stolt, is based.
+It is a very stable processing operation and in most cases
+the preferred tool when subsequent analysis and interpretation is not critically dependent on amplitudes.
+• inverse migration, is, at least approximately, the linear
+inverse of the corresponding migration algorithm.
+Because it necessarily boosts the energy of dipping
+events, it takes care and experimentation to control artifacts such as steep linear noise trains.
+When using either of these options, you should be aware of
+the following:
+• Migration followed by demigration does not reproduce
+the original input data set. Generally speaking, steeper
+dips are attenuated by a factor proportional to the cosine
+of the subsurface dip. This is because migration is not
+an inversion process.
+• Inverse migration does not produce the same data set as
+forward modeling does. It does, however, avoid much of
+the steeper dip attenuation associated with demigration.
+• For the Stolt algorithm, demigration is the inverse of
+migration with the obliquity explicitly turned off.
+• Unlike Stolt migration, Phase Shift migration is not tractably invertible. We use the amplitude correction procedure from inverse Stolt migration to approximate the
+inverse of Phase Shift migration.
+• Theoretically, a “perfect” migration reduces the RMS
+energy of dipping events, but not their spectral amplitudes. Thus, time-spectral analyses of steeply dipping
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration716
+
+ProMAX® Reference
+
+events will see the same spectral amplitudes compressed
+into a smaller bandwidth.
+If the data to be demigrated or inverse migrated are a subset
+of the data that were originally migrated, you may need to
+output padded traces to prevent the loss of events that move
+outside of the input volume. Include extra CDPs beyond the
+range of the input migrated data set in Minimum CDP to
+migrate and Maximum CDP to migrate. Then Pad Traces,
+which is part of this macro, inserts padded traces for any
+missing CDPs from Minimum to Maximum. Select None to
+Rekill dead traces or else the padded traces are rekilled and
+Remove Pad Traces, another part of the macro, removes
+them.
+If the input traces are shorter than the traces that were
+originally migrated, then you can use Output trace length to
+increase the output trace length and prevent the loss of
+events that move downward in time during demigration or
+inverse migration.
+Resampling
+Stolt or Phase Shift 2D Migration resamples and, if
+necessary, antialias ﬁlters the data. Input data are resampled
+to an internal sample interval of 0.6*0.5/fmax, where fmax
+is the maximum frequency to migrate. (The 0.6 comes from
+the accuracy of the 8-point sinc interpolator used to stretch
+the data.) Data are resampled after migration to the
+requested output sample rate. During both resamplings, if
+the sample rate increases, a zero-phase high-ﬁdelity antialias
+ﬁlter is applied before resampling. Both resampling and
+antialias ﬁltering are done using the methods of
+Resample/Desample.
+Stretching
+Stolt or Phase Shift 2D Migration stretches resampled
+input data via a method analogous to Stolt’s stretch
+technique that uses interval velocities instead of RMS
+velocities. The same stretching method is used for both Stolt
+and Phase Shift migration, but the reference velocity differs.
+For Stolt migration, the reference velocity is a single velocity,
+the minimum at any time and place in the input velocity ﬁeld.
+For Phase Shift migration, the reference velocity is a single
+velocity function, the minimum at each time for any place in
+the input velocity ﬁeld. Because the reference velocity is the
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration717
+
+ProMAX® Reference
+
+minimum velocity, data are always stretched, never
+compressed; therefore, data are not aliased during the
+stretch and subsequent migration.
+
+Usage
+Velocities
+As with any migration method, accurate speciﬁcation of
+migration velocities is critical. The reliability and accuracy of
+the results of any migration are highly dependent on the
+quality of the velocity model used to migrate the data.
+Therefore, it is strongly recommended that you use the
+Interactive Velocity Editor for QC and velocity smoothing,
+particularly in the lateral direction. An unsmoothed velocity
+ﬁeld may introduce spurious migration artifacts.
+You can also use a single interval velocity function in time by
+using Velocity Manipulation to derive a spatially-averaged
+function. Alternatively, since averaging may not produce a
+representative velocity function, you can select a single
+velocity function from your original interval velocity ﬁeld. The
+primary advantages of this approach are speed and accurate
+handling of high dips.
+Older Stolt migration programs used RMS velocities to do a
+Stolt stretch. To get approximately the same results here, use
+Velocity Manipulation to resample the RMS velocities to the
+sample rate of the seismic data and to convert them to
+interval velocities in time using the smoothed gradients
+method.
+Input Data
+Data input to this migration are corrected to a ﬂat datum. If
+your data are referenced to a ﬂoating datum, apply datum
+statics or use Poststack Wave Equation Datuming to move
+your data to a ﬂat datum. If your velocity ﬁeld is referenced to
+a ﬂoating datum, modify the velocity ﬁeld with Velocity
+Manipulation.
+Stacked Data
+2D stacked data sets typically consist of one-trace ensembles
+with sort order LINE:CDP. Therefore, Stolt or Phase Shift 2D
+Migration assumes that any data set with one-trace
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration718
+
+ProMAX® Reference
+
+ensembles is stacked data, ignores ensemble boundaries,
+and processes the entire data set as one. To migrate a subset
+of the stacked data set, sort order must be LINE:CDP.
+Common-Offset Gathers
+If your input data are common-offset gathers, your sort order
+should be BOFFSET:CDP or DMOOFF:CDP, where BOFFSET
+or DMOOFF were deﬁned by Trace Binning.
+Output Trace Length
+During migration, it is often desirable for the output migrated
+traces to be much shorter than the input stacked traces,
+particularly for sections with steep or overturned dips that
+were recorded at very large times, but which migrate to
+relatively small times.
+For similar reasons, during demigration or inverse migration,
+it is often desirable for the output demigrated traces to be
+longer than the input migrated traces, especially if the input
+traces are shorter than the traces that were originally
+migrated. Increasing the output trace length prevents the
+loss of events that move downward in time during
+demigration or inverse migration.
+If the output trace is shorter than the input trace, the bottom
+mute is reset to the lesser of the input bottom mute and the
+new, shorter, trace length. In addition, if the top mute is
+greater than or equal to the new trace length, the trace is
+killed.
+If the output trace is longer than the input trace, the bottom
+mute is reset to the new, longer, trace length so that the extra
+samples at trace end are not rezeroed by remute.
+Scratch Space
+Stolt or Phase Shift 2D Migration uses scratch ﬁles and
+scratch directories. Scratch directories must be cross
+mounted on all hosts so each host can read and write all
+scratch ﬁles.
+There are two types of scratch ﬁles. The following paragraphs
+explain how to estimate the amount of scratch space needed
+for each.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration719
+
+ProMAX® Reference
+
+• The ﬁrst type stores all trace headers for one ensemble.
+File size in bytes is ncdp*nb, where ncdp is the number
+of CDPs in the ensemble and nb is the length of the trace
+header in bytes. 268 bytes/trace is a typical poststack
+trace header size. For the exact length, use MB2 to look
+at the data set information.
+• The second type holds intermediate results for one
+ensemble. File size in bytes is approximately
+4.1*(ncdp+npad)*nt, where ncdp is the number of CDPs
+in the ensemble, npad is the trace pad, and nt is the
+input trace length. Actual dimensions are nfft/2+1 by
+8*MAX(nt, ntau, nu), where nfft is the ensemble length
+after padding and nt, ntau and nu are the lengths in
+samples of the input, output and stretched traces. nu
+depends on the velocity ﬁeld, the maximum frequency to
+migrate, and the migration method, Stolt or Phase Shift.
+Intermediate data are spread over an ntile by ntile array of
+scratch ﬁles. ntile=ncpu*ffactor, where ncpu is the number
+of migration server nodes and ffactor is the ﬁle reﬁnement
+factor. ffactor is increased internally as needed to prevent
+individual ﬁles from being more than 1 gigabyte in size. The
+array of scratch ﬁles enables parallel I/O by allowing each
+migration server to have exclusive access to a subset of the
+data during each processing step.
+The dimensions and sizes of all scratch ﬁles are calculated
+and printed during the Initialization Phase. At that time all
+scratch ﬁles are explicitly ﬁlled with zeroes to guarantee that
+needed scratch space is available.
+Stolt or Phase Shift 2D Migration can use extended scratch
+space. Please refer to Adding Extended Scratch Space in
+the System Administration Guide for a complete description of
+extended scratch space setup and requirements.
+
+References
+Claerbout, J. F., 1985, Imaging the Earth’s interior: Blackwell Scientiﬁc Publications.
+Gazdag, J., 1978, Wave-equation migration by phase shift: Geophysics, 43, 13421351.
+Stolt, R. H., 1978, Migration by Fourier transform: Geophysics, 43, 23-48.
+Yilmaz, O., 1987, Seismic data processing: SEG.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration720
+
+ProMAX® Reference
+
+Parameters
+Name of migration server host(s)
+Enter the name of the host(s) for the migration servers.
+Scratch directories must be cross mounted on all hosts. If no
+host name is speciﬁed, the process executes on the same
+host as the ProMAX® executive.
+Number of migration server nodes
+Enter the total number of migration servers. In a distributed
+parallel environment, this number usually matches the
+number of migration server hosts. For shared parallel
+environments, this number corresponds to the number of
+CPUs to use for the migration.
+Migration algorithm
+Select the migration algorithm from the following choices:
+• Phase Shift
+• Stolt
+Migrate, Demigrate or Inverse Migrate?
+Select:
+• Migrate input data
+• Demigrate input data
+• Inverse migrate input data
+Migration of dips
+This appears if Phase Shift to Migration algorithm. Select
+to migrate (or demigrate):
+• Up to 90 degrees only
+• Beyond 90 degrees only
+• Up to and beyond 90 degrees
+Stolt stretch factor
+This appears if Stolt to Migration algorithm or Inverse
+migrate input data to Migrate, Demigrate or Inverse
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration721
+
+ProMAX® Reference
+
+Migrate. Enter the (W) factor to use with time stretching to
+make the constant-velocity Stolt migration algorithm more
+accurately handle velocity variations with depth. A value of
+0.6 is appropriate for young, uncompacted sediments in
+which velocity increases gradually with depth. Decreasing the
+stretch factor tends to lessen the effect of over migration of
+steep dips. Use 1.0 for constant velocity.
+Apply Stolt obliquity correction?
+This appears if Stolt to Migration algorithm and Migrate
+input data to Migrate, Demigrate or Inverse Migrate.
+Select Yes to apply the obliquity correction. The obliquity correction is proportional to the cosine of the subsurface dip.
+Applying it during the forward migration reduces the amplitude of the migration operator for steeper dips. Select No only
+when you plan to do a Stolt demigration on the data later.
+Start of high-dip taper
+This appears if Inverse migrate input data to Migrate,
+Demigrate or Inverse Migrate. Enter the angle in degrees at
+which the high-dip taper starts in inverse migration. The
+amplitude of the cosine-squared taper is 1.0 at the starting
+angle and 0.0 at 90 degrees.
+The high-dip taper reduces the amplitude of dipping linear
+artifacts created by inverse migration. Inverse migration
+applies a scale factor proportional to one over the cosine of
+the subsurface dip. The scale factor is 1.0 at 0 degrees, 2.0 at
+60 degrees, 5.0 at 78.463 degrees and inﬁnite at 90 degrees.
+Large scale factors near 90 degrees produce dipping linear
+noise; therefore, they are tapered.
+Select interval velocity ﬁle
+Select an Interval Velocity in Time ﬁle from the database.
+Minimum CDP to migrate
+Maximum CDP to migrate
+Enter the minimum and maximum CDP bin numbers of the
+output image aperture. Input traces outside the image
+aperture are neither migrated nor output. Pad Traces is
+called before migration to insert any missing CDPs between
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration722
+
+ProMAX® Reference
+
+the minimum and maximum. Remove Padded Traces is
+called after migration to remove these padded CDPs.
+CDP interval (feet or meters)
+Enter the CDP spacing in ft. or m, whichever is consistent
+with the headers and velocity ﬁle.
+Output trace length
+Enter the trace length in ms for output migrated or
+demigrated data. The default, 0.0, means use the input trace
+length.
+Output sampling interval
+Enter the sampling interval in ms for output migrated or
+demigrated data. The default, 0.0, means use the input
+sampling interval.
+Migration tends to downshift the frequency content,
+especially for steep dips. Therefore, the sampling interval of
+the output migrated data can be greater than that of the
+input unmigrated data.
+Demigration and inverse migration tend to upshift the
+frequency content, especially for steeper dips, compensating
+for the downshift that migration applies. Therefore, if the
+sampling interval was changed during migration, it may be
+worthwhile to change the output sampling interval for the
+demigrated data back to the sampling interval before
+migration.
+Minimum frequency to (de)migrate
+This appears if Phase Shift to Migration algorithm. Enter
+the minimum frequency in Hz to migrate or demigrate.
+Minimum frequency is always 0 Hz for Stolt migration.
+To avoid artifacts due to the abrupt truncation of the
+frequency band, ensure that the input traces have little
+energy below the minimum frequency.
+Maximum frequency to (de)migrate
+Enter the maximum frequency in Hz to migrate or demigrate.
+The default, 0.0, means set maximum frequency to 0.6 *
+Nyquist frequency, for example, 75 Hz for 4-ms data. The 0.6
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration723
+
+ProMAX® Reference
+
+comes from the accuracy of the 8-point sinc interpolator used
+to stretch the data.
+Maximum frequency has a strong impact on run time. It
+affects the sampling interval and number of samples of the
+stretched traces. Much computation time and scratch space
+can be saved by not migrating frequencies above the signal
+band of the input data. To avoid artifacts due to the abrupt
+truncation of the frequency band, ensure that input traces
+have little energy above the maximum frequency.
+Number of traces to pad
+Enter the number of zero-amplitude traces to add to each
+common-offset gather or to the stacked section to avoid f-k
+migration wrap around. Theoretically, padding directions
+should be the width of the migration operator, but in practice
+a much smaller pad can be used, particularly if the dips near
+the edges of the gather or section are moderate.
+An equation that can be used to estimate the amount of
+padding is x = v/2 * t * sin(theta), where v is the migration
+velocity at time t, t is the two-way travel time in seconds, and
+theta is the dip of events near the edge of the section at time
+t. Divide x by the CDP interval to get the number of traces to
+pad.
+Change the default tapering?
+Select Yes to change the tapering defaults. Select No to apply
+a bottom taper of 200 ms and an edge taper that varies from
+2 traces at the top of the section to 20 traces at the bottom.
+Tapering is done before migration in order to reduce edge
+effects. Because migration artifacts originating deeper in the
+section tend to move a longer distance, the magnitude of the
+edge taper should normally increase with depth. A Hamming
+taper is used, which consists of a cosine weighting varying
+from 100% to 8% over the length of the taper.
+Bottom taper (in ms)
+This appears if Yes to Change the default tapering. Enter
+the length of the taper in ms. The bottom of each trace within
+the seismic section is tapered to 0 over this number of ms.
+This tapering prevents the creation of migration artifacts
+caused by the abrupt truncation at the last live sample of
+each input trace.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration724
+
+ProMAX® Reference
+
+Upper edge
+taper
+
+Bottom
+taper
+Lower edge
+taper
+
+Upper edge taper (in traces)
+Lower edge taper (in traces)
+These appear if Yes to Change the default tapering. Enter
+the upper and lower edge tapers in traces. Generally, the
+lower edge taper is larger than the upper edge taper because
+of the increase in migration aperture with depth. The taper
+varies linearly with time between the upper and lower edges
+of the section.
+Note: If the speciﬁed taper width is more than half the total
+number of traces in the seismic section, taper width is set to
+half the total number of traces in the seismic section.
+Reapply trace mutes?
+Select Yes to reapply the input top and bottom mutes from
+the trace headers to the output data. For any traces that were
+dead on input but are live on output (see Rekill Dead
+Traces), new mute header values are calculated and applied.
+If the formerly dead trace is bracketed by live input traces,
+new mute values are calculated by linear interpolation. If the
+formerly dead trace is before the ﬁrst live input trace or after
+the last live input trace, mute values from the nearest live
+input trace are used.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration725
+
+ProMAX® Reference
+
+Select No to have no mutes applied to the output data. For all
+live output traces, top mute header values are reset to zero
+and bottom mute header values are reset to output trace
+length.
+Rekill dead traces?
+Select from the following choices:
+• All: traces that were dead on input are rezeroed and
+remain dead on output.
+• None: traces that were dead on input are output as live,
+with TRC_TYPE changed to 1.
+• Edges only: rekill behavior depends upon the location of
+the dead trace. If an input dead trace is before the ﬁrst
+live input trace in the stacked data set or common-offset
+gather or if it is after the last live input trace, then it is
+rezeroed and output as dead. If an input dead trace is
+between the ﬁrst and last live input traces, then it is output as live, with TRC_TYPE changed to 1.
+Any trace with TRC_TYPE not equal to 1 is considered to be a
+dead trace. No check is made on whether or not a trace
+contains nonzero samples.
+File reﬁnement factor
+Enter a ﬁle reﬁnement factor, ffactor. The intermediate data
+are spread over an ntile by ntile array of scratch ﬁles.
+ntile=ncpu*ffactor, where ncpu is the number of migration
+server nodes and ffactor is the ﬁle reﬁnement factor. ffactor
+is increased internally as needed to prevent individual ﬁles
+from being more than 1 gigabyte in size.
+Increasing the ﬁle factor above its minimum default value can
+marginally improve performance by more evenly subdividing
+work amongst multiple processes and by allowing the job to
+more fully use available scratch ﬁle space. Each process has
+up to ntile scratch ﬁles open at the same time. If ntile is too
+large, the job may fail because a process runs out of available
+ﬁle descriptors. The ProMAX® processing system ensures
+that at least 1024 ﬁle descriptors are available to each
+process.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Stolt or Phase Shift 2D Migration726
+
+ProMAX® Reference
+
+Scratch ﬁle ID
+Enter a ﬂow-speciﬁc preﬁx to identify scratch ﬁles. Use
+different IDs to run multiple jobs at the same time from the
+same ﬂow.
+Verbose listing?
+Select Yes to receive verbose printout about migration
+servers.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

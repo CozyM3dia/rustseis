@@ -1,0 +1,141 @@
+Dip Decomposition DMO319
+
+ProMAX® Reference
+
+Dip Decomposition DMO
+Dip Decomposition DMO creates a DMO corrected stack
+section using non-NMO corrected CMP gathers as input.
+
+Theory
+This algorithm scans over a range of dip angles, deﬁning
+different stacking velocities for NMO correction and stacking.
+Dip ﬁlters are then applied, ﬁltering out all the energy that is
+not aligned along the speciﬁed dip angles. Summation of all
+the dip-ﬁltered stacks results in a DMO corrected stack.
+
+Usage
+Ideally, Dip Decomposition DMO should follow datum statics
+(to ﬂoating) and autostatics corrections in the processing
+ﬂow. Furthermore, the velocities used in the NMO application
+within this DMO should be the dip-independent velocities
+appropriate for horizontal reﬂectors. Estimating these
+velocities without ﬁrst applying DMO can be difﬁcult.
+Therefore, a useful intermediate processing sequence is:
+Sort to desired input domain (Use Disk Data Input or Inline sort)
+NMO (Use the best estimate of velocities)
+DMO (Common Offset F-K DMO or Ensemble DMO)
+Inverse NMO (Use the same velocities as for the initial NMO)
+Velocity analysis
+
+When the difference between initial and ﬁnal velocities is
+signiﬁcant, repeat the above sequence. Having arrived at your
+ﬁnal stacking velocities, the processing ﬂow will continue
+with:
+Sort to CDP domain (Use Disk Data Input or Inline sort)
+DMO (Dip Decomposition DMO outputs stacked traces)
+Trace Mute (To reapply ﬁnal mute)
+
+The Dip Decomposition DMO will apply NMO and ﬁnal datum
+statics within the tool. The output should be a stack at ﬁnal
+datum.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Dip Decomposition DMO320
+
+ProMAX® Reference
+
+References
+Jacubowicz, J., A simple efﬁcient method of dip-moveout correction, 1990: Geophysical Prospecting,38, 221-245.
+
+Parameters
+Stretch mute percentage
+Enter the amount of stretch that is acceptable for the output
+traces after NMO has been applied. Enter a value of 0.0 to
+disable the stretch mute.
+Apply datum statics during DMO stack?
+Select Yes to apply the accumulated NA_STAT header word
+static and the FNL_STAT header word datum static during
+DMO stack. The input CDP gathers are expected to be at
+ﬂoating datum and the output stack will be at ﬁnal datum.
+Get velocities from the database:
+Select Yes to get an NMO stacking velocity function from the
+database. Select No to manually enter the velocity function.
+Select Velocity parameter ﬁle
+This appears if Yes to Get velocities from the database.
+Select a velocity function parameter ﬁle in the Parameter
+Tables window.
+Specify NMO velocity function(s)
+This appears if No to Get velocities from the database.
+Enter the velocity functions. The times must be given in ms
+and the units for velocity will be ft or m/sec, depending on
+the units for this dataset. If you do not supply a velocity at
+zero time, the ﬁrst velocity deﬁned is extended back to zero
+time. At the end of the data, the velocity is extrapolated. It is
+best to specify a velocity for the last data sample to know
+exactly what velocity function is applied.
+Minimum frequency to process
+Enter the minimum frequency in Hz to preserve in the data.
+The dip ﬁlter applied to the stacks will reject frequencies
+lower than this value.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Dip Decomposition DMO321
+
+ProMAX® Reference
+
+Maximum frequency to process
+Enter the maximum frequency to preserve in the data. The
+dip ﬁlter applied to the stacks will reject frequencies higher
+than this value.
+Lowest dip angle
+Enter the lowest dip angle in degrees to search.
+Highest dip angle
+Enter the highest dip angle in degrees to search.
+Number of dip angles to process
+Enter the number of dip angles to divide the data into,
+between the lowest and highest value speciﬁed. If memory is
+a problem, reduce this number.
+Number of dip angles to overlap
+Enter the number of dip slices to overlap when calculating
+each dip ﬁlter.
+Panel size in CDPS
+Enter the panel size in stacked CDP traces to use for each
+segment. The DMO operation is done in segments, which are
+overlapped and merged together. If memory is a problem,
+reduce this number.
+Minimum allowable panel size in CDPs
+Enter the smallest segment size allowed for the DMO
+operation. In general the last segment will not be the same
+size as speciﬁed above.
+Number of CDPs to overlap between panels
+Enter the number of CDPs used in blending the separate
+DMO segments together.
+CDP spacing
+Enter the distance between CDPs on the stacked section.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Dip Decomposition DMO322
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

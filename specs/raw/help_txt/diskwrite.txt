@@ -1,0 +1,125 @@
+Disk Data Output346
+
+ProMAX® Reference
+
+Disk Data Output
+Disk Data Output writes traces to disk, in either full 32-bit
+format or optional compressed 2-byte integer (16-bit) format
+with real scalars.
+
+Theory
+For more information about the structure of seismic
+datasets, please refer to the chapter called ProMAX®
+Seismic Datasets.
+
+Usage
+Files can be output to any NFS ﬁle system in the network and
+they can span multiple disks on different systems.
+Full Disk Detection
+When the output disk is full, the job suspends and you get
+the Disk Full notiﬁcation window. You can restart the job,
+once more disk space is made available by executing the kill CONT job number command. The job retries and continues
+once restarted. The process fails if more disk space is needed.
+
+Parameters
+Output Dataset Filename
+Select a dataset ﬁle to append or overwrite, or add a new
+dataset name to the existing list of dataset ﬁles. To add a new
+dataset name to the list, click on Add Dataset and enter the
+new dataset name (up to 35 characters), followed by a
+Return.
+New, or Existing, File?
+Select the trace write option preference:
+• New creates an entirely new dataset, or replace an existing one.
+• Overwrite overwrites individual traces of an existing
+dataset. If a particular trace already exists within the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Output347
+
+ProMAX® Reference
+
+output dataset, Disk Data Output overwrites the trace
+without changing the sort order. If the trace does not
+exist, it is appended to the dataset. Traces are identiﬁed
+by the TRACENO header entry. If TRACENO is null, the
+Overwrite mode will behave exactly like append mode.
+The general intent of overwrite is to modify the contents
+of a prestack data ﬁle without creating a new dataset.
+You may use Overwrite to update the trace headers of
+your dataset without processing the actual traces.
+• Append adds traces, such as additional shots, CDPs or
+stacked traces to the end of an existing ﬁle, regardless of
+whether or not those traces already exist in the ﬁle.
+Note: It is quite possible either by accident or intention
+to create two copies of the same trace within the same
+dataset.
+Using Append is currently the only convenient way to
+compare different stacks. Use New for the ﬁrst stack output,
+then Append for all the rest. Follow this with a Disk Data
+Input using Get All and Screen Display. You cannot append
+or overwrite if your ﬁles have different sample rates, trace
+lengths, data types, data domains, or incompatible trace
+headers.
+Record length to output
+Enter the trace length in ms for the data which you are
+writing to disk. Enter 0.0000 to output all available samples.
+If you specify a value less than the current trace length, the
+record length will be truncated to the value speciﬁed.
+Trace sample format
+This appears if New to New, or existing, ﬁle. Select one of
+data output formats:
+• 16-bit, the default, compresses to a 16-bit data format.
+• Full 32-bit is a full format.
+• 8-bit compresses to further reduce storage requirements.
+The 16-bit or 8-bit compressed data format computes a
+ﬂoating point scalar every 100 samples. This effectively
+doubles or quadruples the seismic trace storage capacity of
+the disk drive, with little degradation of data quality and
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Output348
+
+ProMAX® Reference
+
+accuracy, as most data are recorded with an acquisition
+accuracy of 12 bits or less.
+Skip primary disk storage?
+Select Yes to begin writing immediately to your secondary
+disk partitions without writing any data to your primary disk
+partition. This will leave more room available for ﬂows,
+ordered database ﬁles, parameter tables, and other
+miscellaneous ﬁles on your primary disk partition. By default
+you will write ﬁrst to the primary disk storage device upon
+which your current area and line is stored. Should this disk
+partition ﬁll, your data will automatically spill onto secondary
+disk partitions if they are deﬁned in
+$PROMAX_HOME/etc/conﬁg_ﬁle.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Disk Data Output349
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

@@ -1,0 +1,300 @@
+; IIID IVD 1 BSI FIELD DEV DEPTHC PROSPECTOR BHSS
+'(
+name: FK_FILT
+label: "F-K Filter"
+value_tab: 45
+
+parameter: FILT_OPT
+text: "Type of F-K filter"
+type: pop_choose:
+type_desc: (  
+ ("Fan Filters" 1 "Filter pie slice(s) in the F-K domain." ) 
+ ("Power Exponent" 2 "Raise the F-K domain to a fixed power.") 
+ ("Arbitrary Polygon" 3 "Filter an arbitrary polygon in F-K space." ) )
+mouse_text: "These three types of filters may be applied in F-K space: fan filters, power exponent, arbitrary polygon."
+value: 1
+plot_label: t
+
+parameter: MSPERTRC
+text: "Units of pie slice parameterization"
+type: circular:
+type_desc: (
+    ("Velocity " 0 "Velocity units used to parameterize pie slice.")
+    ("Ms per trace " 1 "Units of milliseconds per trace used to parameterize pie slice.")
+    )
+
+parameter: XSPACING 
+text: "Distance between input traces"
+type: typein:
+type_desc: ( real: 9 0.0 nil )
+value: 0.0
+mouse_text: "Distance between input traces, default to 0.0 for value from global parameters. Check job.output for value used."
+
+parameter: PA_WIDTH
+text: "Panel width in traces"
+type: typein:
+type_desc: ( int: 8 5 nil )
+value: 200
+mouse_text: "Number of traces to process at one time; use number of traces per ensemble for pre-stack."
+
+parameter: IMPULSE
+text: "Test the filter impulse response?"
+type: boolean:
+value: nil
+mouse_text: "If 'YES', the output will be the impulse response of the filter; if 'NO', apply the filter to data."
+plot_label: t
+
+parameter: TFLATPCT
+text: "Percent flat for time ramping"
+type: typein:
+type_desc: ( real: 8 0.0 100. )
+value: 100.
+mouse_text: "The traces may be tapered prior to T-F transform to minimize FFT edge effects (100.0 = no ramping)."
+
+parameter: XFLATPCT
+text: "Percent flat for offset ramping"
+type: typein:
+type_desc: ( real: 8 0.0 100. )
+value: 100.
+mouse_text: "The offsets may be tapered prior to X-K transform to minimize FFT edge effects (100.0 = no ramping)."
+
+parameter: POWER
+text: "Power to raise F-K space to:"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: 2.0
+mouse_text: "The F-K transform values are raised to this power and then inverse 
+transformed."
+plot_label: t
+
+parameter: DB_OPT
+text: "Get polygon mute file from the database?"
+type: boolean:
+value: t
+mouse_text: "A polygon mute parm file may be selected from the database, or an arbitrary polygon may be specified manually."
+plot_label: t
+
+parameter: POLYNAME
+text: "   Select mute parameter file"
+type: function:
+type_desc: ((parm_list "FKP") parms)
+value:  "NONE"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a polygon (mute) parameter file description from the parameter file menu."
+plot_label: t
+
+parameter: POLYSTRN
+text: "Specify arbitrary polygon"
+type: edit:
+type_desc: (18 80 5 " FORMAT: Groups of 'KEY:F1-K1,F2-K2,F3-K3,.../' values
+ EXAMPLE: 1:10.0-0.0,30.0-20.0,60.0-20.0,70.0-0.0/2:12.0-0.0,30.0-20.0,70-20,90-0/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and 
+                          paste'; (Can move the cursor first) " 3 )
+value: "1:10.0-0.0,30.0-20.0,60.0-20.0,70.0-0.0/2:12.0-0.0,30.0-20.0,70-20,90-0/"
+mouse_text: "Use MB1 to enter groups of (frequency-wavenumber) values to define a polygon. **SEE EXAMPLE!!!**"
+plot_label: t
+
+parameter: REJOPT
+text: "Mode of F-K filter operation"
+;type: choose:
+type: circular:
+type_desc: (  
+ ("REJECT" 1 "Reject the specified F-K region." )
+ ("ACCEPT" 0 "Pass the specified F-K region." ) )
+mouse_text: "F-K filter can either pass or reject the specified F-K regions."
+plot_label: t
+
+parameter: FFLATPCT
+text: "Percent flat for F-K filter windowing"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 90.0
+mouse_text: "The F-K filter may be ramped (in T-X) to control the smoothness of the filter."
+
+parameter: TFILT_SZ
+text: "Time length of F-K filter (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 500.0
+mouse_text: "The F-K filter is transformed to T-X domain and windowed.  This will be the time extent of the filter."
+
+parameter: XFILT_SZ
+text: "Spatial extent of F-K filter (traces)"
+type: typein:
+type_desc: ( int: 8 3 nil )
+value: 50
+mouse_text: "The F-K filter is transformed to T-X domain and windowed.  This will be the spatial extent of the filter."
+
+parameter: REMUTE
+text: "Re-apply T-X trace mute after filter?"
+type: boolean:
+value: t
+mouse_text: "Trace mutes (such as first break suppression mutes) may be re-applied after filtering."
+
+parameter: FAN_PARMVE
+text: "Fan filter parameters"
+type: edit:
+type_desc: (17 80 5 " FORMAT: +/- Veloc1, +/- Veloc2, Freq1, Freq2 /
+ EXAMPLES: -1500,-2500,4.5,18 / 1600,2700,5,19 / -8000,8000,10,125 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and 
+                          paste'; (Can move the cursor first) " 3 )
+value: "-1500,-2500,5,18/" 
+mouse_text: "Use MB1 to enter groups of velocity-frequency values to define pie 
+slice(s) =>'1800,2300,5.5,22/-4500,-3500,8,40/'"
+plot_label: t
+
+parameter: FAN_PARMMS
+text: "Fan filter parameters"
+type: edit:
+type_desc: (17 80 5 " FORMAT: +/- MsPerTr1, +/- MsPerTr2, Freq1, Freq2 /
+ EXAMPLES: -5,-2,4.5,18 / 6,2.5,5,19 / -8,8,10,125 /
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and 
+                          paste'; (Can move the cursor first) " 3 )
+value: "-5,-2,5,18/" 
+mouse_text: "Use MB1 to enter groups of dip-frequency values to define pie 
+slice(s) =>'8,2,5.5,22/-4,-3,8,40/'"
+plot_label: t
+
+parameter: KWRAP
+text: "Wrap fan in K-space past Nyquist?"
+type: boolean:
+value: t
+mouse_text: "Set this parameter to 'No' if you do NOT wish to wrap in K-space past K-Nyquist. Default 'Yes' means wrap past Nyquist."
+plot_label: t
+
+parameter: KSUPPCT
+text: "Percent K-space restricted for fan"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 0.0
+mouse_text: "Specify a percentage of total K-space to restrict F-K velocity filtering and prevent fan spreading at higher freqs."
+
+parameter: TPCT_PAD
+text: "Time filter padding in percent"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 25.0
+mouse_text: "The percentage of zero padding for FFTs desired for the TIME filter."
+
+parameter: XPCT_PAD
+text: "Space filter padding in percent"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 25.0
+mouse_text: "The percentage of zero padding for FFTs desired for the SPATIAL filter."
+
+parameter: KSKEEPCT
+text: "Percentage of K-space to keep around K=0"
+type: typein:
+type_desc: ( real: 8 0.0 100.0 )
+value: 0.0
+mouse_text: "The percentage of K-space to leave unfiltered in a corridor around K=0."
+
+ 
+exec_data: ("FK_FILT"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: fk_filt.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $")
+			("FILT_OPT" implicit: (value 'FILT_OPT))
+			("MSPERTRC" implicit: (value 'MSPERTRC))
+			("XSPACING" implicit: (value 'XSPACING))
+			("PA_WIDTH" implicit: (value 'PA_WIDTH))
+			("IMPULSE " implicit: (if (value 'IMPULSE) 1 0))
+			("TFLATPCT" implicit: (value 'TFLATPCT))
+			("XFLATPCT" implicit: (value 'XFLATPCT))
+			("POWER"    implicit: (value 'POWER))
+			("REJOPT"   implicit: (value 'REJOPT))
+			("POLYNAME" implicit: (value 'POLYNAME))
+			("POLYSTRN" implicit: (value 'POLYSTRN))
+			("FAN_PARM" implicit: (if (= (value 'MSPERTRC) 1)
+						  (value 'FAN_PARMMS)
+						(value 'FAN_PARMVE)))
+                        ("KWRAP"    implicit: (if (value 'KWRAP) 1 0 ))
+                        ("KSUPPCT"  implicit: (value 'KSUPPCT))
+			("FFLATPCT" implicit: (value 'FFLATPCT))
+			("TFILT_SZ" implicit: (value 'TFILT_SZ))
+			("XFILT_SZ" implicit: (value 'XFILT_SZ))
+			("TPCT_PAD" implicit: (value 'TPCT_PAD))
+			("XPCT_PAD" implicit: (value 'XPCT_PAD))
+			("KSKEEPCT" implicit: (value 'KSKEEPCT))
+			("REMUTE"   implicit: (if (value 'REMUTE) 1 0 ))
+		)
+	    )
+	
+
+rules: (
+ (rule1 (and ( = ( value 'FILT_OPT  ) 1 ) (= (value 'MSPERTRC) 1)) 
+	(do_show 'FAN_PARMMS) (do_not_show 'FAN_PARMMS))
+
+ (rule1a (and ( = ( value 'FILT_OPT  ) 1 ) (= (value 'MSPERTRC) 0)) 
+	(do_show 'FAN_PARMVE) (do_not_show 'FAN_PARMVE))
+
+ (rule2 ( = ( value 'FILT_OPT  ) 1 ) 
+	(do_show 'KWRAP)  (do_not_show 'KWRAP))
+ (rule3 ( = ( value 'FILT_OPT  ) 1 ) 
+	(do_show 'KSUPPCT)  (do_not_show 'KSUPPCT))
+ (rule3a ( = ( value 'FILT_OPT  ) 1 ) 
+	(do_show 'MSPERTRC) (do_not_show 'MSPERTRC))
+ (rule4 ( = ( value 'FILT_OPT  ) 2 ) 
+	(do_show 'POWER) (do_not_show 'POWER))
+ (rule5 ( = ( value 'FILT_OPT  ) 2 ) 
+	(do_not_show 'REJOPT)   (do_show 'REJOPT))
+ (rule5a (or ( = ( value 'FILT_OPT  ) 2 )  
+	     (and ( = ( value 'FILT_OPT ) 1) ( = ( value 'MSPERTRC ) 1)))
+	 (do_not_show 'XSPACING)   (do_show 'XSPACING))
+ (rule6 ( = ( value 'FILT_OPT  ) 2 ) 
+	(do_not_show 'FFLATPCT) (do_show 'FFLATPCT))
+ (rule7 ( = ( value 'FILT_OPT  ) 2 ) 
+	(do_not_show 'TFILT_SZ) (do_show 'TFILT_SZ))
+ (rule7a ( = ( value 'FILT_OPT  ) 2 ) 
+	 (do_show 'TPCT_PAD) (do_not_show 'TPCT_PAD))
+ (rule7b ( = ( value 'FILT_OPT  ) 2 ) 
+	 (do_not_show 'XFILT_SZ) (do_show 'XFILT_SZ))
+ (rule7c ( = ( value 'FILT_OPT  ) 2 ) 
+	 (do_show 'XPCT_PAD) (do_not_show 'XPCT_PAD))
+ (rule7d ( = ( value 'FILT_OPT  ) 2 ) 
+	 (do_not_show 'KSKEEPCT) (do_show 'KSKEEPCT))
+ (rule8 ( = ( value 'FILT_OPT  ) 3 ) 
+	(do_show 'DB_OPT) (do_not_show 'DB_OPT))
+ (rule9 ( if (and (showing 'DB_OPT) (value 'DB_OPT) ) 
+	    (do_show 'POLYNAME) (do_not_show 'POLYNAME)))
+ (rule10 ( if (and (showing 'DB_OPT) ( not (value 'DB_OPT) ) )
+	     (do_show 'POLYSTRN)  (do_not_show 'POLYSTRN)) )
+ (rule11 (value 'IMPULSE) 
+	 (do_not_show 'TFLATPCT) (do_show 'TFLATPCT))
+ (rule12 (value 'IMPULSE) 
+	 (do_not_show 'XFLATPCT) (do_show 'XFLATPCT))
+ (rule13 (value 'IMPULSE) 
+	 (do_not_show 'REMUTE) (do_show 'REMUTE))
+ (rule14 ( = ( value 'FILT_OPT ) 2)
+	 (do_not_show 'IMPULSE) (do_show 'IMPULSE))
+
+      )
+
+)
+
+
+

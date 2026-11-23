@@ -1,0 +1,279 @@
+{
+  "menu_id": "inter_spect",
+  "tool_name": "ispecana",
+  "label": "Interactive Spectral Analysis",
+  "parameter_count": 37,
+  "parameters": [
+    {
+      "name": "selection_method",
+      "prompt": "Data selection method",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Choose a method to select the data to be analyzed."
+    },
+    {
+      "name": "freeze",
+      "prompt": "Freeze the selected subset?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you want analysis windows to freeze their selected subsets? (If no, analysis windows update for each new selection.)"
+    },
+    {
+      "name": "pan_type",
+      "prompt": "Display data by traces or ensembles?",
+      "kind": "choose",
+      "default": null,
+      "help": "Choose whether to control the trace display by traces or ensembles.",
+      "choices": [
+        {
+          "label": "Traces",
+          "value": "0",
+          "help": "Control data display by number of traces."
+        },
+        {
+          "label": "Ensembles",
+          "value": "1",
+          "help": "Control data display by number of ensembles."
+        }
+      ]
+    },
+    {
+      "name": "num_traces",
+      "prompt": "Number of traces per analysis location",
+      "kind": "typein",
+      "default": "100",
+      "help": "Enter the number of traces to display for each analysis location."
+    },
+    {
+      "name": "trace_pan_inc",
+      "prompt": "Number of traces between analysis locations",
+      "kind": "typein",
+      "default": "0",
+      "help": "Enter the number of traces between successive analyses. For 0, number of traces per location is used."
+    },
+    {
+      "name": "num_ensembles",
+      "prompt": "Number of ensembles per analysis location",
+      "kind": "typein",
+      "default": "1",
+      "help": "Enter the number of ensembles to display for each analysis location."
+    },
+    {
+      "name": "ens_pan_inc",
+      "prompt": "Number of ensembles between analysis locations",
+      "kind": "typein",
+      "default": "0",
+      "help": "Enter the number of ensembles between successive analyses. For 0, number of ensembles per location is used."
+    },
+    {
+      "name": "prim_key",
+      "prompt": "Primary header for sorting and trace label",
+      "kind": "function",
+      "default": "SOURCE  ",
+      "help": "Select the primary header for the trace annotation. WARNING! The traces will be sorted by this header value for display."
+    },
+    {
+      "name": "sec_key",
+      "prompt": "Secondary header for sorting and trace label",
+      "kind": "function",
+      "default": "CHAN    ",
+      "help": "Select a header for the trace annotation. WARNING! The traces will be sorted by this header value for display."
+    },
+    {
+      "name": "show_ave_power",
+      "prompt": "Display the average power spectrum?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Do you want to display the average power spectrum initially?"
+    },
+    {
+      "name": "power_type",
+      "prompt": "Type of scaling for power spectrum",
+      "kind": "pop_choose",
+      "default": "0",
+      "help": "Do you want to display the power spectrum in decibels or percentage of the reference power?"
+    },
+    {
+      "name": "power_mapping",
+      "prompt": "Type of mapping for power spectrum",
+      "kind": "pop_choose",
+      "default": "0",
+      "help": "Do you want to display the frequency axis with linear or log scale?"
+    },
+    {
+      "name": "ref_power",
+      "prompt": "Reference power",
+      "kind": "typein",
+      "default": "-1.0",
+      "help": "Reference power. (For negative input, reference power is set to the maximum power.)"
+    },
+    {
+      "name": "show_ave_phase",
+      "prompt": "Display the average phase spectrum?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Do you want to display the average phase spectrum initially?"
+    },
+    {
+      "name": "shift_option",
+      "prompt": "Time, sample, linear or no phase shift?",
+      "kind": "pop_choose",
+      "default": null,
+      "help": "Select a linear phase shift, a time shift, or a sample shift to be applied to the phase spectrum."
+    },
+    {
+      "name": "deg_per_hz",
+      "prompt": "Linear phase shift slope (degrees/Hz)",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the slope of the linear phase shift applied to the phase spectrum in degrees per Hertz."
+    },
+    {
+      "name": "time_shift",
+      "prompt": "Time shift",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the time to shift the data in msec."
+    },
+    {
+      "name": "sample_shift",
+      "prompt": "Number of samples to shift",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the number of samples to shift the data (-=up, +=down)."
+    },
+    {
+      "name": "unwrap",
+      "prompt": "Unwrap the phase spectrum?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you want to unwrap the phase spectrum? (Add or subtract multiples of 360 degrees to make phase continuous.)"
+    },
+    {
+      "name": "show_trace_data",
+      "prompt": "Display the selected trace data?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Do you want to display the selected trace data initially?"
+    },
+    {
+      "name": "show_fx_power",
+      "prompt": "Display the FX power spectrum?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Do you want to display the  FX power spectrum initially?"
+    },
+    {
+      "name": "show_data_taper",
+      "prompt": "Display the pre-FFT time window?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Do you want to display the pre-FFT time window initially?"
+    },
+    {
+      "name": "tap_type",
+      "prompt": "Pre-FFT time window taper type",
+      "kind": "pop_choose",
+      "default": "1",
+      "help": "Select your desired method of tapering the pre-FFT time window to reduce FFT 'edge' effects."
+    },
+    {
+      "name": "pct_flat",
+      "prompt": "Percent flat for the pre-FFT time window",
+      "kind": "typein",
+      "default": "80.0",
+      "help": "Enter the percentage of the pre-FFT time window which is NOT tapered. (100.0 = no taper)."
+    },
+    {
+      "name": "auto_freq_range",
+      "prompt": "Set frequency display ranges automatically?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "By default, displayed frequency ranges are set automatically. Select NO if you want to set the frequency range yourself."
+    },
+    {
+      "name": "min_freq",
+      "prompt": "Minimum frequency.",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the minimum frequency (in Hz) for spectral displays ."
+    },
+    {
+      "name": "max_freq",
+      "prompt": "Maximum frequency.",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the maximum frequency (in Hz) for spectral displays ."
+    },
+    {
+      "name": "auto_power_range",
+      "prompt": "Set power display ranges automatically?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "By default, displayed power ranges are set automatically. Select NO if you want to set the power range yourself."
+    },
+    {
+      "name": "min_power",
+      "prompt": "Minimum power.",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the minimum power on power displays (dB, percentage, or raw power depending on the type of power scaling)."
+    },
+    {
+      "name": "max_power",
+      "prompt": "Maximum power.",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the maximum power on power displays (dB, percentage, or raw power depending on the type of power scaling)."
+    },
+    {
+      "name": "auto_phase_range",
+      "prompt": "Set phase display ranges automatically?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "By default, displayed phase ranges are set automatically. Select NO if you want to set the phase range yourself."
+    },
+    {
+      "name": "min_phase",
+      "prompt": "Minimum phase.",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the minimum phase (in degrees) on phase displays ."
+    },
+    {
+      "name": "max_phase",
+      "prompt": "Maximum phase.",
+      "kind": "typein",
+      "default": "0.0",
+      "help": "Enter the maximum phase (in degrees) on phase displays ."
+    },
+    {
+      "name": "promax_color_editor",
+      "prompt": "promax_color_editor",
+      "kind": "unknown",
+      "default": "t",
+      "help": ""
+    },
+    {
+      "name": "openworks_color_editor",
+      "prompt": "openworks_color_editor",
+      "kind": "unknown",
+      "default": null,
+      "help": ""
+    },
+    {
+      "name": "invert",
+      "prompt": "invert",
+      "kind": "unknown",
+      "default": "nil",
+      "help": ""
+    },
+    {
+      "name": "DEBUG",
+      "prompt": "Debug mode?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "To debug program, enter YES.  You will have to debug the program yourself."
+    }
+  ]
+}

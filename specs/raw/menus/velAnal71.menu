@@ -1,0 +1,1860 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+;  Menu for Velocity Analysis 9/2000
+'(
+
+name: velAnal
+label: "Velocity Analysis"
+value_tab: 55
+parameter: Xserver
+text: "Select display DEVICE"
+type: typein:
+type_desc: (:string 32)
+:value "This Screen"
+mouse_text: "'This Screen' for current display or type in a display name to OVERRIDE the current display default."
+
+parameter: NEWTABLE
+text: "Table to store velocity picks"
+type: function:
+type_desc: ((parm_list "VEL") parms)
+value: "no entry"
+mouse_text: "Use Mouse Button 1 to select a velocity file from the menu."
+
+parameter: PRECOMP
+text: "Is the incoming data Precomputed?"
+type: boolean:
+value: t
+mouse_text: "Incoming data has been precomputed using the vaprecom tool."
+
+parameter: RMO
+text: "Perform residual velocity analysis?"
+type: int:
+type: choose:
+type_desc: (
+("NONE" 0 "Default pre-stack velocity analysis.")
+("TIME" 1 "Residual moveout analysis in time.")
+("DEPTH" 2 "Residual moveout analysis in depth.")
+)
+value: 0
+selected_item: "NONE"
+mouse_text: "Configure parameters for residual velocity analysis"
+
+parameter: OLDRMO
+text: "Previous value of RMO"
+type: int:
+value: 0
+showp: nil
+
+
+parameter: SPACE0
+text: "-------------------------------------------------"
+value_tab: 80
+
+parameter: SETPARMS
+text: "Set the values for the computation variables?"
+type: boolean:
+value: t
+mouse_text: "Change all of the necessary parameters when running in interactive mode."
+
+parameter: SPACE1
+text: "-------------------------------------------------"
+value_tab: 80
+
+parameter: LANDDATA
+type: integer:
+value: 1
+parameter: NSMASH
+text: "   Number of CDPs to sum into gather"
+type: typein:
+type_desc: ( int: 3 1 100)
+value: 99999999
+mouse_text: "Enter the number of CDPs to use to build the commom offset stacked supergather."
+
+parameter: SMASHNMO
+text: "   Apply partial NMO-to-binning"
+type: boolean:
+value: t
+mouse_text: "Apply partial NMO before summing trace to offset bin center for supergather."
+
+parameter: SMASHSTA
+text: "   Apply differential CDP mean statics?"
+type: boolean:
+value: t
+mouse_text: "Apply differential CDP mean statics prior to offset  super gather stack generation."
+
+parameter: INITDIST
+text: "   Absolute offset of first bin center"
+type: typein:
+type_desc: ( real: 12 0.0 nil)
+value: 50.0
+mouse_text: "Enter the center of the first offset bin."
+
+parameter: BINSIZE
+text: "   Bin size for vertically summing offsets"
+type: typein:
+type_desc: ( real: 12 nil nil)
+value: 100.0
+mouse_text: "Enter the offset bin size for summing offsets for supergather generation."
+
+parameter: MAXOFFS
+text: "   Maximum offset"
+type: typein:
+type_desc: ( real: 8 -1.0 1.0e9)
+value: -1.0
+mouse_text: "Enter the maximum offset for creating common offset stacked supergather."
+
+parameter: USEAOFF
+text: "   Use absolute value of offset for stacking?"
+type: boolean:
+value: t
+mouse_text: "If YES absolute value of offset is used to stack gathers for 2D data.  Otherwise, signed offset is used.  3D always uses absolute offset."
+
+parameter: MINVEL
+text: "   Minimum semblance analysis value"
+type: typein:
+type_desc: ( real: 12 nil nil )
+value: 99999999.
+mouse_text: "Minimum expected stacking value - value of first semblance scan."
+
+parameter: MAXVEL
+text: "   Maximum semblance analysis value"
+type: typein:
+type_desc: ( real: 12 nil nil )
+value: 99999999.
+mouse_text: "Maximum expected stacking value - value of last semblance scan."
+
+parameter: NVELS
+text: "   Number of semblance calculations"
+type: typein:
+type_desc: ( int: 3 1 999 )
+value: 50
+mouse_text: "Number of semblance scans to perform between the minimum and maximum velocity range."
+
+; for precompute only
+parameter: VELSPACE
+text: "   Semblance velocity axis"
+type: circular:
+type_desc: (
+("Equal Velocity" 2 "Semblance velocity spacing and display is logrithmic between minimum and maximum velocity.")
+("Slowness Squared" 4 "Spacing proportional to slowness squared. Use this option ONLY to create semblances for Velocity Auto Picker.")
+;("Logrithmic" 1 "Semblance velocity spacing and display is logrithmic between minimum and maximum velocity.")
+)
+value: 2
+mouse_text: "Method of spacing velocities along semblance axis."
+showp: nil
+
+parameter: WINSIZE
+text: "   Semblance sample rate"
+type: typein:
+type_desc: ( real: 12 0.0 2000.0)
+value: 20.0
+mouse_text: "Enter the semblance sample rate in milliseconds - distance between analysis window centers."
+
+parameter: RSMOOTH
+text: "   Semblance calculation window"
+type: typein:
+type_desc: ( real: 12 0.0 4000.0)
+value: 40.0
+mouse_text: "Enter size of window over which semblance will be calculated."
+
+parameter: NVFS
+text: "   Number of stack velocity functions"
+type: typein:
+type_desc: ( int: 3 1 999 )
+value: 11
+mouse_text: "Number of velocity functions and the number of stack strips."
+
+parameter: NSTACK
+text: "   Number of CDPS per stack strip"
+type: typein:
+type_desc: ( int: 3 1 999 )
+value: 99999999
+mouse_text: "Number of CDPS to stack for each of the velocity function stacks."
+
+parameter: NORMSTK
+text: "   Scale stacks by number of live samples summed"
+type: boolean:
+value: t
+mouse_text: "Divide function velocity stacks, dynamic stacks, and flip stacks by number of live samples summed into stacks."
+
+parameter: VFSTYPE
+text: "   Method of computing velocity functions"
+type: pop_choose:
+type_desc: (
+("Top/base range" 1 "Velocity function range specified min and max time.")
+("Delta delta-t" 2 "Velocity function is the moveout at maximum offset.")
+("Percentage" 3 "Velocity function is percentage of guide function.")
+("Constant Velocity" 4 "Constant velocity function- evenly spaced through semblance span.")
+)
+value: 1
+mouse_text: "Method of computing velocity function from guide velocity function."
+
+parameter: VFDELTA
+text: "      Velocity function time increment"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 10.0
+mouse_text: "Change in moveout (delta t) between the velocity functions at the farthest offset."
+
+parameter: VFCENT
+text: "      Velocity function percent maximum"
+type: typein:
+type_desc: ( real: 5 0.0 nil )
+value: 30.0
+mouse_text: "Maximum percent change of the fan relative to the guide function (minimum and maximum)."
+
+parameter: VFMINVEL
+text: "      Velocity variation at time 0"
+type: typein:
+type_desc: ( real: 6 0 MAXVEL )
+value: 99999999.
+mouse_text: "The fan at time 0 will be the this value (in units/sec) wide centered at the guide function velocity"
+
+parameter: VFMAXVEL
+text: "      Velocity variation at maximum time"
+type: typein:
+type_desc: ( real: 6 0 MAXVEL )
+value: 99999999.
+mouse_text: "The fan at maximum time will be the this value (in units/sec) wide centered at the guide function velocity"
+
+parameter: SPACE2
+text: "-------------------------------------------------"
+value_tab: 80
+parameter: VIEWFLAG
+text: "Set which items are visible?"
+type: boolean:
+value: nil
+mouse_text: "Set on/off the various panels and displays in Velocity Analysis."
+
+parameter: SPACE3
+text: "-------------------------------------------------"
+value_tab: 80
+
+parameter: SHOWSEMB
+text: "   Display semblance panel?"
+type: boolean:
+value: t
+mouse_text: "Display the semblance plot."
+
+parameter: SHOWVF
+text: "   Display stack velocity functions?"
+type: boolean:
+value: t
+mouse_text: "Display the velocity functions on the semblance panel."
+
+parameter: SHOWCONT
+text: "   Display semblance contours?"
+type: boolean:
+value: t
+mouse_text: "Display the semblance contours on the semblance panel."
+
+parameter: SHOWINT
+text: "   Display interval velocity function?"
+type: boolean:
+value: nil
+mouse_text: "Display the interval velocity function on the semblance panel as the stacking velocity function is picked."
+
+parameter: SHOWGUID
+text: "   Display guide function?"
+type: boolean:
+value: t
+mouse_text: "Display the guide function."
+
+parameter: SHOWGAT
+text: "   Display gather panel?"
+type: boolean:
+value: t
+mouse_text: "Display the smashed super gather."
+
+parameter: PLOTTYPE
+text: "   Seismic traces plotted as?"
+type: choose:
+type_desc: (
+	("WIGGLES" "WIGGLES" "Plot seimsic data as wiggly lines")
+	("GRAYSCALE" "GRAYSCALE" "Plot seimsic data as grayscale density")
+	)
+value: "WIGGLES"
+selected: "WIGGLES"
+mouse_text: "Plot seismic data in the form of wiggly lines or grayscale."
+
+
+parameter: APPLYNMO
+text: "   Apply NMO on gather panel?"
+type: boolean:
+value: nil
+mouse_text: "Normal moveout correct the gather panel according to the current pick velocity function"
+
+parameter: ANIMNMO
+text: "   Animate NMO on gather panel?"
+type: boolean:
+value: nil
+mouse_text: "Normal moveout correct a slice of the gather panel according to the velocity coordinate of the dragged mouse location"
+
+parameter: SHOWDYN
+text: "   Display dynamic stack panel?"
+type: boolean:
+value: t
+mouse_text: "Display a stack that represents the stack with the current picked velocity function."
+
+parameter: SHOWFLIP
+text: "   Display flip stacks panel?"
+type: boolean:
+value: nil
+mouse_text: "Display the flip stacks - (the function stacks displayed as a movie)."
+
+parameter: SHOWSTK
+text: "   Display velocity function stacks panel?"
+type: boolean:
+value: t
+mouse_text: "Display the velocity function stacks."
+
+parameter: SHOWVEL
+text: "   Display velocity color background?"
+type: boolean:
+value: nil
+mouse_text: "Display the velocity color background under the function stacks and dynamic stack."
+
+parameter: SHOWKEY
+text: "   Display velocity color key?"
+type: boolean:
+value: nil
+mouse_text: "Display the velocity color key beneath the semblance panel."
+
+parameter: SHOWGHOR
+text: "   Show horizons on gather panel?"
+type: boolean:
+value: t
+mouse_text: "Select YES to display previously picked horizon(s) in the gather."
+
+parameter: SHOWVHOR
+text: "   Show horizons on velocity function stacks panel?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display previously picked horizon(s) in the velocity function stacks."
+
+parameter: SHOWDHOR
+text: "   Show horizons on dynamic stack panel?"
+type: boolean:
+value: t
+mouse_text: "Select YES to display previously picked horizon(s) in the dynamic stack."
+
+parameter: SHOWFHOR
+text: "   Show horizons on flip stacks panel?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display previously picked horizon(s) in the flip stacks."
+
+parameter: SHOWPRES
+text: "   Show current CDP guide function?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display current CDP guide function on Semblance and Function Velocity Stacks"
+
+parameter: SHOWAVE
+text: "   Show average CDP guide function?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display average-of-all-CDPs guide function on Semblance and Function Velocity Stacks"
+
+parameter: SHOWPREV
+text: "   Show previous CDP guide function?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display previous CDP guide function on Semblance and Function Velocity Stacks"
+
+parameter: SHOWNEXT
+text: "   Show next CDP guide function?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display next CDP guide function on Semblance and Function Velocity Stacks"
+
+parameter: SHOWLAST
+text: "   Show last-viewed CDP guide function?"
+type: boolean:
+value: nil
+mouse_text: "Select YES to display last-viewed CDP guide function on Semblance and Function Velocity Stacks"
+
+parameter: TRACEWID
+text: "   Equalize displayed trace width?"
+type: boolean:
+value: nil
+mouse_text: "Equalize the displayed trace width in the gather and stack panels."
+
+parameter: SEMBWID
+text: "   Relative width of semblance panel"
+type: typein:
+type_desc: ( int: 4 0 9999)
+value: 100
+mouse_text: "Relative width of semblance panel compared to other panels."
+
+parameter: GATWID
+text: "   Relative width of gather panel"
+type: typein:
+type_desc: ( int: 4 0 9999)
+value: 75
+mouse_text: "Relative width of gather panel compared to other panels. Zero selects trace equalization default."
+
+parameter: DYNWID
+text: "   Relative width of dynamic stack panel"
+type: typein:
+type_desc: ( int: 4 0 9999)
+value: 30
+mouse_text: "Relative width of dynamic stack panel compared to other panels. Zero selects trace equalization default."
+
+parameter: FLIPWID
+text: "   Relative width of flip stacks panel"
+type: typein:
+type_desc: ( int: 4 0 9999)
+value: 30
+mouse_text: "Relative width of flip stacks panel compared to other panels. Zero selects trace equalization default."
+
+parameter: VFWID
+text: "   Relative width of velocity function stack panel"
+type: typein:
+type_desc: ( int: 4 0 9999)
+value: 200
+mouse_text: "Relative width of velocity function stack panel compared to other panels. Zero selects trace equalization default."
+
+parameter: SPACE4
+text: "-------------------------------------------------"
+value_tab: 80
+
+parameter: SEMBPARM
+text: "Set semblance scaling and autosnap parameters?"
+type: boolean:
+value: nil
+mouse_text: "Configure scaling and autosnap parameters for the semblance display"
+
+parameter: SPACE5
+text: "-------------------------------------------------"
+value_tab: 80
+parameter: NORM
+text: "   Semblance normalization mode"
+type: pop_choose:
+type_desc: (
+ ("Scale Time Slice"   1 "Divide time slice of semblance values by the maximum in time slice.")
+ ("Scale Panel"  2 "Divide all semblance values by the maximum semblance in panel.")
+ ("No Scaling"   3 "Do no scaling of semblance values.")
+           )
+mouse_text: "Choose method of normalizing semblances."
+
+parameter: RPOWER
+text: "   Contrast power factor"
+type: typein:
+type_desc: ( real: 3 0.0 nil )
+value: 1.0
+mouse_text: "Raise each semblance sample power to this power before plotting.  A value greater/less than 1.0 increases/decreases the contrast."
+
+parameter: RNOISE
+text: "   Contrast noise factor"
+type: typein:
+type_desc: ( real: 3 0.0 nil )
+value: 0.1
+mouse_text: "Add this value to maximum semblance before scaling (not used if no scaling applied).  Recommend 0.0 to 0.4"
+parameter: AUTOSNAP
+text: "   Automatically snap"
+type: pop_choose:
+type_desc: ( ( "Off" 0 "Never autosnap - user can snap using the one time snap option.")
+	     ( "After copy only" 1 "Automatically snap the picks at a new location on first visit after the previous function is copied.")
+	     ( "Snap existing functions" 2 "Automatically snap existing function on the first visit if a location already has a function in the output table.")
+	     ( "Always" 3 "Automatically snap copied or previously existing function on first visit."))
+value: 0
+mouse_text: "Options to automatically snap velocity function for new ensemble."
+
+parameter: HOR_DIST
+text: "   Maximum velocity % change for snapping"
+type: typein:
+type_desc: ( int: 5 1 100)
+value: 5
+mouse_text: "Horizontal search distance (in percent) for the neighboring highest semblance."
+
+parameter: VER_DIST
+text: "   Maximum vertical change for snapping"
+type: typein:
+type_desc: ( int: 3 0 nil)
+value: 40
+mouse_text: "Vertical search distance (in msec) for the neighboring highest semblance."
+
+parameter: SPACE6
+text: "-------------------------------------------------"
+value_tab: 80
+
+parameter: MUTEMODE
+text: "Pick/apply a mute?"
+type: choose:
+type_desc: (	( "NONE" 0 "Do not apply picked mute.")
+		("TOP" 1 "Mute from top mute upward and make top mute editable.")
+		("BASE" 2 "Mute from base mute downward and make base mute editable.")
+		("BOTH" 3 "Mute from top mute upward and base mute downward. Top mute initially editable.")
+	)
+value: 0
+mouse_text: "Use top and/or base mutes picked on the Gather panel and/or a mute file."
+
+parameter: TOPMUTE
+text: "  Gather offset Top mute table"
+type: function:
+type_desc: ((parm_list "MUT") parms)
+value: "INVALID"
+mouse_text: "Use Mouse Button 1 to select a mute table from the menu."
+
+parameter: BASEMUTE
+text: "  Gather offset Base mute table"
+type: function:
+type_desc: ((parm_list "MUT") parms)
+value: "INVALID"
+mouse_text: "Use Mouse Button 1 to select a mute table from the menu."
+
+parameter: MUTETAPE
+text: "  Mute taper length"
+type: typein:
+type_desc: ( real: 12 0.0 nil)
+value: 20.0
+mouse_text: "Taper length of end of mute in vertical units."
+
+
+parameter: SHOWHOR
+text: "Select/Display horizons?"
+type: choose:
+type_desc: (
+	("NONE" 0 "Don't show any horizons, but remember selections.")
+	("POP-MENU" 1 "Select using a pop-up menu. Faster, but no color.")
+	("EXPLICIT" 2 "Select each horizon and color explicitly.")
+	("RESET-EXPLICIT" 3 "Erase all explicit entries.")
+	)
+value: 0
+mouse_text: "Methods to select horizon display and color."
+
+parameter: SPACE7
+text: "-------------------------------------------------"
+value_tab: 80
+
+
+parameter: HORDATUM
+text: "   To which datum are the horizons referenced?"
+type: circular:
+type_desc: (
+    ("Final Datum  " -1 "Horizons were picked from a stack referenced to final datum (F_DATUM)." )
+    ("Floating Datum"  1 "Horizons were picked from a stack referenced to floating datum (N_DATUM)" ))
+value: -1
+selected_item: 	("Final Datum  " -1 )
+mouse_text: "Velocity Analysis will shift horizons picked at final datum to floating datum so that horizons picked on conventional stacks can be used for analysis."
+
+parameter: H_TABLES
+text: "   Horizon tables"
+type: action:
+value: nil
+type_desc: ("INVALID")
+mouse_text: "Use MB1 to pop up a window and select Horizon Tables to display."
+
+parameter: HOR1
+text: "   Select horizon #1"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR1
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	)
+value: "red"
+selected_item: "red"
+mouse_text: "Select a color for horizon #1 from the pop up menu."
+
+parameter: HOROK2
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR2
+text: "   Select horizon #2"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR2
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	)
+value: "orange"
+selected_item: "orange"
+mouse_text: "Select a color for horizon #2 from the pop up menu."
+
+parameter: HOROK3
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR3
+text: "   Select horizon #3"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR3
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	)
+value: "yellow"
+selected_item: "yellow"
+mouse_text: "Select a color for horizon #3 from the pop up menu."
+
+parameter: HOROK4
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR4
+text: "   Select horizon #4"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR4
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	)
+value: "green"
+mouse_text: "Select a color for horizon #4 from the pop up menu."
+
+parameter: HOROK5
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR5
+text: "   Select horizon #5"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR5
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	)
+value: "blue"
+mouse_text: "Select a color for horizon #5 from the pop up menu."
+
+parameter: HOROK6
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR6
+text: "   Select horizon #6"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR6
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	)
+value: "violet"
+mouse_text: "Select a color for horizon #6 from the pop up menu."
+
+parameter: HOROK7
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR7
+text: "   Select horizon #7"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR7
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	)
+value: "brown"
+mouse_text: "Select a color for horizon #7 from the pop up menu."
+
+parameter: HOROK8
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR8
+text: "   Select horizon #8"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR8
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	)
+value: "gray"
+mouse_text: "Select a color for horizon #8 from the pop up menu."
+
+parameter: HOROK9
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR9
+text: "   Select horizon #9"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR9
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	)
+value: "white"
+mouse_text: "Select a color for horizon #9 from the pop up menu."
+
+parameter: HOROK10
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR10
+text: "   Select horizon #10"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR10
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	)
+value: "black"
+mouse_text: "Select a color for horizon #10 from the pop up menu."
+
+parameter: HOROK11
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR11
+text: "   Select horizon #11"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR11
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	)
+value: "red"
+mouse_text: "Select a color for horizon #11 from the pop up menu."
+
+parameter: HOROK12
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR12
+text: "   Select horizon #12"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR12
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	)
+value: "orange"
+mouse_text: "Select a color for horizon #12 from the pop up menu."
+
+parameter: HOROK13
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR13
+text: "   Select horizon #13"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR13
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	)
+value: "yellow"
+mouse_text: "Select a color for horizon #13 from the pop up menu."
+
+parameter: HOROK14
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR14
+text: "   Select horizon #14"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR14
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	)
+value: "green"
+mouse_text: "Select a color for horizon #14 from the pop up menu."
+
+parameter: HOROK15
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR15
+text: "   Select horizon #15"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR15
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	)
+value: "blue"
+mouse_text: "Select a color for horizon #15 from the pop up menu."
+
+parameter: HOROK16
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR16
+text: "   Select horizon #16"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR16
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	)
+value: "violet"
+mouse_text: "Select a color for horizon #16 from the pop up menu."
+
+parameter: HOROK17
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR17
+text: "   Select horizon #17"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR17
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	)
+value: "brown"
+mouse_text: "Select a color for horizon #17 from the pop up menu."
+
+parameter: HOROK18
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR18
+text: "   Select horizon #18"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR18
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	)
+value: "gray"
+mouse_text: "Select a color for horizon #18 from the pop up menu."
+
+parameter: HOROK19
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR19
+text: "   Select horizon #19"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR19
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("white" "white" "white")
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	)
+value: "white"
+mouse_text: "Select a color for horizon #19 from the pop up menu."
+
+parameter: HOROK20
+text: "   Another horizon?"
+type: boolean:
+value: nil
+mouse_text: "Select yes whether to select another horizon file and color."
+
+parameter: HOR20
+text: "   Select horizon #20"
+type: function:
+type_desc: ((parm_list "HOR") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a horizon table from the parameter table menu."
+
+parameter: HCOLOR20
+text: "      Color"
+type: pop_choose:
+type_desc: (
+	("black" "black" "black")
+	("red" "red" "red")
+	("orange" "orange" "orange")
+	("yellow" "yellow" "yellow")
+	("green" "green" "green")
+	("blue" "blue" "blue")
+	("violet" "violet" "violet")
+	("brown" "brown" "brown")
+	("gray" "gray" "gray")
+	("white" "white" "white")
+	)
+value: "black"
+mouse_text: "Select a color for horizon #20 from the pop up menu."
+
+parameter: SPACE8
+text: "-------------------------------------------------"
+value_tab: 80
+
+;parameter: NNFLAG
+;text: "Use neural network velocity picker?"
+;type: boolean:
+;value: nil
+;mouse_text: "If YES a neural network can be used to automate the picking process."
+;
+;parameter: SPACE9
+;text: "-------------------------------------------------"
+;value_tab: 80
+;
+;parameter: WGTFILE
+;text: "   Neural network weight table"
+;type: function:
+;type_desc: ((parm_list "VAW") parms)
+;value: "INVALID"
+;selected_item: "* No Parameter File has been Selected *"
+;mouse_text: "Use Mouse Button 1 to select a weight matrix parameter file name."
+;
+;parameter: GUIDEPCT
+;text: "   Percentage of velocity to scan"
+;type: typein:
+;type_desc: ( int: 3 1 100)
+;value: 20
+;mouse_text: "Enter the percentage of the initial velocity for guide function."
+;
+;parameter: TRESHOLD
+;text: "   Minimum semblance value for candidate peaks"
+;type: typein:
+;type_desc: ( real: 3 0.0 1.0)
+;value: 0.5
+;mouse_text: "Semblance peaks that are less than this value will not be considered for training."
+;
+;parameter: NNMINVEL
+;text: "   Minimum allowable interval velocity"
+;type: typein:
+;type_desc: ( real: 12 nil nil)
+;value: 99999999.
+;mouse_text: "Enter the minimum acceptable interval velocity for RMS velocity contraint."
+;
+;parameter: NNMAXVEL
+;text: "   Maximum allowable interval velocity"
+;type: typein:
+;type_desc: ( real: 12 nil nil)
+;value: 99999999.
+;mouse_text: "Enter the maximum acceptable interval velocity for RMS velocity contraint."
+;
+;parameter: HORCONST
+;text: "   Maximum distance of NN picks from horizons"
+;type: typein:
+;type_desc: ( real: 5 0.0 nil)
+;value: 0.0
+;mouse_text: "Allowable maximum distance of NN picks from a horizon, enter 0 to turn this constraint off."
+;
+;parameter: DISPLAY
+;text: "   Picking in interactive mode?"
+;type: boolean:
+;value: t
+;mouse_text: "If NO the neural network is used in batch mode to automate the picking process."
+
+;parameter: SPACE10
+;
+;text: "-------------------------------------------------"
+;value_tab: 80
+;
+parameter: PD_OPT
+text: "Interact with other processes using PD?"
+type: boolean:
+value: t
+mouse_text: "If set to yes, a PD connection will be initiated to communicate with VVE and/or the 3D Viewer"
+parameter: GUIDTYPE
+text: "   Guide file type"
+type: typein:
+value: "VEL"
+mouse_text: "Guide file type."
+
+parameter: GUIDEOPT
+text: "Get guide function from an existing parameter table?"
+type: boolean:
+value: t
+mouse_text: "Get the guide function from the list of RMS velocity parameter tables"
+
+parameter: GUIDETBL
+text: "   Velocity guide function table name"
+type: function:
+type_desc: ((parm_list "VEL") parms)
+value: "no entry"
+mouse_text: "Guide function for fan function stacks, and picking. Use Mouse Button 1 to select a velocity file from the menu."
+
+parameter: MINGDVEL
+text: "   Guide minimum value"
+type: typein:
+type_desc: ( real: 12 MINVEL MAXVEL )
+value: 99999999.
+mouse_text: "Semblance analysis value at minimum time/depth to use as guide."
+
+parameter: MAXGDVEL
+text: "   Guide maximum time value"
+type: typein:
+type_desc: ( real: 12 MINVEL MAXVEL )
+value: 99999999.
+mouse_text: "Semblance analysis value at maximum time/depth to use as guide."
+;parameter: SPACE12
+;text: "-------------------------------------------------"
+;value_tab: 80
+parameter: STRETCH
+text: "Maximum stretch percentage for NMO"
+type: typein:
+type_desc: ( real: 12 0.0 10000.0)
+value: 30.0
+mouse_text: "Any trace stretched more than this factor will be excluded from the semblance analysis. Enter 0.0 to turn off this option"
+
+parameter: LONGOFFS
+text: "Long offset moveout correction?"
+type: choose:
+type_desc: ( ( "NONE" 0 "Apply only two term NMO (normal application).")
+             ( "ALCHALABI" 1 "Apply Al-Chalabi's third term (fastest).")
+             ( "CASTLE" 2 "Apply Castle's shifted hyperbola (slow, least accurate).")
+             ( "HARLAN" 4 "Apply Harlan's anisotropic third term (slower, good accuracy).")
+             ( "TSVANKIN" 3 "Apply Tsvankin and Thomsen's third term (slowest, most accurate).")
+    )
+value: 0
+mouse_text: "Choose desired method for long-offset moveout correction."
+
+parameter: ETA
+text: "   Anisotropy correction parameter eta"
+type: typein:
+type_desc: ( real: 6 -0.25 1.0 )
+value: 0.0
+mouse_text: "Value of zero means no anisotropy correction. Normally nonnegative and less than 0.1"
+plot_label: t
+
+parameter: LASTINT
+text: "Interval velocity below last knee"
+type: typein:
+type_desc: ( real: 12 0.0e-4 nil )
+value: 0.0
+mouse_text: "Constant interval velocity used to phantom in unpicked velocity at time max. Use a a value of 0.0 to turn this option off"
+
+parameter: PICKTYPE
+text: "   Pick file type"
+type: typein:
+value: "VEL"
+mouse_text: "Pick file type"
+
+parameter: COPYPICK
+text: "Copy picks to next location"
+type: boolean:
+value: nil
+mouse_text: "Select YES to copy the picks at one location to the next location if no function previously exists."
+parameter: SPACE14
+text: "-------------------------------------------------"
+value_tab: 80
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "To debug program, enter YES."
+showp: nil
+
+parameter: program
+text: "   Program executable name"
+type: edit:
+type_desc: (30 100 2 " Example: velAnal.exe
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "velAnal71.exe"
+mouse_text: "Type path name of program executable."  
+
+parameter: INIT
+type: int:
+value: 1
+showp: nil
+
+parameter: PATH
+type: string:
+value: nil
+showp: nil
+
+exec_data: 
+
+	("SOCKET_TOOL"
+   	("GENERAL"
+		("version" implicit: "ProMAX $Id: velAnal71.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+
+		("Xserver"  implicit: (if (= (value 'Xserver) "This Screen") (where_promax_displays) (value 'Xserver)))
+		("PRECOMP"	implicit: (if (value 'PRECOMP) 1 0))
+
+		("RMO"		implicit: (value 'RMO))
+		("LANDDATA"	implicit: (value 'LANDDATA))
+		("NSMASH"	implicit: (value 'NSMASH))
+		("SMASHNMO"	implicit: (if (value 'SMASHNMO) 1 0))
+		("SMASHSTA"	implicit: (if (value 'SMASHSTA) 1 0))
+		("INITDIST"	implicit: (value 'INITDIST))
+		("LONGOFFS"	implicit: (value 'LONGOFFS))
+		("ETA"		implicit: (value 'ETA))
+		("BINSIZE"	implicit: (value 'BINSIZE))
+		("MAXOFFS"	implicit: (value 'MAXOFFS))
+		("USEABS"	implicit: (if (value 'USEAOFF) 1 0))
+		("MINVEL"	implicit: (value 'MINVEL))
+		("MAXVEL"	implicit: (value 'MAXVEL))
+		("NVELS"	implicit: (value 'NVELS))
+		("VELSPACE"	implicit: (value 'VELSPACE))
+		("WINSIZE"	implicit: (value 'WINSIZE))
+		("RSMOOTH"	implicit: (value 'RSMOOTH))
+		("NORMSTK"	implicit: (if (value 'NORMSTK) 1 0))
+		("NVFS"		implicit: (value 'NVFS))
+		("NSTACK"	implicit: (value 'NSTACK))
+		("VFSTYPE"	implicit: (value 'VFSTYPE))
+		("VFDELTA"	implicit: (value 'VFDELTA))
+		("VFCENT"	implicit: (value 'VFCENT))
+		("VFMINVEL"	implicit: (value 'VFMINVEL))
+		("VFMAXVEL"	implicit: (value 'VFMAXVEL))
+		("VIEWFLAG"	implicit: (if (value 'VIEWFLAG) 1 0))
+		("SHOWSEMB"	implicit: (if (value 'SHOWSEMB) 1 0))
+		("SHOWVF"	implicit: (if (value 'SHOWVF) 1 0))
+		("SHOWCONT"	implicit: (if (value 'SHOWCONT) 1 0))
+		("SHOWINT"	implicit: (if (value 'SHOWINT) 1 0))
+		("SHOWGUID"	implicit: (if (value 'SHOWGUID) 1 0))
+		("SHOWGAT"	implicit: (if (value 'SHOWGAT) 1 0))
+		("PLOTTYPE"	implicit: (value 'PLOTTYPE))
+		("APPLYNMO"	implicit: (if (value 'APPLYNMO) 1 0))
+		("ANIMNMO"	implicit: (if (value 'ANIMNMO) 1 0))
+		("SHOWDYN"	implicit: (if (value 'SHOWDYN) 1 0))
+		("SHOWFLIP"	implicit: (if (value 'SHOWFLIP) 1 0))
+		("SHOWSTK"	implicit: (if (value 'SHOWSTK) 1 0))
+		("SHOWVEL"	implicit: (if (value 'SHOWVEL) 1 0))
+		("SHOWKEY"	implicit: (if (value 'SHOWKEY) 1 0))
+		("SHOWGHOR"	implicit: (if (value 'SHOWGHOR) 1 0))
+		("SHOWFHOR"	implicit: (if (value 'SHOWFHOR) 1 0))
+		("SHOWPRES"	implicit: (if (value 'SHOWPRES) 1 0))
+		("SHOWPREV"	implicit: (if (value 'SHOWPREV) 1 0))
+		("SHOWNEXT"	implicit: (if (value 'SHOWNEXT) 1 0))
+		("SHOWLAST"	implicit: (if (value 'SHOWLAST) 1 0))
+		("SHOWAVE"	implicit: (if (value 'SHOWAVE) 1 0))
+		("SHOWDHOR"	implicit: (if (value 'SHOWDHOR) 1 0))
+		("SHOWVHOR"	implicit: (if (value 'SHOWVHOR) 1 0))
+		("TRACEWID"	implicit: (if (value 'TRACEWID) 1 0))
+		("SEMBWID"	implicit: (value 'SEMBWID))
+		("GATWID"	implicit: (value 'GATWID))
+		("DYNWID"	implicit: (value 'DYNWID))
+		("FLIPWID"	implicit: (value 'DYNWID))
+		("VFWID"	implicit: (value 'VFWID))
+		("NORM"		implicit: (value 'NORM))
+		("RPOWER"	implicit: (value 'RPOWER))
+		("RNOISE"	implicit: (value 'RNOISE))
+		("AUTOSNAP"	implicit: (value 'AUTOSNAP))
+		("HOR_DIST"	implicit: (value 'HOR_DIST))
+		("VER_DIST"	implicit: (value 'VER_DIST))
+		("MUTEMODE"	implicit: (value 'MUTEMODE))
+		("TOPMUTE"	implicit: (value 'TOPMUTE))
+		("BASEMUTE"	implicit: (value 'BASEMUTE))
+		("MUTETAPE"	implicit: (value 'MUTETAPE))
+		("SHOWHOR"	implicit: (value 'SHOWHOR))
+		("HORDATUM"	implicit: (value 'HORDATUM))
+;       Not required to pass H_TABLES - Menu creates file "Table_List" in the area/line/flow
+;       Program reads for area/line/flow/Table_List file
+;		("H_TABLES"	implicit: (value 'H_TABLES))
+		("HOR1"		implicit: (value 'HOR1))
+		("HCOLOR1"	implicit: (value 'HCOLOR1))
+		("HOR2"		implicit: (value 'HOR2))
+		("HCOLOR2"	implicit: (value 'HCOLOR2))
+		("HOR3"		implicit: (value 'HOR3))
+		("HCOLOR3"	implicit: (value 'HCOLOR3))
+		("HOR4"		implicit: (value 'HOR4))
+		("HCOLOR4"	implicit: (value 'HCOLOR4))
+		("HOR5"		implicit: (value 'HOR5))
+		("HCOLOR5"	implicit: (value 'HCOLOR5))
+		("HOR6"		implicit: (value 'HOR6))
+		("HCOLOR6"	implicit: (value 'HCOLOR6))
+		("HOR7"		implicit: (value 'HOR7))
+		("HCOLOR7"	implicit: (value 'HCOLOR7))
+		("HOR8"		implicit: (value 'HOR8))
+		("HCOLOR8"	implicit: (value 'HCOLOR8))
+		("HOR9"		implicit: (value 'HOR9))
+		("HCOLOR9"	implicit: (value 'HCOLOR9))
+		("HOR10"	implicit: (value 'HOR10))
+		("HCOLOR10"	implicit: (value 'HCOLOR10))
+		("HOR11"	implicit: (value 'HOR11))
+		("HCOLOR11"	implicit: (value 'HCOLOR11))
+		("HOR12"	implicit: (value 'HOR12))
+		("HCOLOR12"	implicit: (value 'HCOLOR12))
+		("HOR13"	implicit: (value 'HOR13))
+		("HCOLOR13"	implicit: (value 'HCOLOR13))
+		("HOR14"	implicit: (value 'HOR14))
+		("HCOLOR14"	implicit: (value 'HCOLOR14))
+		("HOR15"	implicit: (value 'HOR15))
+		("HCOLOR15"	implicit: (value 'HCOLOR15))
+		("HOR16"	implicit: (value 'HOR16))
+		("HCOLOR16"	implicit: (value 'HCOLOR16))
+		("HOR17"	implicit: (value 'HOR17))
+		("HCOLOR17"	implicit: (value 'HCOLOR17))
+		("HOR18"	implicit: (value 'HOR18))
+		("HCOLOR18"	implicit: (value 'HCOLOR18))
+		("HOR19"	implicit: (value 'HOR19))
+		("HCOLOR19"	implicit: (value 'HCOLOR19))
+		("HOR20"	implicit: (value 'HOR20))
+		("HCOLOR20"	implicit: (value 'HCOLOR20))
+; depreciated neural net options
+;		("NNOPT"	implicit: (if (value 'NNFLAG) 1 0))
+;		("WGTFILE"	implicit: (value 'WGTFILE))
+;		("GUIDEPCT"	implicit: (value 'GUIDEPCT))
+;		("TRESHOLD"	implicit: (value 'TRESHOLD))
+;		("NNMINVEL"	implicit: (value 'NNMINVEL))
+;		("NNMAXVEL"	implicit: (value 'NNMAXVEL))
+;		("HORCONST"	implicit: (value 'HORCONST))
+;		("DISPLAY"	implicit: (if (value 'DISPLAY) 1 0))
+		("PD_OPT"	implicit: (if (value 'PD_OPT) 1 0))
+		("GUIDTYPE"	implicit: (value 'GUIDTYPE))
+		("GUIDEOPT"	implicit: (if (value 'GUIDEOPT) 1 0))
+		("GUIDETBL"	implicit: (value 'GUIDETBL))
+		("MINGDVEL"	implicit: (value 'MINGDVEL))
+		("MAXGDVEL"	implicit: (value 'MAXGDVEL))
+		("STRETCH"	implicit: (value 'STRETCH))
+		("LASTINT"	implicit: (value 'LASTINT))
+		("PICKTYPE"	implicit: (value 'PICKTYPE))
+		("NEWTABLE"	implicit: (value 'NEWTABLE))
+		("COPYPICK"	implicit: (if (value 'COPYPICK) 1 0))
+		("DEBUG"	implicit: (if (value 'DEBUG) 2 0))
+		("program"	implicit: (value 'program))
+		   )
+      )
+
+rules: 
+	(
+
+	(Xserver_rule (NOT (= (value 'Xserver) "This Screen"))
+  		(progn
+  		(setq temp (host_valid_p (value 'Xserver)))
+  		(if temp
+  		(add_error 'Xserver temp)
+  		(set_error_list 'Xserver temp)))
+  		(set_error_list 'Xserver nil))
+	(SPACE0_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'SPACE0) (do_not_show 'SPACE0))
+	(SETPARMS_rule (not (value 'PRECOMP)) (do_show 'SETPARMS) (do_not_show 'SETPARMS))
+	(SPACE1_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'SPACE1) (do_not_show 'SPACE1))
+
+; land data rules
+	(LANDDATA_rule (= (db_parmget_line "IUNITSz") 3) (set_value 'LANDDATA 0))
+	(LANDDATA_rule (do_not_show 'LANDDATA))
+; residual moveout rules
+;	(RMO_rule (do_not_show 'RMO))
+	(RMO_rule (= (value 'RMO) -1)
+		(add_error 'RMO "No option selected")
+		(delete_error 'RMO "No option selected"))
+	(OLDRMO_rule (not (= (value 'OLDRMO) (value 'RMO)))
+		(progn	(set_value 'MINVEL 99999999.)
+			(set_value 'MAXVEL 99999999.)
+			(set_value 'VFMINVEL 99999999.)
+			(set_value 'VFMAXVEL 99999999.)
+;			(set_value 'NNMINVEL 99999999.)
+;			(set_value 'NNMAXVEL 99999999.)
+			(set_value 'MINGDVEL 99999999.)
+			(set_value 'MAXGDVEL 99999999.)
+			(set_value 'OLDRMO (value 'RMO))))
+        (RMO_rule2 (= (value 'RMO) 0) (do_show 'VELSPACE) (do_not_show 'VELSPACE))
+        (RMO_rule3 (not (= (value 'RMO) 0)) 
+		   (progn (set_value 'VELSPACE 2)
+			  (set_selected_item 'VELSPACE 
+					     '("Equal Velocity" 2 "Equal spacing of velocities."))))
+; offset rules
+	(NSMASH_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'NSMASH) (do_not_show 'NSMASH))
+	(NSMASH_rule (and (= (value 'RMO) 0) (= (value 'NSMASH) 99999999)) (set_value 'NSMASH 5))
+	(NSMASH_rule (and (= (value 'RMO) 1) (= (value 'NSMASH) 99999999)) (set_value 'NSMASH 1))
+	(NSMASH_rule (and (= (value 'RMO) 2) (= (value 'NSMASH) 99999999)) (set_value 'NSMASH 1))
+	(SMASHNMO_rule (and (not (value 'PRECOMP)) (value 'SETPARMS) (= (value 'RMO) 0)) (do_show 'SMASHNMO) (do_not_show 'SMASHNMO))
+	(SMASHSTA_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'SMASHSTA) (do_not_show 'SMASHSTA))
+	(INITDIST_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'INITDIST) (do_not_show 'INITDIST))
+	(BINSIZE_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'BINSIZE) (do_not_show 'BINSIZE))
+	(MAXOFFS_rule ( = ( value 'MAXOFFS) -1.0) (set_value 'MAXOFFS ( db_parmget_line "OFFMAXz")))
+	(MAXOFFS_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'MAXOFFS) (do_not_show 'MAXOFFS))
+	(USEAOFF_rule (= (db_parmget_line "I3Dz") 1 ) (do_not_show 'USEAOFF) (do_show 'USEAOFF))
+	(USEAOFF_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'USEAOFF) (do_not_show 'USEAOFF))
+; semblance rules
+	(MINVEL_rule (and (= (value 'RMO) 0) (= (value 'MINVEL) 99999999.)) (set_value 'MINVEL 4000.0))
+	(MINVEL_rule (and (= (value 'RMO) 1) (= (value 'MINVEL) 99999999.)) (set_value 'MINVEL -50.))
+	(MINVEL_rule (and (= (value 'RMO) 2) (= (value 'MINVEL) 99999999.)) (set_value 'MINVEL -50.))
+	(MINVEL_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'MINVEL) (do_not_show 'MINVEL))
+	(MAXVEL_rule (and (= (value 'RMO) 0) (= (value 'MAXVEL) 99999999.)) (set_value 'MAXVEL 25000.0))
+	(MAXVEL_rule (and (= (value 'RMO) 1) (= (value 'MAXVEL) 99999999.)) (set_value 'MAXVEL 50.))
+	(MAXVEL_rule (and (= (value 'RMO) 2) (= (value 'MAXVEL) 99999999.)) (set_value 'MAXVEL 50.))
+	(MAXVEL_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'MAXVEL) (do_not_show 'MAXVEL))
+	(NVELS_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'NVELS) (do_not_show 'NVELS))
+	(VELSPACE_rule (do_not_show 'VELSPACE))
+;	(VELSPACE_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'VELSPACE) (do_not_show 'VELSPACE))
+	(WINSIZE_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'WINSIZE) (do_not_show 'WINSIZE))
+	(RSMOOTH_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'RSMOOTH) (do_not_show 'RSMOOTH))
+	(NVFS_rule  (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'NVFS)  (do_not_show 'NVFS))
+; function velocity stack rules
+	(NSTACK_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'NSTACK) (do_not_show 'NSTACK))
+	(NSTACK_rule (and (= (value 'RMO) 0) (= (value 'NSTACK) 99999999)) (set_value 'NSTACK 5))
+	(NSTACK_rule (and (= (value 'RMO) 1) (= (value 'NSTACK) 99999999)) (set_value 'NSTACK 1))
+	(NSTACK_rule (and (= (value 'RMO) 2) (= (value 'NSTACK) 99999999)) (set_value 'NSTACK 1))
+	(NORMSTK_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'NORMSTK) (do_not_show 'NORMSTK))
+; velocity function rules
+	(VFSTYPE_rule (and (not (value 'PRECOMP)) (= (value 'RMO) 0) (value 'SETPARMS)) (do_show 'VFSTYPE) (do_not_show 'VFSTYPE))
+	(VFDELTA_rule (and (= (value 'RMO) 0) (value 'SETPARMS) (= (value 'VFSTYPE) 2) (not (value 'PRECOMP))) (do_show 'VFDELTA) (do_not_show 'VFDELTA))
+	(VFCENT_rule (and (= (value 'RMO) 0) (value 'SETPARMS) (= (value 'VFSTYPE) 3) (not (value 'PRECOMP))) (do_show 'VFCENT) (do_not_show 'VFCENT))
+	(VFMINVEL_rule (and (= (value 'VFMINVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'VFMINVEL 500.0))
+	(VFMINVEL_rule (= (value 'VFMINVEL) 99999999. ) (set_value 'VFMINVEL 2000.0))
+	(VFMINVEL_rule (and (value 'SETPARMS) (= (value 'RMO) 0) (= (value 'VFSTYPE) 1) (not (value 'PRECOMP))) (do_show 'VFMINVEL) (do_not_show 'VFMINVEL))
+	(VFMAXVEL_rule (and (= (value 'VFMAXVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'VFMAXVEL 1500.0))
+	(VFMAXVEL_rule (= (value 'VFMAXVEL) 99999999. ) (set_value 'VFMAXVEL 5000.0))
+; mute rules
+        (TOPMUTE_rule (or (= (value 'MUTEMODE) 1) (= (value 'MUTEMODE) 3) (= (value 'MUTEMODE) 4))
+		(do_show 'TOPMUTE) (do_not_show 'TOPMUTE))
+	(BASEMUTE_rule (or (= (value 'MUTEMODE) 2) (= (value 'MUTEMODE) 3) (= (value 'MUTEMODE) 4))
+		(do_show 'BASEMUTE) (do_not_show 'BASEMUTE))
+	(MUTETAPE_rule  (not (= (value 'MUTEMODE) 0))
+		(do_show 'MUTETAPE) (do_not_show 'MUTETAPE))
+	(VFMAXVEL_rule (and (value 'SETPARMS) (= (value 'RMO) 0) (= (value 'VFSTYPE) 1) (not (value 'PRECOMP))) (do_show 'VFMAXVEL) (do_not_show 'VFMAXVEL))
+	(SPACE2_rule (and (not (value 'PRECOMP)) (value 'SETPARMS)) (do_show 'SPACE2) (do_not_show 'SPACE2))
+; show items rules
+	(SPACE3_rule (value 'VIEWFLAG) (do_show 'SPACE3) (do_not_show 'SPACE3))
+	(SHOWSEMB_rule (value 'VIEWFLAG) (do_show 'SHOWSEMB) (do_not_show 'SHOWSEMB))
+	(SHOWVF_rule (and (value 'VIEWFLAG) (= (value 'RMO) 0)) (do_show 'SHOWVF) (do_not_show 'SHOWVF))
+	(SHOWCONT_rule (value 'VIEWFLAG) (do_show 'SHOWCONT) (do_not_show 'SHOWCONT))
+	(SHOWINT_rule (and (value 'VIEWFLAG) (= (value 'RMO) 0)) (do_show 'SHOWINT) (do_not_show 'SHOWINT))
+	(SHOWGUID_rule (value 'VIEWFLAG) (do_show 'SHOWGUID) (do_not_show 'SHOWGUID))
+	(SHOWGAT_rule (value 'VIEWFLAG) (do_show 'SHOWGAT) (do_not_show 'SHOWGAT))
+	(PLOTTYPE_rule (value 'VIEWFLAG) (do_show 'PLOTTYPE) (do_not_show 'PLOTTYPE))
+	(APPLYNMO_rule (value 'VIEWFLAG) (do_show 'APPLYNMO) (do_not_show 'APPLYNMO))
+	(ANIMNMO_rule (value 'VIEWFLAG) (do_show 'ANIMNMO) (do_not_show 'ANIMNMO))
+	(SHOWDYN_rule (value 'VIEWFLAG) (do_show 'SHOWDYN) (do_not_show 'SHOWDYN))
+	(SHOWFLIP_rule (value 'VIEWFLAG) (do_show 'SHOWFLIP) (do_not_show 'SHOWFLIP))
+	(SHOWSTK_rule (value 'VIEWFLAG) (do_show 'SHOWSTK) (do_not_show 'SHOWSTK))
+	(SHOWVEL_rule (and (value 'VIEWFLAG) (= (value 'PLOTTYPE) "WIGGLES"))
+		(do_show 'SHOWVEL)
+		(progn	(do_not_show 'SHOWVEL)
+			(set_value 'SHOWVEL nil)))
+	(SHOWKEY_rule (value 'VIEWFLAG) (do_show 'SHOWKEY) (do_not_show 'SHOWKEY))
+	(SHOWGHOR_rule (value 'VIEWFLAG) (do_show 'SHOWGHOR) (do_not_show 'SHOWGHOR))
+	(SHOWFHOR_rule (value 'VIEWFLAG) (do_show 'SHOWFHOR) (do_not_show 'SHOWFHOR))
+	(SHOWPRES_rule (value 'VIEWFLAG) (do_show 'SHOWPRES) (do_not_show 'SHOWPRES))
+	(SHOWAVE_rule (value 'VIEWFLAG) (do_show 'SHOWAVE) (do_not_show 'SHOWAVE))
+	(SHOWPREV_rule (value 'VIEWFLAG) (do_show 'SHOWPREV) (do_not_show 'SHOWPREV))
+	(SHOWNEXT_rule (value 'VIEWFLAG) (do_show 'SHOWNEXT) (do_not_show 'SHOWNEXT))
+	(SHOWLAST_rule (value 'VIEWFLAG) (do_show 'SHOWLAST) (do_not_show 'SHOWLAST))
+	(SHOWDHOR_rule (value 'VIEWFLAG) (do_show 'SHOWDHOR) (do_not_show 'SHOWDHOR))
+	(SHOWVHOR_rule (value 'VIEWFLAG) (do_show 'SHOWVHOR) (do_not_show 'SHOWVHOR))
+	(TRACEWID_rule (value 'VIEWFLAG) (do_show 'TRACEWID) (do_not_show 'TRACEWID))
+	(SEMBWID_rule (value 'VIEWFLAG) (do_show 'SEMBWID) (do_not_show 'SEMBWID))
+	(GATWID_rule (value 'VIEWFLAG) (do_show 'GATWID) (do_not_show 'GATWID))
+	(DYNWID_rule (value 'VIEWFLAG) (do_show 'DYNWID) (do_not_show 'DYNWID))
+	(FLIPWID_rule (value 'VIEWFLAG) (do_show 'FLIPWID) (do_not_show 'FLIPWID))
+	(VFWID_rule (value 'VIEWFLAG) (do_show 'VFWID) (do_not_show 'VFWID))
+	(SPACE4_rule (value 'VIEWFLAG) (do_show 'SPACE4) (do_not_show 'SPACE4))
+; more semblance rules
+	(SPACE5_rule (value 'SEMBPARM) (do_show 'SPACE5) (do_not_show 'SPACE5))
+	(NORM_rule (value 'SEMBPARM) (do_show 'NORM)  (do_not_show 'NORM))
+	(RPOWER_rule (value 'SEMBPARM) (do_show 'RPOWER) (do_not_show 'RPOWER))
+	(RNOISE_rule (and (value 'SEMBPARM) (or (= (value 'NORM) 1) (= (value 'NORM) 2))) (do_show 'RNOISE) (do_not_show 'RNOISE))
+; snap rules
+	(AUTOSNAP_rule (value 'SEMBPARM) (do_show 'AUTOSNAP) (do_not_show 'AUTOSNAP))
+	(HOR_DIST_rule (value 'SEMBPARM) (do_show 'HOR_DIST) (do_not_show 'HOR_DIST))
+	(VER_DIST_rule (value 'SEMBPARM) (do_show 'VER_DIST) (do_not_show 'VER_DIST))
+	(SPACE6_rule (value 'SEMBPARM) (do_show 'SPACE6) (do_not_show 'SPACE6))
+; horizon rules
+	(SPACE7_rule (= (value 'SHOWHOR) 2) (do_show 'SPACE7) (do_not_show 'SPACE7))
+	(get_tables (value 'H_TABLES) 
+          (progn 
+            (set_value 'H_TABLES nil)
+          	(set_selected_item 'H_TABLES none:)
+            (set_type_desc 'H_TABLES (list (get_promax_tables)) )
+          )
+    )
+	(H_TABLES_rule (= (value 'SHOWHOR) 1) (do_show 'H_TABLES) (do_not_show 'H_TABLES))
+	(HORDATUM_rule (or (= (value 'SHOWHOR) 1) (= (value 'SHOWHOR) 2)) (do_show 'HORDATUM) (do_not_show 'HORDATUM))
+	(HOR1_rule (= (value 'SHOWHOR) 2) (do_show 'HOR1) (do_not_show 'HOR1))
+	(HCOLOR1_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR1) "no entry"))) (do_show 'HCOLOR1) (do_not_show 'HCOLOR1))
+	(HOROK2_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK2)) (not (= (value 'HOR1) "no entry"))) (do_show 'HOROK2) (do_not_show 'HOROK2))
+	(HOR2_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK2)) (do_show 'HOR2) (do_not_show 'HOR2))
+	(HCOLOR2_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR2) "no entry"))) (do_show 'HCOLOR2) (do_not_show 'HCOLOR2))
+	(HOROK3_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK3)) (not (= (value 'HOR2) "no entry"))) (do_show 'HOROK3) (do_not_show 'HOROK3))
+	(HOR3_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK3)) (do_show 'HOR3) (do_not_show 'HOR3))
+	(HCOLOR3_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR3) "no entry"))) (do_show 'HCOLOR3) (do_not_show 'HCOLOR3))
+	(HOROK4_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK4)) (not (= (value 'HOR3) "no entry"))) (do_show 'HOROK4) (do_not_show 'HOROK4))
+	(HOR4_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK4)) (do_show 'HOR4) (do_not_show 'HOR4))
+	(HCOLOR4_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR4) "no entry"))) (do_show 'HCOLOR4) (do_not_show 'HCOLOR4))
+	(HOROK5_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK5)) (not (= (value 'HOR4) "no entry"))) (do_show 'HOROK5) (do_not_show 'HOROK5))
+	(HOR5_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK5)) (do_show 'HOR5) (do_not_show 'HOR5))
+	(HCOLOR5_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR5) "no entry"))) (do_show 'HCOLOR5) (do_not_show 'HCOLOR5))
+	(HOROK6_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK6)) (not (= (value 'HOR5) "no entry"))) (do_show 'HOROK6) (do_not_show 'HOROK6))
+	(HOR6_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK6)) (do_show 'HOR6) (do_not_show 'HOR6))
+	(HCOLOR6_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR6) "no entry"))) (do_show 'HCOLOR6) (do_not_show 'HCOLOR6))
+	(HOROK7_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK7)) (not (= (value 'HOR6) "no entry"))) (do_show 'HOROK7) (do_not_show 'HOROK7))
+	(HOR7_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK7)) (do_show 'HOR7) (do_not_show 'HOR7))
+	(HCOLOR7_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR7) "no entry"))) (do_show 'HCOLOR7) (do_not_show 'HCOLOR7))
+	(HOROK8_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK8)) (not (= (value 'HOR7) "no entry"))) (do_show 'HOROK8) (do_not_show 'HOROK8))
+	(HOR8_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK8)) (do_show 'HOR8) (do_not_show 'HOR8))
+	(HCOLOR8_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR8) "no entry"))) (do_show 'HCOLOR8) (do_not_show 'HCOLOR8))
+	(HOROK9_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK9)) (not (= (value 'HOR8) "no entry"))) (do_show 'HOROK9) (do_not_show 'HOROK9))
+	(HOR9_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK9)) (do_show 'HOR9) (do_not_show 'HOR9))
+	(HCOLOR9_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR9) "no entry"))) (do_show 'HCOLOR9) (do_not_show 'HCOLOR9))
+	(HOROK10_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK10)) (not (= (value 'HOR9) "no entry"))) (do_show 'HOROK10) (do_not_show 'HOROK10))
+	(HOR10_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK10)) (do_show 'HOR10) (do_not_show 'HOR10))
+	(HCOLOR10_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR10) "no entry"))) (do_show 'HCOLOR10) (do_not_show 'HCOLOR10))
+	(HOROK11_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK11)) (not (= (value 'HOR10) "no entry"))) (do_show 'HOROK11) (do_not_show 'HOROK11))
+	(HOR11_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK11)) (do_show 'HOR11) (do_not_show 'HOR11))
+	(HCOLOR11_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR11) "no entry"))) (do_show 'HCOLOR11) (do_not_show 'HCOLOR11))
+	(HOROK12_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK12)) (not (= (value 'HOR11) "no entry"))) (do_show 'HOROK12) (do_not_show 'HOROK12))
+	(HOR12_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK12)) (do_show 'HOR12) (do_not_show 'HOR12))
+	(HCOLOR12_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR12) "no entry"))) (do_show 'HCOLOR12) (do_not_show 'HCOLOR12))
+	(HOROK13_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK13)) (not (= (value 'HOR12) "no entry"))) (do_show 'HOROK13) (do_not_show 'HOROK13))
+	(HOR13_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK13)) (do_show 'HOR13) (do_not_show 'HOR13))
+	(HCOLOR13_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR13) "no entry"))) (do_show 'HCOLOR13) (do_not_show 'HCOLOR13))
+	(HOROK14_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK14)) (not (= (value 'HOR13) "no entry"))) (do_show 'HOROK14) (do_not_show 'HOROK14))
+	(HOR14_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK14)) (do_show 'HOR14) (do_not_show 'HOR14))
+	(HCOLOR14_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR14) "no entry"))) (do_show 'HCOLOR14) (do_not_show 'HCOLOR14))
+	(HOROK15_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK15)) (not (= (value 'HOR14) "no entry"))) (do_show 'HOROK15) (do_not_show 'HOROK15))
+	(HOR15_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK15)) (do_show 'HOR15) (do_not_show 'HOR15))
+	(HCOLOR15_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR15) "no entry"))) (do_show 'HCOLOR15) (do_not_show 'HCOLOR15))
+	(HOROK16_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK16)) (not (= (value 'HOR15) "no entry"))) (do_show 'HOROK16) (do_not_show 'HOROK16))
+	(HOR16_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK16)) (do_show 'HOR16) (do_not_show 'HOR16))
+	(HCOLOR16_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR16) "no entry"))) (do_show 'HCOLOR16) (do_not_show 'HCOLOR16))
+	(HOROK17_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK17)) (not (= (value 'HOR16) "no entry"))) (do_show 'HOROK17) (do_not_show 'HOROK17))
+	(HOR17_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK17)) (do_show 'HOR17) (do_not_show 'HOR17))
+	(HCOLOR17_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR17) "no entry"))) (do_show 'HCOLOR17) (do_not_show 'HCOLOR17))
+	(HOROK18_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK18)) (not (= (value 'HOR17) "no entry"))) (do_show 'HOROK18) (do_not_show 'HOROK18))
+	(HOR18_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK18)) (do_show 'HOR18) (do_not_show 'HOR18))
+	(HCOLOR18_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR18) "no entry"))) (do_show 'HCOLOR18) (do_not_show 'HCOLOR18))
+	(HOROK19_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK19)) (not (= (value 'HOR18) "no entry"))) (do_show 'HOROK19) (do_not_show 'HOROK19))
+	(HOR19_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK19)) (do_show 'HOR19) (do_not_show 'HOR19))
+	(HCOLOR19_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR19) "no entry"))) (do_show 'HCOLOR19) (do_not_show 'HCOLOR19))
+	(HOROK20_rule (and (= (value 'SHOWHOR) 2) (not (value 'HOROK20)) (not (= (value 'HOR19) "no entry"))) (do_show 'HOROK20) (do_not_show 'HOROK20))
+	(HOR20_rule (and (= (value 'SHOWHOR) 2) (value 'HOROK20)) (do_show 'HOR20) (do_not_show 'HOR20))
+	(HCOLOR20_rule (and (= (value 'SHOWHOR) 2) (not (= (value 'HOR20) "no entry"))) (do_show 'HCOLOR20) (do_not_show 'HCOLOR20))
+;	(HORDATUM_rule (not (value 'H_TABLES)) (do_not_show 'HORDATUM) (do_show 'HORDATUM))
+	(SPACE8_rule (= (value 'SHOWHOR) 2) (do_show 'SPACE8) (do_not_show 'SPACE8))
+	(HORERASE_rule (= (value 'SHOWHOR) 3) (progn
+		(set_value 'HOROK2 nil)
+		(set_value 'HOROK3 nil)
+		(set_value 'HOROK4 nil)
+		(set_value 'HOROK5 nil)
+		(set_value 'HOROK6 nil)
+		(set_value 'HOROK7 nil)
+		(set_value 'HOROK8 nil)
+		(set_value 'HOROK9 nil)
+		(set_value 'HOROK10 nil)
+		(set_value 'HOROK11 nil)
+		(set_value 'HOROK12 nil)
+		(set_value 'HOROK13 nil)
+		(set_value 'HOROK14 nil)
+		(set_value 'HOROK15 nil)
+		(set_value 'HOROK16 nil)
+		(set_value 'HOROK17 nil)
+		(set_value 'HOROK18 nil)
+		(set_value 'HOROK19 nil)
+		(set_selected_item 'HOROK20 nil)
+		(set_selected_item 'HOROK2 nil)
+		(set_selected_item 'HOROK3 nil)
+		(set_selected_item 'HOROK4 nil)
+		(set_selected_item 'HOROK5 nil)
+		(set_selected_item 'HOROK6 nil)
+		(set_selected_item 'HOROK7 nil)
+		(set_selected_item 'HOROK8 nil)
+		(set_selected_item 'HOROK9 nil)
+		(set_selected_item 'HOROK10 nil)
+		(set_selected_item 'HOROK11 nil)
+		(set_selected_item 'HOROK12 nil)
+		(set_selected_item 'HOROK13 nil)
+		(set_selected_item 'HOROK14 nil)
+		(set_selected_item 'HOROK15 nil)
+		(set_selected_item 'HOROK16 nil)
+		(set_selected_item 'HOROK17 nil)
+		(set_selected_item 'HOROK18 nil)
+		(set_selected_item 'HOROK19 nil)
+		(set_selected_item 'HOROK20 nil)
+		(set_value 'HOR1 "no entry")
+		(set_value 'HOR2 "no entry")
+		(set_value 'HOR3 "no entry")
+		(set_value 'HOR4 "no entry")
+		(set_value 'HOR5 "no entry")
+		(set_value 'HOR6 "no entry")
+		(set_value 'HOR7 "no entry")
+		(set_value 'HOR8 "no entry")
+		(set_value 'HOR9 "no entry")
+		(set_value 'HOR10 "no entry")
+		(set_value 'HOR11 "no entry")
+		(set_value 'HOR12 "no entry")
+		(set_value 'HOR13 "no entry")
+		(set_value 'HOR14 "no entry")
+		(set_value 'HOR15 "no entry")
+		(set_value 'HOR16 "no entry")
+		(set_value 'HOR17 "no entry")
+		(set_value 'HOR18 "no entry")
+		(set_value 'HOR19 "no entry")
+		(set_value 'HOR20 "no entry")
+		(set_value 'HOROK2 nil)
+		(set_value 'HOROK3 nil)
+		(set_value 'HOROK4 nil)
+		(set_value 'HOROK5 nil)
+		(set_value 'HOROK6 nil)
+		(set_value 'HOROK7 nil)
+		(set_value 'HOROK8 nil)
+		(set_value 'HOROK9 nil)
+		(set_value 'HOROK10 nil)
+		(set_value 'HOROK11 nil)
+		(set_value 'HOROK12 nil)
+		(set_value 'HOROK13 nil)
+		(set_value 'HOROK14 nil)
+		(set_value 'HOROK15 nil)
+		(set_value 'HOROK16 nil)
+		(set_value 'HOROK17 nil)
+		(set_value 'HOROK18 nil)
+		(set_value 'HOROK19 nil)
+		(set_value 'HOROK20 nil)
+		))
+; neural net rules (depreciated)
+;	(SPACE9_rule  (value 'NNFLAG) (do_show 'SPACE9) (do_not_show 'SPACE9))
+;	(WGTFILE_rule (and (value 'NNFLAG) (= (value 'RMO) 0)) (do_show 'WGTFILE) (do_not_show 'WGTFILE))
+;	(GUIDEPCT_rule (and (value 'NNFLAG) (= (value 'RMO) 0)) (do_show 'GUIDEPCT) (do_not_show 'GUIDEPCT))
+;	(TRESHOLD_rule (and (value 'NNFLAG) (= (value 'RMO) 0)) (do_show 'TRESHOLD) (do_not_show 'TRESHOLD))
+;	(NNMINVEL_rule (and (= (value 'NNMINVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'NNMINVEL 1500.0))
+;	(NNMINVEL_rule (= (value 'NNMINVEL) 99999999. ) (set_value 'NNMINVEL 4000.0))
+;	(NNMINVEL_rule (and (value 'NNFLAG) (= (value 'RMO) 0)) (do_show 'NNMINVEL) (do_not_show 'NNMINVEL))
+;	(NNMAXVEL_rule (and (= (value 'NNMAXVEL) 99999999. ) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'NNMAXVEL 7500.0))
+;	(NNMAXVEL_rule (= (value 'NNMAXVEL) 99999999. ) (set_value 'NNMAXVEL 25000.0))
+;	(NNMAXVEL_rule (and (value 'NNFLAG) (= (value 'RMO) 0)) (do_show 'NNMAXVEL) (do_not_show 'NNMAXVEL))
+;	(HORCONST_rule  (value 'NNFLAG) (do_show 'HORCONST) (do_not_show 'HORCONST))
+;	(DISPLAY_rule (and (value 'NNFLAG) (= (value 'RMO) 0)) (do_show 'DISPLAY) (do_not_show 'DISPLAY))
+; long offset rules
+	(LONGOFFS_rule (= (value 'RMO) 0) (do_show 'LONGOFFS) (do_not_show 'LONGOFFS))
+	(ETA_rule (and (> (value 'LONGOFFS) 2) (= (value 'RMO) 0))  (do_show 'ETA) (do_not_show 'ETA))
+;	(SPACE10_rule  (value 'NNFLAG) (do_show 'SPACE10) (do_not_show 'SPACE10))
+; guide function rules
+	(GUIDTYPE_rule (do_not_show 'GUIDTYPE))
+	(GUIDTYPE_rule (= (value 'RMO) 0) (set_value 'GUIDTYPE "VEL"))
+	(GUIDTYPE_rule (= (value 'RMO) 1) (set_value 'GUIDTYPE "RSL"))
+	(GUIDTYPE_rule (= (value 'RMO) 2) (set_value 'GUIDTYPE "RSD"))
+	(GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 0)) (set_type_desc 'GUIDETBL (list (list 'parm_list "VEL") 'parms)))
+	(GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 1)) (set_type_desc 'GUIDETBL (list (list 'parm_list "RSL") 'parms)))
+	(GUIDETBL_rule (and (value 'GUIDEOPT) (= (value 'RMO) 2)) (set_type_desc 'GUIDETBL (list (list 'parm_list "RSD") 'parms)))
+	(GUIDETBL_rule (value 'GUIDEOPT) (do_show 'GUIDETBL) (do_not_show 'GUIDETBL))
+	(MINGDVEL_rule (not (value 'GUIDEOPT)) (do_show 'MINGDVEL) (do_not_show 'MINGDVEL))
+	(MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 0) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'MINGDVEL 1500.0))
+	(MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 0)) (set_value 'MINGDVEL 5000.0))
+	(MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 1)) (set_value 'MINGDVEL 0.0))
+	(MINGDVEL_rule (and (= (value 'MINGDVEL) 99999999. ) (= (value 'RMO) 2)) (set_value 'MINGDVEL 0.0))
+	(MAXGDVEL_rule (not (value 'GUIDEOPT)) (do_show 'MAXGDVEL) (do_not_show 'MAXGDVEL))
+	(MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 0) ( = (db_parmget_line "IUNITSz") 3) ) (set_value 'MAXGDVEL 4000.0))
+	(MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 0)) (set_value 'MAXGDVEL 12500.0))
+	(MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 1)) (set_value 'MAXGDVEL 0.0))
+	(MAXGDVEL_rule (and (= (value 'MAXGDVEL) 99999999. ) (= (value 'RMO) 2)) (set_value 'MAXGDVEL 0.0))
+; interval velocity rules
+	(LASTINT_rule (= (value 'RMO) 0) (do_show 'LASTINT) (do_not_show 'LASTINT))
+; pick rules
+	(PICKTYPE_rule (do_not_show 'PICKTYPE))
+	(PICKTYPE_rule (= (value 'RMO) 0) (set_value 'PICKTYPE "VEL"))
+	(PICKTYPE_rule (= (value 'RMO) 1) (set_value 'PICKTYPE "RSL"))
+	(PICKTYPE_rule (= (value 'RMO) 2) (set_value 'PICKTYPE "RSD"))
+	(NEWTABLE_rule (= (value 'RMO) 0) (set_type_desc 'NEWTABLE (list (list 'parm_list "VEL") 'parms)))
+	(NEWTABLE_rule (= (value 'RMO) 1) (set_type_desc 'NEWTABLE (list (list 'parm_list "RSL") 'parms)))
+	(NEWTABLE_rule (= (value 'RMO) 2) (set_type_desc 'NEWTABLE (list (list 'parm_list "RSD") 'parms)))
+; misc rules
+        (initialization (= (value 'INIT) 1)
+		(progn (set_value 'PATH (flow_directory))
+		(set_value 'INIT 0) ) )
+	(SPACE14_rule (do_not_show 'SPACE14))
+;	(DEBUG_rule (do_not_show 'DEBUG))
+	(program_rule (value 'DEBUG) (do_show 'program) (do_not_show 'program))
+	(program_rule (do_not_show 'program))
+	)
+)

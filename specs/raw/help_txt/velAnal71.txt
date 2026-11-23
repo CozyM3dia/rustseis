@@ -1,0 +1,1404 @@
+Velocity Analysis23
+
+ProMAX® Reference
+
+Velocity Analysis
+Velocity Analysis is an interactive tool used to interpret
+stacking (NMO) velocities or residual moveout on 2D and 3D
+prestack seismic datasets.
+
+Theory
+There are many methods for determining correct velocities for
+the NMO equation. Typically, the analysis procedure involves
+comparing a series of stacked traces in which a range of
+velocities were applied in NMO. This procedure uses prestack
+data with varying velocities in displays representing the
+amplitudes after stack. A typical analysis involves picking a
+velocity in a panel, varying as a function of time to properly
+correct prestack data. The correction removes the time delay
+caused by the separation of the source and receiver on the
+surface.
+Velocity Analysis offers the following display panels for
+interpreting NMO velocities:
+• The Semblance panel displays the stack response as a
+function of time and velocity in a contour plot. Semblances are computed by performing hyperbolic scans at
+a speciﬁed number of constant velocities between a minimum and maximum stacking velocity on prestack data.
+Semblance is a measurement of the similarity of one
+trace to the next and a maximum semblance represents
+the hyperbolic trajectory representing the most similar
+data. Given that data is the most similar along this trajectory, the stack response should be a maximum. This
+panel is used to pick velocities on maximum semblance
+peaks.
+• The Gather panel displays a common offset stacked
+supergather of a speciﬁed number of CDPs. You can
+interactively apply NMO and a time offset mute during
+this analysis. Applying NMO allows you to check the
+time correction applied to traces. If the velocity is correct, the events on the supergather appear ﬂat in time.
+To ensure the highest ﬁdelity semblance calculations on
+this supergather, partial moveout and differential CDP
+mean statics are applied. This panel is used to aid in the
+analysis procedure and for quality control the NMO. This
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis24
+
+ProMAX® Reference
+
+panel is also used for picking your top and/or bottom
+mutes for the Interactive Mute Analysis capabilities.
+• The Velocity Function Stacks (VFS) panel displays a
+series of side-by-side stacked traces for a set of CDPs.
+These traces are corrected for NMO with a series of different velocities. The velocities can be a series of constant velocities or a series of time variant velocity
+functions as a function of time. Typically, the velocity
+test range is small at shallow times and larger at deep
+times due to the nature of the NMO effect. In order to
+help with the analysis, the differential CDP mean static
+is applied to ensure that the dip of the events matches
+the same data on a stacked section. This panel is used to
+pick velocities by visually locating the maximum stacked
+response.
+• The Flip Stack panel displays the same stacked data as
+the VFS panel. This panel animates in a manner similar
+to ﬂipping through a deck of cards. One stack panel is
+displayed at a time. The display animates when the
+mouse is horizontally moved in the semblance or the
+VFS panels. This panel is used to compare the stacks at
+the different velocities velocity functions as they are
+picked on the Semblance or VFS panels.
+• The Dynamic Stack panel displays an approximation of
+a stack generated with the current velocity pick. This
+stack is an interpolation of the existing VFS panel. This
+panel is used as a quality control of the picked function.
+Velocity Analysis now handles the special case of Residual
+Moveout. Residual moveout is used on gathers which have
+been output from a pre-stack migration imaging program. If
+the velocity model and migration program were completely
+correct, events on the gather would have been ﬂattened.
+However, they may have been under corrected or overcorrected by a too high or low migration velocity. The
+remaining moveout can be analyzed by Velocity Analysis to
+generate a residual moveout parameter. These residual
+parameters can be input to the Residual Moveout
+Correction tool to ﬂatten and stack the migrated gathers. Or
+they can be run through 2D/3D Migration Tomography to
+generate a corrected velocity model.
+Residual moveout analysis operates the same way as
+conventional velocity analysis with the following changes:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis25
+
+ProMAX® Reference
+
+• The velocity parameter is replaced by the residual
+parameter R in the hyperbolic moveout equation
+2
+
+2
+
+t=
+
+t 0 + RT x
+
+Z=
+
+Z 0 + RD x
+
+2
+
+2
+
+R has the dimensions of inverse velocity squared in time
+or is dimensionless in depth. R can be either positive or
+negative representing under-correction or overcorrection. Because R is a very small number when
+using ProMAX® units of feet, meters, and milliseconds, it
+is multiplied by a billion (10E9) to keep in it in the range
+of 1 to 1000.
+• The two kinds of R are stored in their own ProMAX®
+tables: RSL for time R T and RSD for depth R D .
+• Menu parameters have custom defaults for the cases of
+Residual Analysis menu item is NONE, TIME or DEPTH.
+Velocity Analysis Computation Flow
+Data Preconditioning
+(sort, statics, gain, ﬁlter,
+supergather ensembles)
+Differential CDP Statics
+Partial NMO
+
+Velocity function stacks
+
+Supergather smash
+Semblance
+Velocity editing
+Dynamic
+stack
+
+Flip
+stacks
+
+Velocity database
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis26
+
+ProMAX® Reference
+
+Usage
+A typical ﬂow for 2D or 3D Velocity Analysis is:
+SuperGather Formation*
+Apply Residual Statics
+Bandpass Filter
+Automatic Gain Control
+Velocity Analysis Precompute
+Disk Data Output > precompute
+Disk Data Input < precompute
+Velocity Analysis
+Volume Viewer / Editor
+
+Supergathers are sets of adjacent CDPs used in velocity
+analysis to:
+• increase signal-to-noise
+• study stacking power variability of nearby CDPs
+You can create supergathers before Velocity Analysis with
+Supergather Formation, 3D Supergather Formation or
+3D Supergather Select. In Velocity Analysis, the nearest
+CDPs to the central supergather CDP are used. Nearness is
+calculated by the root-squared distance between CDP_X and
+CDP_Y coordinates, or INLINE_NO and XLINE_NO or CDP bin
+if coordinates are not in the header. If distances are equal,
+the smaller CDP bin number is considered nearer. Velocity
+Analysis applies a differential static correction relative to the
+central CDP to align the supergather CDPs.
+Velocity Analysis allows you to move forward, backward, or
+randomly through the supergathers if you use Velocity
+Analysis in conjunction with Interactive Data Access (IDA),
+Volume Viewer/ Editor, or DBTools.
+When panels are computed, the following tools become
+available to help with interactive velocity picking:
+• NMO animation to examine quality of event ﬂattening.
+• Guide functions to show recent or nearby velocity picks.
+• Continuously updating interval velocity graph to constrain the geologic reasonableness of the picks.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis27
+
+ProMAX® Reference
+
+• Horizon display to identify important picking zones.
+Tips
+You can increase the speed of interactive velocity picking by
+using the following optional tips:
+• Use Velocity Analysis Precompute to calculate semblance values, and create VFS and supergathers. If you
+use this process, you must select Yes to Is Data Precomputed.
+• Use Pick Copy and Automatic Snap to copy picks from
+one location to the next, and to automatically snap the
+copied picks to the nearest semblance peak.
+If you do not use Velocity Analysis Precompute, most
+parameters can be dynamically entered in the interactive
+dialog boxes.
+You can simultaneously use the Volume Viewer/Editor with
+Velocity Analysis to display the entire velocity ﬁeld as
+information is added to it for quality control purposes. The
+velocity ﬁeld can be viewed as a color vertical cross section or
+for 3D adding a color horizontal time slice.
+Interactive selection of analysis locations is also available by
+using the communication between Volume Viewer/Editor and
+Velocity Analysis using Pointing Dispatcher and IDA.
+If you use the Volume Viewer/Editor with the ProMAX® 3D
+Viewer, we recommend the following tips:
+• Select Yes to the Interact with other processes using
+PD parameter in both Velocity Analysis and in the Volume Viewer/Editor.
+• Use the same velocity table name in both Velocity Analysis and Volume Viewer/Editor.
+• Inform the Volume Viewer/Editor of new or modiﬁed
+picks by clicking the PD icon in Velocity Analysis.
+
+References
+Al-Chalabi’s third term (Geophysical Prospecting, 1973).
+Tvankin and Thomsen’s correction (Geophysics 59:1290, 1994) and discussed
+extensively in the Colorado School of Mines Center for Wave Phenomena literature.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis28
+
+ProMAX® Reference
+
+Castle’s shifted hyperbola Geophysics 59:983, 1994.
+
+Parameters
+Select display DEVICE
+Select This Screen as the display default. Enter a display
+name to override the current display default.
+Table to store velocity picks
+Select a database table to store velocities picks from the
+menu. If the current CDP exists, picks are overwritten. If
+Perform Residual Velocity Analysis? is set to None, the
+database table is type VEL; if set to Time, the table is type
+RSL; if set to Depth, the table is type RSD.
+Is the incoming data precomputed?
+Select Yes if the incoming dataset is precomputed by
+Velocity Analysis Precompute.
+Perform residual velocity analysis?
+Conﬁgure velocity analysis for residual velocity analysis in
+one of three modes:
+• None - conventional Velocity Analysis.
+• Time - T ime Residual Analysis
+• Depth - Depth Residual Analysis
+Calculation Parameters
+Set the values for the computation variables
+This appears if No to Is the incoming data precomputed.
+Select Yes to enter computation variable parameters. This
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis29
+
+ProMAX® Reference
+
+parameter is used to display the computation variable
+parameters.
+
+Note
+Selecting Yes opens the Calculation Parameters
+menu. Once you have made changes, select No to close
+the menu.
+
+Number of CDPs to sum into gather
+Enter the number of CDPs to sum in the gather and
+semblance panels. This value should be equal to or less than
+the number of CDPs in the supergather. Large numbers of
+CDPs increase signal to noise and lower numbers increase
+the horizontal and vertical precision of the velocity peaks. A
+lower number is sometimes preferred on marine data.
+Apply partial NMO-to-binning
+Select Yes to apply partial NMO to bin center for supergather
+smash and semblance calculation. This parameter does not
+appear if Perform residual velocity analysis? is set to Time
+or Depth) Partial NMO has its greatest effect at shallow times
+and wide offset bins where the differential moveout is
+greatest.
+Apply differential CDP mean statics
+Select Yes to apply differential statics during supergather
+smash, semblance and VFSs calculation. The difference
+between FNL_STAT of the center CDP and the other CDPs is
+applied. The center CDP is not shifted. Differential statics has
+its greatest effect in complex structure areas, wide offset
+bins, and deep times.
+Absolute offset of ﬁrst bin center
+Enter the absolute offset of the center of the ﬁrst offset bin.
+Bin size for vertically summing offsets
+Enter the bin size of the offsets for forming supergathers. A
+reasonable value is the receiver group spacing.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis30
+
+ProMAX® Reference
+
+Maximum offset
+Enter the maximum offset for creating supergathers. The
+default is the maximum offset value in the database.
+Use absolute value of offset for stacking?
+Select Yes to use the absolute value of offset to stack gathers
+for 2D data. 3D always uses absolute offset. This parameter
+affects the supergather display in 2D. Select No to separately
+see both sides of a split spread.
+Minimum semblance analysis value
+Enter the minimum expected stacking velocity (or residual
+parameter). This value is the lowest used in the generation of
+the semblance panel and to scale all other velocity data on
+the screen.
+Maximum semblance analysis value
+Enter the maximum expected stacking velocity (or residual
+parameter). This value is the highest used in the generation
+of the semblance panel to scale all other velocity data on the
+screen.
+Number of semblance calculations
+Enter the number of semblance scans to perform between the
+minimum and maximum velocity (or residual parameter)
+range. More velocities increase the lateral semblance
+resolution and time to compute semblance.
+Semblance sample rate
+Enter the spacing, in ms, between semblance analysis
+window centers. The recommended default is about ﬁve times
+the sample rate.
+Semblance calculation window
+Enter the size of the semblance calculation window. The
+temporal smoothing increases as the semblance calculation
+window gets larger and/or the semblance sample rate gets
+smaller. The recommended default is twice the semblance
+sample rate.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis31
+
+ProMAX® Reference
+
+Number of stack velocity functions
+Enter the number of stack velocity (or residual parameter)
+functions.
+Number of CDPs per stack strip
+Enter the number of CDPs to display in the stack panels. It
+should be equal to or less than the number of CDPs in the
+supergather.
+Scale stacks by number of live samples summed
+Select Yes to divide the stacks by the count of traces
+summed. Normalization increases the display gain of shallow
+data with respect to deep data.
+Method of computing velocity functions
+Select one of the following methods for computing stack
+velocity functions:
+• Top-base range interpolates velocity functions between
+minimum time velocity range and maximum time velocity range about a central guide function.
+• Delta-delta-t uses a delta-t moveout at maximum offset
+with respect to the guide function to specify a stack
+velocity function. Older versions of Velocity Analysis
+used this method to compute fan functions.
+• Percentage is a percentage of the central guide function.
+• Constant Velocity evenly interpolates constant velocities between the minimum and maximum semblance
+velocity.
+If Perform residual velocity analysis? is Time or Depth
+then this option is not display and set to Constant Velocity.
+Velocity variation at time 0
+This appears if Top-base range to Method of computing
+stack velocity functions. Enter the minimum time range of
+velocity variation in the stack velocity functions.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis32
+
+ProMAX® Reference
+
+Velocity variation at maximum time
+This appears if Top-base range to Method of computing
+stack velocity functions. Enter the maximum time range of
+velocity variation in the stack velocity function.
+Velocity function time increment
+This appears if Delta-delta-t to Method of computing stack
+velocity. Enter the velocity function time increment in ms.
+Velocity function percent maximum
+This appears if Percentage to Method of computing stack
+velocity functions. Enter the percentage for interpolating
+stack velocity functions.
+Display Parameters
+Set which items are visible
+Select Yes to display panels, guide functions, contours, and
+horizons. Various attributes of the visible items, such as line
+color, can be set in the XWindows default ﬁles.
+
+Note
+Selecting Yes opens the Display Parameters menu.
+Once you have made changes, select No to close the
+menu.
+
+Display semblance panel
+Select Yes to display and calculate semblance and gather
+panels.
+Display stack velocity functions
+Select Yes to display the stack velocity functions on the
+semblance panel. This parameter does not appear if Perform
+residual velocity analysis? is set to Time or Depth.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis33
+
+ProMAX® Reference
+
+Display semblance contours
+Select Yes to overlay contours on the semblance panel.
+Display interval velocity function
+Select Yes to display the interval velocity function on the
+semblance panel. Interval velocities are recalculated
+whenever a pick is added, deleted or moved; this option will
+slow interactivity. This parameter does not appear if Perform
+residual velocity analysis? is set to Time or Depth,
+because no interval velocity is computed.
+Display guide function
+Select Yes to display the guide function on the semblance
+panel. The guide function often overlies the central stacking
+velocity (or residual parameter) function, depending on how
+the later have been calculated.
+Display gather panel
+Select Yes to display and calculate the gather panel.
+Seismic trace plotted as?
+Plot seismic traces in gather panel, function velocity stack
+panel, dynamic stack panel, and ﬂip stack panel as Wiggles
+or Grayscale.
+Apply NMO on gather panel
+Select Yes to automatically apply NMO on the gather panel
+using the current pick velocity (or residual parameter)
+function. The NMO is updated every time a pick is changed.
+Selecting Yes enables mute picking.
+Animate NMO on gather panel
+Select Yes to apply NMO within a narrow time window on the
+gather panel for the current time-velocity coordinate (or timeresidual parameter coordinate).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis34
+
+ProMAX® Reference
+
+Display dynamic stack panel
+Select Yes to display and calculate dynamic stack and VFS
+panels. Dynamic stacks are recomputed when a new pick is
+added, deleted or moved; this option will slow interactivity.
+Display ﬂip stacks panel
+Select Yes to display and calculate the ﬂip stack and VFS
+panels. This option will slow interactivity.
+Display velocity function stacks panel
+Select Yes to display and calculate the VFS panel.
+Display velocity color background
+Select Yes to display the velocity color background beneath
+the VFS, dynamic stacks, and ﬂip stacks panels. The velocity
+color background changes as velocity picks are modiﬁed. This
+option will slow interactivity.
+Display velocity color key
+Select Yes to display a velocity color key.
+Show horizons on gather panel
+Select Yes to display horizons on the gather panel.
+Show horizons on velocity function stacks panel
+Select Yes to display horizons on the VFS panel.
+Show horizons on dynamic stack panel
+Select Yes to display horizons on the dynamic stack panel.
+Show horizons on ﬂip stack panels
+Select Yes to display horizons on the ﬂip stacks panel.
+Show current CDP guide function
+Select Yes to display the current CDP velocity function from
+the Table to Store Velocity Picks on the semblance and
+function velocity stack panels.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis35
+
+ProMAX® Reference
+
+Show average CDP guide function
+Select Yes to display the average of all CDP velocity (or residual parameter) functions in the Table to Store Velocity
+Picks on the semblance and function velocity stack panels.
+Show previous CDP guide function
+Select Yes to display the previous CDP velocity (or residual
+parameter) function from the Table to Store Velocity Picks
+on the semblance and function velocity stack panels.
+Show next CDP guide function
+Select Yes to display the next CDP velocity (or residual
+parameter) function from the Table to Store Velocity Picks
+on the semblance and function velocity stack panels.
+Show last-viewed CDP guide function
+Select Yes to display the last-viewed CDP velocity (or residual
+parameter) function from the Table to Store Velocity Picks
+on the semblance and function velocity stack panels.
+Equalize displayed trace width
+Select Yes to adjust the width of the gather panel and three
+stack panels to equalize the width of displayed traces.
+Relative width of semblance panel
+Enter a value for the initial width of the semblance panel
+display. The default value is 100. The displayed width is this
+width with respect to the sum of relative widths of all visible
+panels.
+Relative width of gather panel
+Enter a value for the initial width of the gather panel display.
+The menu default value is 75. The displayed width is this
+width with respect to the sum of the relative widths of all
+visible panels.
+Relative width of dynamic stack panel
+Enter a value for the initial width of the dynamic stack panel
+display. The menu default value is 30. The displayed width is
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis36
+
+ProMAX® Reference
+
+this width with respect to the sum of the relative widths of all
+visible panels.
+Relative width of ﬂip stacks panel
+Enter in a value for the initial width of the ﬂip stacks panel
+display. The menu default value is 30. The displayed width is
+this width with respect to the sum of the relative widths of all
+visible panels.
+Relative width of velocity function stack panel
+Enter a value for the initial width of the VFS panel display.
+The menu default value is 200. The displayed width is this
+width with respect to the sum of the relative widths of all
+visible panels.
+Semblance Parameters
+Set semblance scaling and autosnap parameters
+Select Yes to set semblance scaling and autosnapping.
+
+Note
+Selecting Yes opens the Semblance Parameters
+menu. Once you have made changes, select No to close
+the menu.
+
+Semblance normalization mode
+Select the semblance normalization mode from the following
+choices:
+• Scale Time Slice divides time slice of semblance values
+by the maximum in time slice. Scaling in this manner
+will help bring up the very weak reﬂections that are often
+pickable, but lost in the background.
+• Scale panel divide all semblance values by the maximum semblance in panel. Prior to division, a noise factor
+can be added to the maximum semblance.
+• No Scaling does not normalize.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis37
+
+ProMAX® Reference
+
+The purpose of scaling semblance values is to elevate the
+weak semblances resulting from marginal signal to noise
+ratio data to a level that yields consistent quality screen
+displays.
+Contrast noise factor
+This appears if Scale Time Slice or Panel to Semblance
+normalization mode. Enter a bias factor to add to maximum
+semblance before scaling. Values between 0.0 and 0.4 are
+recommended. A small bit of noise decreases the number of
+semblance peaks, especially when applying the Semblance
+Power Contrast Factor.
+Contrast power factor
+Enter a number from zero to ten to change the contrast of the
+semblance appearance. Mathematically, each semblance
+sample is raised to that power. A value larger than one
+enhances the high semblance values, hence increasing the
+contrast and narrowing the semblance peaks. A value less
+than one enhances the weaker semblance values, hence
+discoursing the contrast and broadening the semblance
+peaks.
+Automatically snap
+Select Yes to automatically snap the peaks of a velocity (or
+residual parameter) function. A function is automatically
+snapped only once to prevent unintentional repicking. You
+can manually resnap a location by using the Snap once
+option from the Semblance menu. An automatically snapped
+pick is depicted by a small triangle instead the usual small
+circle.
+The following are the automatic snap options:
+• Off does not automatically snap. Use the Snap once
+option in the Semblance menu for manual snapping.
+• After copy only automatically snaps picks at a new
+location after the previous function is copied. This option
+is used to ﬁll in new and empty velocity tables by copying
+and modifying the previous picks.
+• Snap existing functions automatically snaps existing
+functions in the output table. This option is for updating
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis38
+
+ProMAX® Reference
+
+velocity tables from a previous implementation of this
+process.
+• Always automatically snaps copied or previously existing functions.
+Maximum velocity% change for snapping
+Enter how far the nearest peak can be horizontally, in
+percentage of velocity (or residual parameter), from the
+current pick position. For example, if the pick is at velocity
+10,000 and the maximum horizontal distance for snapping is
+10%, the peak is searched between the velocities 9,000 and
+11,000.
+Maximum vertical change for snapping
+Enter how far the nearest peak can be vertically, in ms, from
+the current pick position.
+Mute Parameters
+Pick/apply a mute?
+Select an option for picking, editing, and applying a time
+mute as a function of offset on the gather panel. The ﬁve
+options are:
+• None does not pick or apply a mute
+• Top mutes above the line. It is useful for erasing direct
+arrivals, refracted and converted events.
+• Base mutes below the line. It is useful erasing new offset
+multiple energy.
+• Both mutes with both the top and bottom editing
+enabled. To interactively change between editing the top
+and the bottom mutes, use the Swap Edit icon.
+Gather offset Top mute table
+This appears if Top or Both to Pick/Apply a mute. Select a
+mute table (MUT) containing top mute picks and for storing
+newly edited top mute picks.
+Note: The primary key of the mute table MUST be CDP or the
+job will fail or produce incorrect results.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis39
+
+ProMAX® Reference
+
+Gather offset Base mute table
+This appears if Base or Both to Pick/Apply a mute. Select a
+mute table (MUT) containing top mute picks and for storing
+newly edited base mute picks.
+Note: The primary key of the mute table MUST be CDP or the
+job will fail or produce incorrect results.
+Mute taper length
+This appears for all options except None to Pick/Apply a
+mute. Enter the mute taper length in ms. The default is 20.
+Horizon Parameters
+Select/Display horizons
+Select one of two ways to select displayed horizons:
+• None does not display horizons.
+• Pop-menu uses the Horizon tables menu to add and
+delete an arbitrary number of horizons. You cannot
+explicitly color horizons with this method.
+• Explicit sets up to 20 horizons and colors explicitly.
+• Reset-Explicit erases all of the horizons you entered
+under Explicit and resets the menu.
+To which datum are the horizons referenced?
+Select whether horizons are from surface or datum:
+• Final Datum is the default; references horizons picked
+from a stack to ﬁnal datum (F_DATUM). Stacks are
+shifted to ﬁnal datum by CDP/Ensemble Stack. Use
+this option if horizons were picked on such a stack.
+Velocity Analysis will shift the horizon times by the CDP
+mean static value so that horizons picked on a conventionally stacked section can be used in the Velocity Analysis
+• Floating Datum references horizons picked on a stack
+to ﬂoating datum (N_DATUM).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis40
+
+ProMAX® Reference
+
+Horizon tables
+This appears if Pop-menu to Select/Display horizons.
+Select or deselect horizons from a list of available horizon
+parameter tables.
+
+Note
+Due to a limitation in the menu, one horizon remains
+after trying to deselect all horizons. Set Display
+horizons to No to remove horizon.
+
+Note
+Selecting Yes opens the Horizon Parameters menu.
+Once you have made changes, select No to close the
+menu.
+
+Select horizon N
+This appears if Explicit to Select/Display horizons. Select a
+horizon table (HOR) to display. This option is an alternative to
+the Horizon table parameter allowing an explicit color
+choice. You can select that up to 20 horizons.
+Color
+Select the color of the horizon select for Select horizon N.
+You have a palette of ten choices.
+Another horizon?
+Select Yes to another horizon table and color pair.
+Interact with other ProMAX® Modules
+Interact with other processes using PD
+Select Yes to communicate with the Volume Viewer/Editor or
+the ProMAX® 3D viewer. A change in Velocity Analysis is
+reﬂected in the Volume Viewer/Editor and the ProMAX® 3D
+Viewer when the PD icon is used.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis41
+
+ProMAX® Reference
+
+Guide Function Parameters
+Get guide function from existing parameter table
+Select Yes to select a guide function from an existing
+parameter table. A guide function is used for the differential
+moveout in constructing the Gather panel for all methods of
+computing the velocity (or residual parameter) function, even
+for constant velocity.
+Velocity guide function table name
+This appears if Yes to Get guide function from existing
+parameter table. Select a velocity table to use as a guide
+function. If Perform Residual Velocity Analysis? is set to
+None, the database table is type VEL; if set to Time, table
+type is RSL; if set to Depth, table type is RSD.
+Guide minimum time velocity
+This appears if No to Get guide function from existing
+parameter table. Enter the velocity (or residual parameter)
+at the top of the guide function.The guide function is a linear
+ramp between the top and base values.
+Guide maximum time velocity
+This appears if No to Get guide function from existing
+parameter table. Enter the velocity (or residual parameter)
+at the base of the guide function. The guide function is a
+linear ramp between the top and base values.
+Main Parameters
+Maximum stretch percentage for NMO
+Enter the maximum percentage of sample-to-sample stretch
+for NMO. The default is 30. This mute is applied at low times
+and high offsets. The larger the percentage value, the smaller
+the mute region. Enter 0.0 for no stretch mute.
+Long offset moveout correction
+This parameter does not appear if Perform residual velocity
+analysis? is set to Time or Depth. Select an option for
+increasing the accuracy of the NMO at long offsets. The
+standard two-term hyperbolic equation used in NMO
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis42
+
+ProMAX® Reference
+
+becomes less accurate as the vertical velocity gradient
+increases, as offset becomes greater than depth, or as
+anisotropy increases. The following options add a third term
+to the conventional NMO equation using higher powers of
+offset, velocity, and eta:
+• None applies only the two-term NMO equation. This is
+the normal application.
+• Alchalabi uses the simplest third term and should be
+the most efﬁcient long offset correction method.
+• Castle is normally applied as a shifted hyperbola before
+applying two-term NMO. This correction has been incorporated directly into ProMAX® NMO. This method does
+not appear to be as accurate as Al-Chalabi’s, when compared to exact results for a linear velocity gradient, and
+requires more computation time.
+• Tsvankin allows for the greatest accuracy and the inclusion of anisotropic corrections, at the expense of the
+longest run time.
+• Harlan is an alternative anisotropic correction. It
+accounts from anisotropy, but not v(z).
+If you use this long-offset correction, then stack your data
+using the same correction in the NMO tool.
+The long-offset moveout corrections are more accurate on the
+moved-out gather and VFS panels than the semblance panel
+because they use variable velocity functions instead of
+constant velocity functions. The reason is that long-offset
+moveout calculations use velocity gradient information.
+Otherwise, with ordinary NMO they are equally accurate.
+Anisotropy correction parameter eta
+This appears if Tvankin or Harlan to Long offset
+correction. Enter the anisotropy correction parameter, eta.
+Eta is deﬁned in η = ( ε – δ ) ⁄ ( 1.0 + 2.0 × δ ) . Small positive
+values between 0.0 and 0.5 are most physically likely.
+Interval velocity below last knee
+Enter an interval velocity as the deepest velocity. This
+parameter does not appear if Perform residual velocity
+analysis? is set to Time or Depth. Picks above this
+maximum are set to this value. Velocity Analysis adds a
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis43
+
+ProMAX® Reference
+
+phantom pick to obtain this interval velocity. It also moves
+this phantom pick as other picks are moved or deleted so that
+the interval velocity retains the desired value. Enter 0.0 to
+turn off this option.
+Copy picks to next location
+Select Yes to have the current picks copied into the nextviewed ensemble when there are no velocity picks at that
+location. Copied picks are indicated by a small diamond
+rather than a small circle for picks loaded from a velocity
+table. This is useful for iterating modest velocity changes
+across the line. Copied velocity functions are automatically
+snapped by setting Automatically snap to Always, Existing,
+or After Copy Only.
+
+Interactive Display
+After running this process, the following interactive display
+window appears:
+
+Panels
+Data display in Velocity Analysis is divided into sections
+called panels. From left-to-right are the Semblance, Gather,
+Dynamic Stack, Flip Stacks and Velocity Function Stack
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis44
+
+ProMAX® Reference
+
+(VFS) panels. The vertical axis of all the panels is time in ms.
+Each panel has its own horizontal axis depending upon the
+its contents.
+Velocities are picked on semblance and VFS panels. Pick
+changes in one panel are reﬂected in the other panel.
+Changing a pick alters the gather panel moveout and
+recomputes the dynamic stack.
+When the mouse is moved in each panel, the time, velocity,
+and velocity function number, and interval velocity
+coordinates are displayed at the bottom of the screen.
+Semblance Panel
+The semblance panel shows the semblance plot, the picked
+velocity function, the velocity guide functions, the stack
+velocity functions, and the interval velocity of the picked
+function.
+
+Picks
+
+Interval
+
+Velocity Functions
+
+Contours
+
+Gather Panel
+The gather panel displays the offset-binned supergather, the
+NMO moveout curve, NMO ﬂattening, and guide horizons.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis45
+
+ProMAX® Reference
+
+NMO ﬂattening is turned on via the Apply NMO option in the
+Gather menu. It is automatically updated whenever a pick is
+changed. The NMO moveout curve is not drawn when NMO
+ﬂattening is on.
+A more interactive version of NMO ﬂattening is turned on via
+the NMO Animation option in the Gather menu. This option
+creates a window around the pick time and displays the effect
+of NMO in real time as the mouse is dragged in the
+semblance or VFS panels. You must hold down MB1 to make
+a new pick or MB3 while moving an existing pick to enable
+the NMO Animation. You can change the size of the window
+by setting NMO Animation Window Size in the Gather
+parameters dialog box.
+Velocity Analysis now has Interactive Mute Analysis
+capabilities. You can pick mutes on this panel and save them
+to the database. There are two mute lines: the top mute
+erases above the line and is useful for erasing direct arrivals,
+refracted and converted events. The base mute erases below
+the line and is useful erasing new offset multiple energy.
+Apply NMO must be on and there must be at least one
+velocity pick to display to pick a mute function. If there are
+mute picks at this supergather CDP location, the mute
+function is drawn as a red or blue solid line with the mute
+picks shown as dots. The red line can be edited. If there are
+no mute picks, a dotted blue line of an interpolated mute line
+is drawn on the gather.
+Note: The primary key of the mute table MUST be CDP or the
+job will fail or produce incorrect results.
+You edit the gather panel doing the following:
+For incoming data = precomputed:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis46
+
+ProMAX® Reference
+
+1.
+
+Activate Apply NMO from the Gather menu pulldown
+
+2.
+
+MB1 adds a pick
+
+3.
+
+MB2 deletes the nearest pick
+
+4.
+
+MB3 moves the nearest pick to the deleted pick’s location
+
+5. For Pick/apply mute = Both, use the Swap Edit icon to
+switch between picking your top or bottom mute.
+6. Use the Paint Brush icon to graphically apply your mute
+to the gather
+7. Use the Clear Edits icon to clear the picks you have made
+8. The mute(s) will be saved in the ﬁle that was speciﬁed in
+the menu
+For incoming data = Non precomputed:
+1. Use the same steps as with precomputed
+2. Use the Apply mute to semblance and stacks (slow) icon
+to recompute the semblance and stack displays.
+Pick lines are interpolated linearly between picks, between
+CDPs, to the edge offsets.
+Mute picks are applied to data in the following manner:
+1. Existing mutes are applied to the Semblance and VFS
+panels during initial calculation for the CDP. If the data
+has been precomputed, then the mute is also applied.
+2. The mute is only applied to the Gather panel if Apply
+NMO under the Gather menu or Gather Parameter
+Dialog is on, there is at least one velocity pick, and the
+Paint Brush icon is activated. We suggest picking and
+editing the mutes on the gather with the painting turned
+off so that you can see the bad data parts.
+3. A newly picked or edited mute is only applied to the
+Semblance and VFS panels when the incoming data is non
+precomputed and is applied by the Apply mute to
+semblance and stacks icon. The mute is graphically
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis47
+
+ProMAX® Reference
+
+applied to the Gather panel with the Paint Brush icon for
+both precompute and non precomputed data.
+
+NMO
+
+Horizons
+
+Velocity Function Stacks Panel
+The VFS panel shows multi-CDP stacks. It can be annotated
+with the color background of the stacking velocity functions
+and guide horizons.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis48
+
+ProMAX® Reference
+
+Dynamic Flip
+Stack Stacks
+
+Velocity Function Stack (#)
+
+Picks
+
+Dynamic Stacks Panel
+The Dynamic Stack panel shows a representation of a stack
+generated by the current velocity pick. The dynamic stack
+interpolates between the velocity function stacks. It can be
+annotated with color background of the stacking velocity
+function and the guide horizons.
+Flip Stacks Panel
+The Flip Stacks panel animates through the velocity function
+stacks when the mouse button is dragged on the semblance
+or VFS panels. You must use MB1 to make a new pick or
+MB3 with an existing pick to activate the animation.
+Menu Bar
+The menu bar contains the pulldown menus: File, View,
+Semblance, Gather, Stacks, plus Help which is located on
+the far right of the menu bar. When commands in the menu
+bar are not appropriate, they are grayed out. Commands that
+pop up dialog boxes end in an ellipsis(...).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis49
+
+ProMAX® Reference
+
+Many of the options launch a dialog box to edit parameters.
+In all cases, you will use the following buttons for the
+settings.
+OK applies new settings and exits dialog box.
+Apply applies new settings.
+Cancel cancels dialog box.
+File
+The File menu contains commands to generate, read and
+save picks, make a copy of the screen, and exit.
+• Save Picks saves current picks to a velocity table.
+• Save Screen Snapshot saves the current screen image.
+You can save up to ten screen snapshots.
+• Animate displays the animation control dialog box. Use
+this to review saved screen images, manually or automatically cycles through images. It controls the speed of
+playback, limits the set of displayed frames, and deletes
+unwanted frames.
+Animation Dialog
+
+Speed Control controls the playback speed. This control
+is active during an animation sequence.
+Frame Control shows the current frame. Drag the slider
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis50
+
+ProMAX® Reference
+
+to change frames.
+
+Animation Tool Icons
+Start Frame sets the start frame to the current frame.
+Animation sequences operate between the start and end
+frames.
+End Frame sets the end frame to the current frame.
+
+Delete deletes the current frame. Start and
+end frame are then updated.
+Rewind steps backward to the ﬁrst frame.
+
+Back single steps backward by one frame.
+
+Cycle cycles through saved frames.
+
+Ramp ramps through saved frames.
+
+Toggle toggles between the start and end
+frames.
+
+Stop stops an animation sequence started by
+Cycle, Ramp, or Toggle.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis51
+
+ProMAX® Reference
+
+Animation Tool Icons
+Forward single steps forward by one frame
+
+Cancel closes the animation dialog box.
+
+Printer Hardcopy prints the screen to a
+printer.
+Plotter Hardcopy prints the screen to a
+plotter.
+Exit and continue ﬂow exits Velocity Analysis
+and continues the ﬂow.
+Exit and stop ﬂow exits Velocity Analysis and
+stops the ﬂow.
+View
+The View menu controls which objects are displayed on the
+screen, their color, and size.
+• Object Visibility Dialog launches a dialog box to turn
+on or off the ﬁve panels, plot wiggle traces or grayscale,
+and adjust the width of the panels. You can also turn on
+or off horizons, color scales, NMO, and guide functions.
+• Edit ColorMap launches the Color Editor. This controls
+the color scale of the semblance panel and velocity color
+backgrounds. The color scale is bounded by the minimum and maximum stacking velocities.
+Semblance
+The Semblance menu controls the appearance of the
+semblance panel.
+• Semblance parameters launches a dialog box to change
+the semblance parameters. See the Semblance and Computation Parameters sections for a complete description.
+• Semblance panel scaling launches a dialog boxes to
+scale a time slice, panel, or turn off semblance scaling.
+See the Semblance Parameters section for a complete
+description.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis52
+
+ProMAX® Reference
+
+• Erase current pick function erases a current pick function.
+• Copy picks to next location (diamonds) copies a
+picked to an unpicked location. The pick drawing shape
+is changed from a circle to a diamond to show the pick
+was copied instead of loaded.
+• Auto snap options (triangles) automatically snaps the
+peaks of a velocity function. A function is automatically
+snapped only once to prevent unintentional repicking.
+Off does not autosnap.
+After Copy Only snaps the pick to the current
+semblance after a function is copied to a new location
+Existing Functions snaps the pick to the current
+semblance to an existing function. Useful for converting
+a stacking velocity ﬁeld to a new RMS ﬁeld after DMO or
+prestack migration.
+Always snaps the pick to an new location or after
+copying.
+• Snap once (triangles) snaps picks to the nearest semblance peaks. The pick drawing shape is changed from a
+circle to a triangle to show the pick was automatically
+snapped.
+• Snap Parameters launches a dialog box to modify snapping parameters.
+Gather
+The Gather menu controls the appearance of the gather
+panel.
+• Gather parameters launches a dialog boxes to change
+the gather parameters. See the Gather Parameters section for a complete description
+• NMO parameters launches a dialog box to change the
+NMO parameters. See the Main and Mute Parameters
+sections for a complete description. This option appears
+when incoming data is non precomputed.
+• Apply NMO applies NMO to the gather after each pick.
+• Animate NMO animates the effect of NMO around the
+location of the pick.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis53
+
+ProMAX® Reference
+
+• Trace Scaling adjusts the scaler values for scaling
+stacks and gathers.
+Stacks
+The Stacks menu controls the appearance of the VFS, Flip
+Stacks, and the Dynamic Stack panels.
+• Stack parameters launches a dialog boxes to change
+the stack parameters. See the Calculation Parameters
+section for a complete description. This option appears
+when incoming data is non precomputed.
+• Stack Velocity Function launches dialog boxes to
+change the following methods of computing stack velocity functions: Top-Base Range, Delta-delta Time, Percentage, and Constant Velocity. This option appears
+when incoming data is non precomputed.
+• Trace scaling adjusts the intensity values for scaling
+stacks and gathers.
+Icon Bar
+The following commands are invoked using the icons on the
+left hand side of the screen.
+
+Velocity Analysis Icons
+Next ensemble proceeds to and processes the
+next ensemble in the dataset. If you are
+currently processing the last ensemble in the
+dataset, this button will rewind the data and
+bring up the ﬁrst ensemble.
+Previous ensemble steps backward one
+ensemble and process the ensemble before the
+current ensemble. If you are currently
+processing the ﬁrst ensemble of the dataset,
+this button does not do anything. This button
+only works if Interact with other processes
+using PD? is set to Yes.
+Rewind rewinds the dataset to the ﬁrst
+ensemble speciﬁed in the sort order. This
+button only works if Interact with other
+processes using PD? is set to Yes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis54
+
+ProMAX® Reference
+
+Velocity Analysis Icons
+PD saves and sends the velocity picks in the
+current ensemble to the Volume Viewer/Editor
+or the ProMAX® 3D Viewer. This icon only
+appears when Interact with other processes
+using PD? is set to Yes.
+Swap Edit allows you to switch between
+picking your top or your bottom mute. Click on
+the upper line to enable your top mute and the
+bottom line for your bottom mute.
+Paint Brush applies the current mute
+functions to the Gather panel.
+
+Clear Edit allows you to clear your mute
+picks, but will not recompute.
+
+Apply Mute applies your mute picks to the
+semblance and stack panels.
+
+Zoom zooms on an individual panel, or on the
+panel axis. Since all panels share the same Yaxis, zooming a panel will zoom other panels in
+the vertical direction. However, since X-axis is
+not shared, zooming one panel does not affect
+the other panels. Click and drag using MB1 to
+select an area to zoom. If you release MB1
+outside the window, the zoom operation is
+cancelled. If you just click MB1 without
+dragging, this tool will unzoom.
+Picking Tool picks, moves, or deletes velocity
+picks in either the semblance or the VFS
+panels. When in picking mode, the mouse
+tracker is turned on. Picks are mirrored in
+these two panels.
+MB1 picks a new point and enables the NMO
+animation.
+MB2 deletes a point.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis55
+
+ProMAX® Reference
+
+Velocity Analysis Icons
+MB3 moves an existing point and enables the
+NMO animation.
+
+Customizing the User Interface
+In addition to the controls and menu items described, there
+are a number of features of Velocity Analysis that can be
+customized using X Windows resources. The ﬁle
+$PROMAX_HOME/port/lib/X11/app-defaults/VelAnal71 is
+the default resource ﬁle and contains a sample set of
+resources used to customize Velocity Analysis.
+Note: The exact path of this ﬁle will depend on your
+installation. The resources in this ﬁle can be used to
+conﬁgure the screen size as well as the colors and fonts of
+various objects in Trace Display.
+In order for Velocity Analysis to ﬁnd this ﬁle, you must add a
+path to it in your XFILESEARCHPATH environment variable.
+A typical setting for this environment variable might be:
+$PROMAX_HOME/port/lib/X11/%T/%N%S:/usr/lib/X11/%T/%N%S
+
+There are a number of ways to customize the resource
+settings used by Velocity Analysis:
+• Your system administrator can edit the default resource
+ﬁle.
+• You can copy the default resource ﬁle into your own
+directory, edit the ﬁle, and add that directory to the
+XFILESEARCHPATH environment variable.
+• You can copy the default resource ﬁle to your $HOME
+directory and edit it.
+• You can copy the resources you want to change into your
+.Xdefaults ﬁle. If you do this, please add the word
+VelAnal71to the beginning of each resource name. For
+example, the default resource ﬁle contains a line that
+looks like:
+VelAnal71*geometry: 2000x2000
+
+This line starts up Velocity Analysis using the full
+screen. Suppose you wanted Velocity Analysis to startup using an 800 by 600 pixel window. You could place
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Velocity Analysis56
+
+ProMAX® Reference
+
+the following line in your .Xdefaults ﬁle:
+VelAnal71*geometry: 800x600
+
+For a more detailed discussion on customizing ProMAX®
+applications, please refer to the System Administration guide.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

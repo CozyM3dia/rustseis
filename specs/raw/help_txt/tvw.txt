@@ -1,0 +1,143 @@
+Time-Variant Spectral Whitening15
+
+ProMAX® Reference
+
+Time-Variant Spectral Whitening
+Time-Variant Spectral Whitening provides time-variant
+spectral whitening by applying different gains to individual
+frequency bands. It will perform the selected spectral
+whitening on each input trace. The amount of whitening
+desired can vary as a function of time.
+
+Theory
+The spectral whitening algorithm operates in the frequency
+domain. You specify one or more ﬁlter slices by deﬁning at
+least four corner frequencies: F1 = 0%, F2 = 100%, F3 =
+100%, F4 = 0% in Hz. A percentage of the input trace length
+to pad with zeroes may be added so as to avoid wrap-around
+effects of circular Fourier transforms. There is a linear taper
+on both the low-cut and high-cut slopes, then 100% of the
+frequencies within the bandpass are passed.
+You can vary the amount of whitening desired as a function
+of time. The bandwidth is linearly interpolated between
+speciﬁed time points, and extrapolated as a constant outside
+the the speciﬁed time points.
+Each trace will be forward transformed to the frequency
+domain and multiplied by the ﬁlter slice spectrums, inverse
+transformed back to time, and an AGC scalar applied to each
+narrow bandpass-ﬁltered trace. Both the ﬁltered traces and
+the ﬁltered traces’ AGC scalars will be summed to produce
+the whitened output trace and an average AGC scalar trace.
+The output trace is divided by the average AGC scalar trace to
+restore true amplitude.
+
+Parameters
+TYPE of ﬁlter
+Spectral parameters can be constant or vary as a function of
+time. Select either time variant or constant spectral
+parameters.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time-Variant Spectral Whitening16
+
+ProMAX® Reference
+
+Spectral balancing scalar LENGTH
+Enter the scaling operator length in ms. This AGC-like scaler
+is used to perform time-variant scaling of frequency sliced
+traces.
+Percent zero padding for FFTs
+Enter the percentage of the input trace length to pad with
+zeroes to avoid wrap-around effects of circular FFTs.
+Automatic ﬁlter panel design?
+Select Yes to supply four corner frequencies and
+automatically design the panels.
+Number of frequency panels
+This appears if Yes to Automatic ﬁlter design. Enter the
+number of equal size ﬁlter panels to automatically calculate
+over the supplied spectrum.
+SPECIFY spectral balancing frequencies
+Spectral balancing frequencies may be input automatically or
+manually.
+Automatic Design: Enter four corner frequencies of
+standard Ormsby ﬁlter: F1 = 0%, F2 = 100%, F3 = 100%, F4
+= 0%. This passband will then be divided into the above
+speciﬁed number of smaller ﬁlter panels. Each ﬁlter panel
+will have equal width 100% pass zones and linear ramps
+except for the outer low-cut and high-cut ramps which you
+control. The high-cut ramp for the ﬁrst panel will become the
+low-cut for the second and so on. For example, if you enter
+5-10-80-90
+
+and specify 4 panels above, the following ﬁlter panels will be
+constructed:
+5 - 10 - 20 - 30
+20 - 30 - 40 - 50
+40 - 50 - 60 - 70
+60 - 70 - 80 - 90
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time-Variant Spectral Whitening17
+
+ProMAX® Reference
+
+For a Time Varying Whitening example, the parameterization
+/1000:5-10-80-90/2000:5-10-60-70/3000:5-10-40-50/
+
+will whiten to 80 Hz at 1 second, but only whiten to 60 Hz at
+2 seconds, and 40 Hz at 3 seconds.
+Manual Design: Enter at least four bandpass frequency
+values to use as spectral balancing ﬁlter panels. The
+frequency values will be used as four corner frequencies for
+each ﬁlter panel: F1 = 0%, F2 = 100%, F3 = 100%, F4 = 0%.
+The ﬁrst and last will deﬁne zero percent linear ramps. A list
+of six frequencies will produce two ﬁlter panels; eight will give
+three; etc. The high-cut ramp for the ﬁrst panel will become
+the low-cut ramp for the second and so on. For example, if
+you enter
+5,10,20,30,40,50,60,70,80,90
+
+you will create the same ﬁlter panels listed above in the
+automatics design example.
+Mode for amplitude restoration
+Select the method for backing out the AGC scalars and
+restoring the trace to the same amplitude envelope as the
+input. The choices are:
+• Log Average uses a very robust geometrical mean to
+average the AGC scalars and is insensitive to large
+amplitude, narrow band noise such as ground roll and
+air blasts.
+• Simple Mean uses a standard mean of scalars and is
+easily affected by large noise bursts.
+Reapply trace mute after spectral whitening?
+Select Yes to automatically reapply previously applied trace
+mutes after whitening. Select No to leave the data as it is
+output from spectral whitening.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Time-Variant Spectral Whitening18
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

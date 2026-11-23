@@ -1,0 +1,50 @@
+{
+  "menu_id": "resamp",
+  "tool_name": "RESAMP",
+  "label": "Resample/Desample",
+  "parameter_count": 6,
+  "parameters": [
+    {
+      "name": "SAMPRATE",
+      "prompt": "Output sample rate",
+      "kind": "typein",
+      "default": "4.0",
+      "help": "Desired output sample rate in milliseconds.  This may be larger or smaller than the input sample rate."
+    },
+    {
+      "name": "ALIAS",
+      "prompt": "Apply Anti-Alias filter?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Specify whether to apply an anti-alias filter before the data is resampled. If the sampling interval is decreasing, the filter will not be applied."
+    },
+    {
+      "name": "FIDELITY",
+      "prompt": "Use a high-fidelity Anti-Alias filter?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Specify whether to use a high-fidelity filter 'YES' or a low-fidelity filter 'NO'."
+    },
+    {
+      "name": "PHASE",
+      "prompt": "Use a zero phase Anti-Alias filter?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Specify whether to use a zero phase filter 'YES' or a minimum phase filter 'NO'."
+    },
+    {
+      "name": "TIMEDLAY",
+      "prompt": "Remove minimum-phase filter time delay?",
+      "kind": "boolean",
+      "default": "nil",
+      "help": "Specify 'YES' to remove the bulk time delay of the minimum phase filter."
+    },
+    {
+      "name": "REMUTE",
+      "prompt": "Re-apply trace mute after resample?",
+      "kind": "boolean",
+      "default": "t",
+      "help": "Trace mutes (such as first break suppression mutes) may be re-applied after filtering."
+    }
+  ]
+}

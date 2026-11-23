@@ -1,0 +1,159 @@
+Ensemble DMO in the T-X Domain323
+
+ProMAX® Reference
+
+Ensemble DMO in the T-X Domain
+Ensemble DMO in the T-X Domain is applied to arbitrary
+ensembles of input traces, including common-offset gathers,
+common-shot gathers, and common-receiver gathers.
+
+Theory
+Comparison of DMO Algorithms
+Advance offers three DMO processes: Common Offset F-K
+DMO, Ensemble DMO in T-X Domain, and Dip
+Decomposition DMO. A comparison of the three can be
+found in the DMO Overview.
+Dip-moveout correction is a dip-dependent partial migration,
+applied so nonzero-offset seismic data exhibits the same
+zero-offset for all offsets. This transformation from non-zerooffset to zero-offset yields improved velocity estimates and
+higher lateral resolution, as well as a few other desirable side
+effects, such as the attenuation of coherent noise.
+For each ensemble of input traces, the process accumulates
+the DMO response of each trace in a buffer, indexed by CDP
+location. When an entire ensemble of DMO-corrected traces
+has been accumulated, the process outputs the ensemble.
+Speciﬁcally, this process is an implementation of the integral
+Kirchhoff method, with care taken to avoid spatial aliasing of
+the DMO operators.
+New traces are not produced by this process, implying that
+part of the DMO response for far-offset traces will be lost if
+applied to common-shot ensembles. The best ensembles are
+pseudo common-offset gathers binned so all CDP locations
+are represented in each input and output ensemble.
+
+Usage
+Ideally, DMO should follow autostatics and NMO corrections
+in the processing ﬂow. Furthermore, the velocities used in
+NMO (before DMO) should be the dip-independent velocities
+appropriate for horizontal reﬂectors. Estimating these
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Ensemble DMO in the T-X Domain324
+
+ProMAX® Reference
+
+velocities without ﬁrst applying DMO can be difﬁcult.
+Therefore, a useful intermediate processing sequence is:
+Sort to desired input domain (Use Disk Data Input or Inline Sort)
+NMO (Use the best estimate of velocities)
+DMO
+Inverse NMO (Use the same velocities as for the initial NMO)
+Velocity analysis
+
+When the difference between initial and ﬁnal velocities is
+signiﬁcant, repeat the above sequence. Having arrived at your
+ﬁnal stacking velocities, the processing ﬂow will continue
+with:
+Sort to desired input domain (Use Disk Data Input or Inline sort)
+NMO (Use the ﬁnal velocities)
+DMO
+Sort to CDP domain (Use Disk Data Input or Inline sort)
+CDP Stack
+
+In cases of skidded shots or other irregular shooting
+geometry, traces may spill from one DMO bin into an
+adjacent bin, yielding two or more traces per CDP within a
+given DMO bin. Traces within the same DMO bin having
+identical CDP numbers are stacked together prior to DMO
+being applied to the common offset sections. Thus, less
+traces may be output from this process than were input. This
+will cause the DMO output to be stamped as not matching
+the database.
+
+References
+Deregowski, S. M., 1986, What is DMO?: First Break, 4, 7.
+Hale, D., 1991, A non-aliased integral method for DMO: Geophysics, 56, 6.
+
+Parameters
+CDP interval
+Enter the CDP interval in ft. or m. This parameter and the
+source-receiver offset determine the width of the DMO
+operator.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Ensemble DMO in the T-X Domain325
+
+ProMAX® Reference
+
+Typical CDP spacing in ensembles
+Enter the CDP spacing in the input/output ensembles, but
+not less than the CDP interval. However, when applying this
+process to common-shot ensembles, this parameter is
+usually the same as the CDP interval. This parameter
+determines the highest wavenumber contained in the DMO
+operator. The DMO operator contains wavenumbers less than
+1/2 cycle per typical CDP spacing to avoid operator aliasing.
+Maximum offset of data
+Enter the maximum absolute value of the offsets.
+Typical mute time at largest offset
+Enter a rough estimate of the smallest time of interest for the
+largest source-receiver offset. Used only in determining the
+number of time shifts required in the DMO operators.
+Typical RMS velocity at early times
+Enter a rough estimate of the RMS velocity in ft./s or m/s.
+Determines the number of time shifts used to construct the
+DMO operator. Too high a value may degrade the DMO
+operator at early times. Too low a value results in more time
+shifts and, more computation time than is necessary.
+Reapply old trace mutes after DMO?
+Select Yes to reapply trace mutes after DMO. Select No if you
+want the mutes to be adjusted based on the ﬁrst and last
+non-zero samples after DMO. In either case, if tapered mutes
+were used before DMO, the same taper length will be used
+after DMO.
+Rekill old dead traces after DMO?
+Select Yes to rekill dead traces after DMO. Select No to leave
+previously dead traces alive, and mutes will be determined
+from the ﬁrst and last non-zero samples.
+Header entry to use for offsets
+Select the binned offset entry if the binned traces by offset
+header exists. However, the binned offset is constant, and
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Ensemble DMO in the T-X Domain326
+
+ProMAX® Reference
+
+you might want to experiment with binned offsets instead of
+true offsets.
+Change maximum memory usage?
+Select Yes to change the maximum memory the DMO can
+use.
+Maximum memory reserved for DMO (in megabytes)
+This appears if Yes to Change maximum memory usage.
+Enter the maximum memory in megabytes. When DMO
+requires more memory than this limit, the DMO is done in
+overlapping panels.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

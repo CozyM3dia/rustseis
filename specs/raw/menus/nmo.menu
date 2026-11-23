@@ -1,0 +1,313 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+'(
+ name: NMO
+label: "Normal Moveout Correction"
+value_tab: 50
+
+parameter: DIRECT
+text: "Direction for NMO application"
+type: circular:
+type_desc: ( ( "FORWARD" 1  "Apply NMO... this is the normal application mode." )
+             ( "INVERSE" -1 "Back off (remove) previously applied NMO." ) )
+value: 1
+mouse_text: "Normally use FORWARD, but you can also remove (INVERSE) previously applied NMO."
+plot_label: t
+
+parameter: STR_MUTE
+text: "  Stretch mute percentage"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 30.0
+mouse_text: "Any sample stretched more than this percentage will be automatically muted (enter 0.0 to disable)."
+plot_label: t
+
+parameter: DO_STAT
+text: "  Apply any remaining static during NMO?"
+type: boolean:
+value: t
+mouse_text: "If 'Yes', accumulated NA_STAT header word statics (such as the floating datum static) will be applied during NMO."
+plot_label: t
+
+parameter: NMO_APLD
+text: "  Disable check for previously applied NMO?"
+type: :boolean
+value: nil
+mouse_text: "Normally, you will not want to apply NMO twice, but some exceptions may exist."
+plot_label: t
+
+parameter: IDIP_VEL
+text: "Get 3D dip velocities?"
+type: boolean:
+value: nil
+mouse_text: "Select 'Yes' if applying 3D NMO dip velocity correction."
+plot_label: t
+
+parameter: IBIN_CTR
+text: "  Apply bin center corrections?"
+type: boolean:
+value: nil
+mouse_text: "User may decide if the bin center corrections are to be applied as part of the 3D dip/velocity NMO."
+plot_label: t
+
+parameter: IPARTIAL
+text: "Apply partial NMO?"
+type: boolean:
+value: nil
+mouse_text: "You may correct the trace to something other than zero offset for processes that require apparent constant offset."
+plot_label: t
+
+parameter: PART_HDR
+text: "  Header entry with desired non-zero offset"
+type: function:
+type_desc: (header_list headers)
+value: "OFB_CNTR"
+selected_item: "Offset bin center"
+mouse_text: "Use MB1 to select a header entry from the headers menu that contains the desired non-zero offset."
+plot_label: t
+
+; old parameter loaded during overlay
+parameter: LONGOFFS
+text: "Long offset correction?"
+type: choose:
+type_desc: ( ( "NONE" 0 "Apply only two term NMO (normal application).")
+             ( "ALCHALABI" 1 "Apply Al-Chalabi's third term (fastest).")
+             ( "CASTLE" 2 "Apply Castle's shifted hyperbola (slow, least accurate).")
+             ( "TSVANKIN" 3 "Apply Tsvankin and Thomsen's third term (slow, most accurate)."))
+value: 0
+mouse_text: "Choose desired method for long-offset correction."
+showp: nil
+
+; one-time check flag for overlay processing
+parameter: OVERLAY1
+text: "Has menu been overlayed?"
+type: :boolean
+value: nil
+mouse_text: "After initial overlay processing this is toggled to prevent repetition"
+showp: nil
+
+; new parameters
+parameter: LONGOFFS2
+text: "Long offset correction?"
+type: choose:
+type_desc: ( ( "NONE" 0 "Apply only two term NMO (normal application).")
+             ( "ALCHALABI" 1 "Apply Al-Chalabi's third term (fastest).")
+             ( "CASTLE" 2 "Apply Castle's shifted hyperbola (slow, least accurate).")
+             ( "HARLAN" 4 "Apply Harlan's anisotropic third term (slower, good accuracy).")
+             ( "TSVANKIN" 3 "Apply Tsvankin and Thomsen's third term (slowest, most accurate).")
+	   )
+value: 0
+mouse_text: "Choose desired method for long-offset correction."
+plot_label: t
+
+parameter: ETASRC
+text: "   Constant or variable ETA anisotropy?"
+type: :circular
+:type_desc (
+	     ("Constant"  1  "Constant value for ETA")
+	     ("Variable"  2  "ETA is retrieved from a table")
+           )
+:selected_item ("Constant" 1  "Constant value for ETA")
+value: 1
+:mouse_text "Source of ETA anisotropy correction parameter"
+plot_label: t
+
+parameter: ETA
+text: "   Anisotropy correction parameter ETA"
+type: typein:
+type_desc: ( real: 6 -0.25 1.0 )
+value: 0.0
+mouse_text: "Value of zero means no anisotropy correction. Normally nonnegative and less than 0.1"
+plot_label: t
+
+parameter: ETANAME
+:text "   Parameter table with ETA parameters"
+:type :function
+:type_desc ((parm_list "ETA") parms)
+:value "no entry"
+:mouse_text "Use Mouse Button 1 to select an ETA parameter file for anisotropic corrections."
+plot_label: t
+
+parameter: vel_option
+text: "Get velocities from the database?"
+type: boolean:
+value: t
+mouse_text: "Select 'Yes' if there is an appropriate NMO stacking velocity function in the database as a parameter file."
+plot_label: t
+
+parameter: VELNAME
+text: "  SELECT Velocity parameter file"
+type: function:
+type_desc: ((parm_list "VEL") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a velocity function parameter file from the parameter file menu."
+plot_label: t
+properties: (:supported_formats ("JAVASEIS" "PROMAX"))
+
+
+parameter: VELFIELD
+text: "  SPECIFY NMO velocity function(s)"
+type: edit:
+type_desc: (20 80 15 " FORMAT: CDP1:T1-V1,T2-V2,...,Tn-Vn/CDP2:T1-V1,T2-V2,...,Tn-Vn/
+ EXAMPLE: 1:0-5000,900-6725,1500-8571,2000-9670/101:0-5100,860-6690,2000-9852/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+value: "XXX"
+mouse_text: "Use Mouse Button 1 to edit/define normal moveout velocity functions. (SEE EDITOR FOR EXAMPLES.)"
+plot_label: t
+
+
+exec_data: ("NMO"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: nmo.menu 44938 2009-10-08 23:53:08Z Gary Wong $ $Revision: 44938 $ $Date: 2009-10-08 17:53:08 -0600 (Thu, 08 Oct 2009) $")
+			("NUM_WAYS" implicit: 2 )
+			("DIRECT  " implicit: (value 'DIRECT))
+			("IDIP_VEL" implicit: (if (value 'IDIP_VEL) 1 0 ))
+			("IBIN_CTR" implicit: (if (value 'IBIN_CTR) 1 0 ))
+			("LONGOFFS" implicit: (value 'LONGOFFS2))
+			("IPARTIAL" implicit: (if (value 'IPARTIAL) 1 0 ))
+			("PART_HDR" implicit: (value 'PART_HDR))
+			("VELNAME " implicit: (if (value 'vel_option) (value 'VELNAME) "NONE    "))
+			("VELFIELD" implicit: (value 'VELFIELD))
+			("DO_STAT " implicit: (if (value 'DO_STAT) 1 0 ))
+			("NMO_APLD" implicit: (if (value 'NMO_APLD) 1 0 ))
+			("STR_MUTE" implicit: (value 'STR_MUTE))
+			("ETASRC  " implicit: (if (showing 'ETASRC) (value 'ETASRC) 1))
+                        ("ETA     " implicit: (if (showing 'ETA) (value 'ETA) 0.0))
+			("ETANAME " implicit: (if (showing 'ETANAME) (value 'ETANAME) "NONE    "))
+		)
+	    )	
+
+rules: 	
+(
+
+
+ (rule1 ( = (value 'DIRECT) -1 ) 
+	(do_not_show 'DO_STAT)
+	(do_show 'DO_STAT))
+
+ (str_mute_mouse_text (= (value 'DIRECT) 1)
+	(set_mouse_text 'STR_MUTE "Any sample stretched more than this percentage will be automatically muted (enter 0.0 to disable).")
+	(set_mouse_text 'STR_MUTE "For INVERSE NMO, this parameter only affects the reset of the mute header entries (enter 0.0 to disable reset).")
+ )
+
+ (overlay_check t (if (not (value 'OVERLAY1))
+     (progn
+        (if (and (or
+	   (equal (selected_item 'LONGOFFS) (first (type_desc 'LONGOFFS)))
+           (= (value 'LONGOFFS) 0))
+           (not (= (value 'ETA) 0.0)))
+	   (progn
+	    (set_selected_item 'LONGOFFS2 (fourth (type_desc 'LONGOFFS2)))
+	    (set_value 'LONGOFFS2 4)
+           )
+        )
+        (if (or
+	 (equal (selected_item 'LONGOFFS) (second (type_desc 'LONGOFFS)))
+         (= (value 'LONGOFFS) 1))
+	  (progn
+           (set_value 'LONGOFFS2 1)
+	   (set_selected_item 'LONGOFFS2 (second (type_desc 'LONGOFFS2)))) 
+          )
+        (if (or
+	 (equal (selected_item 'LONGOFFS) (third (type_desc 'LONGOFFS)))
+         (= (value 'LONGOFFS) 2))
+	  (progn
+           (set_value 'LONGOFFS2 2)
+	   (set_selected_item 'LONGOFFS2 (third (type_desc 'LONGOFFS2)))) 
+          )
+        (if (or
+	 (equal (selected_item 'LONGOFFS) (fourth (type_desc 'LONGOFFS)))
+         (= (value 'LONGOFFS) 3))
+	  (progn
+           (set_value 'LONGOFFS2 3)
+	   (set_selected_item 'LONGOFFS2 (fifth (type_desc 'LONGOFFS2)))) 
+          )
+        (set_selected_item 'OVERLAY1 (first (type_desc 'OVERLAY1)))
+        (set_value 'OVERLAY1 t)
+     ))
+ )
+
+; (dipvel ( = (db_parmget_line "I3Dz" ) 1 ) 
+; 	 (progn
+; 	   (do_show 'IDIP_VEL))
+;	 (progn
+;	   (do_not_show 'IDIP_VEL)) 
+;	 )
+
+ (vel_opt ( and (showing 'IDIP_VEL) (value 'IDIP_VEL) ) 
+	  (dont_show 'vel_option)
+	  (do_show 'vel_option) )
+
+ (bin_ctr ( and (showing 'IDIP_VEL) (value 'IDIP_VEL) ( = (db_parmget_line "I3Dz" ) 1 ) ) 
+	  (do_show 'IBIN_CTR)
+	  (dont_show 'IBIN_CTR) )
+
+ (bin_ctr_off ( = (db_parmget_line "I3Dz" ) 0 )
+	  (set_value 'IBIN_CTR nil)
+ )
+
+ (dipvels ( and (showing 'IDIP_VEL) (value 'IDIP_VEL) ) 
+	  (progn  (set_value 'vel_option t)
+		  (set_selected_item 'vel_option (first (type_desc 'vel_option)))
+		  (set_type_desc 'VELNAME  '((parm_list "DVA") parms)))
+	  (set_type_desc 'VELNAME  '((parm_list "VEL") parms)))
+
+ (partial_nmo ( or (and (value 'IDIP_VEL) (showing 'IDIP_VEL)) ( = (value 'DIRECT) -1 ))
+	      (progn (do_not_show 'IPARTIAL)
+		     (set_value 'IPARTIAL nil)
+		     (set_selected_item 'IPARTIAL (second (type_desc 'IPARTIAL))))
+	      (progn
+		(do_show 'IPARTIAL)
+		))
+
+ (part_hdr (and (value 'IPARTIAL) (showing 'IPARTIAL) ) 
+	   (progn
+	     (do_show 'PART_HDR)
+	     (do_not_show 'LONGOFFS2)
+	    )
+	   (progn
+	     (do_show 'LONGOFFS2)
+	     (do_not_show 'PART_HDR)))
+
+ (longoffs (or  (and (showing 'IDIP_VEL) (value 'IDIP_VEL))
+		(and (showing 'IPARTIAL) (value 'IPARTIAL)))
+	(do_not_show 'LONGOFFS2)
+	(do_show 'LONGOFFS2)
+ )
+ 
+ (eta (and (showing 'LONGOFFS2) (> (value 'LONGOFFS2) 2))
+	(do_show 'ETASRC)
+	(do_not_show 'ETASRC)
+ )
+
+ (etatoggle1 (and (= (value 'ETASRC) 1) (showing 'ETASRC))
+	(do_show 'ETA)
+	(do_not_show 'ETA)
+ )
+ (etatoggle2 (and (= (value 'ETASRC) 2) (showing 'ETASRC))
+	(do_show 'ETANAME)
+	(do_not_show 'ETANAME)
+ )
+
+ (velfield2d (value 'vel_option) 
+	     (do_not_show 'VELFIELD) 
+	     (do_show 'VELFIELD))
+
+ (velname2d  (value 'vel_option) 
+	     (do_show 'VELNAME) 
+	     (do_not_show 'VELNAME))
+
+ (VEL_default_rule1 (and ( equal ( value 'VELFIELD) "XXX" )
+			 ( = ( db_parmget_line "IUNITSz") 1 ) ) (set_value 'VELFIELD "1:0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000/" ) )
+ (VEL_default_rule2 ( equal ( value 'VELFIELD) "XXX" ) (set_value 'VELFIELD "1:0-1480,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000/" ) )
+ )
+)

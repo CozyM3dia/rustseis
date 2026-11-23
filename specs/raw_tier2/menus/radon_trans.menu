@@ -1,0 +1,232 @@
+; IIID IVD 1 FIELD DEV DEPTHC
+'(
+ name: RADON_TRANS
+label: "Forward/Inverse Radon Transform"
+value_tab: 43
+
+
+parameter: TMODE
+text: "Direction of transform"
+type: circular:
+type_desc: ( ("Forward" 0 "Forward radon transform")
+	     ("Inverse" 1 "Inverse radon transform"))
+mouse_text: "Choose forward or inverse direction for radon transform."
+
+parameter: NP 
+text: "Number of P-values"
+type: typein:
+type_desc: ( int: 7 1 nil )
+value: 31
+mouse_text: "The number of P-values for the Radon transform."
+
+
+parameter: PMIN
+text: "Minimum P-value of interest (ms)"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: -100.
+mouse_text: "This is the minimum P-value in msecs (overcorrected)."
+
+
+parameter: PMAX
+text: "Maximum P-value of interest (ms)"
+type: typein:
+type_desc: ( real: 8 nil nil )
+value: 400.
+mouse_text: "This is the maximum P-value in msecs (undercorrected)."
+
+parameter: TMIN
+text: "Minimum time of interest (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the minimum time in msecs for Radon transform."
+
+
+parameter: TMAX
+text: "Maximum time of interest (ms)"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 0.0
+mouse_text: "This is the maximum time in msecs for Radon transform. (0 = use maximum data time.)"
+
+
+parameter: FMIN
+text: "Minimum frequency of interest"
+type: typein:
+type_desc: ( real: 8 0.0 nil )
+value: 10.0
+mouse_text: "This is the minimum coherent frequency (in Hertz) that is of interest in the data."
+
+
+parameter: FMAX
+text: "Maximum frequency of interest"
+type: typein:
+type_desc: ( real: 8 1.0e-6 )
+value: 80.0
+mouse_text: "This is the maximum coherent frequency (in Hertz) that is of interest in the data."
+
+parameter: XFORMTYP
+text: "Type of transform to perform"
+type: pop_choose:
+type_desc: ( ("Parabolic" 2 "Parabolic radon transform")
+	     ("Hyperbolic" 3 "Hyperbolic radon transform (approx)")
+             ("Linear" 1 "Linear radon transform"))
+mouse_text: "Choose whether you want to model events which are Linear,
+Parabolic, or Hyperbolic."
+
+parameter: REF_OFFS
+text: "Reference offset for delta moveout"
+type: typein:
+type_desc: ( real: 8 1.0e-6 1.0e9 )
+value: -1.0
+mouse_text: "Reference offset at which mute parameters were picked for a particular delta moveout."
+ 
+parameter: MININENS 
+text: "Minimum number of traces/ensemble to transform"
+type: typein:
+type_desc: ( int: 7 1 nil )
+value: 5
+mouse_text: "Transformed traces are set to zero if number of traces per ensemble is less than this number."
+
+parameter: DAMPING
+text: "Damping for Radon solution"
+type: typein:
+type_desc: ( real: 8 0.0001 1.0 )
+value: 0.03
+mouse_text: "Fraction of main diagonal to add to matrix for stability. Value between 0 and 1."
+
+;parameter: GATELENG
+;text: "Time gate length for Radon solution (ms)"
+;type: typein:
+;type_desc: ( real: 8 20.0 10000.0 )
+;value: 200.0
+;mouse_text: "Time gate length in milliseconds for sparse radon"
+ 
+parameter: SPARSE
+text: "Compute a sparse (Hi-res) radon solution?"
+type: boolean:
+value: nil 
+mouse_text: "Sparse inversion constructs a sparse Radon domain solution that also reconstructs the input data in a least-squares sense."
+ 
+parameter: LAMBDA
+text: "  Sparseness parameter"
+type: typein:
+type_desc: ( real: 8 1.0e-6 9999.0 )
+value: 0.1
+mouse_text: "Amount of sparseness in solution measured as a fraction of the main matrix diagonal. Use value between 0 and 1.0."
+ 
+parameter: SPARSE_B
+text: "  Sparseness stability parameter"
+type: typein:
+type_desc: ( real: 8 1.0e-4 1.0 )
+value: 0.1
+mouse_text: "This parameter (measured as a fraction of sparseness parameter) avoids division by zero. Use value between 0.0001 and 1.0."
+
+parameter: EPSILON
+text: "  Sparse inversion stopping parameter"
+type: typein:
+type_desc: ( real: 8 1.e-6 1.0 )
+value: 0.001
+mouse_text: "Parameter to determine when sparse solution has been reached. When change in solution is less than this amount, iterations stop." 
+
+parameter: MAXITER
+text: "  Maximum number of sparse iterations"
+type: typein:
+type_desc: ( int: 4 0 9999 )
+value: 2
+mouse_text: "Maximum number of iterations that will be performed at each frequency."
+
+parameter: NCGITER
+text: "Number of CG iterations"
+type: typein:
+type_desc: ( int: 4 1 100 )
+value: 3
+mouse_text: "Maximum number of conjugate gradient iterations."
+
+parameter: RDNECHO
+text: "Debug flag"
+type: boolean:
+value: nil
+mouse_text: "Show debug write statements:  yes/no"
+showp: nil
+
+parameter: REMUTE
+text: "Re-apply mutes to traces?"
+type: boolean:
+value: nil
+mouse_text: "Reapply mutes which were in traces input to forward transform?:  yes/no"
+
+exec_data:  ("RADON_TRANS"
+	     ("GENERAL"
+	      ("version" implicit: "ProMAX $Id: radon_trans.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+	      ("TMODE"    implicit: (value 'TMODE))
+	      ("NP"       implicit: (value 'NP))
+	      ("PMIN"     implicit: (value 'PMIN))
+	      ("PMAX"     implicit: (value 'PMAX))
+	      ("TMIN"     implicit: (value 'TMIN))
+	      ("TMAX"     implicit: (value 'TMAX))
+	      ("FMIN"     implicit: (value 'FMIN))
+	      ("FMAX"     implicit: (value 'FMAX))
+	      ("REF_OFFS" implicit: (value 'REF_OFFS))
+	      ("DAMPING"  implicit: (value 'DAMPING))
+;	      ("GATELENG"  implicit: (value 'GATELENG))
+	      ("SPARSE"   implicit: (if (value 'SPARSE) 1 0))
+	      ("LAMBDA"   implicit: (value 'LAMBDA))
+	      ("SPARSE_B" implicit: (value 'SPARSE_B))
+	      ("EPSILON"  implicit: (value 'EPSILON))
+	      ("MAXITER"  implicit: (value 'MAXITER))
+	      ("NCGITER"  implicit: (value 'NCGITER))
+	      ("HPOWER"   implicit: (if (= (value 'XFORMTYP) 1)	1.0 
+				      (if (= (value 'XFORMTYP) 2) 
+					  2.0 1100.0)) )
+	      
+	      ("MININENS" implicit: (value 'MININENS))
+	      ("RDNECHO" implicit: (if (value 'RDNECHO) 1 0))
+	      ("REMUTE" implicit: (if (value 'REMUTE) 1 0))
+	      )
+	     ) 
+rules: (
+	(rule1 (= (value 'TMODE) 1) 
+	       (do_not_show 'NP)
+	       (do_show 'NP) )
+	(rule2 (= (value 'TMODE) 1) 
+	       (do_not_show 'DAMPING)
+	       (do_show 'DAMPING) )
+;	(rule2a (= (value 'TMODE) 1) 
+;	       (do_not_show 'GATELENG)
+;	       (do_show 'GATELENG) )
+	(rule3 (= (value 'TMODE) 0) 
+	       (do_not_show 'REMUTE) 
+	       (do_show 'REMUTE))
+	(rule4 (= (value 'TMODE) 1) 
+	       (do_not_show 'SPARSE) 
+	       (do_show 'SPARSE))
+	(rule5 (= (value 'TMODE) 1) 
+	       (do_not_show 'MININENS) 
+	       (do_show 'MININENS) )
+;
+; Do not show the sparse parameter, default to not-sparse
+; Remove this rule to activate sparse Radon transform.
+;
+;	(rule_no_sparse (do_not_show 'SPARSE))
+			     
+
+	(hide_parms_rule ( do_not_show '(EPSILON MAXITER NCGITER)))
+	(rule6 (and (value 'SPARSE) (= (value'TMODE) 0))
+	       (progn 
+                 (do_show 'LAMBDA) 
+                 (do_show 'SPARSE_B))
+	       (progn  
+                 (do_not_show 'LAMBDA) 
+                 (do_not_show 'SPARSE_B))) 
+
+	(REF_OFFS_default_rule ( = ( value 'REF_OFFS) -1.0 )
+			       (set_value 'REF_OFFS (  db_parmget_line "OFFMAXz"))) 
+	
+	)
+)
+
+
+
+

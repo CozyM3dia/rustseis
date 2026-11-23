@@ -1,0 +1,1033 @@
+201
+
+Developer’s Programming Guide
+
+Parameter Tables
+
+This chapter describes ProMAX parameter tables.
+
+Topics covered in this chapter:
+
+➲ Overview of Parameter Tables
+➲
+Structure of ProMAX Tables
+➲
+Table Rules
+➲
+Table Interpolation
+➲
+X Values in Tables
+➲
+Table Extrapolation
+➲
+Table Subroutine Categories
+➲ Examples of Table Routines
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables202
+
+Developer’s Programming Guide
+
+Overview of Parameter Tables
+ProMAX parameter tables are useful for storing and
+interpolating parameters, such as velocity functions, time
+windows, mutes, etc. The general philosophy behind ProMAX
+tables is that parameters, such as ﬁrst break mute times, are
+stored on disk and retrieved into memory when they are needed.
+Interpolation of the parameters can then be done as needed by
+the ProMAX parameter interpolation routines. For example,
+suppose a ProMAX user picks mute times on a set of shot
+records. Those mute times will be stored in a ProMAX table on
+disk. When the user wants to apply those mutes, the mute times
+are read into memory and traces for which no mute times were
+speciﬁcally picked will be interpolated by the ProMAX
+interpolation routines. The application of the routines is, of
+course, under the control of the programmer.
+
+Structure of ProMAX Tables
+A ProMAX table is a framework for storing information at a
+location within a 3-dimensional volume. The following ﬁgure
+shows a 3-dimensional volume with axes X1, X2, and Y. A
+black dot marked P is a location at which information can be
+stored.
+
+X1
+
+X2
+P
+
+Y
+
+A three dimensional volume with point P
+where data can be stored
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables203
+
+Developer’s Programming Guide
+
+A consistent terminology is used to describe locations within
+ProMAX tables. As in the previous ﬁgure, a location within the
+table is described in terms of the X1, X2, and Y axes. Data
+stored at a point within the table is referred to as a Z value.
+Therefore, a ProMAX table is a description of Z(X1, X2, Y).
+In fact, any number of Z values can be stored at an X1, X2, Y
+location, so this description might be more accurately be written
+as Z[ ](X1,X2, Y), where the “[ ]” indicates that a vector of Z
+values can be stored.
+An example use of a ProMAX table would be in the storage of
+NMO functions for a 3D seismic survey. Suppose that NMO
+functions had been picked for several CDP bin locations in the
+survey, as in the following ﬁgure. These functions could be
+stored in a ProMAX table using the X1, X2 coordinates to
+describe the spatial location of the CDP bins, the Y axis to
+describe the times at which velocities had been picked, and the
+Z values to describe the velocity at each picked time. In this
+case there would only be one Z value at each (X1, X2, Y)
+location.
+X1
+
+Surface locations of
+CDP bins
+X2
+
+Y
+Marks a time at which a velocity is stored
+
+Velocity functions stored at CDP bin locations in a table
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables204
+
+Developer’s Programming Guide
+
+Table Rules
+Some important rules about the structure of tables are as
+follows:.
+•
+
+The number of X1, X2 locations in a table can vary from
+table to table and can also be changed within a table (points
+can be added and deleted).
+
+•
+
+There can be any number of Y locations at any X1, X2
+location.
+
+•
+
+The number of Z values stored at X1, X2, Y locations is
+ﬁxed for a table.
+
+Table Interpolation
+The following ﬁgure shows a set of scattered points in the
+X1, X2 plane of a ProMAX table. These points might be
+surface locations in a 3D seismic survey or points in any other
+reference frame that is appropriate for a ProMAX table.
+Assume that a set of parameters have been picked for each of
+these points; in other words, there are Z values stored at Y
+locations at each point in the plane. Also in the plane is a point
+marked P, which is at coordinates (X1p, X2p). No parameters
+have been picked at P; the goal of interpolation will be to
+approximate values for Z(X1p, X2p, Y) based on the points that
+are near to P. The question that is then raised is, “Which of the
+points that are near to P should be used for the interpolation?”
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables205
+
+Developer’s Programming Guide
+
+X1
+
+P(X1p, X2p)
+
+X2
+
+Points scattered in the X1, X2 plane of a ProMAX table
+The answer to this question in ProMAX tables begins by
+dividing the X1, X2 plane into a set of triangles, as shown in the
+following ﬁgure.
+The triangles used to divide the X1, X2 plane are called
+Delaunay triangles, which is a unique set of triangles for a
+given set of points that comes as close as possible to making all
+of the triangles equilateral. The Delaunay triangles method tries
+to avoid creating long skinny triangles because they make
+interpolation inaccurate.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables206
+
+Developer’s Programming Guide
+
+X1
+
+P
+
+X2
+
+Delaunay triangles divide the X1, X2 plane
+of a ProMAX table
+Suppose that interpolation is needed for a Z value at coordinates
+(X1p, X2p, Y). The table interpolation routines ﬁrst determine
+which triangle contains P. The following ﬁgure shows the point
+P in the X1, X2 plane along with the triangle that contains P.
+The vertices of the triangle in the ﬁgure are A, B, and C, and
+have X1, X2 coordinates (X1a,X2a), (X1b, X2b), and
+(X1c, X2c), respectively. The Y axis extends downward from
+the X1-X2 plane.
+The next step in the interpolation of Z(X1p, X2p, Y) is to
+linearly interpolate values of Z(X1a, X2a, Y), Z(X1b, X2b, Y),
+and Z(X1c, X2c, Y) along the Y axis of the respective points of
+A, B, and C. Points of known Z(X1, X2, Y) are shown as dark
+circles in the ﬁgure and interpolated points are shown as open
+circles.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables207
+
+Developer’s Programming Guide
+
+X1
+B
+X2
+
+P
+A
+
+C
+
+Y
+
+(X1a, X2a, Y)
+
+Interpolated Z(X1, X2, Y )
+Known Z(X1, X2, Y)
+
+Interpolation of Z(X1, X2, Y) along the Y axis from the
+triangle vertices A, B, and C
+A plane can now be formed in X1, X2, Z space that contains the
+points (X1a, X2a, Za), (X1b, X2b, Zb), and (X1c, X2c, Zc), as
+is shown in the following ﬁgure. The value of Z(X1p, X2p, Y)
+is then calculated at the point where the line parallel to Y that
+intersects P also intersects the plane.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables208
+
+Developer’s Programming Guide
+
+X1
+B
+X2
+
+P
+A
+
+C
+
+Z
+
+(X1a, X2a, Z)
+
+Interpolated (X1, X2, Z)
+Vertex of triangle
+
+Interpolation of (X1p, X2p, Z) from nearby points
+
+X Values in Tables
+The primary use of tables is for interpolation of parameters in
+2D and 3D seismic data processing. The parameters that are
+interpolated are frequently associated with some integer
+ensemble number, such as CDP bin number or Source Index
+Number (SIN). Both CDP and SIN can be associated with
+spatial locations on the ground such as the CDP bin location or
+the source location.
+When there is a 1-to-1 mapping between ensemble number and
+spatial coordinates, ProMAX table information can be referred
+to by either ensemble number or by the X1, X2 coordinates. For
+example, interpolation of parameters can be done with the
+subroutine tblInterpXY using just the ensemble number, which
+is referred to as X in the calling arguments. The interpolation
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables209
+
+Developer’s Programming Guide
+
+can also be done with the routine tblInterpZ which uses X1, X2
+pairs to describe the location at which interpolation is to be
+done. Tables can be built and used via either or both methods. In
+the internals of the code, the tables are referenced by the X1, X2
+values, so mapping goes on between X and X1, X2.
+
+Precision of Key Values
+Beginning with the Linux-only release of ProMAX/SeisSpace
+2003.19.1 the structure of parameter tables has changed
+slightly. The primary table key is now a 64-bit (double) ﬂoating
+point number but the secondary key remains a 32-bit (real)
+ﬂoating point number. The XY coordinates in the parameter
+tables are now also doubles as well. Although at the time of this
+writing the ProMAX database only supports 32-bit ﬂoating
+point XY coordinates, and the ProMAX traces headers only 32bit ﬂoating point numbers, the parameter tables are higher
+precision.
+All the previous parameter table routines still exist and are
+functional, but their precison in primary key and XY
+coordinates is limted to values that can be stuffed into 32-bit
+ﬂoating point numbers. These routines have names like
+TBL_SOMETHING in Fortran and tblSomething in C. The
+new 64-bit parameter table routines are almost identical to the
+32-bit routines except they are named like
+TBL2_SOMETHING for Fortran and tbl2Something for C.
+All of the source code examples in this document have been
+converted to use the 64-bit routines.
+Note: Parameter tables created in ProMAX/SeisSpace
+2003.19.1 and beyond are not backwards compatable with
+previous releases of ProMAX/SeisSpace.
+
+Table Extrapolation
+The preceeding discussion of value interpolation assumed that
+there were points bracketing the location for which
+interpolation was being done. In cases where a value is beyond
+the limit of known table values, the new value must be
+extrapolated from values within the table.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables210
+
+Developer’s Programming Guide
+
+Extrapolation in the X1, X2 plane: The rules for extrapolation
+in the X1, X2 plane are simple. If interpolation is requested for
+an X1, X2 location outside the table, then the point on the table
+that is nearest the requested point is found. The Y and Z values
+at the requested point are set equal to the Y and Z values of the
+nearest point. Note that the nearest point might be (probably
+will be) an interpolated point. See the following ﬁgure.
+
+X1
+Requested point
+
+Nearest point on table
+
+X2
+
+indicates a point in the table
+
+The nearest point on the table is used to set values at
+exterior points
+Extrapolation along Y: Extrapolation in Y can be done either
+by setting the Y value equal to the nearest deﬁned Y value or by
+linearly interpolating based on the slope between the last two
+deﬁned points along Y. The method of extrapolation is set by
+running the routine tblSetExtrap in C or TBL_SET_EXTRAP
+in FORTRAN.
+
+Table Subroutine Categories
+Four general categories of table subroutines are available to the
+ProMAX programmer:
+•
+
+•
+
+Other Docs
+
+table initialization and creation routines to input/output
+data to/from disk ﬁles
+table value editing routines for adding, deleting, and
+changing table values
+Search Page
+
+Known Problems
+
+Overview of Parameter Tables211
+
+Developer’s Programming Guide
+
+•
+
+routines to ﬁnd values at locations in the table and to ﬁnd
+global minimum and maximum values
+
+•
+
+interpolation routines
+
+A set of routines in each of these categories that be called from
+the C programming language, with an analogous set for
+FORTRAN (with one important exception which is discussed
+later). Use the command
+aman -k tbl
+
+to print a list of all of the ProMAX table routines and a brief
+description of their purpose.
+In order to access the on-line manual pages for ProMAX
+routines, you must have the path to PROMAX_HOME/port/bin,
+where PROMAX_HOME is the path name where the ProMAX
+directory structure is installed. To see documentation on an
+individual table routine, such as tblCountX, type
+aman tblCountX.
+
+This provides an explanation of calling arguments, along with a
+description of the function of the subroutine.
+If you look at a list of the table routines you may notice that
+there is a large number of routine names which begin with the
+letters tbl or TBL. Many of these routines are used for working
+with data that can be stored in the 2D tables. Many of the tbl
+routines actually call other routines that work directly with data
+in the underlying 3D data structure. These direct access routines
+have names that begin with tb3. Direct access to the underlying
+3D data structure can be gained by ﬁrst calling the routine
+tblFetchTb3 from C, which returns a pointer to the location of
+the table which can be used with the tb3 routines. There is not a
+set of FORTRAN routine names that begin with the letters tb3,
+and there currently is no direct access to the underlying C
+structures from FORTRAN. Direct access to the underlying C
+structures is not necessary, however, since FORTRAN routines
+are provided that access the tables via X1 and X2 arguments.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines212
+
+Developer’s Programming Guide
+
+Examples of Table Routines
+One of the best ways to demonstrate the use of the ProMAX
+table routines is through example code. The following examples
+are in both FORTRAN and C. You will not miss anything if you
+read the code examples in one language and not in the other.
+Both sets of code accomplish the same tasks; a discussion
+accompanies each code fragment.
+
+FORTRAN Code Examples
+This section contains two examples of FORTRAN table
+routines.
+
+Example 1
+The ﬁrst FORTRAN example comes from the subroutine
+INIT_AMP_RATIO, which can be found in the example source
+code amp_ratio.f. This code is actually altered slightly from the
+original amp_ratio.f to minimize code that is extraneous to this
+discussion.
+In this example, a table that holds start and end times for a time
+gate is read from the database. The table DB_TBL_GET
+allocates memory for the table and loads the table values into
+that memory. The routine returns an argument called
+ITBL_HANDLE. This is a numerical value that should not be
+changed, as it is the memory location of the table. This value of
+ITBL_HANDLE is the way in which the table is referenced.
+Any subroutines that make use of the table will pass
+ITBL_HANDLE to the routine so that the table can be uniquely
+identiﬁed.
+C ..... Get the name of the time gate file from the menu
+CALL EX_CGETPARM( 'GATENAME', 1, CGATENAME,
+NCHARS )
+C ..... Get the gate table from the database
+CALL DB_TBL_GET( 'GAT', CGATENAME, ITBL_HANDLE,
+IERR )
+IF ( IERR .NE. 0 ) THEN
+CALL REPORT_PROMAX_ERR( IERR )
+CALL EX_ERR_FATAL(
+&
+'Cannot open time gate ' //CGATENAME )
+ENDIF
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines213
+
+Developer’s Programming Guide
+
+C ......Get info on the gate table
+CALL TBL_INFO( .TRUE., ITBL_HANDLE, CPRIM_KEY,\
+CSCND_KEY,
+&
+CZ_DESC, CTABLE_DESC, IDUMMY(1), IDUMMY(2),\
+IDUMMY(3),
+&
+NTIMES, RDUMMY(1), RDUMMY(2), RDUMMY(3),\
+RDUMMY(4),
+&
+RDUMMY(5), RDUMMY(6) )
+C ......There had better be two time values (upper and\
+lower gate)
+IF ( NTIMES .NE. 2 ) CALL EX_ERR_FATAL(
+&
+'Invalid gate (must have an upper and lower\
+gate)' )
+C ......We will need the index of the primary and\
+secondary key
+CALL HDR_NAMINFO( CPRIM_KEY, CDESC_DB, LENGTH,\
+IFORMAT_PKEY,
+&
+IH_PKEY, IERR )
+IF ( IERR .NE. 0 ) CALL EX_ERR_FATAL(
+&
+'The primary key of the time gate\
+(' //CPRIM_KEY
+&
+//') is not in the header' )
+CALL HDR_NAMINFO( CSCND_KEY, CDESC_DB, LENGTH,\
+IFORMAT_SKEY,
+&
+IH_SKEY, IERR )
+IF ( IERR .NE. 0 ) CALL EX_ERR_FATAL(
+&
+'The secondary key of the time gate\
+(' //CSCND_KEY
+&
+//') is not in the header' )
+
+After the table is created with DB_TBL_GET, information
+about the table is retrieved from the table by use of the program
+TBL_INFO. You can investigate the other calling arguments for
+this subroutine by typing aman tbl_info.
+Most of the arguments returned in this code are dummy
+variables. The only information about the table that is needed is
+the primary and secondary keys on which the table is based (the
+X and Y axes of the table) and the number of Z values in the
+table, represented here as the argument NTIMES.
+After checking to be sure that there are only two times, a start
+and end time, stored in the table, the code gets the trace header
+index and format of the primary and secondary keys by use of
+the header routine called HDR_NAMINFO.
+This piece of code came from the initialization subroutine in
+amp_ratio. The table is read into memory only one time. It will
+be preserved there until it is intentionally closed by the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines214
+
+Developer’s Programming Guide
+
+programmer, or until the routine fails through EX_ERR_FATAL
+or some other means of stopping execution.
+Next we see where the table that is created is used in the
+subroutine EXEC_AMP_RATIO, which can also be found in
+the example code ﬁle amp_ratio.f. The subroutine
+EXEC_AMP_RATIO is given one data trace at a time to
+process, and the time gate is interpolated for that trace. The
+trace for which the time gate is interpolated is referred to as the
+current trace in the following discussion. The subroutine
+EX_GET_DBLEKEY is used to get a double representation of
+the primary key value (the table’s X axis value) and
+EX_GET_REALKEY is used to get a ﬂoating point value of the
+secondary key value (the table’s Y axis value). This is because
+the table interpolation routines only work with double and
+ﬂoating point values.
+FLOAT SKEYVAL, TGATE(2)
+REAL*8 PKEYVAL
+INTEGER IERR
+C ......... Interpolate the gate
+CALL EX_GET_DBLEKEY(
+IFORMAT_PKEY,\ PKEYVAL )
+CALL EX_GET_REALKEY(
+IFORMAT_SKEY,\ SKEYVAL )
+CALL TBL2_INTERP_XY(
+SKEYVAL, TGATE, NOINTERP )
+
+times from the table
+RTHDR(IH_PKEY),
+RTHDR(IH_SKEY),
+ITBL_HANDLE, PKEYVAL,\
+
+The routine TBL2_INTERP_XY is called next; it interpolates
+the time gate values from the table. Note that the calling
+arguments include ITBL_HANDLE, which was passed from
+INIT_AMP_RATIO through the common block in
+amp_ratio.inc. The input arguments PKEYVAL and SKEYVAL
+are the X and Y locations in the table at which interpolation of
+the time gate values will be done. The routine
+TBL2_INTERP_XY returns the start and end time of the time
+gate TGATE. It also returns the value of NOINTERP, which is
+used in control of extrapolation.
+We could also do the interpolation by direct use of the X1, X2
+coordinates. This is only desirable if X1 and X2 are readily
+available through trace headers or accessible , as occurs in the
+following code:
+C ......... Get the X1,X2 coordinates from the headers\
+and interpolate
+X1 = (double)RTHDR( IH_X1 )
+X2 = (double)RTHDR( IH_X2 )
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines215
+
+Developer’s Programming Guide
+
+CALL TBL2_INTERP_Z( ITBL_HANDLE, X1, X2, 2,
+1,\ SKEYVAL, SKEYVAL,
+&
+TIMES, NOINTERP )
+
+Example 2
+In order to create a new ProMAX table, the user must have ﬁrst
+created a table name while working in the user interface. The
+program that will ﬁll the table with data must get the name of
+the table into which the table data will be written. The name of
+the table is acquired with the routine EX_CGETPARM in the
+INIT_ subroutine, as is shown in the previous example. Note
+that the name of the table that is acquired from a call to
+EX_CGETPARM is the 8-character label (or hash name) which
+is generated from the table description input by the user. In
+order write to the table, you must ﬁnd the descriptive name by
+use of the routine TBL_DESC_FROM_DB. Memory must then
+be allocated for the table, which is done using
+TBL_ALLOCATE.
+The following code shows a working ProMAX module which
+writes a new velocity table to the database.
+C----------------------------------------------------------------------------C
+C
+Description:
+C
+Standard initialization routine
+C
+C
+Output arguments:
+C
+LEN_SAVE - number of 4-byte words to save
+for\ re-entrancy
+C
+ITOOLTYPE - processing tool type
+C
+C----------------------------------------------------------------------------SUBROUTINE INIT_DUMMYA( LEN_SAV, ITOOLTYPE )
+#include "dummya.inc"
+INTEGER LEN_SAV, ITOOLTYPE
+INTEGER NCHARS, IERR
+C ..... declare variable for user-given descriptive table
+name
+CHARACTER CTABLE_DESC*128
+C ..... declare variable for lable or name created from\
+CTABLE_DESC
+CHARACTER CHASH_NAME*8
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines216
+
+Developer’s Programming Guide
+
+C ..... Call for the input parameter by name. Note the\
+padding in the
+C ..... character constant. It is the programmers\
+responsibility to
+C ..... provide the correct type of return argument.
+CALL EX_CGETPARM( 'VEL_FILE', 1, CHASH_NAME,\
+NCHARS )
+C ..... Get the table description from the hash name.\
+The description is
+C ..... needed both when the table is allocated and\
+written to the data base
+CALL TBL_DESC_FROM_DB( 'VEL', CHASH_NAME,\
+CTABLE_DESC, IERR );
+IF( IERR .NE. 0 ) THEN
+CALL EX_ERR_FATAL('Table description not\
+found.')
+END IF
+C ..... Allocate space for a new table
+CALL TBL_ALLOCATE( ID_TABLE, 1, 'CDP', 'VEL',\
+'TIME',
+&
+CTABLE_DESC, IERR )
+C ..... Set the number of words that need to be saved\
+for re-entrancy.
+C ..... to avoid oversights
+LEN_SAV = CALC_LENSAV
+C ..... Set the tool type to simple (one trace in, one\
+trace out)
+ITOOLTYPE = ISIMPLEpz
+RETURN
+END
+
+C----------------------------------------------------------------------------C
+C
+Description:
+C
+Standard execution routine
+C
+C
+Input/output arguments:
+C
+TRACE - array of trace samples
+C
+ITHDR - trace header (as integer)
+C
+RTHDR - trace header (as floating point)
+C
+C----------------------------------------------------------------------------SUBROUTINE EXEC_DUMMYA( TRACE, ITHDR, RTHDR )
+#include "dummya.inc"
+REAL TRACE(NUMSMPz), RTHDR(NTHz)
+REAL YVALUE, ZVALUE
+REAL*8 XVALUE
+INTEGER ITHDR(NTHz), IERR
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines217
+
+Developer’s Programming Guide
+
+IF ( CLEANUPz ) THEN
+CALL TBL_TO_DATABASE( ID_TABLE, 'VEL', IERR )
+C ......... We don't want control to pass into the main\
+body
+RETURN
+ENDIF
+C ..... Add values to the table
+XVALUE = 1.0;
+YVALUE = 2.0;
+ZVALUE = 3.0;
+CALL TBL2_ADD_XY( ID_TABLE, XVALUE, YVALUE, \
+ZVALUE )
+RETURN
+END
+C----------------------------------------------------------------------------C
+Include file for DUMMYA
+C----------------------------------------------------------------------------IMPLICIT NONE
+#include "global.inc"
+COMMON /SAVED_PARMS/ SAVE1z, ID_TABLE, END1z
+INTEGER ID_TABLE
+
+C ..... ID_TABLE memory handle for the velocity table
+
+C Code Examples
+This section contains two examples of C table routines.
+
+Example 1
+The ﬁrst C example comes from the subroutine
+init_amp_ratio_, which can be found in the example source
+code ampRatio.c. This code is actually altered slightly from the
+original ampRatio.c to minimize code that is extraneous to this
+discussion.
+In this example, a table that holds start and end times for a time
+gate is read from the database. The table database allocates
+memory for the table and loads the table values into that
+memory. The routine returns a (void*) pointer to the table
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines218
+
+Developer’s Programming Guide
+
+location. The returned value is the way in which the table is
+referenced. Any subroutines that make use of the table require
+this pointer value as an argument to allow the table to be
+uniquely identiﬁed.
+char *tblName, *xKeyName, *yKeyName;
+void* tblPointer;
+int
+xIndex, yIndex;
+/* Get the name of the time gate file from the menu */
+exParGetString( "TBLNAME", tblName );
+/* Get the gate from the database */
+tblPointer = tblFromDatabase( "MUT", tblName );
+if( tblPointer == NULL ){
+exErrFatal("Cannot open time gate");
+}
+/* Get the name of X and Y axes of the table and the\
+header indicies */
+xKeyName = tblDescX( tblPointer );
+yKeyName = tblDescY( tblPointer );
+if( xKeyName == NULL || yKeyName == NULL ){
+exErrFatal("Table X or Y header names do not exist\
+in the dataset.");
+}
+xIndex = hdrIndex( xKeyName);
+yIndex = hdrIndex( yKeyName);
+/* Get the number of Z values (times), it should be 2 */
+if( tblCountZ( tblPointer ) != 2 ){
+exErrFatal("Time gate must have a start and end\
+time.");
+}
+
+After the table is read into memory, the names of the X and Y
+axes are retrieved using tlbDescX and tblDescY. The header
+array indices for the X and Y keys are also retrieved using
+hdrIndex. The number of Z values (times) is checked using
+tblCountZ to be sure that it is exactly two (a start and end time),
+otherwise this would be an invalid table for this operation.
+This piece of code came from the initialization subroutine in
+ampRatio.c. The table is read into memory only one time. It
+will be preserved there until it is intentionally closed by the
+programmer, or until the routine fails through exErrFatal or
+some other means of stopping execution.
+Next we see where the table that is created above is used in the
+subroutine exec_amp_ratio, which can also be found in the
+example code ﬁle ampRatio.c. The subroutine exec_amp_ratio
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines219
+
+Developer’s Programming Guide
+
+is given one data trace at a time to process, and the time gate is
+interpolated for that trace, which is referred to as the current
+trace in the following discussion.
+In the following code segment, double representation of the
+primary key value and a ﬂoating point representation of the
+secondary key value are found (the table interpolation routines
+only work with double and ﬂoating point values for X and Y
+coordinates) and the time gate is interpolated. The values of
+xKeyName, etc., from init_amp_ratio were passed to
+exec_amp_ratio through the external parms structure.
+float skeyVal, tgate[2];
+double pkeyVal;
+int iErr;
+/* get the primary and secondary key values */
+pkeyVal = (double)rthdr[xIndex];
+if( hdrFormat( xKeyName ) == HDRINT ) pkeyVal =\
+(double)ithdr[xIndex];
+skeyVal = rthdr[yIndex];
+if( hdrFormat( yKeyName ) == HDRINT ) skeyVal =\
+(float)ithdr[yIndex];
+/* interpolate the time gates */
+iErr = tbl2InterpXY( tblPointer, pkeyVal, skeyVal,\
+tgate );
+if( iErr != 0 ){
+exErrFatal("Error interpolating time gate.");
+}
+
+The routine tbl2InterpXY is called which interpolates the time
+gate values from the table. tlb2InterpXY also returns an error
+code to iErr which must be 0, else the interpolation could not be
+done for some reason.
+We could also do the interpolation by direct use of the X1, X2
+coordinates. This is only desirable if X1 and X2 are readily
+available through trace headers, as occurs in the following code:
+/* Get the X1,X2 coordinates from the headers and
+interpolate */
+x1 = (double)rthdr[ indexX1 ];
+x2 = (double)rthdr[ indexX2 ];
+iErr = tbl2InterpZ( tblPointer, x1, x2, 1, 1, 1,\
+&skeyVal, tgate );
+if( iErr != 0 ){
+exErrFatal("Error interpolating table value.");
+}
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines220
+
+Developer’s Programming Guide
+
+Example 2
+In order to create a new ProMAX table, the user must have ﬁrst
+created a table name while working in the user interface. The
+program that will ﬁll the table with data must get the name of
+the table into which the data will be written. The name of the
+table is acquired with the routine exParGetString in the init_
+subroutine, as shown in the previous example. The name of the
+table that is acquired from a call to exParGetString is the 8character label (or hash name) which is generated from the table
+description input by the user. In order write to the table, you
+must ﬁnd the descriptive name by use of the routine
+tblDescFromDatabase. Memory must then be allocated for the
+table, which is done using tblAllocate.
+The following code shows a working ProMAX module which
+writes a new velocity table to the database.
+/* This example shows how to create a new table in the
+database. */
+/* The example if for adding a new RMS velocity table */
+/* include ProMAX prototypes and globals */
+#include "cpromax.h"
+#include "cglobal.h"
+/* define saved parameters */
+BEGINPARMS
+void *tblPntr;
+ENDPARMS(parms)
+/***-----------------------------------------------------------------Description:
+Standard initialization routine
+output arguments:
+len_save - number of 4-byte words to save for\
+re-entrancy
+itooltype - processing tool type
+--------------------------------------------------------------------***/
+void
+init_dummya_(int *len_sav, int *itooltype)
+{
+/* local variabes */
+char *tblDesc; /* user-given descriptive table name
+*/
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines221
+
+Developer’s Programming Guide
+
+char *tblHashName; /* 8-character name created from\
+tblDesc */
+/* get the table hash name from a menu, this is an\
+8-character */
+/* string created from the original user-given table\
+name */
+exParGetString("VEL_FILE", &tblHashName );
+/* get the table description from the hash name. The\
+description is */
+/* needed when the table is written to the data base */
+tblDesc = tblDescFromDatabase( "VEL", tblHashName );
+if( tblDesc == NULL ){
+exErrFatal("Table description not found.");
+}
+/* allocate space for a new table, one z value per
+x1,x2,y location */
+parms->tblPntr = tblAllocate( 1, "CDP", "TIME",\
+"VEL", tblDesc );
+if( parms->tblPntr == NULL ){
+exErrFatal("couldn’t allocate space for a new\
+table.");
+}
+/* Set the number of words that need to be saved for
+re-entrancy. */
+*len_sav = NPARMS (parms);
+/* set the tool type */
+*itooltype = ISIMPLE;
+
+}
+
+/*******************************************************
+**************
+*
+*
+Description:
+*
+Standard execution routine
+*
+*
+Input/output arguments:
+*
+trace - array of trace samples
+*
+ithdr - trace header (as integer)
+*
+rthdr - trace header (as floating [point)
+*
+********************************************************
+**************/
+
+void exec_dummya_(float *trace, int *ithdr, float *rthdr)
+{
+float yValue, zValue;
+double xValue;
+int
+iErr;
+if( globalRuntime->cleanup ){
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Examples of Table Routines222
+
+Developer’s Programming Guide
+
+/* .. The last trace has been processed, write the table
+to the database */
+tblToDatabase( parms->tblPntr, "VEL" );
+return;
+}
+/* add values to the table */
+xValue = 1.0;
+yValue = 2.0;
+zValue = 3.0;
+tbl2AddXY( parms->tblPntr, xValue, yValue, &zValue );
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

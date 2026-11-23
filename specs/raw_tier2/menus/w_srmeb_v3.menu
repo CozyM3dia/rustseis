@@ -1,0 +1,80 @@
+;; 1 IIID IVD DEV DEPTHC
+'(
+name: W_SRMEB_V3
+label: "SRME F-X to Y-X"
+value_tab: 50
+
+parameter: MAXSHOTS
+text: "Maximum number of shots"
+type: typein:
+type_desc:  ( int: 7 1 nil)
+value: 999999
+mouse_text: "The maximum number of shots in this dataset."
+
+parameter: HDR_VAL1
+text: "Primary key of regularization"
+type: function:
+type_desc: (header_list headers )
+value: "SOURCE  "
+selected_item: "SOURCE  "
+mouse_text: "Use MB1 to specify the Primary key trace header entry of regularization."
+plot_label: t
+
+parameter: FILENAME
+text: "Trace Header file name"
+type: typein:
+type_desc: ( :string 32 )
+value: "trchdrs"
+mouse_text: "Specify the name of the file to save the Trace Headers out to."
+plot_label: t
+
+parameter: MAXFREQ
+text: "Maximum Frequency to process"
+type: typein:
+type_desc: ( real: 9 nil nil )
+value: 0.0
+mouse_text: "Maximum frequency to process (hz).  0.0 implies Nyquist."
+plot_label: t
+
+parameter: PFREQT
+text: "Frequency taper"
+type: typein:
+type_desc: ( real: 9 0.0 100.0 )
+value: 5.0
+mouse_text: "Frequency taper (% of maximum frequency)."
+plot_label: t
+
+parameter: DEBUG
+text: "Debug mode?"
+type: boolean:
+value: nil
+mouse_text: "If 'Yes', you must execute this program yourself using a debugger."
+
+exec_data:
+	("ST_W_SRMEB_V3"
+		("GENERAL"
+			("program"   implicit: "w_srmeb_v3.exe" )
+			("DEBUG"     implicit: (if (value 'DEBUG) 2 0 ) )
+			("version"   implicit: "ProMAX $Id: w_srmeb_v3.menu 43993 2009-02-26 17:51:37Z David Johnston $ $Revision: 43993 $ $Date: 2009-02-26 10:51:37 -0700 (Thu, 26 Feb 2009) $")
+;  variables after here are user parameters
+			("MAXSHOTS"  implicit: (value 'MAXSHOTS))
+			("HDR_VAL1"  implicit: (value 'HDR_VAL1))
+			("FILENAME"  implicit: (value 'FILENAME))
+			("MAXFREQ"   implicit: (value 'MAXFREQ))
+			("PFREQT"    implicit: (value 'PFREQT))
+		)
+	)
+
+rules: 	(
+
+(socket_debug_rule t
+		(if (= (printenv 'SOCKET_DEBUG) "t")
+			(do_show 'DEBUG)
+			(do_not_show 'DEBUG) )  )
+
+(maxshots_default_rule  (AND ( = (value 'MAXSHOTS) 999999.) (db_parmget_line "NSHOTSz"))
+                 (set_value 'MAXSHOTS (db_parmget_line "NSHOTSz")))
+
+	)
+
+)

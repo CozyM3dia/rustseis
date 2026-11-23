@@ -1,0 +1,187 @@
+; IIID IVD 1 DEV DEPTHC
+'(
+ name: DMOJ
+
+label: "Dip Decomposition DMO"
+
+value_tab: 50
+
+parameter: STR_MUTE
+text: "Stretch mute percentage"
+type: typein:
+type_desc: ( real: 7 0.0 100.0 )
+value: 20.0
+mouse_text: "Any sample stretched more than this percentage will be automatically muted (enter 0.0 to disable)."
+plot_label: t
+
+parameter: DO_STAT
+text: "Apply datum statics during DMO stack?"
+type: boolean:
+value: t
+mouse_text: "If 'Yes', NA_STAT and FNL_STAT header word statics will be applied during DMO stack."
+plot_label: t
+
+parameter: vel_option
+text: "Get velocities from the database?"
+type: boolean:
+value: t
+mouse_text: "Select 'Yes' if there is an appropriate NMO stacking velocity function in the database as a parameter file."
+plot_label: t
+ 
+parameter: VELNAME
+text: "  SELECT Velocity parameter file"
+type: function:
+type_desc: ((parm_list "VEL") parms)
+value:  "no entry"
+selected_item: "* No Parameter File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select a velocity function parameter file from the parameter file menu."
+plot_label: t
+ 
+parameter: VELFIELD
+text: "SPECIFY NMO velocity function(s)"
+type: edit:
+type_desc: (20 80 15 " FORMAT: CDP1:T1-V1,T2-V2,...,Tn-Vn/CDP2:T1-V1,T2-V2,...,Tn-Vn/
+ EXAMPLE: 1:0-5000,900-6725,1500-8571,2000-9670/101:0-5100,860-6690,2000-9852/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and 
+                          paste'; (Can move the cursor first) " 3 )
+value: "XXX"
+mouse_text: "Use Mouse Button 1 to edit/define normal moveout velocity functions. (SEE EDITOR FOR EXAMPLES.)"
+plot_label: t
+ 
+
+parameter: FMIN
+text: "Minimum frequency to process"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 0.0
+mouse_text: "Enter the minimum frequency to process in Hz."
+plot_label: t
+
+parameter: FMAX
+text: "Maximum frequency to process"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 100.0
+mouse_text: "Enter the maximum frequency to process in Hz."
+plot_label: t
+
+parameter: THETA1
+text: "Lowest dip angle"
+type: typein:
+type_desc: ( real: 7 0.0 90.0 )
+value: 0.0
+mouse_text: "Enter the lowest dip angle in the data in degrees."
+plot_label: t
+
+parameter: THETA2
+text: "Highest dip angle"
+type: typein:
+type_desc: ( real: 7 0.0 90.0 )
+value: 60.0
+mouse_text: "Enter the highest dip angle in the data in degrees."
+plot_label: t
+
+parameter: NTHETA
+text: "Number of dip angles to process"
+type: typein:
+type_desc: ( int: 2 1 50 )
+value: 20
+mouse_text: "Enter the number of dip angles to divide the dip range into. Reduce this number if memory is a problem."
+plot_label: t
+
+parameter: IOVERLAP
+text: "Number of dip angles to overlap"
+type: typein:
+type_desc: ( int: 2 1 nil )
+value: 4
+mouse_text: "Enter the number of dip angles to overlap when calculating the dip filter."
+plot_label: t
+
+parameter: NCDP
+text: "Panel size in CDPs"
+type: typein:
+type_desc: ( int: 3 1 nil )
+value: 96
+mouse_text: "Enter the stacked data panel size for the dip filter in CDPs. Reduce this size if memory is problem."
+plot_label: t
+
+parameter: MINTR
+text: "Minimum allowable panel size in CDPs."
+type: typein:
+type_desc: ( int: 3 0 nil )
+value: 60
+mouse_text: "Enter the minimum allowable stacked data panel size for the dip filter in CDPs."
+plot_label: t
+
+parameter: NOVER
+text: "Number of CDPs to overlap between panels"
+type: typein:
+type_desc: ( int: 3 0 nil )
+value: 20
+mouse_text: "Enter the number of CDPs to overlap between merged stack panels."
+plot_label: t
+
+parameter: DX
+text: "CDP spacing"
+type: typein:
+type_desc: ( real: 7 0.0 nil )
+value: 0.0
+mouse_text: "Enter the distance between CDPs. Must be specified"
+plot_label: t
+
+
+exec_data: ("DMOJ"
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: dmoj.menu 41831 2007-09-01 20:51:38Z crs $ $Revision: 41831 $ $Date: 2007-09-01 14:51:38 -0600 (Sat, 01 Sep 2007) $")
+                        ("VELNAME " implicit: (if (value 'vel_option) (value 'VELNAME) "NONE    "))
+                        ("VELFIELD" implicit: (value 'VELFIELD))
+			("DO_STAT " implicit: ( if (value 'DO_STAT) 1 0 ))
+			("STR_MUTE" implicit: (value 'STR_MUTE))
+			("FMIN    " implicit: (value 'FMIN))
+			("FMAX    " implicit: (value 'FMAX))
+			("THETA1  " implicit: (value 'THETA1))
+			("THETA2  " implicit: (value 'THETA2))
+			("NTHETA  " implicit: (value 'NTHETA))
+			("IOVERLAP" implicit: (value 'IOVERLAP))
+			("NCDP    " implicit: (value 'NCDP))
+			("MINTR   " implicit: (value 'MINTR))
+			("NOVER   " implicit: (value 'NOVER))
+			("DX      " implicit: (value 'DX))
+
+		)
+	    )	
+
+
+
+rules: (
+
+
+
+ (velfield2d (value 'vel_option) 
+             (do_not_show 'VELFIELD) 
+             (do_show 'VELFIELD))
+ 
+ (velname2d  (value 'vel_option) 
+             (do_show 'VELNAME) 
+             (do_not_show 'VELNAME))
+ 
+ (VEL_default_rule1 (and ( equal ( value 'VELFIELD) "XXX" )
+                          ( = ( db_parmget_line "IUNITSz") 1 ) ) (set_value 'VELFIELD "1:0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000/" ) )
+ (VEL_default_rule2 ( equal ( value 'VELFIELD) "XXX" ) (set_value 'VELFIELD "1:0-1480,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000/" ) )
+
+)
+
+
+
+
+
+
+)

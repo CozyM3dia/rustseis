@@ -1,0 +1,409 @@
+Radon Analysis2071
+
+ProMAX® Reference
+
+Radon Analysis
+Radon Analysis transforms data to time-moveout space so
+that a mute can be picked to eliminate primary energy.
+
+Theory
+Radon Analysis transforms the data to time-moveout space
+so that a suitable mute can be picked to eliminate the
+primary energy. The multiple energy is left, which can then
+be subtracted from the input data. Radon ﬁlters can also be
+applied such that they pass the primary energy, but in
+practice this has tended to produce an artiﬁcial and wormy
+appearing result.
+The Radon transform distinguishes between primaries and
+multiples based on the residual moveout from near to far
+offset. A parabolic form of the Radon transform is used since
+multiples have an approximately parabolic form after NMO.
+An approximately hyperbolic form can also be used. This
+hyperbolic approximation is more accurate at times around
+offset=depth, but is not as accurate for shallower events as
+the parabolic method.
+The transform is applied for linear moveout as well.
+Sparse Transform Option
+Conventional Radon Filtering has limitations on the
+discrimination possible between multiples and primaries.
+These limitations stem from the fact that events in T-X space
+do not transform to points in Tau-P space, but exhibit a
+“butterﬂy” shape. The sparse transform option will reduce
+the size of the butterﬂy in the Moveout (P) direction, but can
+cause dispersion of energy in the time (Tau) direction. The
+sparse transform does this by concentrating energy on the
+Moveout samples which have the most energy. This
+discrimination against weak events tends to reduce the effect
+of aliased events as well as enhance those which are desired.
+In order for the sparse option to be most effective, the
+primaries should be ﬂattened by applying NMO before Radon
+Filter or Analysis. This will align all of the primary energy
+near P=0, giving greatest weight to the primary reﬂections in
+the sparse transform. Multiple energy should be expected to
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2072
+
+ProMAX® Reference
+
+fall on a variety of P-values, so the sparse solution does not
+reconstruct it as well as the aligned primaries. Incoherent
+noise and aliased energy should be diminished for this same
+reason.
+Testing should be done to determine the optimum amount of
+sparseness to use for each dataset. There is a tradeoff
+between the ﬁdelity of data reconstruction and the separation
+of events which can be obtained.
+
+Usage
+Input Data
+Input CDP domain data to Interactive Radon/Tau-P
+Analysis and Radon Filter that has NMO ﬁrst applied using
+the primary velocities and an appropriate mute for
+eliminating ﬁrst break refractions and NMO stretch. A Radon
+space is then computed for the analysis CDP.
+Beneﬁts
+This method requires no knowledge of the multiple
+generating mechanism, and unlike the F-K demultiple
+processes, it attenuates multiples at all offsets equally. It also
+works fairly well with non-uniform geometries.
+A minimum moveout of 30 ms from near trace to far trace is
+required for this algorithm to be effective on real data. The
+greater the moveout differential, the more effective the Radon
+ﬁlter. However, large moveout differentials can require more
+p-values over a greater range for adequate sampling.
+Note: Choose this parameter with care because run time for
+this process increases with the square of the number of pvalues. Radon ﬁltering is a compute intensive process
+requiring several minutes for a high fold CDP.
+Displaying Output
+Use Radon Analysis to display data as time versus residual
+moveout. Primaries map from offset space to zero residual
+moveout in Radon space. Multiples map to the positive
+residual moveout zone. Overcorrected events are in the
+negative residual moveout portion of Radon space. This is
+why the typical range of minimum to maximum p values for a
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2073
+
+ProMAX® Reference
+
+Radon Transform are biased toward positive values, typically
+from -x0 ms to +x00 ms.
+
+Input Gather
+Inverse Transform
+Radon Transform
+Removing Multiplies
+Use the following steps to remove multiples.
+1. Apply NMO with the primary velocity function.
+2. Run Radon Analysis on a representative set of CDPs. Set
+the Radon Transform parameters using the Edit
+➛Transform Parameters pulldown menu.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2074
+
+ProMAX® Reference
+
+To pick a top mute use Edit ➛ Select Mutes and Edit ➛
+Mute Parameters pulldown menus.
+
+Apply the mute for quality control by clicking on the
+Paintbrush icon.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2075
+
+ProMAX® Reference
+
+Reﬁne the transform parameters and mute until the
+desired output is achieved.
+3. Run the Radon Filter using the mute and parameters
+picked in Step 2.
+Radon analysis also provides general functions of display and
+interactive parameter ﬁle creation for the Radon transformed
+data. The display function is actually a subset of the full
+trace display process. Any parameters not available on the
+menu can be available for modiﬁcation once the ﬂow has
+executed, using pulldown menus from the menu bar.
+The display supports interactive picking of mutes for
+subsequent Radon ﬁlters. The display uses the range-limited
+scaling option.
+Note: The reference offset must be the same as used in
+Radon Filter, to apply the same mutes.
+Parameters controlling the ﬁdelity of the ﬁltering are
+interactively changed. Output from the inverse transform is
+viewed to evaluate the entire ﬁltering process.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2076
+
+ProMAX® Reference
+
+References
+Cary, P., 1998. The simplest discrete Radon transform. SEG Expanded
+Abstracts, Vol. II, p. 1999-2002.
+Foster, D.J., and Mosher, C.C., 1992, Suppression of multiple reﬂections using the
+Radon transform: Geophysics, vol 57 p386-395.
+Hampson, D., 1986, Inverse velocity stacking for multiple elimination: Journal of
+the Canadian Society of Exploration Geophysicists, vol 22 p44-55.
+Sacchi, M.D. and Ulrych, T. J., 1995. High resolution velocity gathers and offsetspace reconstruction: Geophysics, 60, 1169-1177.
+Sacchi, M.D., 1999. Fast high resolution parabolic Radon transform. SEG
+Expanded Abstracts, Vol. II, p. 1477-1480.
+Thorson, J. R., and Claerbout, J. F., 1985, Velocity stack and slant stack stochastic inversion: Geophysics, vol 50 p2727-2741.
+
+Parameters
+Number of P-values
+Enter the number of p-values for the radon transform. A
+typical range is between 20 and 40. Minimally, the number of
+p-values should equal the maximum fold of the input data.
+Too low a value generates streaks in the output; too large a
+value greatly increases runtime.
+Minimum P-value of interest (ms)
+Enter the minimum p-value of interest, in ms. This value
+represents the largest overcorrection on the data at the far
+offset. Start with a value around -100 ms. Allow the
+primaries to show a slight overcorrection. You must also
+allow for the ﬁnite length of the primary reﬂection wavelet.
+Maximum P-value of interest (ms)
+Enter the maximum p-value of interest, in ms. This value
+represents the largest undercorrection on the data at the far
+offset. Start with a value of around 400 ms. This value
+depends on the data, the velocities of the multiple energy,
+and the offsets used in recording the data. Select the
+maximum value seen in the data for undercorrected
+multiples, and add about a 100 ms margin.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2077
+
+ProMAX® Reference
+
+Note: All coherent events on the data should fall between the
+minimum and maximum p-values of interest. If coherent
+energy falls outside of this range, the least-squares ﬁt
+attempts to model it into the range of p-values. This results
+in artifacts in the output.
+Minimum time of interest (ms)
+Enter the minimum time in ms. The minimum time is the top
+of the window on the input data.
+Maximum time of interest (ms)
+Enter the maximum time in ms. The maximum time is the
+bottom of the window on the input data. Enter 0 to
+automatically set the maximum data time.
+Minimum frequency of interest
+Enter the minimum coherent frequency in Hz in the data.
+Maximum frequency of interest
+Enter the maximum coherent frequency in Hz in the data.
+Type of transform to perform
+Select how to model events which are:
+• Parabolic: Parabolic radon transform.
+• Hyperbolic: Exactly hyperbolic for events at depths
+equal to the reference offset. This has greater error than
+Parabolic for shallower events.
+• Linear: Use to attack linear noise, also known as slant
+stack.
+Parabolic and Hyperbolic are normally used for multiple
+rejection.
+Reference offset for delta moveout
+Enter the reference at which mute parameters were picked
+for a particular delta moveout. A larger residual moveout is
+expected for larger offsets, hence the need to deﬁne a
+reference for the mutes. P-values are expected to vary with
+the square of the change in reference offset. The reference
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2078
+
+ProMAX® Reference
+
+offset should be close to the maximum offset of the input
+data, and must agree with that speciﬁed in Radon Filter.
+Damping for radon solution
+Enter a fraction of damping (white noise) to add for the
+matrix solver. For typical datasets, the damping should be set
+to a value between 0.01 and 0.1. Higher values are
+appropriate for noisier data.
+If the damping is set less than 0.01, it is assumed that the
+data are very clean, such as synthetics. An alternative matrix
+solution can be used, depending on the stability of the matrix
+at each frequency. Results may be signiﬁcantly different
+compared with higher levels of noise.
+Compute a sparse (Hi-res) radon solution?
+Select Yes to compute a sparse radon transform. The sparse
+solution is an iterative solution which will take more time to
+compute, but can give sharper deﬁnition of events along the
+moveout axis.
+Sparseness parameter
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. Enter the amount of sparseness in the solution
+measured as a fraction of the main matrix diagonal. Use
+values between 0 and 1.0. A larger value will give a solution
+which is sparser in the moveout axis. Values between 0.05
+and 0.2 should be tested.
+Sparseness stability parameter
+This appears if Yes to Compute a sparse (Hi-res) radon
+solution. Enter a value between 0.001 and 0.1. Test these
+values until you ﬁnd the correct solution for your data. A
+smaller value allows a sparser solution to be computed. This
+parameter (measured as a fraction of sparseness parameter)
+avoids division by zero. It has a similar, but opposite, effect
+to the Sparseness parameter.
+Stopping parameter
+Enter a value to determine when sparse solution has been
+reached. When change in solution is less than this amount,
+iterations stop. TGhe default is 0.001.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2079
+
+ProMAX® Reference
+
+Maximum number of iterations allowed
+Enter the maximum number of iterations to arrive at sparse
+solution. The default is 10.
+Select display DEVICE
+Select This Screen to plot on the current screen. To override
+the display default, enter the name of the display device.
+Maximum Number of TRACES/screen
+Enter the number of traces to display on screen at one time.
+Enter 0, the default, to automatically calculate the maximum
+number of traces.
+Number of ENSEMBLES (line segments)/screen
+Enter the number of trace ensembles, or stacked line
+segments, to display on the screen at one time.
+Output mode
+Select how to output traces from:
+• When Done: Return traces to the ﬂow when you display
+the next screen.
+• Immediate: Return traces to the ﬂow as soon as they
+are read.
+Header Plot Parameter:
+Select a trace header entry to plot in the headboard from the
+Headers menu.
+Automatically SAVE screens?
+Select Yes to automatically save every display screen.
+Maximum number of screen images to save
+Enter the maximum number of screen images to save. The
+default, 1, is one color screen. The maximum number of
+saved images is 20. When the number of individual screens is
+reached, then additional screens will remove older screens.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2080
+
+ProMAX® Reference
+
+Note: Keep this number as low as reasonably possible
+because you are assigning approximately 1 megabyte per
+image automatically.
+Save screens in color?
+Select Yes to save color images.
+Where to save screen images:
+Select where to save screen images. The options are Xserver
+and Program.
+Xserver is faster but may not work on X terminals with
+limited memory.
+Number of screens to collect
+This appears if Yes to Automatically save screens. Enter
+the number of individual screen to collect before reviewing.
+The maximum value is 20 Color screens. The saved screens
+can only be reviewed and compared; they can not be
+interacted with in this mode. To do that you would need to
+rerun the ﬂow changing this parameter to 1.
+DIRECTION of trace plotting
+Select the trace display direction of your CDPs. The options
+are:
+• Left to Right, the default, displays the traces with the
+low numbers starting on the left-hand side of the screen.
+• Right to Left displays the traces with the low numbers
+starting on the right-hand side of the screen.
+This has nothing to do with the polarity of your data.
+Get min/max amplitudes from the data?
+Select Yes to extract the minimum and maximum amplitude
+values from the data. Select No to enter the min/max
+amplitude values.
+Specify minimum amplitude to display
+This appears if No to Get min/max amplitudes from the
+data. Enter the minimum amplitude to display, without
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2081
+
+ProMAX® Reference
+
+clipping. In color, this corresponds to the coldest color. The
+default is -1.0.
+Specify maximum amplitude to display
+This appears if No to Get min/max amplitudes from the
+data. Enter the maximum amplitude to display, without
+clipping. In color, this corresponds to the hottest color. The
+default is 1.0.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Radon Analysis2082
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

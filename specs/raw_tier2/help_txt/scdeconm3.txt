@@ -1,0 +1,290 @@
+Gated SC Decon 3: Application69
+
+ProMAX® Reference
+
+Gated SC Decon 3: Application
+Gated SC (Surface Consistent) Decon 3: Application uses
+selected components from a spectrum ﬁle created by an
+earlier stage of Gated SC Decon to design a Wiener-Levinson
+decon ﬁlter for each gate of each input trace. The ﬁlter is
+applied to each gate and the results are blended to form the
+deconvolved output trace.
+
+Theory
+For an introduction to Gated SC Decon and how Stage 3:
+Application ﬁts in, refer to Gated SC Decon Introduction.
+Stage 3: Application can use the spectrum ﬁle created by
+either Stage 1: Estimation or Stage 2: Decomposition. If it
+uses the decomposed ensemble spectra from Stage 2, then it
+is doing surface consistent deconvolution. If it uses the initial
+ensemble spectral estimates from Stage 1, then it is doing
+ensemble deconvolution.
+For information about the amortization option, refer to
+Ensemble Deconvolution.
+
+Usage
+Input traces may be in any order.
+The spectrum ﬁle contain no spectrum for component
+indexes that were not in the traces used in Stage 1:
+Estimation. Traces input here that were not also input to
+Stage 1: Estimation are likely to have components for which
+there is no spectrum. If offsets were limited in Stage 1:
+Estimation, then a few traces may have components for
+which there is no spectrum.
+The program prints a warning whenever an input trace has a
+component for which there is no spectrum. If all components
+of a trace have no spectrum, the program prints a warning
+and kills the trace. If some, but not all, components have no
+spectrum, what happens depends upon the choice for
+parameter Kill trace if component missing. The program
+either deconvolves the trace with the remaining components
+or prints a warning and kills the trace.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application70
+
+ProMAX® Reference
+
+Input
+The input spectrum ﬁle depends on the choice for parameter
+Solution option:
+• Surface consistent deconvolution uses
+$PROMAX_SCRATCH_HOME/area_line_SOL-xxxx.
+• Ensemble deconvolution uses
+$PROMAX_SCRATCH_HOME/area_line_INI-xxxx.
+
+Parameters
+Get APPLICATION gates from the DATABASE?
+Select Yes if a table containing application time gates exists.
+Select No to enter the gate parameters.
+SELECT Primary gate header word
+This appears if No to Get APPLICATION gates from the
+DATABASE. Select the primary header word for the
+application gates.
+SELECT Secondary gate header word
+This appears if No to Get APPLICATION gates from the
+DATABASE. Select the secondary header word for the
+application gates.
+Specify APPLICATION gate parameters
+This appears if No to Get APPLICATION gates from the
+DATABASE. Enter the gate pattern for up to 10 gates. The
+format is Primary Gate location: Secondary Gate location:
+Time Gate(s). For example, 101:0.0:700-2000 /
+101:5280.0:1200-2200.
+Note: The gate parameters speciﬁed here can differ from the
+ones used in Stage 1: Estimation. The only requirement is
+that the number of gates remain the same.
+Select APPLICATION Time Gate Parameter FILE
+This appears if Yes to Get APPLICATION gates from the
+DATABASE. Select a time gate parameter ﬁle from the
+database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application71
+
+ProMAX® Reference
+
+Note: The gate ﬁle selected here can differ from the one used
+in Stage 1: Estimation. The only requirement is that the
+number of gates remain the same.
+Components of spectral decomposition
+Select the components used in the spectral decomposition.
+The selections here must match the selections made in
+Stage 1: Estimation and Stage 2: Decomposition.
+A multi-value menu appears with ﬁve possible components
+for the spectral decomposition: SHOT, RCVR, OFFSET, CDP
+and OTHER. Select your choices and click Accept. Click
+Help to display a description of the functionality of this
+menu. Exit without performing any update by clicking Abort.
+SELECT header word for OTHER component
+This appears if OTHER to Components of spectral
+decomposition. Select the header word to use as the OTHER
+component of spectral decomposition. The selection here
+must match the selection made in Stage 1: Estimation.
+Minimum value for OTHER
+Maximum value for OTHER
+Increment for OTHER
+These appear if OTHER to Components of spectral
+decomposition. Enter the minimum and maximum values
+and the increment for the OTHER component header word.
+The values entered here must match the values used in
+Stage 1: Estimation.
+Components to use in application
+Select the components to use in application. Normally only
+the SHOT and RCVR components are applied.
+A multi-value menu appears containing only the components
+of the spectral decomposition. Select your choice(s) and click
+Accept. Click Help to display a description of the
+functionality of this menu. Exit without performing any
+update by clicking Abort.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application72
+
+ProMAX® Reference
+
+Kill trace if component missing?
+Select what happens when an input trace has a component
+for which there is no spectrum. Select Yes to kill the trace.
+Select No to deconvolve the trace with the remaining
+components. If all component spectra are missing, the trace
+is always killed.
+Solution option
+Select the spectra to use when designing the deconvolution
+operators from the following choices:
+• Surface consistent deconvolution uses the decomposed ensemble spectra from Stage 2: Decomposition.
+• Ensemble deconvolution uses the initial ensemble
+spectral estimates from Stage 1: Estimation.
+Limit offsets?
+This appears if OFFSET to Components to use in
+application. The selection here must match the selection
+made in Stage 1: Estimation.
+Minimum absolute offset
+Maximum absolute offset
+These appear if Yes to Limit offsets. Enter minimum and
+maximum absolute offsets. The values entered here must
+match the values used in Stage 1: Estimation. Any trace
+with AOFFSET less than the minimum will be deconvolved
+using the spectrum for the offset bin (OFB_NO) containing
+the minimum. Any trace with AOFFSET greater than the
+maximum will be deconvolved using the spectrum for the
+offset bin (OFB_NO) containing the maximum.
+TYPE of deconvolution
+Select the type of deconvolution operator to design and apply.
+The choices are:
+• Spiking applies Wiener-Levinson spiking decon.
+• Phase correction only applies Wiener-Levinson spiking
+decon without spectral whitening.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application73
+
+ProMAX® Reference
+
+• Spectral whitening only applies Wiener-Levinson spiking decon without phase correction.
+• Predictive applies Wiener-Levinson predictive decon.
+Decon operator length(s)
+Enter the deconvolution operator length, in ms, for each gate.
+The operator length determines how much of the
+autocorrelation function is used to design the deconvolution
+operator. The number of values must equal the number of
+gates. The values entered here must match the values used
+in Stage 1: Estimation.
+Operator white noise level(s)
+Enter the white noise value, in percent, for each gate. This
+value represents the percentage of white noise to add to the
+zero lag of the autocorrelation function. The number of values
+must equal the number of gates. The values entered here
+may differ from the values used in Stage 1: Estimation.
+Note: The autocorrelation function is derived from the sum of
+the spectral components. White noise was already added to
+the zero lag of the autocorrelation function when the spectra
+were calculated.
+Operator prediction distance (s)
+This appears if Predictive to TYPE of deconvolution. Enter
+the prediction distance, in ms, for each predictive
+deconvolution operator. The number of values must equal the
+number of gates.
+Gate rejection factor
+Enter the factor by which to multiply the operator length. If a
+gate contains fewer live samples than the product of Gate
+rejection factor * Decon operator length, no operator is
+designed for that gate. The data in the gate are deconvolved
+using the operator for an adjacent gate. If all gates for a trace
+have too few live samples, then the trace is killed.
+Apply a bandpass ﬁlter after decon?
+Select Yes to apply a bandpass ﬁlter to the data after
+deconvolution.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application74
+
+ProMAX® Reference
+
+Bandpass ﬁlter frequency values
+This appears if Yes to Apply a bandpass ﬁlter after decon.
+Enter the bandpass ﬁlter frequencies in Hz. The ﬁlter is
+speciﬁed by a set of four corner frequencies, separated by
+dashes. The values can be integers or real numbers. They
+represent, sequentially, the 0% and 100% points of the lowcut ramp, and the 100% and 0% points of the high-cut ramp.
+The ramps are formed by cosine tapers (Hanning windows) in
+the frequency domain.
+Amortize the operator spectrum?
+Select Yes to override the operator design at the low and high
+ends of the frequency spectrum. Select No for conventional
+operator design.
+Low-end amortization frequency (Hz)
+This appears if Yes to Amortize the operator spectrum.
+Enter the frequency in Hz where low-end amortization
+begins.
+Low-end amortization slope (dB/oct)
+This appears if Yes to Amortize the operator spectrum.
+Enter the low-end amortization slope in decibels/octave.
+High-end amortization frequency (Hz)
+This appears if Yes to Amortize the operator spectrum.
+Enter the frequency in Hz where high-end amortization
+begins.
+High-end amortization slope (dB/oct)
+This appears if Yes to Amortize the operator spectrum.
+Enter the high-end amortization slope in decibels/octave.
+Reapply trace mute after decon?
+Select Yes to reapply previously applied trace mutes after
+deconvolution. Select No to leave the data as it is output from
+the deconvolution.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application75
+
+ProMAX® Reference
+
+4-character ﬁle ID
+Enter 4 characters (letters or numbers) for identifying the
+input spectrum ﬁle.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Gated SC Decon 3: Application76
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

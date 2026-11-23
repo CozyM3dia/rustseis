@@ -1,0 +1,84 @@
+; 1
+'(
+ name: AUTOSTAT
+label: "CDP Trim Statics*"
+value_tab: 45
+
+
+parameter: LABEL
+text: "Select Trace data file"
+type: function:
+type_desc: (dataset_list datasets)
+value: "no entry"
+selected_item: "* No Datasets Found *"
+mouse_text: "Use Mouse Button 1 to select a trace data file description from the datasets menu."
+
+
+parameter: HRZ_NAME
+text: "Select trim statics horizon file"
+type: function:
+type_desc: ((parm_list "AHZ") parms)
+value:  "no entry"
+selected_item: "* No Horizon File has been Selected *"
+mouse_text: "Use Mouse Button 1 to select an trim statics Horizon file from the time gate file menu."
+
+
+parameter: TLIVEMIN
+text: "Minimum live samples in a gate (percent)"
+type: typein:
+type_desc: ( real: 5 1.0e-3 100.0 )
+value: 60.0
+mouse_text: "If fewer than this percentage of samples in any gate are non-zero, the trace is excluded from statics estimates."
+
+
+parameter: STAT_MAX
+text: "Maximum static allowed (milliseconds)"
+type: typein:
+type_desc: ( real: 5 1.0e-3 nil )
+value: 10.0
+mouse_text: "Do not allow computed statics to exceed this magnitude."
+
+
+
+parameter: db_option
+text: "Create a NEW database entry for each run?"
+type: boolean:
+value: nil
+mouse_text: "If this is set to NO, if a previous database entry is present it will be overwritten (thereby saving space)."
+
+
+parameter: DB_NUM
+text: "  Enter 4 digit ID number"
+type: typein:
+type_desc: ( string: 4 )
+value: "0001"
+mouse_text: "Enter a 4 digit number identifying the TRC STATICS database output as TRIMXXXX."
+
+
+exec_data: ("AUTOSTAT"
+		("SPECIAL"
+			("TOOLTYPE"     implicit: "STAND_ALONE")
+			("PATHNAME"     implicit: "autostat.exe")
+		)
+		("GENERAL"
+			("version" implicit: "ProMAX $Id: trimstat.menu 28744 2001-06-25 07:56:19Z build $ $Revision: 28744 $ $Date: 2001-06-25 01:56:19 -0600 (Mon, 25 Jun 2001) $")
+			("TRIMSTAT" implicit: 1 )
+			("LABEL"    implicit: (value 'LABEL))
+			("HRZ_NAME" implicit: (value 'HRZ_NAME))
+			("TLIVEMIN" implicit: (value 'TLIVEMIN))
+			("STAT_MAX" implicit: (value 'STAT_MAX))
+			("NEW_DB"    implicit: (if (value 'db_option) 1 0 ))
+			("DB_NUM  " implicit: (value 'DB_NUM))
+		)
+	   )
+
+rules: (
+
+	(rule1 (value 'db_option)
+             (do_show 'DB_NUM)
+             (do_not_show 'DB_NUM))
+
+	)
+)
+
+

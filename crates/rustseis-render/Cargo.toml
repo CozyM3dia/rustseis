@@ -1,0 +1,12 @@
+[package]
+name = "rustseis-render"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+png.workspace = true
+rustfft.workspace = true
+rustseis-core.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tiny-skia.workspace = true

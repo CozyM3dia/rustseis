@@ -1,0 +1,153 @@
+Kirchhoff Time Migration405
+
+ProMAX® Reference
+
+Kirchhoff Time Migration
+Kirchhoff Time Migration performs a migration by applying
+a Green’s function to each CDP location using a traveltime
+map.
+
+Theory
+Traveltime maps relate the time from each surface location to
+a region of points in the subsurface. This migration uses a
+vertically and laterally variant RMS velocity ﬁeld, VRMS(x,t), in
+time. This migration provides good handling of steep dips, up
+to 90 degrees. Refer to the Migration Overview for more
+information on this process.
+A sophisticated option is provided to avoid spatial aliasing. If
+chosen, this option will result in dynamic frequency limiting
+being performed, depending upon local velocity, trace spacing
+and dip. If spatial aliasing is not a concern, this option can be
+disabled, with a resulting speed-up of about a factor of two in
+execution time.
+The primary advantages of this algorithm are relative speed
+and good handling of vertically variant velocity ﬁelds and
+steep dip handling, and fair handling of lateral velocity
+variations.
+
+Usage
+Data input to this migration is corrected to a ﬂat datum. If
+your data is referenced to a ﬂoating datum, you will need to
+apply datum statics, or use Poststack Wave Equation
+Datuming, to move your data to a ﬂat datum. If your velocity
+ﬁeld is referenced to a ﬂoating datum, you may need to
+modify the velocity ﬁeld with Velocity Field Manipulation.
+
+Parameters
+CDP interval (ft. or m)
+Enter the CDP spacing, in ft. or m, whichever is consistent
+with the headers.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Kirchhoff Time Migration406
+
+ProMAX® Reference
+
+Maximum frequency to migrate (in Hz)
+Enter the maximum usable frequency in the data. A value
+less than the Nyquist frequency for the dataset will speed up
+computations. If the input data has frequencies above this
+maximum, it should be bandpass ﬁltered before migration to
+avoid artifacts caused by abruptly truncating the frequency
+band.
+Migration aperture (ft. or m)
+Enter the maximum horizontal distance that energy can
+move in the migration. This distance determines the width of
+the traveltime maps to the left and right of a given surface
+location. Enter 0.0, the default, to compute the maximum
+aperture. Run time is proportional to this value, and can be
+signiﬁcantly decreased by calculating the maximum
+aperture, rather than using the default.
+Maximum dip to migrate
+Enter the maximum dip to migrate, in degrees. Energy with
+dip larger than this angle will not be migrated.
+Avoid Spatial Aliasing?
+Select No for maximum speed when spatial aliasing is not a
+concern. Select Yes when spatial sampling is a concern.
+When spatial sampling is small enough that the high
+frequencies are spatially aliased, artifacts can be introduced
+in to the migration, especially near the surface where
+velocities are low.
+Get RMS velocities from database?
+Select Yes to select an RMS velocity in time ﬁle from the
+database. Select No to enter the RMS velocity in time
+function.
+Select RMS vs. time velocity ﬁle
+This appears if Yes to Get RMS velocities from database.
+Select an RMS velocity in time ﬁle from the database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Kirchhoff Time Migration407
+
+ProMAX® Reference
+
+RMS velocities in time for migration
+This appears if No to Get RMS velocities from database.
+Enter a velocity function. An ASCII ﬁle can be read by
+entering the full path name to the ﬁle, and Ctrl-r.
+Change maximum memory usage?
+Select Yes to change the maximum memory that the
+migration can use.
+Maximum memory to use in megabytes
+This appears if Yes to Change maximum memory usage.
+Enter an upper limit on the amount of computer memory.
+Change the default tapering?
+Select Yes to change the edge tapering defaults. Tapering is
+performed on the section before migration in order to reduce
+edge effects.
+Bottom taper (in ms)
+This appears if Yes to Change the default tapering. Enter
+the length of the taper, in ms, between the last sample of
+each trace set to zero amplitude, and the untapered data.
+Upper edge taper (in traces)
+This appears if Yes to Change the default tapering. The
+sides of the section should be tapered before migration. In
+general, the upper edge taper will be smaller that the lower
+edge taper because of the increase in migration aperture with
+time.
+Lower edge taper (in traces)
+This appears if Yes to Change the default tapering. The
+sides of the section should be tapered before migration. In
+general, the upper edge taper will be smaller that the lower
+edge taper because of the increase in migration aperture with
+time. The taper will be varied linearly with time between the
+upper and lower edges of the section.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Kirchhoff Time Migration408
+
+ProMAX® Reference
+
+Reapply trace mutes?
+Select Yes to reapply the mutes according to the mute header
+words. Migration can move data from deeper in the section to
+the shallower portions that may be in the mute zone.
+Rekill dead traces?
+Select Yes to rekill traces that were dead (all zeros) before
+migration. Select No to keep whatever migration has mixed
+into a previously dead trace, the trace is made live, and
+mutes are determined from the ﬁrst and last nonzero
+samples.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

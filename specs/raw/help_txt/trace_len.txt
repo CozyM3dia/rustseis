@@ -1,0 +1,41 @@
+Trace Length1552
+
+ProMAX® Reference
+
+Trace Length
+Trace Length is used to shorten or lengthen traces.
+
+Theory
+This process will clip the trace if shortened or pad the trace
+with zeros if lengthened. For example, you may have
+estimated a source signature using recorded traces from
+several records. Now you want to append the data, and use
+Source Signature Correction to remove the effects of the
+source signature. The signature trace is only 500 ms long. If
+you append the seismic traces, they would normally be
+truncated to match the existing data. Therefore, you can use
+this process to lengthen the signature trace to match the
+length of the incoming seismic data.
+
+Parameters
+New trace length
+Enter the revised output trace length in ms. The trace is
+clipped if shortened; padded with zeros if lengthened.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Length1553
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

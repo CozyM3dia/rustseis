@@ -1,0 +1,289 @@
+;; IIID IVD 1 BSI PROSPECTOR FIELD DEV DEPTHC BHSS
+'(
+  :name SEG_WRITE
+  :label "SEG-Y Output"
+  :value_tab 65
+  :plot_label nil
+  :include FILENUM "tapewrite_inc3.menu" ( "SEG_WRITE" "GENERAL" ) 
+  :include IOVER "aux_write_inc.menu" ( "SEG_WRITE" "GENERAL" )
+
+  :parameter FLAVOUR
+  :text "Type of SEG-Y"
+  :type :pop_choose
+  :type_desc (
+			  ("Standard" 1 "Write a standard SEGY tape.")
+			  ("Sierra"   3 "Write a Sierra SEGY disk file (fixed record length).")
+			  ("Landmark TOD"   5 "Write a Landmark TOD SEGY disk file (fixed trace length).")
+			  ("Western"  6 "Write a Western SEGY disk file (variable record length).")
+			  ("Charisma" 9 "Write a Charisma SEGY disk file (fixed record length).")
+			  ("MS-DOS"   7 "Write a MS-DOS SEGY disk file (fixed record length, 2-byte integer format).")
+			  )
+  :mouse_text "Specify the type of storage to use.  Note that the disk formats are vendor-specific extensions of SEGY tape."
+
+
+  :parameter FILENUM
+  :text "  File Number on tape"
+  :type :typein
+  :type_desc ( :int 3 1 999 )
+  :value 1   
+  :mouse_text "This parameter handles the case of multiple SEG-Y files on one reel."
+
+
+  :parameter SEGEND
+  :text "  New file on line segment end?"
+  :type :boolean
+  :mouse_text "Choose 'YES' to output a new SEG-Y file on line segment boundaries. Trace header work 'LSEG_END' is true (value of 1)."
+ 
+  :parameter POLARITY
+  :text "Polarity of output data"
+  :type :pop_choose
+  :type_desc (
+			  ("UNKNOWN" 0 "Origin and input polarity not known")
+			  ("NORMAL" 1 "Positive pressure, negative sample value")
+			  ("REVERSE"  2 "Positive pressure, positive sample value")
+			  )
+  :mouse_text "This will set the polarity value in the SEGY binary header; UNKNOWN=0, NORMAL=1, REVERSE=2."
+
+
+  :parameter STORE
+  :text "EBCDIC Reel Header Generation Method"
+  :type :pop_choose
+  :type_desc (
+			  ("User type in" 1 "Hand edit/user type in.")
+			  ("Derived from processing history"  2 "Derived from ProMAX processing history.")
+			  ("Automatic system generated"   3 "System generated, derived from ProMAX global runtime.")
+			  )
+  :mouse_text "Methods for populating the 3200 byte EBCDIC reel header."
+
+
+  :parameter CLNTNAME
+  :text "  Client name to use in system generated reel header"
+  :type :edit
+  :type_desc (30 50 1 " The name value entered here goes in the label.
+ EXAMPLE: Wild Cat's Gushers/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and
+                          paste'; (Can move the cursor first) " 3 )
+  :value "Default Name"
+  :mouse_text "The value here is shown in the EBCDIC reel header CLIENT position 'Default Name'."
+ 
+  :parameter CMPYNAME
+  :text "  Company name to use in system generated reel header"
+  :type :edit
+  :type_desc (30 50 1 " The name value entered here goes in the label.
+ EXAMPLE: Wild Cat Processing/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and
+                          paste'; (Can move the cursor first) " 3 )
+  :value "Default Name"
+  :mouse_text "The value here is shown in the EBCDIC reel header COMPANY position 'Default Name'."
+ 
+  :parameter REEL_HDR
+  :text "  Edit (copy) SEG-Y reel header"
+  :type :edit
+  :type_desc (32 81 10 " FORMAT: 'Card Column' number, PROCESSING: Sequential Processing Step
+ EXAMPLE: C21 PROCESSING: demultiplexed" )
+
+  value: "C 1 CLIENT                        COMPANY                       CREW NO         
+C 2 LINE            AREA                        MAP ID                          
+C 3 REEL NO           DAY-START OF REEL     YEAR      OBSERVER                  
+C 4 INSTRUMENT: MFG            MODEL            SERIAL NO                       
+C 5 DATA TRACES/RECORD        AUXILIARY TRACES/RECORD         CDP FOLD          
+C 6 SAMPLE INTERNAL         SAMPLES/TRACE       BITS/IN      BYTES/SAMPLE       
+C 7 RECORDING FORMAT        FORMAT THIS REEL        MEASUREMENT SYSTEM          
+C 8 SAMPLE CODE: FLOATING PT     FIXED PT     FIXED PT-GAIN     CORRELATED      
+C 9 GAIN  TYPE: FIXED     BINARY     FLOATING POINT     OTHER                   
+C10 FILTERS: ALIAS     HZ  NOTCH     HZ  BAND    -     HZ  SLOPE    -    DB/OCT 
+C11 SOURCE: TYPE            NUMBER/POINT        POINT INTERVAL                  
+C12     PATTERN:                           LENGTH        WIDTH                  
+C13 SWEEP: START     HZ  END     HZ  LENGTH      MS  CHANNEL NO     TYPE        
+C14 TAPER: START LENGTH       MS  END LENGTH       MS  TYPE                     
+C15 SPREAD: OFFSET        MAX DISTANCE        GROUP INTERVAL                    
+C16 GEOPHONES: PER GROUP     SPACING     FREQUENCY     MFG          MODEL       
+C17     PATTERN:                           LENGTH        WIDTH                  
+C18 TRACES SORTED BY: RECORD     CDP     OTHER                                  
+C19 AMPLITUDE RECOVEY: NONE      SPHERICAL DIV       AGC    OTHER               
+C20 MAP PROJECTION                      ZONE ID       COORDINATE UNITS          
+C21 PROCESSING:                                                                 
+C22 PROCESSING:                                                                 
+C23                                                                             
+C24                                                                             
+C25                                                                             
+C26                                                                             
+C27                                                                             
+C28                                                                             
+C29                                                                             
+C30                                                                             
+C31                                                                             
+C32                                                                             
+C33                                                                             
+C34                                                                             
+C35                                                                             
+C36                                                                             
+C37                                                                             
+C38                                                                             
+C39 SEG Y REV1                                                                  
+C40 END EBCDIC                                                                  
+"
+  :mouse_text "Use MB1 to edit the SEG-Y reel header (40 80-col. card images). Copy each line to insert your info, then delete the non-edited line."
+
+
+  :parameter DISPYHDR
+  :text "Display dataset information option"
+  :type :pop_choose
+  :type_desc (
+			  ("None" 0 "Write dataset information to log file")
+			  ("Show REEL HEADER" 1 "Write SEGY REEL HEADER into log file")
+			  ("Show Processing History"  2 "Write dataset Processing History into log file")
+			  ("Show REEL HEADER and History"  3 "Write REEL HEADER and Processing History into log file")
+			  )
+  :mouse_text "This will determine how much dataset information is written to the log file."
+
+
+  :parameter JOB_ID
+  :text "Job ID # for binary header"
+  :type :typein
+  :type_desc ( :int 9 1 nil )
+  :value 9999
+  :mouse_text "The JOB IDENTIFICATION NUMBER is needed for the binary header and is not meaningful for the ProMAX database."
+
+
+  :parameter LINE_NUM
+  :text "Line # for binary header"
+  :type :typein
+  :type_desc ( :int 9 nil nil )
+  :value  9999
+  :mouse_text "The LINE NUMBER is needed for the binary header and is not necessarily an integer in the ProMAX database."
+
+  :parameter FORMAT
+  :text "Desired trace format"
+  :type :pop_choose
+  :type_desc (  
+			  ("IBM Real"        1 "4-byte IBM Floating Point SEG-Y." ) 
+			  ("4 byte Integer"  2 "4-byte Integer SEG-Y." ) 
+			  ("IEEE Real"       5 "4-byte IEEE Floating Point SEG-Y (Rev 1 standard)." ) 
+			  ("2 byte Integer"  3 "2-byte Integer SEG-Y." )
+			  ("1 byte Integer"  8 "1-byte Integer (Rev 1 standard)." ) )
+  :value 1
+  :mouse_text "What type of trace data sample words do you wish to write out?  Must use IEEE Real for 'Disk (ProMAX)'."
+
+  :parameter COORSCAL
+  :text "Use the coordinate scalars?"
+  :type :boolean
+  :value t
+  :mouse_text "This flag determines whether to calculate scalars (bytes 71-72, 73-74) that preserves the maximum precision of the corresponding coordinates in the output SEG-Y trace headers.  Choose 'NO' to disable this feature and use the scalar value 1."
+  :plot_label t
+
+  :parameter TIMESCAL
+  :text "Use the Rev 1 time scalars?"
+  :type :boolean
+  :value nil
+  :mouse_text "This flag determines whether to calculate a time scalar (bytes 215-216) to achieve submillisecond precision in the statics, lag times and mutes (bytes 95-114).  Choose 'NO' to disable this feature and use the scalar value 1."
+  :plot_label t
+
+  :parameter IOVER
+  :text "Remap SEGY header values?"
+  :type :boolean
+  :mouse_text "Choose 'YES' to input/override SEGY trace header values."
+
+
+  :parameter OVERRIDE
+  :text "  Output/override trace header entries"
+  :type :edit
+  :type_desc (32 80 5 " Purpose: write trace header with user format and position
+ Format:  keyword,format,floating_pt_qualifier,byte_start/
+ Example: RCVRTYPE,2I,,181/SOURCE,4R,IEEE,17/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A		Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E		Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys	Delete one character to the LEFT of the cursor
+ E:  Ctrl-D			Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K		KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y		YANK back the contents of the kill buffer; 'Cut and 
+			  paste'; (Can move the cursor first) " 3 )
+  :value "sou_sloc,4I,,233/srf_sloc,4I,,237/"
+  :mouse_text "Enter 1-8 char keyword, 2I or 4I or 4R or 8R, IEEE or IBM, byte start (1-240)/ ... /"
+
+  :exec_data 
+  ("SEG_WRITE"
+   ("GENERAL"
+	("version"  :implicit "ProMAX $Id: segy_write.menu 44577 2009-07-29 16:44:43Z David Johnston $ $Revision: 44577 $ $Date: 2009-07-29 10:44:43 -0600 (Wed, 29 Jul 2009) $" )
+	("SEGFORMT" :implicit 0 )
+	("FLAVOUR"  :implicit (value 'FLAVOUR))
+	("DATASET"  :implicit (value 'TSYSFILE))
+	("FILENUM"  :implicit (value 'FILENUM))
+	("POLARITY" :implicit (value 'POLARITY))
+	("DISPYHDR" :implicit (value 'DISPYHDR))
+	("SEGEND"   :implicit (if (value 'SEGEND) 1 0 ))
+	("PRELABEL" :implicit (if (eq (value 'TSYSLAB) 'NL) 0 1 ))
+	("STORE"    :implicit (value 'STORE))
+	("CLNTNAME" :implicit (value 'CLNTNAME))
+	("CMPYNAME" :implicit (value 'CMPYNAME))
+	("REEL_HDR" :implicit (value 'REEL_HDR))
+	("JOB_ID"   :implicit (value 'JOB_ID))
+	("LINE_NUM" :implicit (value 'LINE_NUM))
+	("FORMAT"   :implicit (value 'FORMAT))
+	("IOVER"    :implicit (if (value 'IOVER) 1 0 ))
+	("COORSCAL" :implicit (if (value 'COORSCAL) 1 0 ))
+	("TIMESCAL" :implicit (if (value 'TIMESCAL) 1 0 ))
+	("OVERRIDE" :implicit (value 'OVERRIDE))
+	)
+   ) ; end of exec_data
+
+  :rules
+  (
+   (rule1 t (setq FMTNAME "SEGY"))
+
+   (((value STORAGE)(value FLAVOUR)) diskonly (> ( value 'FLAVOUR ) 2 )
+                        (set_value 'DISKONLY t)
+                        (progn
+                                (set_value 'TAPEONLY nil)
+                                (set_value 'DISKONLY nil)))
+
+   (rule2 (eq (value 'STORAGE) :disk )
+		  (dont_show '(SEGEND FILENUM))
+		  (do_show '(SEGEND FILENUM)))
+
+   (rule6  ( value 'IOVER )
+		   ( do_show 'OVERRIDE )
+		   ( do_not_show 'OVERRIDE ) )
+
+   (rule7  ( = ( value 'STORE) 3 )
+		   ( do_show 'CLNTNAME) 
+		   ( do_not_show 'CLNTNAME))
+
+   (rule8  ( = ( value 'STORE) 3 )
+		   ( do_show 'CMPYNAME) 
+		   ( do_not_show 'CMPYNAME))
+
+   (rule9  ( = ( value 'STORE) 1 )
+		   ( do_show 'REEL_HDR) 
+		   ( do_not_show 'REEL_HDR))
+
+   (rule10  ( = ( value 'STORE) 2 ) 
+			( do_not_show 'REEL_HDR))
+
+   (rule11  ( = (value 'FLAVOUR) 7 )
+			(do_not_show 'FORMAT) (do_show 'FORMAT))
+   ) ; end of rules
+
+  :after_exec
+  (setq FMTNAME "SEGY")
+
+  )

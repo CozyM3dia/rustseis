@@ -1,0 +1,225 @@
+Steep Dip Explicit FD Time Migration707
+
+ProMAX® Reference
+
+Steep Dip Explicit FD Time Migration
+Steep Dip Explicit FD Time Migration performs poststack
+time migration using explicit ﬁnite difference extrapolators.
+As a ﬁnite difference scheme, the approach can handle
+variable interval velocity ﬁelds in time.
+
+Theory
+Steep Dip Explicit FD Time Migration is an algorithm
+which uses explicit F-X spatially-variant extrapolators to
+perform time migration. This migration is designed to be
+accurate up to approximately 70 degrees of dip. This
+migration uses a vertical and laterally-variant interval
+velocity ﬁeld in time, VINT(x,t), for input. Refer to the
+Migration Overview for more information on this process.
+To reduce run times by nearly a factor of two for this
+algorithm, you may specify a maximum dip of 50 degrees,
+rather than 70 degrees, if your data characteristics warrant
+this. Note also that run times are dependent upon the
+maximum frequency for migration, so choose this value
+accordingly.
+The primary advantages of this approach are good handling
+of vertically variant velocities and relatively steep dips, and
+fair handling of lateral velocity variations.
+Sample Impulse Response
+Impulse responses are generated with 2 band limited
+impulses (3-6-30-50 Hz) at 1000 & 1500 ms. The velocity
+ﬁeld in time is 2000 m/sec at 0 time. with a gradient to 5000
+m/sec at 2000 ms. Trace spacing is 20 m. Run times are for
+an IBM RS/6000 550
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Steep Dip Explicit FD Time Migration708
+
+ProMAX® Reference
+
+Steep Dip Explicit FD time migration
+
+steep dips are
+properly migrated
+70 degree option Run time: 65 CPUs.
+
+Steep Dip Explicit FD time migration
+
+50 degree option Run time: 40 CPUs.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Steep Dip Explicit FD Time Migration709
+
+ProMAX® Reference
+
+Steep Dip Implicit FD time migration
+
+noise
+
+dispersed energy
+side reﬂections
+Run time 58 s.
+
+Usage
+Trace padding should be speciﬁed to reduce wrap-around
+effects in the frequency domain. Note that prime-factor FFT
+libraries are used for this and other migrations so that
+minimal FFT padding will occur. Consequently, the amount
+of padding you specify will be very close to the total amount
+of trace padding applied prior to transforming from time to
+frequency. Values in the range of 30 to 50 per cent are
+generally adequate for normal amplitude-balanced datasets.
+Data input to this migration is corrected to a ﬂat datum. If
+your data is referenced to a ﬂoating datum you will need to
+apply datum statics, or use Poststack Wave Equation
+Datuming to move your data to a ﬂat datum. If your velocity
+ﬁeld is referenced to a ﬂoating datum, you may need to
+modify the velocity ﬁeld with Velocity Field Manipulation.
+
+References
+Soubaras, R., 1992, Explicit 3D migration using equiripple polynomial expansion
+and Laplacian synthesis: SEG annual meeting, New Orleans, Expanded
+Abstracts, 905-908.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Steep Dip Explicit FD Time Migration710
+
+ProMAX® Reference
+
+Parameters
+CDP interval (feet or meters)
+Enter the CDP spacing, in ft. or m, whichever is consistent
+with the headers.
+Maximum frequency (in Hz)
+Enter the maximum usable frequency in the data. A value
+less than the Nyquist frequency for the dataset will speed up
+computations. If the input data has frequencies above this
+maximum, it should be bandpass ﬁltered before migration to
+avoid artifacts caused by abruptly truncating the frequency
+band.
+Maximum dip to migrate
+Select the maximum dip to migrate. The options are:
+• 50 degrees, which uses an 11 point ﬁlter.
+• 70 degrees, which uses a 25 point ﬁlter.
+Steeper dips take longer to migrate since they use a longer
+ﬁlter length. These angles are data dependant, and, therefore,
+very general.
+Percent to pad trace length
+Enter a percent to pad the trace length to eliminate the FFT
+wrap around effects. 30% padding should generally be
+sufﬁcient, but if spikes exist in the shallow part of the data,
+you may want to increase padding some more. Padding will
+linearly increase run time.
+Get interval velocities from database?
+Select Yes to use an interval velocity versus time function
+stored in the database. Select No to manually enter interval
+velocities.
+Select interval vs. time velocity ﬁle
+This appears if Yes to Get Interval velocities from
+database. Select an interval velocity versus time ﬁle from the
+database.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Steep Dip Explicit FD Time Migration711
+
+ProMAX® Reference
+
+Interval velocities in time for migration
+This appears if No to Get Interval velocities from database.
+Access the editor and enter the time-velocity pairs. Refer to
+the editor for examples.
+Change paneling parameters?
+Select Yes to change paneling parameters.
+Maximum Memory for migration to use in megabytes
+This appears if Yes to Change paneling parameters. Enter
+the maximum memory. When the migration requires more
+memory than this limit, the migration is done in overlapping
+panels. Paneling generally only happens with very large
+(>2000 CDPs) datasets with long trace length.
+Migration aperture to use for panel overlap
+This appears if Yes to Change paneling parameters. Enter a
+migration aperture in ft. or m. Enter 0.0 to automatically
+calculate the aperature.The migration aperture is how far
+data will move horizontally during the migration.
+Change the default tapering?
+Select Yes to change the edge tapering defaults. Tapering is
+performed on the section before migration in order to reduce
+edge effects. Select No for a bottom taper of 200 ms to be
+applied. The edge taper will vary from 2 traces at the top of
+the section to 20 traces at the bottom of the section. Because
+migration artifacts originating deeper in the section tend to
+move a longer distance, the magnitude of the edge taper
+should normally increase with depth. A Hamming taper is
+used, which consists of a cosine weighting that varies from
+100% to 8% over the length of the taper.
+Bottom taper (in ms)
+This appears if Yes to Change the default tapering. Enter
+the length of the taper, in ms. The bottom of each trace within
+the seismic section will be tapered to 0 over this number of
+ms. This tapering will prevent the creation of migration
+artifacts caused by the abrupt truncation at the last live
+sample of each input trace.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Steep Dip Explicit FD Time Migration712
+
+ProMAX® Reference
+
+Upper edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the upper edge taper in traces. Generally this will be smaller
+than the lower edge taper because of the increase in
+migration aperture with depth.
+Lower edge taper (in traces)
+This appears if Yes to Change the default tapering. Enter
+the lower edge taper in traces. Generally this will be larger
+than the upper edge taper because of the increase in
+migration aperture with depth. The taper will be varied
+linearly with time between the upper and lower edges of the
+section.
+Note: If the speciﬁed taper width is more than half the total
+number of traces in the seismic section, taper width will be
+set to half the total number of traces in the seismic section.
+Reapply trace mutes?
+Select Yes to reapply the trace mutes after migration. Select
+No to adjust mutes based on the ﬁrst and last non-zero
+samples after migration. In either case, if tapered mutes were
+used before migration, the same taper length will be used
+after migration.
+Rekill dead traces?
+Select Yes to rekill dead traces after migration. Select No to
+leave previously dead trace alive, and mutes will be
+determined from the ﬁrst and last nonzero samples.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+

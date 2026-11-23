@@ -1,0 +1,214 @@
+; IIID IVD 1 DEV DEPTHC PROSPECTOR
+'(
+ name: P2S_DMO
+label: "Converted Wave DMO"
+value_tab: 45
+
+parameter: MAX_OFFSET
+text: "Maximum offset to stack"
+type: typein:
+type_desc: ( real: 6 -1.0 99999.0 )
+value: -1.0
+mouse_text: "Use MB1 to enter the maximum absolute offset to stack, usually max spread length.  Enter -1 to get value from LIN database."
+plot_label: t
+
+parameter: OFFSET
+text: "Header entry to use for offset planes"
+type: function:
+type_desc:  (header_list headers)
+value: "DMOOFF  "
+selected_item: "Offset bin for DMO"
+mouse_text: "Header word to use for offset-stacking of the input data."
+plot_label: t
+
+parameter: SHIFT
+text: "Shift data to final datum?"
+type: boolean:
+value: t
+mouse_text: "Use MB1 to toggle application of shift-to-final-datum statics prior
+ to stacking."
+plot_label: t
+
+parameter: DMAX
+text: "Maximum dip aperture (deg)"
+type: typein:
+type_desc: ( real: 6 0.0 90.0 )
+value: 60.0
+mouse_text: "Use MB1 to enter the maximum dip aperture of the DMO response in degrees."
+plot_label: t
+
+parameter: TAPER
+text: "Dip aperture taper (deg)"
+type: typein:
+type_desc: ( real: 6 0.0 90.0 )
+value: 10.0
+mouse_text: "Use MB1 to enter the dip taper in degrees to apply at the maximum dip of the DMO response."
+plot_label: t
+
+parameter: FBAR  
+text: "Average frequency of the input data"
+type: typein:
+type_desc: ( real: 6 1.0 250.0 )
+value: 20.0
+mouse_text: "Use MB1 to enter the average frequency of the input converted-wave data."
+
+parameter: FMAX
+text: "Maximum frequency to preserve"
+type: typein:
+type_desc: ( real: 6 1.0 250.0 )
+value: 40.0
+mouse_text: "Use MB1 to enter the maximum frquency of the input data to preserve without aliasing."
+
+parameter: RAMP
+text: "Poststack mute ramp (ms)"
+type: typein:
+type_desc: ( real: 5 0.0 100.0 )
+value: 30.0
+mouse_text: "Use MB1 to enter the length of the post-DMO mute ramp to use."
+
+parameter: VP_FLAG
+text: "Get P-P RMS velocities from database?"
+type: boolean:
+value: t
+mouse_text: "Stacking requires P-P RMS velocities.  Do you want to get these vel
+ocities from the database?"
+plot_label: t
+
+parameter: VP_VELF
+text: "  SELECT P-P RMS velocity file"
+type: function:
+type_desc: ((parm_list "VEL") parms)
+value: "no entry"
+selected_item: "INVALID"
+mouse_text: "Use MB1 to select a P-P RMS VELOCITY parameter file from the parame
+ter-sets menu."
+plot_label: t
+
+parameter: VP_VELS
+text: "  P-P RMS velocities for stacking"
+type: edit:
+type_desc: (20 80 15 " FORMAT: CDP1:T1-V1,T2-V2,...,Tn-Vn/CDP2:T1-V1,T2-V2,...,T
+n-Vn/
+ EXAMPLE: 1:0-5000,900-6725,1500-8571,2000-9670/101:0-5100,860-6690,2000-9852/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and
+                          paste'; (Can move the cursor first) " 3 )
+value: "XXX"
+mouse_text: "Use Mouse Button 1 to edit P-P RMS velocities for stacking. (See ed
+itor for examples.)"
+plot_label: t
+
+parameter: VS_FLAG
+text: "Get Vp/Vs ratios from database?"
+type: boolean:
+value: t
+mouse_text: "Stacking requires Vp/Vs values.  Do you want to get these velocitie
+s from the database?"
+plot_label: t
+
+parameter: VS_VELF
+text: "  SELECT Vp/Vs values parameter file"
+type: function:
+type_desc: ((parm_list "VIT") parms)
+value: "no entry"
+selected_item: "INVALID"
+mouse_text: "Use MB1 to select a Vp/Vs VELOCITY ratio file from the parameter-se
+ts menu."
+plot_label: t
+
+parameter: VS_VELS
+text: "  Vp/Vs ratios for stacking"
+type: edit:
+type_desc: (20 80 15 " FORMAT: CDP1:T1-R1,T2-R2,...,Tn-Rn/CDP2:T1-R1,T2-R2,...,T
+n-Rn/
+ EXAMPLE: 1:0-2.00,900-1.90,1500-1.90,2000-1.80/101:0-2.10,860-2.00,2000-1.85/
+ HELP: EMACS Editor Widget (scroll with down/up arrow keys)
+ CURSOR MOVEMENT: Use the arrow keys:->,<-,etc.;Point the mouse cursor,click B1
+ CM: Ctrl-A             Move the cursor to the BEGINNING of the current line
+ CM: Ctrl-E             Move the cursor to the END of the current line
+ EDITING: All keyboard entry is in 'insert' mode
+ E:  Backspace, Delete keys     Delete one character to the LEFT of the cursor
+ E:  Ctrl-D                     Delete one character to the RIGHT of the cursor
+ E:  Ctrl-K             KILL to the end of the line (from the cursor)
+ E:  Ctrl-Y             YANK back the contents of the kill buffer; 'Cut and
+                          paste'; (Can move the cursor first) " 3 )
+value: "XXX"
+mouse_text: "Use Mouse Button 1 to edit Vp/Vs ratios for stacking. (See editor f
+or examples.)"
+plot_label: t
+
+
+exec_data: ("SOCKET_TOOL"
+		("GENERAL"
+                        ("version" implicit: "ProMAX $Id: p2s_dmo.menu 45205 2010-02-22 19:10:09Z David Johnston $ $Revision: 45205 $ $Date: 2010-02-22 12:10:09 -0700 (Mon, 22 Feb 2010) $")
+                        ("program"     implicit: "p2s_dmo.exe")
+                        ("DEBUG"       implicit: 0 )
+                        ("machine"     implicit: " ")
+                        ("MAX_OFF "    implicit: (value 'MAX_OFFSET))
+                        ("OFFSET  "    implicit: (value 'OFFSET))
+                        ("SHIFT   "    implicit: (if (value 'SHIFT) 1 0 ))
+			("DMAX    "    implicit: (value 'DMAX))
+			("TAPER   "    implicit: (value 'TAPER))
+			("FBAR    "    implicit: (value 'FBAR))
+			("FMAX    "    implicit: (value 'FMAX))
+                        ("RAMP    "    implicit: (value 'RAMP))
+                        ("VPFLAG  "    implicit: (if (value 'VP_FLAG) 1 0 ))
+                        ("VP_VELF "    implicit: (value 'VP_VELF))
+                        ("VP_VELS "    implicit: (value 'VP_VELS))
+                        ("VSFLAG  "    implicit: (if (value 'VS_FLAG) 1 0 ))
+                        ("VS_VELF "    implicit: (value 'VS_VELF))
+                        ("VS_VELS "    implicit: (value 'VS_VELS))
+		)
+	   )
+rules:  (
+           (MAX_OFFSET_default
+	    (= (value 'MAX_OFFSET) -1.0 )
+	    (set_value 'MAX_OFFSET (db_parmget_line "OFFMAXz"))
+           )
+           (VP_VELF_visibility
+              (showing 'VP_VELS)
+                 (do_not_show 'VP_VELF)
+                 (do_show 'VP_VELF)
+           )
+           (VP_VELS_visibility
+              (value 'VP_FLAG)
+                 (do_not_show 'VP_VELS)
+                 (do_show 'VP_VELS)
+           )
+           (VP_VELS_default_rule1
+              (and
+                 (equal (value 'VP_VELS) "XXX")
+                 (= (db_parmget_line "IUNITSz") 1)
+              )
+                 (set_value 'VP_VELS
+"1:0-5000,1000-7500,2000-9500,3000-11500,4000-14000,6000-18000,8000-22000")
+           )
+           (VP_VELS_default_rule2
+              (equal (value 'VP_VELS) "XXX")
+                 (set_value 'VP_VELS
+"1:0-1500,1000-2500,2000-3200,3000-4000,4000-4500,6000-6000,8000-7000")
+           )
+           (VS_VELF_visibility
+              (showing 'VS_VELS)
+                 (do_not_show 'VS_VELF)
+                 (do_show 'VS_VELF)
+           )
+           (VS_VELS_visibility
+              (value 'VS_FLAG)
+                 (do_not_show 'VS_VELS)
+                 (do_show 'VS_VELS)
+           )
+           (VS_VELS_default
+              (equal (value 'VS_VELS) "XXX")
+                 (set_value 'VS_VELS
+"1:0-2.00,1000-2.00,2000-2.00,3000-2.00,4000-2.00,6000-2.00,8000-2.00")
+           )
+        )
+)

@@ -1,0 +1,384 @@
+##############################################################################
+# Tools database used to build the toolcall.f subroutine
+#
+# RCS:  ProMAX $Id: tools.db 44084 2009-03-24 21:43:10Z Steven M Cook $ $Revision: 44084 $ $Date: 2009-03-24 15:43:10 -0600 (Tue, 24 Mar 2009) $
+#
+##############################################################################
+# The "label" field contains the character string used to determine which
+# tool is called.  The "entry" field contains the entry point of the
+# tool's subroutines, but without the INIT_ or EXEC_ parts.  Note that
+# both label and entry must be UPPERCASE by convention, although, in this
+# database, entry may be "same" for those tools (most tools) for which
+# label and entry are the same.
+#
+# The "type" field contains the tool's type, such as "simple" or
+# "complex".  The optional "conditional" field is used to describe
+# conditions under which the tool is to be included.  The syntax of this
+# field is the same as that used in an #if directive to the C
+# pre-processor.
+#
+# The "library" field indicates whether a tool is a part of the libmaxtool'n'
+# libraries that is 'internal' or whether the tool is built into a separate
+# shared object (library) that is named in this column.
+##############################################################################
+
+# Flow tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+END_SPLIT	FLOW_ENDIF	complex		internal
+FLOW_ELSE	same		flow		internal
+FLOW_ELSEIF	same		flow		internal
+FLOW_ENDIF	same		flow		internal
+FLOW_IF		same		flow		internal
+FLOW_STOP	same		flow		internal
+SPLIT		FLOW_IF		flow		internal
+
+# Panel tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+ADD_NOISE	same		panel		internal
+ARRAY_COMP  	same		panel		internal
+ASCII_ATTR_OUT  same            panel		internal
+AVO_GATHER	same		panel		internal
+A_CN3D		same		panel		internal
+A_FF3D		same		panel		internal
+COH_FILT	same		panel		internal
+DEBUG1		same		panel		internal
+DESIG		same		panel		internal
+DIPVELS		same		panel		internal
+DMOFK_PANEL	same		panel		internal
+DMOTX_PANEL	same		panel		internal
+EDITAPPLY	same		panel		internal
+EDITTRAIN	same		panel		internal
+EIGFILT		same		panel		internal
+ENS_BALANCE	same		panel		internal
+ENS_DECON	same		panel		internal
+ENS_SLICE  	same		panel		internal
+ENS_VALUE  	same		panel		internal
+ESSD_DEPHASE	same		panel		internal
+FBAPPLY		same		panel		internal
+FBTRAIN		same		panel		internal
+FB_PREDICT	same		panel		internal
+FILT_2D		same		panel		internal
+FKFILT		same		panel		internal
+FK_FILT		same		panel		internal
+FXDECON		same		panel		internal
+IMP2F2  	same		panel		internal
+KLT_CANCL	same		panel		internal
+LFAF		same		panel		internal
+MB_TRANS	same		panel		internal
+MIGTK_PANEL	same		panel		internal
+NAFLTR		same		panel		internal
+NEWSTOLT	same		panel		internal
+NMO_INFILL      same            panel		internal
+NNHPTRAIN	same		panel		internal
+NOISE_EDIT	same		panel		internal
+PHASE           same            panel		internal
+PRECOM70	same		panel		internal		defined (CXXLINK)
+PSMIG		same		panel		internal
+REVAPPLY	same		panel		internal
+REVTRAIN	same		panel		internal
+SG_CDP		same		panel		internal
+SUPER2D		same		complex		internal		defined (CXXLINK)
+SUPER3D		same		complex		internal		defined (CXXLINK)
+TX_SWTGAIN	same		panel		internal
+VABATCH		same		panel		internal
+VAPRECOM	same		panel		internal		defined (CXXLINK)
+VSPCDP		same		panel		internal
+WEMR            same            panel		internal
+
+# Buffer tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+COMPARE		same		buffer		internal
+LEVEL_STATS	same		buffer		internal
+ORNT_COMP	same		buffer		internal
+PART_MOTION	same		buffer		internal
+POPSTAK		same		buffer		internal
+RE_ORNT		same		buffer		internal
+SEMBLANCE	same		buffer		internal
+SPLC_DSET	same		buffer		internal
+TRANS_3C	same		buffer		internal
+TRC_INTERP	same		buffer		internal
+
+# Single-buffer tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+COMPARE		same		single_buffer		internal
+LEVEL_STATS	same		single_buffer		internal
+ORNT_COMP	same		single_buffer		internal
+PART_MOTION	same		single_buffer		internal
+POPSTAK		same		single_buffer		internal
+RE_ORNT		same		single_buffer		internal
+TRANS_3C	same		single_buffer		internal
+
+# Double-buffer tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+SEMBLANCE	same		double_buffer		internal
+SPLC_DSET	same		double_buffer		internal
+TRC_INTERP	same		double_buffer		internal
+
+# Simple tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+ADAPT_DECON	same		simple		internal
+AGC		same		simple		internal
+AIRBLAST	same		simple		internal
+AMPSCAN		same		simple		internal
+AMP_CLIP	same		simple		internal
+ASCIISPREADSHEET        same    simple	internal
+AUTO_CORR	same		simple		internal
+BINNER		same		simple		internal
+BLEND_OPEN	same		simple		internal
+CDP_TAPER	same		simple		internal
+CONVERT_MUTES   same            simple		internal
+DATUM_STAT_APPLY	same	simple		internal
+DB_HDR_LOAD	same		simple		internal
+DEBIAS		same		simple		internal
+DECON		same		simple		internal
+DEITY		same		simple		internal
+DEPTH		same		simple		internal
+DEPTH2		same		simple		internal
+DISKWRITE	same		simple		internal
+DMOBIN		same		simple		internal
+DS2ASCII	same		simple		internal
+ELEV_STAT	same		simple		internal
+EMCA_XC_SUM     same            simple		internal
+EM_XCOR		same		simple		internal
+EM_XCOR_STAT	same		simple		internal
+ENVN            same            simple		internal
+ESI_GAIN	same		simple		internal
+ESI_GAIN_CHECK	ESI_GAIN	simple		internal
+ESI_WRITE	same		simple		internal
+FBPICK		same		simple		internal
+FILTER		same		simple		internal
+FLOW_COMMENT	same		simple		internal
+FRACSTAT	same		simple		internal
+HANDSTAT	same		simple		internal
+HDR2HOR		same		simple		internal
+HDR2KIL		same		simple		internal
+HDRSTAT		same		simple		internal
+HDRWEIGHT	same		simple		internal
+HDR_DELETE	same		simple		internal
+HDR_RANGE 	same		simple		internal
+HEADER_RENUM	same		simple		internal
+HEADER_VALUES	same		simple		internal
+HRZ_FLATTEN	same		simple		internal
+IES_WRITE	same		simple		internal
+IMP             same            simple		internal
+INLINE_CDPBIN	same		simple		internal
+INVERT		same		simple		internal
+JTOOL_TRC	same	simple		jtool_trc
+LMO		same		simple		internal
+MON_SHIFT	same		simple		internal
+MON_TBL_LOAD	same		simple		internal
+MUTE		same		simple		internal
+NMO		same		simple		internal
+NOISE_MONITOR	same		simple		internal
+OPF_EXTRACT	same		simple		internal
+PHFILTER	same		simple		internal
+QCOMP		same		simple		internal
+QPHS 		same		simple		internal
+QSTL 		same		simple		internal
+REFLSTAT3D	same		simple		internal		defined (CXXLINK)
+RESAMP		same		simple		internal
+RESAMPLE_LOG	same            simple		internal		defined (CXXLINK)
+REVIVE_TRC	same		simple		internal
+ROTATE		same		simple		internal
+SAF_WRITE	same		simple		internal
+SAMPLE_VALUES	same		simple		internal
+SCAMP		same		simple		internal
+SCDECONM	same		simple		internal
+SEGP1_LOAD	same		simple		internal
+SEG_WRITE	same		simple		internal
+SEP_PROGRAM	same		simple		internal
+SIP_WRITE	same		simple		internal
+SLOC_ASSIGN	same		simple		internal
+SMPTOHDR   	same		simple		internal
+SPIKE		same		simple		internal
+SSD_DEPHASE	same		simple		internal
+SYNLVXZ		same		simple		internal
+TAPEWRITE	same		simple		internal
+TAR		same		simple		internal
+TBL_HDR_LOAD	same		simple		internal
+TE		same		simple		internal
+TEQ		same		simple		internal
+TEST_FAIL	same		simple		internal
+THDRMATH	same		simple		internal
+THRESH		same            simple		internal
+TRACE_LEN	same		simple		internal
+TRACE_STATS	same		simple		internal
+TRACE_STATS     same            simple		internal
+TRC_EDIT	same		simple		internal
+TSMPMATH	same		simple		internal
+TT3HDMAP	same		simple		internal
+TVS		same		simple		internal
+TVW		same		simple		internal
+UPHOLE_CORR	same		simple		internal
+UP_DCON		same		simple		internal
+USR_FILTER	same		simple		internal
+VELOCITY_CORR	same            simple		internal		defined (CXXLINK)
+VIBTEST		same		simple		internal		defined (CXXLINK)
+VOID		same		simple		internal
+V_TRANSFER	same		simple		internal
+WHITESH		same		simple		internal
+WP_APPLY	same		simple		internal
+WP_FILT		same		simple		internal
+W_HDRSTACK	same		simple		internal
+W_IHDRHIST	same		simple		internal
+W_PROCESS	same		simple		internal
+XTAR		same            simple		internal
+
+# PROWESS_STUB can be simple or complex
+PROWESS_STUB	same		simple		internal
+
+# Complex tools
+#label		entry		type		library		conditional
+#-----		-----		----		-------		-----------
+ACOUSTIC_FD	same		complex		internal
+ACOUSTIC_IMP	same		complex		internal		defined (CXXLINK)
+AVO		same		complex		internal
+AVO_ATTCOMP	same		complex		internal
+BLEND_CLOSE	same		complex		internal
+CHECK_SHOT	same		complex		internal		defined (CXXLINK)
+CHEV_HEADER	same		complex		internal
+CROSS_CORR	same		complex		internal
+CVS		same		complex		internal
+DEPTH_TIME	same		complex		internal		defined (CXXLINK)
+DISKREAD	same		complex		internal
+DISKREAD2	PROMAX_READ	complex		internal
+DISK_INSERT	PROMAX_READ	complex		internal
+DISP_3D		same 		complex		internal
+DMOCOFF		same		complex		internal
+DMOJ		same		complex		internal
+DMOTX		same		complex		internal
+DSMB		same		complex		internal
+EIGEN_STACK	same		complex		internal
+EMCA_DB         same            complex		internal
+EMCA_GS         same            complex		internal
+ENS_COMBINE	same		complex		internal
+ENS_DEFINE	same		complex		internal
+ENS_SPLIT	same		complex		internal
+ENS_STATISTICS	same		complex		internal
+ESI_INSERT	ESI_READ	complex		internal
+ESI_READ	same		complex		internal
+ESI_TEST	same		complex		internal
+FDMIG		same		complex		internal
+FD_DEPTH_MIG	same		complex		internal
+FFT_INTERP	same		complex		internal
+FKITER		same		complex		internal
+FKMIG3D		same		complex		internal
+FK_GEN		same		complex		internal
+FLOPPY_READ	same		complex		internal
+FT_GEN		same		complex		internal
+FXYDECON	same		complex		internal
+FX_INTERP	same		complex		internal
+GEOM_LOAD	same		complex		internal
+IES_READ	same		complex		internal
+INLINE_SORT	same		complex		internal
+JTOOL_READ	same	complex		jtool_read
+KIR_P_TOOL	same		complex		internal
+LDISPLAY	same		complex		internal		defined (CXXLINK)
+LOG_BLOCK	same		complex		internal		defined (CXXLINK)
+LOG_MFILTER	same		complex		internal		defined (CXXLINK)
+LOG_READ	same		complex		internal		defined (CXXLINK)
+MARINE_QC	same		complex		internal
+MATCH		same		complex		internal
+MATCH3D		same		complex		internal
+MIGTAPER	same		complex		internal
+MIGTK		same		complex		internal
+MTD		same		complex		internal
+MUTE_TEST	same		complex		internal
+MWMATCH		same		complex		internal
+NNHPAPPLY	same		complex		internal
+PAD_TRACES	same		complex		internal
+PARALLEL_TOOL	same		complex		internal
+PM_HYBRID_TOOL  same            complex         internal
+POSTSTACK_3D	same            complex		internal
+PSEUDO_DENSITY	same		complex		internal		defined (CXXLINK)
+PSEUDO_SONIC	same		complex		internal		defined (CXXLINK)
+PSI2DN     	same		complex		internal
+PSI3D     	same		complex		internal
+PSMIG3D		same		complex		internal
+PT_DMO3D	PVMTOOL		complex		internal
+PT_DMO3DG	PVMTOOL		complex		internal
+PT_FKMIG3D	FKMIG3D		complex		internal
+PT_FXY3DMIG	same		complex		internal
+PT_FXYDECON	FXYDECON	complex		internal
+PT_MPFXY3DMIG	same		complex		internal
+PT_PSMIG3D	PSMIG3D		complex		internal
+PT_PXBEGEND	PXBEGEND	complex		internal
+PT_STACK3D	PVMTOOL		complex		internal
+PT_STKMRG3D     PVMTOOL         complex		internal
+PT_STOLT3D	STOLT3D		complex		internal
+PVMTOOL		same		complex		internal
+PXBEGEND	same		complex		internal
+PXIN		same		complex		internal
+PXOUT		same		complex		internal
+RADON_FILTER	same		complex		internal
+RADON_TRANS	same		complex		internal
+REFL_LOG	same		complex		internal		defined (CXXLINK)
+REPEAT		same		complex		internal
+RGEOM		same		complex		internal
+RMPAD_TRACES	same		complex		internal
+ROLL_CHECK	same		complex		internal
+RSTACK		same		complex		internal
+SCAMP2		same		complex		internal
+SCAMP3		same		complex		internal
+SCDECON		same		complex		internal
+SCDECON2	same		complex		internal
+SC_AMP		same		complex		internal
+SC_AMP1		same		complex		internal
+SEG_READ	same		complex		internal
+SHOT_CHECK	same		complex		internal
+SIP_READ	same		complex		internal
+SOCKET_TOOL	STAND_ALONE_MODULE	complex		internal
+SORTMERGE	same		complex		internal
+SPECT		same		complex		internal
+SPIK2MED	same		complex		internal
+SSAA		same		complex		internal
+STACK		same		complex		internal
+STAND_ALONE	STAND_ALONE_MODULE	complex		internal
+STOLT3D		same		complex		internal
+ST_DMOMOD	STAND_ALONE_MODULE	complex		internal
+SWEEP		same		complex		internal
+SWOPT		same		complex		internal		defined (CXXLINK)
+SYNTH		same		complex		internal
+SYN_CDP		same		complex		internal		defined (CXXLINK)
+TAPEREAD	same		complex		internal
+TAPEREAD2	PROMAX_READ	complex		internal
+TAPE_INSERT	PROMAX_READ	complex		internal
+TAUP		same		complex		internal
+TAUPIN		same		complex		internal
+TIME_LOG	same		complex		internal		defined (CXXLINK)
+TIME_SLICE	same		complex		internal
+TRACEMATH	same		complex		internal
+TR_DISPLAY	same		complex		internal
+TR_SPLICE	same		complex		internal
+TR_UNSPLICE	same		complex		internal
+TVG		same		complex		internal
+T_AND_B		same		complex		internal		defined (CXXLINK)
+T_TRANSFER	same		complex		internal
+USP_PROGRAM	same		complex		internal
+WAV_EXT1	same		complex		internal
+WIN_ALIN	same		complex		internal
+WP_AVE		same		complex		internal
+WP_WAV		same		complex		internal
+W_ITRSELT	same		complex		internal
+
+# PROWESS_STUB can be simple or complex
+MASWEMR		same		complex		internal
+PROWESS_STUB	same		complex		internal
+SPLITZERO	same		complex		internal
+SSP_READ	same 		complex		internal
+
+# Dead tools that result in a fatal error
+#label		type	error message
+#-----		----	-------------
+BLEND		dead	'Please re-parameterize the BLEND menu!'
+SYNTHETIC	dead	'SYNTHETIC is no longer supported!'
+
+
+
+

@@ -1,0 +1,1047 @@
+Trace Display1155
+
+ProMAX® Reference
+
+Trace Display
+Trace Display is a general purpose tool for displaying and
+interacting with prestack and poststack seismic data.
+
+Theory
+This interactive process displays on screen gray scale, color,
+wiggle trace, variable density plots. Wiggle trace can also be
+overlain on variable density plots. You can zoom and pan the
+data display, view trace headers, and pick horizons, mutes,
+gates, and ﬁrst breaks. The pick data can be written to
+parameter ﬁles for later use in processing. Many of the
+display parameters can be altered while the data is displayed
+without re-running the display ﬂow.
+Trace Display has an integrated neural net ﬁrst break picker
+which can be created and trained interactively. While the
+neural net picker runs, you may QC and, if necessary, retrain
+the neural net.
+
+Usage
+Unlike the older Screen Display which Trace Display
+replaces, Trace Display can be used more than once per ﬂow
+without writing an intermediate dataset. The results from
+early processing steps can be viewed to satisfy QC
+requirements while the data is passed down the ﬂow to be
+viewed again after more processing. The ﬁrst display can be
+terminated without stopping the processing ﬂow.
+While you are using Trace Display, you may need to access
+the traces of your dataset. For example, to change the trace
+sort list or create a subset of selected traces in your dataset.
+You can dynamically change the trace sort by using the
+Interactive Data Access tool. However, this tool must be
+turned on in Disk Data Input.
+
+Parameters
+Select display DEVICE
+Select This Screen to plot the display on the current screen.
+Enter the name of the display device including the display
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1156
+
+ProMAX® Reference
+
+number and screen number, multi-screen displays to
+override the current display default. For example:
+workhorse:0
+
+speciﬁes display number 0 on the host workhorse.
+workhorse:0.0
+
+speciﬁes screen 0 on display 0 on the host workhorse.
+Specify display START time
+Enter the starting time in ms. to display at the top of the
+screen. Samples above the starting time will be clipped.
+Specify display END time
+Enter the ending time in ms. to display at the bottom of the
+screen. Samples after the ending time will be clipped. Enter 0
+to display all samples after the starting time.
+Maximum number of TRACES/screen
+Enter the maximum number of traces to display on the
+screen at one time. Enter 0, the default, to automatically
+determine how many traces to display.
+Traces to overlap between screens
+This appears if a >0 for Maximum number of
+traces/screen. Enter the number of traces to overlap
+between screens. For example, if you enter a value of 10,
+whenever you load new traces, 10 traces from the previous
+screen will remain in the next screen. This feature is useful
+for picking horizons on stacked data. The horizon picks from
+the previous screen will show up on the ﬁrst 10 traces of the
+next screen and serve as a guide when you continue picking
+the horizon.
+Number of ENSEMBLES (line segments)/screen
+Enter the maximum number of trace ensembles to be
+displayed on the screen at one time. If the data is stacked
+data, line segments are treated as ensembles. When Trace
+Display loads and displays traces, it continues loading and
+displaying until it reaches either this limit or the Maximum
+number of Traces/screen.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1157
+
+ProMAX® Reference
+
+Trace GAP between ensembles
+This appears if >1 to Number of Ensembles/ screen. Enter
+the gap width in traces between ensembles when displaying
+multiple ensembles per screen. Enter 2 to put a two trace
+wide gap between each shot record or CDP ensemble. Note:
+This parameter is independent of the Number of
+Traces/screen. If you specify 120 traces/screen and a 2 trace
+gap between ensembles, Trace Display automatically ﬁgures
+in the extra 2 trace space when it displays the traces.
+Ensemble increment
+This appears if 0 to Maximum number of Traces/screen.
+Enter the number of ensembles between successive screens.
+Enter 0, the default, to increment by the Number of
+Ensembles/screen. If the value is less than the value of
+Number of Ensembles/screen, some ensembles from the
+current screen will be overlapped onto the next one. If the
+value is greater than the Number of Ensembles/screen, some
+ensembles will be skipped.
+For example, to look at every 10th shot record with one shot
+record on the screen at a time, specify 1 for Number of
+Ensembles (line segments)/screen and 10 for the Ensemble
+increment.
+Stacked data is considered to be an ensemble.
+Do you want to use variable trace spacing?
+Select Yes to position the traces by the sort key values. If the
+secondary sort key has duplicate values, Trace Display will
+revert to ﬁxed trace spacing.
+Output Mode
+Select the output mode from:
+• When Done returns traces to the ﬂow when you display
+the next screen. This is the default.
+• Immediate returns traces to the ﬂow as soon as they are
+read. Immediate is useful if the ﬂow has two Trace Displays because you can look at traces before and after a
+set of processes. Since the ﬁrst Trace Display returns
+the traces to the ﬂow immediately, the following tools will
+operate on them and the second Trace Display can dis-
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1158
+
+ProMAX® Reference
+
+play the result. Note: Editing of trace header values is
+disabled in this mode.
+Trace display MODE
+Select the display mode. The choices are:
+• WT/VA displays traces in wiggle traces/variable area
+mode.
+• WT displays traces in wiggle trace mode.
+• VA displays traces in variable area only mode.
+• Color displays traces in variable density color mode.
+• Grayscale displays traces in variable density grayscale
+mode.
+Offset BIAS for variable area
+This appears if WT/VA or VA to Trace display Mode. Enter
+the percent bias to have on the variable area ﬁll. A positive
+value will shift to the left of the zero line of the trace with
+more black. A negative value will result in less black.
+Display color bar?
+This appears when Grayscale or Color to Trace to Trace
+display MODE. Select Yes to display the color bar.
+Header Plot Parameter
+Select a trace header from the Headers menu to plot. Select
+No trace header entry, the default, to not plot any trace
+headers. You can always add trace header plots later using
+the interactive controls within Trace Display.
+Automatically SAVE screens?
+Select Yes to automatically save an image of each new screen.
+You can then use the animation tool to review these saved
+screen images for comparison.
+Maximum number of screen images to save
+Enter the maximum number of screen images to maintain.
+Once this number is exceeded, older images will be deleted as
+new ones are saved.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1159
+
+ProMAX® Reference
+
+Caution: Each screen image can require as much as 1
+megabyte of memory.
+Save screens in Color?
+Select Yes to save screen in color. Color screen images
+require approximately 8 times more memory than black and
+white images.
+Where to save screen images
+Select where to save screen images. The options are X Server
+and Program.
+Images stored in X Server can be retrieved and displayed
+much faster than images stored in program memory.
+However, some X Servers, particularly X terminals, have a
+limited amount of memory available for storing screen
+images. If your terminal is directly connected to a
+workstation try saving screen images in the X Server.
+If you store screen images in program memory, the number of
+images you can save can be much larger, limited by the
+available swap space. However image retrieval time will be
+much longer. If you are using a network connected X
+terminal, you may want to store screen images in the Trace
+Display program.
+Number of screens to collect
+This appears if Yes to Automatically save screens. Enter
+the number of individual screens to save, before reviewing
+them. This parameter is ideal for saving up parameter tests
+prior to reviewing the results. Saved screens can only be
+reviewed and compared; they can not be interacted with in
+this mode.
+DIRECTION of trace plotting
+Select the trace display direction of your shots, CDPs, or
+stacked traces:
+• Left to Right, the default, displays the traces with the
+low numbers starting on the left-hand side of the screen.
+• Right to Left displays the traces with the low numbers
+starting on the right-hand side of the screen.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1160
+
+ProMAX® Reference
+
+This option has nothing to do with the polarity of your data.
+POLARITY of trace display
+Select the polarity for traces display, the actual amplitude
+values are not altered:
+• Normal, the default, displays the positive amplitude of
+normal polarity traces to the right of the zero baseline.
+• Reversed displays the positive amplitude of reversed
+polarity traces to the left of the baseline.
+Primary trace LABELING header entry
+Select a trace header word to use as the primary or top label
+trace label. For example, select SOURCE or CDP for shot or
+CDP ordered data. A primary trace label is not required.
+Select None to disable the top trace annotation.
+Secondary trace LABELING header entry
+Select a trace header word to use as the secondary or bottom
+trace label. For example, select CHAN, SOURCE, REC_SLOC,
+OFFSET, or CDP. The default is CHAN.
+A secondary labeling header is not required. Select None to
+disable the secondary trace labeling.
+MODE of Secondary trace annotation
+Select the secondary trace annotation mode. This speciﬁes
+the frequency of the secondary trace annotation. The choices
+are:
+• Incremental labels the ﬁrst trace and every Nth trace
+thereafter. Thus a value of 2 would annotate traces 1, 3,
+5, 7, etc. This is useful for annotating offsets, channels,
+and fold.
+• Multiple labels a trace if the header falls on a multiple of
+the chosen increment. Thus a value of 5 would annotate
+all traces whose secondary labeling header value is divisible by 5. This is useful for annotating CDPs and receivers.
+• Different labels the ﬁrst trace, or every trace, if the
+header value is different from the previous trace.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1161
+
+ProMAX® Reference
+
+Note: Trace Display decimates the annotation frequency to
+avoid overplotting of annotation. If this occurs, the
+annotation frequency increases to the speciﬁed value as you
+zoom in.
+INCREMENT for Secondary trace annotation
+This appears if either Incremental or Multiple to Mode of
+Secondary trace annotation. Enter the increment to use for
+the bottom trace annotation.
+Trace scaling mode
+Select the trace scaling mode from:
+• Conventional uses conventional trace scaling in conjunction with the selected scaling option. This is the
+default and is better for trace data.
+• Range-limited uses range-limited scaling which
+includes a bias. Ideal for F-K type data and dB down
+type data.
+Conventional scaling works in the following manner:
+Divide trace amplitudes by trace scaling option value
+selected.
+Multiply all samples by a scalar to enhance the display.
+Multiply all samples by the additional scalar.
+Multiply all samples by the polarity value.
+Clip all amplitudes on the trace.
+Rasterize the trace amplitudes.
+Range-limited scaling works in the following manner:
+Subtract (MIN + MAX) / 2 from every sample.
+Divide every sample by (MAX - MIN) / 2.
+Multiply all of the samples by the polarity value.
+Rasterize the trace amplitudes using a Clip value of 1.0.
+Note: The amplitudes shown in the coordinate line at the
+bottom of the screen are the original unscaled amplitudes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1162
+
+ProMAX® Reference
+
+Any traces which contain NaN, not-a-number, values are
+killed before scaling, with the trace data and header actually
+changed.
+Trace excursion at which to CLIP
+This appears if Conventional to Trace scaling mode. Enter
+the number of trace excursions for data to cross before being
+clipped. Enter 2, the default, to clip at the second trace
+crossing away from the current trace. An amplitude of CLIP is
+represented by an excursion of plus or minus CLIP trace
+spacings.
+For color displays, an amplitude of 0.0 is represented by the
+central color, an amplitude of +CLIP will be represented by
+the hottest color, and an amplitude of -CLIP will be
+represented by the coldest color.
+SCALAR for sample value multiplication
+This appears if Conventional to Trace scaling mode. Enter
+the additional scalar to multiply the trace sample values
+before display. The default value is 1.0. This value is applied
+after actual trace scaling.
+Use a smaller value, such as 0.3, for picking ﬁrst break
+traces, or 2.0 for scaling data displayed in one of the color
+display options. Data can be gained with a higher value of 1.5
+or 2.0.
+Trace scaling option
+This appears if Conventional for Trace scaling mode. Select
+the option for scaling displayed traces. The choices are:
+• Individual scales each trace individually by dividing the
+trace amplitudes by the mean absolute value of the
+trace. This is the default.
+• Entire screen scales all traces in an ensemble by dividing the trace amplitudes by the mean absolute value of
+all traces.
+• No scaling applies no additional trace scaling.
+The amplitudes shown in the coordinate line at the bottom of
+the screen are the original unscaled amplitudes.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1163
+
+ProMAX® Reference
+
+Get min/max amplitudes from the data?
+This appears if Range-limited to Trace scaling mode. Select
+Yes to extract the minimum and maximum amplitude values
+for scaling from the data. Select No to enter the min/max
+amplitude values.
+Specify minimum amplitude to display
+This appears if No to Get min/max amplitudes from the
+data. Enter the minimum amplitude to display, without
+clipping. In color, this will correspond to the ﬁrst color in the
+colorbar.
+Specify maximum amplitude to display
+This appears if No to Get min/max amplitudes from the
+data. Enter the maximum amplitude to display, without
+clipping. In color, this will correspond to the last color in the
+colorbar.
+Number of display panels
+This appears if 0 for Maximum number of Traces/screen.
+Enter the number of display panels to create. Enter 1, the
+default, to display one window of traces. Enter a value greater
+than one, to split the window into multiple panels of trace
+data.
+You can display multiple panels of traces for applications like
+ﬁrst break picking where it is desirable to see more shot
+records, but with a smaller time range in each. You might
+also use this option to view multi-component data, splitting
+each component into a different panel.
+Split data by
+This appears if >1 to Number of display panels. Select how
+to split the traces into the display panels. Choices are:
+• Ensemble splits the incoming data at ensemble boundaries. For example, the ﬁrst set of traces go into the ﬁrst
+panel and the second set into the second panel. In this
+case, the Number of Ensembles/screen determines
+how many traces go into each panel. For example, you
+would split the data by Ensemble to display multiple
+shot records for ﬁrst break picking.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1164
+
+ProMAX® Reference
+
+• Demultiplex demultiplexs the incoming data into the
+different display panels. For example, if you select 3 display panels and split by Demultiplex, the ﬁrst trace will
+go into the ﬁrst panel, the second trace into the second
+panel, the third trace into the third panel, and the fourth
+trace will go into the ﬁrst panel. Use this option for displaying multi-component data with each component
+multiplexed together. Note: It is important that the number of display panels be consistent with how the traces
+are multiplexed. View 3 component data in two display
+panels results in a confusing picture.
+Trace Orientation
+Select the trace orientation:
+• Vertical, the default, displays vertically oriented seismic
+traces.
+• Horizontal plots traces horizontally, with time increasing to the right and trace numbers increasing from top to
+bottom. Trace numbers increase from bottom to top if
+display direction is set to Right to Left.
+
+Interactive Display
+After running this process, an interactive display window will
+appear. The graphic below is an example.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1165
+
+ProMAX® Reference
+
+Trace Display Window
+Icon Bar
+
+Menu Bar
+
+Trace Header Plot
+
+Views
+View
+
+Active Icon
+
+Mouse Help
+
+Data Display
+
+Click on a menu item or icon above and jump to the explanation. ➲
+Menu bar
+The menu bar contains the ﬁve pulldown menus shown
+above plus the Help menu. When commands in the menu bar
+are not appropriate, they are grayed out.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1166
+
+ProMAX® Reference
+
+Commands that pop up dialog boxes end in an ellipsis (...).
+Commands that bring up a ﬂy out menu for additional
+choices end with >.
+Keyboard Shortcuts
+Each menu may be accessed via the keyboard. The keyboard
+shortcut for the menu bar is an <Alt> key in combination
+with the underlined letter. Then choose the submenu
+command by typing the underlined letter for that command.
+For example: <Alt>-F, S will bring up the File menu and Save
+Picks.
+The following describes each menu bar command.
+File menu
+The ﬁle menu commands are:
+• Save Picks saves any picks made since the last save.
+• Hardcopy > generates a hardcopy print of the screen on
+either a printer or a plotter:
+Printer prints to a printer. This command uses the
+screendump command in the conﬁg_ﬁle. The default is
+to print to a Postscript printer.
+Plotter prints to a plotter. This command uses
+screendump.exe.
+• Next Screen displays the next screenful of data. When
+no more data is available, this command is grayed out.
+Same as the Trafﬁc Light icon. This works the same as
+the
+icon.
+• Previous Screen moves backward by one frame. This
+works the same as the
+icon.
+• Rewind moves backward to the ﬁrst frame. This works
+the same as the
+icon
+• Exit/Continue Flow exits and continues the ﬂow. You
+are asked to save picks before exiting.
+• Exit/Stop Flow exits Trace Display and stops the ﬂow.
+You are asked to save picks before exiting. Note: This
+command stops the ProMAX® ﬂow, but not other socket
+tools such as Trace Display. You must exit multiple
+socket tools in a ﬂow individually.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1167
+
+ProMAX® Reference
+
+View menu
+The view menu commands change the appearance of the
+display.
+• Trace Display... controls trace display parameters.
+• Trace Scaling... controls trace scaling parameters.
+• Trace Annotation... controls the trace headers used for
+the primary and secondary trace annotation.
+• Header Plot > manages trace header plots in the plot
+area above the traces. It has two submenus:
+Plot On... toggles the header plot on/off. This command
+is grayed when there are no trace header plots deﬁned.
+Conﬁgure... adds, removes, and changes trace header
+plots. The dialog box is shown below.
+Conﬁgure Trace Header Plots Dialog
+
+Select a trace header entry from the left-hand side to
+plot. Select a plot to change or remove from the righthand list.The Remove button removes the plot
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1168
+
+ProMAX® Reference
+
+highlighted in the right hand list. Line Color and Line
+Width are option menus that change the plot attributes
+of the trace header entry selected in the right-hand list.
+• Edit Colormap edits the colormap used to display seismic traces.
+• Colorbar displays the color bar on the right-hand side of
+the screen, if Color or Grayscale is selected in Trace Display Mode. The colorbar is used to track amplitudes. As
+you move your mouse around your trace display, the colorbar moves accordingly.
+• Refresh redisplays the Trace Display window. This is
+most useful if invoked from the keyboard, either with
+<Alt>-V,R or by the shortcut listed in the resource ﬁle
+$PROMAX_HOME/port/lib/X11/app-defaults/TraceDisplay. The
+default for this shortcut is <Ctrl>-L.
+Animation
+The animation menu applies to saving and replaying screen
+images.
+• Save Screen saves the current screen image. Any picks
+and annotation on the screen are saved along with the
+trace data.
+• Animate reviews the saved screen images.
+The animation dialog is used to review the saved screen
+images, step through the images manually or cycle through
+them automatically. It controls the speed of playback, limits
+the set of displayed frames, and deletes unwanted frames.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1169
+
+ProMAX® Reference
+
+Animation Dialog
+
+• Speed Control controls the playback speed for automatic, faster on the right, slower on the left. This control
+is active even during an animation sequence.
+• Frame Control shows the current frame. Drag the slider
+to position the frame of interest.
+• Start Frame sets the start frame to the currently displayed frame. Animation sequences operate between the
+start and end frames.
+• End Frame sets the end frame to the currently displayed
+frame.
+• Manual toggles manual mode on/off. In manual mode,
+the Cycle, Ramp, and Toggle controls step one frame at a
+time and ignores the speed control setting.
+
+• Delete deletes the currently displayed frame. The start
+and end frame will be updated appropriately.
+
+• Rewind steps backward to the ﬁrst frame.
+
+• Back single steps backward by one frame.
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1170
+
+ProMAX® Reference
+
+• Cycle cycles through the saved frames from start to end,
+and back.
+
+• Ramp ramps through the saved frames from start up to
+end, back down to start.
+
+• Toggle toggles between the start and end frames.
+
+• Stop stops an animation sequence started by Cycle,
+Ramp, or Toggle.
+
+• Forward single steps forward by one frame.
+
+• End steps forward to the last frame.
+
+• Cancel closes the animation dialog box.
+
+Picking menu
+The Picking menu applies to selecting objects to pick. Each of
+these commands will popup a dialog box showing a list of
+existing objects, tables, lists, database entries, etc. The dialog
+also contains a place to enter the name of a new object.
+Either select an existing object or enter the name of a new
+one. Then click OK or Apply. Note: If you click Apply, the
+dialog box remains on the screen and you can select or create
+another object.
+If you enter the name of a new object, another dialog box
+appears showing Trace Header entries. Select one of the
+Trace Header entries for a secondary key. Click OK to create
+the object or Cancel to cancel the entire operation.
+The following choices are in the picking menu. Commands
+that are not appropriate for current data are grayed out:
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1171
+
+ProMAX® Reference
+
+Kill Traces
+Reverse Traces
+Pick Top Mute
+Pick Bottom Mute
+Pick Top Mute (WB_TIME relative)
+Pick Bottom Mute (WB_TIME relative)
+Pick Surgical Mute
+Pick Miscellaneous Time Gates
+Pick Miscellaneous Time Gates (WB_TIME relative)
+Edit Header Values (ﬁrst breaks)
+Edit Database Values (ﬁrst breaks)
+Pick Autostatics Horizons
+Pick Other Horizons
+First Break Picker menu
+The ﬁrst break picker gives you the opportunity to
+interactively create and train a neural network to pick ﬁrst
+breaks. Even though the actual picking is performed from
+within Trace Display, most of the time the neural network is
+used in batch mode using the Neural Network FB Picker
+tool. A means is provided for you to QA the picks. Once the
+network is able to pick ﬁrst breaks to your satisfaction, the
+network’s weight matrix is stored as a standard ProMAX®
+table and can be used from other process. For a more
+detailed description of the mechanics of an artiﬁcial neural
+network, refer to the helpﬁle for Neural Network Reversed
+Trace Training.
+Trace numbers must be valid for this process to work.
+Without valid trace numbers, the Neural Network menu is
+not displayed in Trace Display. The Neural Network menu
+contains the following commands:
+• Set Neural Network Parameters allows you to set the
+following parameters, which must be set before training
+of the neural network can proceed. Once set, the parameters can be modiﬁed at any time during execution. However, resetting the parameters without retraining the
+neural network might cause the network to fail.
+Pick polarity picks are shifted down in time depending
+on the option selected. Shifting improves pick
+consistency in noisy data and decreases the number of
+locations for the network to consider as potential picks,
+thus improving speed and accuracy.
+Peak shifts the pick down to the nearest peak below the
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1172
+
+ProMAX® Reference
+
+actual ﬁrst break pick.
+Trough shifts the pick down to the nearest trough below
+the actual ﬁrst break pick.
+Zero - to + shifts the pick down to the nearest negative
+to positive-going zero crossing below the actual ﬁrst
+break pick.
+Zero + to - shifts the pick down to the nearest positive to
+negative-going zero crossing below the actual ﬁrst break
+pick.
+Signal and Noise gate length (in ms) is the length of
+the leading and trailing windows used to analyze the
+characteristics of each of the example peaks. It is
+generally recommended that the gate length be
+approximately 3 times the dominant frequency of the
+data.
+• Create Training Dataset creates manual picks to use
+for neural network training. Select an existing, or create
+a new, time gate to limit the search for the ﬁrst breaks.
+Once a gate is selected, two pick objects are created in
+memory, the selected time gate table and FB Training
+Data, which is a temporary pick object. The Pick icon is
+displayed on the left hand side of the screen. By default,
+FB Training data is the active object in the Pick Layer
+dialog box.
+If the time gate is selected from an existing table, the
+gate will be displayed on screen. If a new gate is created,
+you can select the gate pick object from the Pick
+Manager and pick the gate. Remember that the gate has
+to have two layers, the top and bottom gate. It is
+generally recommended that the gate is wide enough to
+at least contains three peaks so that the neural network
+can consider more than one or two candidate peaks for
+picking, but not overly large that the execution time gets
+lengthy.
+Since the training is performed interactively, the
+network is equipped with the capability to perform
+incremental learning. Therefore, you can create a
+training dataset with as few manual picks as possible.
+This assumes that if the net needs more data to learn,
+you can always create more manual picks and train the
+network incrementally. Keeping the size of the training
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1173
+
+ProMAX® Reference
+
+dataset to a minimal also speeds up the training process.
+Generally, for clean data, a quarter or one-half of a shot
+is all that is needed to train the network. For noisy data
+the network might need the whole shot to train. Note:
+Snap the peaks to the nearest peak/trough/zero
+crossings before starting the training process. If you
+should forget to snap, the program will automatically
+snap picks before training according to the neural net
+parameters deﬁned.
+If you constrain the length of the traces in trace display
+(by specifying trace START time and trace END time), the
+neural net only picks whose both top and bottom gates
+are within the start and end times of the trace.
+• Neural Net Training speciﬁes where the neural network
+weight matrix is stored in the database. If you select an
+existing database table, the network performs an incremental learning. Otherwise a new network is created
+from scratch. During the training process, the watch
+icon appears indicating the program is tied up. This is
+intended to prevent accidental modiﬁcations to the network parameters and training dataset.
+• Neural Net Recall allows you to apply the network to the
+rest of the data, once the training is completed in the following manner:
+Continuous Recall applies the network to the current
+and subsequent ensembles.
+One time Recall applies the network only to the current
+ensemble. When using this option, you can deactivate
+the previous picks from the display before asking for the
+new pick. This will avoid overplotting of both attributes
+Stop Recall stops this process.
+When Recall is selected, a dialog box appears where you
+can select or type a description for the NN_PICK
+attribute where the neural network picks are stored in
+the database. Also set the following three parameters to
+perform neural network picking:
+Maximum Trace to Trace Static enters the allowable
+deviation from the predicted arrival time. It should
+reﬂect the maximum trace-to-trace static expected for
+the line. This number is converted to static per unit
+distance for use, and the geometry information for the
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1174
+
+ProMAX® Reference
+
+trace is used by the picker.
+Starting offset for picking enters the starting offset. It
+is assumed this initial offset reﬂects a relatively low
+noise, non-shingled area of the data. The picker will then
+proceed from this starting offset to the local minima and
+maxima within the ensemble.
+Number of traces for median line ﬁt enters the
+number of previous ﬁrst break picks to establish the
+local slope of the ﬁrst break picks. A median time
+prediction is derived to predict the arrival time of the
+next trace.
+Since Recall creates a new pick object that can be
+selected from the Pick Manager dialog box, the neural
+net picks can be treated just like any other pickable
+objects. If the neural net picks are generally acceptable
+and only need a minor editing, you can edit them by
+hand. If the picks are mostly incorrect, you can create
+more manual picks and retrain the network, or adjust
+the picking parameters. When retraining the network,
+you will want to add picks to or just edit the FB Training
+pick object and not your NN_PICK edits. FB Training is
+the ﬁle used to retrain the network.
+• Purge Neural Net deletes the neural network from memory. This in effect cancels all the training performed during the current execution of Trace Display. This is useful
+if you want to start training from scratch or create a new
+neural network.
+A typical scenario of picking ﬁrst breaks using the neural
+network follows:
+1. Set Neural Network parameters.
+2. Create Training dataset.
+3. Train the network.
+4. Apply the network in current ensemble. If the picks are
+acceptable, go to step 5. Otherwise, pick some more
+manual picks, and return to step 3. If you feel there are
+enough manual picks, adjust the picking parameters,
+such as the starting offset or trace to trace static. Also
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1175
+
+ProMAX® Reference
+
+check that the top gate closely follows the slope of the ﬁrst
+break.
+5. Apply the network in subsequent ensembles to QA the
+picks. If some corrections are needed, pick a few manual
+picks in the subsequent ensembles and return to step 3. If
+the network’s picks are satisfactory, picking can be
+stopped. Then use the process NN First Break Picker and
+run in batch mode to pick the whole data set.
+Help
+Clicking on Help pops up a menu with two choices:
+• Mouse > Submenu with the following choices:
+❑ Coordinates enables coordinate display.
+❑ Buttons enables button help.
+❑ General enables general help.
+
+All enables mouse help.
+None enables all mouse help.
+• Documentation brings up this helpﬁle.
+Icon Bar
+The following commands are invoked using the icons on the
+left hand side of the screen.
+• Forward shows the next screen full of data.
+
+• Back single steps backward to previous screens. If there
+is no previous data available, this icon is grayed out.
+
+• Rewind steps backward to the ﬁrst screen full of data. If
+there is no previous data available, this icon is grayed
+out.
+
+• Save Image saves the current screen image. Annotation
+and picked events are saved with the trace data.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1176
+
+ProMAX® Reference
+
+• Animation brings up the Animation dialog box. This
+button is active only when there are at least two saved
+screen images. For more information please see the Animation discussion in the Menu bar section above.
+• Paintbrush toggles on/off picked kills, reverses, and
+mutes to the data. Click once to apply, click again to
+unapply. This tool is only active when you are picking
+something.
+• Zoom Tool zooms a selected area by clicking and dragging MB1. If you release MB1 outside the window, the
+zoom operation is canceled. If you click MB1 without
+dragging, this tool will unzoom. You can use the zoom
+tool in the axis area to zoom in one direction only.
+• Annotation Tool allows you to add, change, and delete
+text annotation in the trace and header plot areas. The
+pointer changes to a circle when it is over text annotation. You can move an annotation by clicking and dragging MB1, or add new annotation by clicking MB1 when
+the pointer is not over an existing annotation. When the
+pointer is over an existing annotation, click MB2 to
+delete the text or MB3 to edit the text or change its color.
+• Velocity Tool draws a rubberband line between the
+location of the ﬁrst button click and the mouse pointer.
+The coordinate area will show the velocity implied by this
+line. For prestack data, click MB2 and the velocity tool
+draws a hyperbolic velocity function with its apex at the
+zero offset location. Shift MB2 locates the apex of the
+hyperbola where the mouse is clicked. Click MB3 when
+the velocity function is active to save an annotated copy
+of the displayed function.
+• Header Tool shows the trace header of a selected trace.
+The ﬁrst section of the dialog shows the primary and secondary sort keys. The second section shows the rest of
+the trace headers in alphabetical order. You can move,
+resize, and scroll the dialog box to position the headers.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1177
+
+ProMAX® Reference
+
+.
+
+• Picking Tool appears when one or more pick objects
+from the Picking menu are selected. When active, click
+on MB1 to pick a point on a trace or click and drag to
+pick a range of traces. When the mouse is over a picked
+point, the pointer shape changes into a circle. Click and
+drag using MB1 to move a picked point. Use MB2 to click
+on a single point to delete it, or click and drag over a
+range of points to delete them. Click MB3 for additional
+picking options.
+Pick Manager
+When the Picking Tool is active, the Pick Layer dialog box
+will popup for selecting a pickable object. Click on the object
+name; it will become active and drawn in red. Click on the
+Remove button to remove this object only from the list of
+pickable objects (this will not physically delete your ﬁle).
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1178
+
+ProMAX® Reference
+
+Picking Options
+When the Picking Tool is active, you can click MB3 to popup
+the following options for the current pick object:
+• New Layer adds a new layer to the active pick object.
+This command is only active for objects with multiple
+layers.
+• Project projects the interpolated display. Use this command to see how the picks on the current ensemble are
+projected onto the next ensemble(s).
+• Snap Peak snaps picks to the nearest peak.
+• Snap Trough snaps picks to the nearest trough.
+• Snap Zero + to - snaps picks to the nearest positive to
+negative going zero crossing.
+• Snap Zero - to + snaps picks to the nearest negative to
+positive going zero crossing.
+• Smooth Picks smooths the picks using a running average ﬁlter.
+• Smooth Options... pops up a dialog box in which you
+can enter the smoothing ﬁlter length.
+
+Customizing the User Interface
+There are a number of features of Trace Display that can be
+customized using X Windows resources. The default resource
+ﬁle /advance/port/lib/X11/app-defaults/TraceDisplay
+contains a sample set of resources. Note: The exact path of
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1179
+
+ProMAX® Reference
+
+this ﬁle will depend on your installation. The resources in
+this ﬁle are used to conﬁgure the screen size, colors, and
+fonts of various objects in Trace Display.
+You must add a path to your XFILESEARCHPATH
+environment variable. A typical setting for this environment
+variable might be:
+/advance/port/lib/X11/%T/%N%S:/usr/lib/X11/%T/%N%S
+
+There are a number of ways to customize the resource
+settings:
+• Your system administrator can edit the default resource
+ﬁle.
+• You can copy the default resource ﬁle into your own
+directory, edit the ﬁle, and add that directory to
+XFILESEARCHPATH.
+• You can copy the default resource ﬁle to your $HOME
+directory and edit it.
+• You can copy the resources into your .Xdefaults ﬁle, and
+add the word TraceDisplay to the beginning of each
+resource name. For example, the default resource ﬁle
+contains a line that looks like:
+*geometry: 2000x2000
+
+This line causes Trace Display to start up using the full
+screen. To start up using an 800 by 600 pixel window,
+place the following line in your .Xdefaults ﬁle:
+TraceDisplay*geometry: 800x600
+
+For a more detailed discussion of customizing ProMAX®
+applications, please refer to the System Administration guide.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+Trace Display1180
+
+Other Docs
+
+ProMAX® Reference
+
+Search Page
+
+Known Problems
+
+

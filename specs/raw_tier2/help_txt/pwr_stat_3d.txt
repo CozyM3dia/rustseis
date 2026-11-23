@@ -1,0 +1,387 @@
+2D/3D Maximum Power Autostatics (Old)1965
+
+ProMAX® Reference
+
+2D/3D Maximum Power Autostatics (Old)
+Maximum Power Autostatics computes source and receiver
+residual statics by maximizing the CDP stack power.
+
+Theory
+Maximum Power Autostatics can be effective in poor signalto-noise data. However, this process works well for a wide
+range of data quality, if the velocity errors are reasonably
+small. For a general discussion of input requirements,
+database entries, and how residual statics are applied, refer
+to the Residual Statics Overview.
+Maximum Power Autostatics uses a modiﬁcation of the
+method described in Ronen and Claerbout’s paper. For each
+CDP, you build an initial pilot trace model from various time
+gates of surrounding traces. Pilot traces are formed for each
+time gate by ﬂattening all traces along the autostatics horizon
+over the number of CDPs speciﬁed in the autostatics horizon
+ﬁle by Smash for 2D, and over the number of CDPs speciﬁed
+by the inline and crossline smash for 3D in the menu. All of
+these traces are then summed to form a single pilot trace. A
+given trace from an active CDP (center CDP unless near a
+survey boundary) is subtracted from the single pilot trace to
+form an updated pilot trace. This trace from the active CDP is
+then cross-correlated with the pilot trace, forming a shift
+power trace. This shift-power trace is then summed with
+other shift-power traces having the same receiver and again
+with those having the same shot. The above process is then
+repeated for all traces in the active CDP, then the active CDP
+is incremented, and the pilot-stack power process repeated
+for all speciﬁed CDPs. After the shift spectra from all traces
+for the entire dataset have been computed and summed in
+the receiver and shot domains, time shifts are picked at the
+maxima relative to the center (within the maximum allowed
+time shift for that iteration) of the power shift spectra and
+stored as receiver and shot statics. The CDP static
+component is removed by linear (2D) or spatial (3D) trend
+removal. In the next iteration, the pilot stacks are then
+updated with these statics estimates and the complete
+process is repeated for a speciﬁed number of iterations. After
+the convergence criteria has been met or the maximum
+number of iterations used, the program outputs the ﬁnal
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1966
+
+ProMAX® Reference
+
+source static values to the SIN STATICS database as
+SPRWXXXX. Similarly the receiver statics are SRF STATICS
+RPRWXXXX. Quality factors are also output as S_PQXXXX
+and R_PQXXXX.
+
+Usage
+You have the option to apply previously computed statics
+before execution to allow iteration on a step by step basis, or
+check pointing. If the dataset is large and execution times are
+long, running one iteration at a time may be preferable to
+trying multi-iterations resulting in very large elapsed times.
+Since you can now set the maximum residual static value
+allowed per iteration, it may be instructive to try many
+attempts at the ﬁrst iteration, varying the maximum
+allowable static to determine the best maximum static per
+iteration. We suggestions increasing the maximum allowable
+static for each iteration, but start small. Residual statics
+exceeding the iteration limit value are set to zero.
+In addition to the maximum number of iterations, you may
+specify an RMS static change convergence criteria. If the RMS
+of the change in the computed statics between iterations is
+less than this value, the additional iterations are not
+performed.
+The program includes a parameter for the percentage of live
+samples in a gate. If less than this percentage of the samples
+in any gate are non-zero, the gate is excluded from the
+residual static estimate. Zero sample values normally result
+from NMO stretch muting or surgical mutes.
+The correlation reject option scans the correlation to ﬁnd the
+values of the two largest peaks. If these values are NOT
+different by a user speciﬁed percent, the correlation is
+rejected, that is, it does not enter the source correlation stack
+or receiver correlation stack. This option will reject
+correlations contributing to cycle skips.
+You can optionally use the positive envelope of the stackpower traces before source and receiver accumulation. This
+option may be useful on datasets with cycle skips on the
+brute stack.
+You can also restrict the offsets of traces used in the
+computations, if the data has serious ground roll or other
+offset separable problems.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1967
+
+ProMAX® Reference
+
+The dataset used for computation may be restricted by CDP
+number or by start and end inline and crossline.
+You must specify ﬁnal minimum and maximum static values
+allowed. Any source or receiver static that exceeds these
+values will be set to zero.
+It is critical to remember that CDPs used in the solution will
+be enclosed by the geometry of the entries in the Autostatics
+Horizon ﬁle. Typically, to use all CDPs (entire survey in 3D)
+the autostatics horizon ﬁle deﬁnition points must include the
+ﬁrst CDP of the ﬁrst inline, the last CDP of the ﬁrst inline, the
+ﬁrst CDP of the last inline and the last CDP on the last inline
+(if the survey is oriented N-S-E-W). However, this may not be
+enough points to include all the edge CDPs (with oblique
+surveys). We suggest that the start and end CDPs of
+intermediate inlines also be picked to ensure the whole
+survey. If the autostatics horizon is only desired over a part of
+the survey, we suggest that a minimum of 4 points be used in
+the horizon deﬁnition.
+The CDP term may be optionally 1) removed after each
+iteration (default), 2) removed after the last iteration (if more
+than one iteration is speciﬁed) or 3) NOT removed at all. In
+2D, if the length of the smoother is speciﬁed equal to or larger
+than the total number of CDP’s in the line, a straight line is
+ﬁtted to the source statics and another line is ﬁtted to the
+receiver statics. The static values are adjusted so that the
+lines are ﬂat (horizontal) at y = 0 (no static bias). If, in 2D, the
+length of the smoother is LESS than the total number of
+CDP’s in the line, a low frequency source static component is
+computed using the speciﬁed length of smoother. The low
+frequecy component is subtracted from the original source
+statics. The same process is applied to the receiver
+statics.The same adjustment occurs in 3D, except 2
+dimensional ﬁlters are used as speciﬁed in the menu. The
+(old and new) default length is (NILINESz + NXLINESz) / 2. on
+each side. This trend is computed for both source and
+receiver statics and the trend values are subtracted.
+Successful execution of 2D/3D Maximum Power
+Autostatics creates the following database entries. These
+attributes can be viewed and edited in the OPF database. It is
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1968
+
+ProMAX® Reference
+
+necessary to run Apply Residual Statics, to apply these
+database entries.
+Database Entries
+Order
+
+Info Type
+
+Parameter
+
+Description
+
+SIN
+
+STATICS
+
+SPWRXXXX
+
+Shot Static
+
+SIN
+
+STATICS
+
+S_PQXXXX
+
+Shot Static Quality
+
+SRF
+
+STATICS
+
+RPWRXXXX
+
+Receiver Static
+
+SRF
+
+STATICS
+
+R_PQXXXX
+
+Receiver Static Quality
+
+Reference
+Ronen and Claerbout’s paper Geophysics 1985
+
+Parameters
+Select Trace data ﬁle
+Select an NMO-corrected CDP gather trace dataset from the
+datasets menu.
+Select Autostatics horizon ﬁle
+Select an Autostatics horizon ﬁle from the horizon ﬁle menu.
+This ﬁle should contain time gates for the autostatics
+reference horizons.
+RMS static change convergence criteria
+Enter a check for the convergence of the solution.
+Calculations are terminated if the RMS of the change in
+computed statics between iterations is less than this value.
+Enter 0.0 to disable this feature.
+Maximum number of iterations
+Enter the maximum number of iterations. Only this number
+of iterations are performed if the RMS static convergence
+limit is never satisﬁed.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1969
+
+ProMAX® Reference
+
+Minimum live samples in a gate (percent)
+Enter the percentage of non-zero samples to accept in a gate.
+Traces exceeding this value are excluded from static
+estimates.
+Maximum static allowed (ms)
+Enter the maximum residual static for each iteration. This
+value limits the maximum magnitude of the computed
+residual statics. For example, you can enter the following
+statics for 4 iterations:
+10.,20,30,50/
+
+Correlation reject percent
+Any correlation whose maximum peak val;ue is less than this
+percent greater than the next largest peak value will not be
+used. Enter 0 to use all correlations.
+Minimum smash fold
+Minim number of traces needed to form a pilot. Any pilot with
+less than this number of traces will no be used to generate
+source or receiver correlations.
+Minimum source fold
+Minim fold of source correlation stack needed to compute a
+source static. Any source whose correlation stack has less
+than this fold will have it’s static value set to zero (0).
+Minimum receiver fold
+Minim fold of receiver correlation stack needed to compute a
+receiver static. Any receiver whose correlation stack has less
+than this fold will have it’s static value set to zero (0).
+Compute Statics for whole line?
+Select Yes to compute statics for the complete line. Select No
+to compute statics for a subset of the line.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1970
+
+ProMAX® Reference
+
+Dataset restriction option
+This appears for a 3D dataset and if No to Compute Statics
+for the whole line. and the dataset is 3D. Select how to
+restrict the dataset from the following choices:
+• CDP Range restricts the dataset by a start and end CDP.
+You can use this option for statics analysis.
+• Inline and Crossline Range restricts the dataset by a
+start and end inline and crossline.
+Start CDP of input dataset
+This appears if CDP Range to Dataset restriction option.
+This also appears for a 2D dataset if No to Compute Statics
+for whole time. Enter a starting CDP of the input dataset.
+End CDP of input dataset
+This appears if CDP Range to Dataset restriction
+option.This also appears for a 2D dataset if No to Compute
+Statics for whole time.. Enter an ending CDP of the input
+dataset.
+Start Inline
+This appears if Inline and Crossline Range to Dataset
+restriction option and if the data are 3D. Enter a starting
+inline number.
+End Inline
+This appears if Inline and Crossline Range to Dataset
+restriction option and if the data are 3D. Enter an ending
+inline number.
+Start Crossline
+This appears if Inline and Crossline Range to Dataset
+restriction option and if the data are 3D. Enter a starting
+crossline number.
+End Crossline
+This appears if Inline and Crossline Range to Dataset
+restriction option and if the data are 3D. Enter an ending
+crossline number.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1971
+
+ProMAX® Reference
+
+Length of smash Inline
+This appears for a 3D dataset. Enter the inline length of the
+smash area. This value must be odd.
+Length of smash Crossline
+This appears for a 3D dataset. Enter the crossline length of
+the smash area. This value must be odd.
+Use envelope of correlations?
+Select Yes to sum the positive envelope of the correlations.
+CDP term options
+The default is to compute and apply a CDP term after ALL
+iterations. The second option is to compute and apply a CDP
+term after the ﬁnal iteration(multiple iterations speciﬁed) The
+ﬁnal option is to NOT compute or apply any CDP term.
+Length of CDP smoother
+Refer to USAGE above for a discussion of this parameter. The
+value must be odd value must be odd.
+Apply previously computed residuals?
+Select Yes to apply previously computed source and receiver
+statics prior to residual static calculation.
+Source residual static database parameter
+This appears if Yes to Apply previously computed
+residuals. Select a source statics ﬁle from the SIN STATICS
+database.
+Receiver residual static database parameter
+This appears if Yes to Apply previously computed
+residuals. Select a receiver statics ﬁle from the SRF STATICS
+database.
+Restrict offsets?
+Select Yes to restrict offsets.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+2D/3D Maximum Power Autostatics (Old)1972
+
+ProMAX® Reference
+
+Minimum absolute offset
+This appears if Yes to Restrict Offsets. Enter the minimum
+absolute offset of interest.
+Maximum absolute offset
+Tis appears if Yes to Restrict offsets. Enter the maximum
+absolute offset of interest.
+Final minimum static
+Enter the minimum value (usually negative) allowed for any
+ﬁnal source or receiver static values written to the database.
+Static values less than this value are set to zero.
+Final maximum static
+Enter the maximum value (usually positive) allowed for any
+ﬁnal source or receiver static values written to the database.
+Static values greater than this maximum are set to zero.
+Run ID
+Enter 4 numbers to identify the source and receiver statics
+output parameters.
+Report static values after each iteration.
+Select No to only report the ﬁnal statics values. Select Yes to
+report static values after each iteration.
+Output static values after each iteration.
+Select Yes to output statics values after each iteration. This
+may be very useful for long runs on large datasets. Select NO
+to only output static values after ﬁnal iteration.
+
+Other Docs
+
+Search Page
+
+Known Problems
+
+
