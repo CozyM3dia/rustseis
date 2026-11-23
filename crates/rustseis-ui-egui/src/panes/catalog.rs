@@ -124,12 +124,13 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     }
 }
 
-fn tool_row(ui: &mut Ui, p: &Palette, t: &ToolDescriptor, color: egui::Color32) {
-    let (rect, resp) = ui.allocate_exact_size(egui::vec2(ui.available_width(), 26.0), egui::Sense::click_and_drag());
+fn tool_row(ui: &mut Ui, p: &Palette, t: &ToolDescriptor, _color: egui::Color32) {
+    let (rect, resp) = ui.allocate_exact_size(egui::vec2(ui.available_width(), 27.0), egui::Sense::click_and_drag());
     if resp.hovered() {
         ui.painter().rect_filled(rect, egui::CornerRadius::same(6), p.raised);
     }
-    ui.painter().text(egui::pos2(rect.left() + 10.0, rect.center().y), egui::Align2::LEFT_CENTER, archetype_icon(t.archetype), egui::FontId::proportional(13.0), color);
+    let ic_rect = egui::Rect::from_center_size(egui::pos2(rect.left() + 14.0, rect.center().y), egui::vec2(16.0, 16.0));
+    crate::icons::paint(ui.painter(), ic_rect, crate::icons::for_tool(&t.menu_id, &t.category), p);
     let clip = egui::Rect::from_min_max(egui::pos2(rect.left() + 30.0, rect.top()), egui::pos2(rect.right() - 6.0, rect.bottom()));
     ui.painter().with_clip_rect(clip).text(egui::pos2(rect.left() + 30.0, rect.center().y), egui::Align2::LEFT_CENTER, &t.label, egui::FontId::proportional(12.5), p.text);
 }

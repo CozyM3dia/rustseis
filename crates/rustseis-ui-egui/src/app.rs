@@ -206,7 +206,7 @@ impl RustSeisApp {
             self.project_chip(ui, p);
 
             let pills_w = stage_pills_width(ui, p);
-            let right_w = 470.0;
+            let right_w = 430.0;
             let free = ui.available_width() - right_w;
             ui.add_space(((free - pills_w) * 0.5).max(8.0));
             self.stage_pills(ui, p);
@@ -214,10 +214,6 @@ impl RustSeisApp {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 ui.spacing_mut().item_spacing.x = 6.0;
                 ui.add_space(4.0);
-                let assist = self.right_mode == RightMode::Assistant;
-                if top_icon(ui, p, icon::SPARKLE, "Assistant", assist).clicked() {
-                    self.right_mode = if assist { RightMode::Inspector } else { RightMode::Assistant };
-                }
                 let theme_icon = if self.state.theme == ThemeMode::Dark { icon::SUN } else { icon::MOON };
                 if top_icon(ui, p, theme_icon, "Light or dark", false).clicked() {
                     self.state.theme = self.state.theme.toggled();
@@ -290,6 +286,9 @@ impl RustSeisApp {
             let on = self.stage == *w;
             if on {
                 ui.painter().rect(r, CornerRadius::same(7), p.raised, Stroke::new(1.0, p.border_strong), StrokeKind::Inside);
+                // ArcGIS-Pro-style active tab accent bar along the bottom edge connecting to the ribbon.
+                let bar = egui::Rect::from_min_max(pos2(r.left() + 8.0, r.bottom() - 2.5), pos2(r.right() - 8.0, r.bottom()));
+                ui.painter().rect_filled(bar, CornerRadius::same(2), p.info);
             } else if resp.hovered() {
                 ui.painter().rect_filled(r, CornerRadius::same(7), with_alpha(p.raised, 160));
             }
@@ -773,8 +772,8 @@ impl RustSeisApp {
         let p = *palette(self.state.theme);
         let g = space::GUTTER as i8;
 
-        egui::Panel::top("rs_top").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 8, right: 8, top: 4, bottom: 2 })).exact_size(50.0).show_separator_line(false).show(ui, |ui| self.top_bar(ui, &p));
-        egui::Panel::top("rs_cmd").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: g, top: 2, bottom: 0 })).exact_size(46.0).show_separator_line(false).show(ui, |ui| {
+        egui::Panel::top("rs_top").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 8, right: 8, top: 4, bottom: 2 })).exact_size(46.0).show_separator_line(false).show(ui, |ui| self.top_bar(ui, &p));
+        egui::Panel::top("rs_cmd").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: g, top: 2, bottom: 0 })).exact_size(98.0).show_separator_line(false).show(ui, |ui| {
             crate::commands::bar(self, ui, &p);
         });
         egui::Panel::bottom("rs_status").frame(Frame::NONE.fill(p.chrome)).exact_size(26.0).show_separator_line(false).show(ui, |ui| self.status_line(ui, &p));

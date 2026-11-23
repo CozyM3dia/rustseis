@@ -103,6 +103,16 @@ impl Tour {
             st.viewer.request_refit = true;
         })));
         s.extend([Step::Settle, Step::Pause(0.5), Step::Shot("04_viewer_before_after_radon".into())]);
+        // Imaging stage ribbon view (Depth Model / Kirchhoff PSDM / 2D RTM GPU).
+        s.push(Step::Do(Box::new(|a| {
+            a.stage = crate::state::Workspace::Imaging;
+            a.left_tab = crate::app::LeftTab::Library;
+            a.left_open = true;
+        })));
+        s.extend([Step::Pause(0.4), Step::Shot("04b_imaging_ribbon_library".into())]);
+        s.push(Step::Do(Box::new(|a| {
+            a.left_tab = crate::app::LeftTab::Explorer;
+        })));
         // Velocity analysis on CDP gathers with the auto-picked table.
         let b = buf("cdp_gathers");
         s.push(Step::Do(Box::new(move |a| {

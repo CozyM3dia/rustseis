@@ -266,6 +266,9 @@ fn card(
                 ui.label(RichText::new(icon::DOTS_SIX_VERTICAL).color(p.text_faint));
             });
             handle.response.on_hover_cursor(egui::CursorIcon::Grab).on_hover_text("Drag to reorder");
+            let (ic_rect, _) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::hover());
+            let cat_str = desc.map(|d| d.category.as_str()).unwrap_or("");
+            crate::icons::paint(ui.painter(), ic_rect, crate::icons::for_tool(&node.tool, cat_str), p);
             let title = node.label.clone().unwrap_or_else(|| desc.map(|d| d.label.clone()).unwrap_or_else(|| node.tool.clone()));
             ui.label(RichText::new(title).font(crate::theme::font_semibold(13.0)).color(if enabled { p.text } else { p.text_muted }));
             if !known {
