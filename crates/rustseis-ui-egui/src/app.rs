@@ -27,6 +27,8 @@ pub struct RustSeisApp {
     pub stage: Workspace,
     pub docs: Vec<Doc>,
     pub active: Doc,
+    pub last_workspace_doc: Doc,
+    pub start_tab: crate::panes::start::StartTab,
     pub left_tab: LeftTab,
     pub left_open: bool,
     pub right_mode: RightMode,
@@ -51,8 +53,10 @@ impl RustSeisApp {
         Self {
             state: AppState::new(ctx),
             stage: Workspace::Data,
-            docs: vec![Doc::Start],
+            docs: Vec::new(),
             active: Doc::Start,
+            last_workspace_doc: Doc::Flow,
+            start_tab: crate::panes::start::StartTab::Start,
             left_tab: LeftTab::Explorer,
             left_open: true,
             right_mode: RightMode::Inspector,
@@ -78,8 +82,11 @@ impl RustSeisApp {
 
     /// Show a document (opening its tab if needed) and move the stage bar to match.
     pub fn open(&mut self, doc: Doc) {
-        if !self.docs.contains(&doc) {
-            self.docs.push(doc);
+        if doc != Doc::Start {
+            if !self.docs.contains(&doc) {
+                self.docs.push(doc);
+            }
+            self.last_workspace_doc = doc;
         }
         self.active = doc;
         let keep_stage = matches!((self.stage, doc), (Workspace::Imaging, Doc::Viewer) | (Workspace::Statics, Doc::Viewer) | (Workspace::Process, Doc::Viewer));
@@ -91,8 +98,11 @@ impl RustSeisApp {
     pub fn set_stage(&mut self, w: Workspace) {
         self.stage = w;
         let d = w.doc();
-        if !self.docs.contains(&d) {
-            self.docs.push(d);
+        if d != Doc::Start {
+            if !self.docs.contains(&d) {
+                self.docs.push(d);
+            }
+            self.last_workspace_doc = d;
         }
         self.active = d;
     }
@@ -101,7 +111,8 @@ impl RustSeisApp {
         if let Some(i) = self.docs.iter().position(|d| *d == doc) {
             self.docs.remove(i);
             if self.docs.is_empty() {
-                self.docs.push(Doc::Start);
+                self.active = Doc::Start;
+                return;
             }
             if self.active == doc {
                 self.active = self.docs.get(i.saturating_sub(1)).copied().unwrap_or(Doc::Start);
@@ -201,8 +212,20 @@ impl RustSeisApp {
         ui.horizontal_centered(|ui| {
             ui.spacing_mut().item_spacing.x = 10.0;
             ui.add_space(4.0);
-            widgets::logo(ui, p, 24.0);
-            ui.label(RichText::new("RustSeis").font(font_semibold(15.0)).color(p.text));
+            let brand_resp = ui
+                .horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 8.0;
+                    widgets::logo(ui, p, 24.0);
+                    ui.label(RichText::new("RustSeis").font(font_semibold(15.0)).color(p.text));
+                })
+                .response
+                .interact(Sense::click())
+                .on_hover_cursor(egui::CursorIcon::PointingHand)
+                .on_hover_text("Back to Start page");
+            if brand_resp.clicked() {
+                self.start_tab = crate::panes::start::StartTab::Start;
+                self.open(Doc::Start);
+            }
             self.project_chip(ui, p);
 
             let pills_w = stage_pills_width(ui, p);
@@ -445,7 +468,7 @@ impl RustSeisApp {
     fn doc_content(&mut self, ui: &mut Ui) {
         let s = &mut self.state;
         match self.active {
-            Doc::Start => crate::panes::start::ui(s, ui),
+            Doc::Start => {}
             Doc::Viewer => crate::panes::viewer::ui(s, ui),
             Doc::Flow => crate::panes::flow_editor::ui(s, ui),
             Doc::Velocity => crate::panes::iva::ui(s, ui),
@@ -765,14 +788,18 @@ impl RustSeisApp {
         let p = *palette(self.state.theme);
         let g = space::GUTTER as i8;
 
-        egui::Panel::top("rs_top").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 8, right: 8, top: 4, bottom: 2 })).exact_size(46.0).show_separator_line(false).show(ui, |ui| self.top_bar(ui, &p));
-        egui::Panel::top("rs_cmd").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: g, top: 2, bottom: 0 })).exact_size(98.0).show_separator_line(false).show(ui, |ui| {
-            crate::commands::bar(self, ui, &p);
-        });
-        egui::Panel::bottom("rs_status").frame(Frame::NONE.fill(p.chrome)).exact_size(26.0).show_separator_line(false).show(ui, |ui| self.status_line(ui, &p));
+        if self.active == Doc::Start {
+            egui::CentralPanel::default()
+                .frame(Frame::NONE.fill(p.chrome))
+                .show(ui, |ui| crate::panes::start::backstage_ui(self, ui, &p));
+        } else {
+            egui::Panel::top("rs_top").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 8, right: 8, top: 4, bottom: 2 })).exact_size(46.0).show_separator_line(false).show(ui, |ui| self.top_bar(ui, &p));
+            egui::Panel::top("rs_cmd").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: g, top: 2, bottom: 0 })).exact_size(98.0).show_separator_line(false).show(ui, |ui| {
+                crate::commands::bar(self, ui, &p);
+            });
+            egui::Panel::bottom("rs_status").frame(Frame::NONE.fill(p.chrome)).exact_size(26.0).show_separator_line(false).show(ui, |ui| self.status_line(ui, &p));
 
-        let picking = self.state.viewer.mode != crate::panes::viewer::PickMode::Navigate && self.active == Doc::Viewer;
-        if self.active != Doc::Start {
+            let picking = self.state.viewer.mode != crate::panes::viewer::PickMode::Navigate && self.active == Doc::Viewer;
             if self.left_open && !picking {
                 egui::Panel::left("rs_left")
                     .frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: 0, top: g, bottom: 0 }))
@@ -788,8 +815,6 @@ impl RustSeisApp {
                     .show_separator_line(false)
                     .show(ui, |ui| self.rail(ui, &p));
             }
-        }
-        if self.active != Doc::Start || self.right_mode == RightMode::Assistant {
             let w = if self.right_mode == RightMode::Assistant { 380.0 } else { 316.0 };
             egui::Panel::right("rs_right")
                 .frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 0, right: g, top: g, bottom: 0 }))
@@ -798,8 +823,8 @@ impl RustSeisApp {
                 .size_range(260.0..=520.0)
                 .show_separator_line(false)
                 .show(ui, |ui| self.right_panel(ui, &p));
+            egui::CentralPanel::default().frame(Frame::NONE.fill(p.chrome).inner_margin(Margin::same(g))).show(ui, |ui| self.center_panel(ui, &p));
         }
-        egui::CentralPanel::default().frame(Frame::NONE.fill(p.chrome).inner_margin(Margin::same(g))).show(ui, |ui| self.center_panel(ui, &p));
 
         self.toasts(&ctx, &p);
         self.command_palette(&ctx, &p);

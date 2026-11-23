@@ -833,6 +833,7 @@ impl AppState {
             self.focus.key = "FFID".into();
         }
         self.run_flow(spec, JobPurpose::OpenData { label });
+        self.doc_request = Some(Doc::Viewer);
     }
 
     pub fn open_flow_dialog(&mut self) {
@@ -891,6 +892,7 @@ impl AppState {
     pub fn load_opf(&mut self, path: PathBuf) {
         self.project.opf_path = Some(path.clone());
         self.submit(EngineJob::Command(EngineCommand::LoadOpfDatabase { db_path: path }), JobPurpose::Opf);
+        self.doc_request = Some(Doc::Viewer);
     }
 
     pub fn save_opf_dialog(&mut self) {

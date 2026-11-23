@@ -1,254 +1,494 @@
-//! Start page: quick actions, sample lines, recent flows and a first-line checklist.
+//! Full-window Backstage Start screen (ArcGIS Pro / RustGIS style):
+//! Clean accent sidebar on the left (`←`, Start, New, Open, Save, Save As, About) and spacious
+//! dark/light main area on the right with quick-start template cards and Current Project summary.
+//! Shown edge-to-edge on first launch without cluttering the window with menus or ribbons.
 
-use super::project::{NewProject, flow_files, flow_title, list_row, refresh_files, sample_files};
-use crate::state::{AppState, StageStatus, Workspace};
-use crate::theme::{Palette, mix, palette, with_alpha};
-use crate::widgets::{self, caps};
-use egui::{Color32, CornerRadius, RichText, Sense, Stroke, Ui, pos2, vec2};
-use egui_phosphor::regular as icon;
-use std::path::PathBuf;
+use super::project::{NewProject, flow_files, refresh_files};
+use crate::app::RustSeisApp;
+use crate::data::fmt_count;
+use crate::icons::{self, Icon};
+use crate::state::{Doc, Level};
+use crate::theme::{Palette, ThemeMode, font_display, font_mono, font_semibold, mix, with_alpha};
+use crate::widgets;
+use egui::{Align2, Color32, CornerRadius, Frame, Margin, RichText, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
+use egui_phosphor::regular as glyph;
 
-pub fn ui(s: &mut AppState, ui: &mut Ui) {
-    let p = *palette(s.theme);
-    refresh_files(s);
-    egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
-        let w = ui.available_width().min(1180.0);
-        let margin = ((ui.available_width() - w) * 0.5).max(24.0);
-        egui::Frame::new().inner_margin(egui::Margin { left: margin.min(120.0) as i8, right: margin.min(120.0) as i8, top: 28, bottom: 24 }).show(ui, |ui| {
-            ui.spacing_mut().item_spacing.y = 10.0;
-            hero(ui, &p);
-            ui.add_space(6.0);
-            tiles(s, ui, &p);
-            ui.add_space(12.0);
-            let col_w = (ui.available_width() - 24.0) / 3.0;
-            ui.horizontal_top(|ui| {
-                ui.spacing_mut().item_spacing.x = 12.0;
-                ui.vertical(|ui| {
-                    ui.set_width(col_w * 2.0 + 12.0);
-                    samples(s, ui, &p);
-                    ui.add_space(10.0);
-                    flows(s, ui, &p);
-                });
-                ui.vertical(|ui| {
-                    ui.set_width(col_w);
-                    checklist(s, ui, &p);
-                });
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum StartTab {
+    #[default]
+    Start,
+    About,
+}
+
+/// Full-window Backstage Start experience rendered when `app.active == Doc::Start`.
+pub fn backstage_ui(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
+    refresh_files(&mut app.state);
+
+    let full = ui.max_rect();
+    let sidebar_w = 196.0;
+    let sidebar_rect = egui::Rect::from_min_max(full.min, pos2(full.left() + sidebar_w, full.bottom()));
+    let main_rect = egui::Rect::from_min_max(pos2(full.left() + sidebar_w, full.top()), full.max);
+
+    // Paint clean split backgrounds edge-to-edge.
+    let rail_bg = match p.mode {
+        ThemeMode::Dark => Color32::from_rgb(176, 70, 42),
+        ThemeMode::Light => Color32::from_rgb(186, 74, 44),
+    };
+    let main_bg = match p.mode {
+        ThemeMode::Dark => Color32::from_rgb(30, 34, 42),
+        ThemeMode::Light => Color32::from_rgb(245, 246, 249),
+    };
+    ui.painter().rect_filled(sidebar_rect, 0.0, rail_bg);
+    ui.painter().rect_filled(main_rect, 0.0, main_bg);
+
+    // 1. Left accent sidebar.
+    let mut rail_ui = ui.new_child(
+        egui::UiBuilder::new()
+            .max_rect(sidebar_rect)
+            .layout(egui::Layout::top_down(egui::Align::Min)),
+    );
+    rail_ui.set_clip_rect(sidebar_rect);
+    left_sidebar(app, &mut rail_ui);
+
+    // 2. Right spacious main area.
+    let mut main_ui = ui.new_child(
+        egui::UiBuilder::new()
+            .max_rect(main_rect)
+            .layout(egui::Layout::top_down(egui::Align::Min)),
+    );
+    main_ui.set_clip_rect(main_rect);
+    egui::ScrollArea::vertical().auto_shrink([false, false]).show(&mut main_ui, |ui| {
+        Frame::new()
+            .inner_margin(Margin { left: 44, right: 44, top: 34, bottom: 32 })
+            .show(ui, |ui| match app.start_tab {
+                StartTab::Start => start_content(app, ui, p, main_bg),
+                StartTab::About => about_content(app, ui, p),
             });
-        });
     });
+
+    ui.allocate_rect(full, Sense::hover());
 }
 
-fn hero(ui: &mut Ui, p: &Palette) {
+fn left_sidebar(app: &mut RustSeisApp, ui: &mut Ui) {
+    ui.add_space(12.0);
+    // Back arrow to enter / return to the workstation.
     ui.horizontal(|ui| {
-        widgets::logo(ui, p, 44.0);
-        ui.add_space(8.0);
-        ui.vertical(|ui| {
-            ui.spacing_mut().item_spacing.y = 2.0;
-            ui.label(RichText::new("Welcome to RustSeis").font(crate::theme::font_display(26.0)).color(p.text));
-            ui.label(RichText::new("Seismic processing from field records to an image, on your own machine.").size(13.5).color(p.text_muted));
+        ui.add_space(12.0);
+        let (r, resp) = ui.allocate_exact_size(vec2(34.0, 34.0), Sense::click());
+        if resp.hovered() {
+            ui.painter().rect_filled(r, CornerRadius::same(6), Color32::from_rgba_unmultiplied(255, 255, 255, 30));
+        }
+        ui.painter().text(
+            r.center(),
+            Align2::CENTER_CENTER,
+            glyph::ARROW_LEFT,
+            egui::FontId::proportional(18.0),
+            Color32::WHITE,
+        );
+        if resp
+            .on_hover_cursor(egui::CursorIcon::PointingHand)
+            .on_hover_text("Enter workstation")
+            .clicked()
+        {
+            let target = app.last_workspace_doc;
+            app.open(target);
+        }
+    });
+
+    ui.add_space(18.0);
+
+    // Start (active section)
+    if rail_item(ui, None, "Start", app.start_tab == StartTab::Start).clicked() {
+        app.start_tab = StartTab::Start;
+    }
+    ui.add_space(4.0);
+    if rail_item(ui, Some(glyph::FILE_PLUS), "New", false).clicked() {
+        app.state.project.new_project = Some(NewProject {
+            area: "Survey".into(),
+            line: "Line 01".into(),
+            ..Default::default()
         });
-    });
-}
+    }
+    if rail_item(ui, Some(glyph::FOLDER_OPEN), "Open", false).clicked() {
+        app.state.open_seismic_dialog();
+    }
+    if rail_item(ui, Some(glyph::FLOPPY_DISK), "Save", false).clicked() {
+        app.state.save_flow(false);
+    }
+    if rail_item(ui, Some(glyph::FLOPPY_DISK_BACK), "Save As", false).clicked() {
+        app.state.save_flow(true);
+    }
+    if rail_item(ui, Some(glyph::INFO), "About", app.start_tab == StartTab::About).clicked() {
+        app.start_tab = StartTab::About;
+    }
 
-fn tile(ui: &mut Ui, p: &Palette, ic: &str, title: &str, body: &str, accent: Color32, w: f32) -> egui::Response {
-    let (rect, resp) = ui.allocate_exact_size(vec2(w, 112.0), Sense::click());
-    let hov = resp.hovered();
-    let painter = ui.painter();
-    painter.rect(rect, CornerRadius::same(14), if hov { mix(p.raised, accent, 0.10) } else { p.raised }, Stroke::new(1.0, if hov { with_alpha(accent, 160) } else { p.border }), egui::StrokeKind::Inside);
-    let disc = pos2(rect.left() + 30.0, rect.top() + 32.0);
-    painter.circle_filled(disc, 16.0, with_alpha(accent, 36));
-    painter.text(disc, egui::Align2::CENTER_CENTER, ic, egui::FontId::proportional(17.0), accent);
-    painter.text(pos2(rect.left() + 16.0, rect.top() + 62.0), egui::Align2::LEFT_TOP, title, crate::theme::font_semibold(14.0), p.text);
-    let g = painter.layout(body.to_string(), egui::FontId::proportional(11.5), p.text_muted, w - 32.0);
-    painter.galley(pos2(rect.left() + 16.0, rect.top() + 82.0), g, p.text_muted);
-    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
-}
-
-fn tiles(s: &mut AppState, ui: &mut Ui, p: &Palette) {
-    let w = (ui.available_width() - 36.0) / 4.0;
-    let first_sample = sample_files(s).into_iter().next();
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = 12.0;
-        if tile(ui, p, icon::FOLDER_OPEN, "Open data", "SEG-Y files or a folder of SEG-D shots", p.accent, w).clicked() {
-            s.open_seismic_dialog();
-        }
-        if tile(ui, p, icon::FLOW_ARROW, "Open a flow", "Pick up a processing sequence", p.info, w).clicked() {
-            s.open_flow_dialog();
-        }
-        if tile(ui, p, icon::FOLDER_SIMPLE_PLUS, "New project", "Keep a line's data, flows and tables together", p.series_c, w).clicked() {
-            s.project.new_project = Some(NewProject { area: "Survey".into(), line: "Line 01".into(), ..Default::default() });
-        }
-        let r = tile(ui, p, icon::PLAY_CIRCLE, "Try a sample", "Load a ready-made line and look around", p.pick, w);
-        if r.clicked() {
-            if let Some(f) = &first_sample {
-                s.open_seismic(f, None);
-            } else {
-                s.toast(crate::state::Level::Warn, "No sample data found next to the flows folder");
-            }
-        }
-    });
-}
-
-fn card(ui: &mut Ui, p: &Palette, add: impl FnOnce(&mut Ui)) {
-    egui::Frame::new().fill(p.raised).stroke(Stroke::new(1.0, p.border)).corner_radius(CornerRadius::same(14)).inner_margin(egui::Margin::same(14)).show(ui, |ui| {
-        ui.set_min_width(ui.available_width());
-        ui.spacing_mut().item_spacing.y = 6.0;
-        add(ui);
-    });
-}
-
-fn samples(s: &mut AppState, ui: &mut Ui, p: &Palette) {
-    let list = sample_files(s);
-    card(ui, p, |ui| {
-        caps(ui, p, "SAMPLE LINES", Some("open one to explore"));
-        if list.is_empty() {
-            ui.label(RichText::new("Put SEG-Y files in the out folder next to your flows to list them here.").size(11.5).color(p.text_muted));
-            return;
-        }
-        let mut open: Option<PathBuf> = None;
-        let n = list.len().min(6);
-        let w = ((ui.available_width() - 10.0 * (n.min(3) as f32 - 1.0)) / n.min(3) as f32).max(120.0);
-        for chunk in list[..n].chunks(3) {
-            ui.horizontal(|ui| {
-                ui.spacing_mut().item_spacing.x = 10.0;
-                for f in chunk {
-                    let name = f.file_stem().map(|x| x.to_string_lossy().replace('_', " ")).unwrap_or_default();
-                    let size = std::fs::metadata(f).map(|m| m.len() as usize).unwrap_or(0);
-                    let (rect, resp) = ui.allocate_exact_size(vec2(w, 120.0), Sense::click());
-                    let painter = ui.painter();
-                    let hov = resp.hovered();
-                    painter.rect(rect, CornerRadius::same(10), p.sunken, Stroke::new(1.0, if hov { p.accent_line } else { p.border }), egui::StrokeKind::Inside);
-                    // Stylised preview: a few wavelets across the card.
-                    let pv = egui::Rect::from_min_max(rect.min + vec2(8.0, 8.0), pos2(rect.right() - 8.0, rect.top() + 72.0));
-                    painter.rect_filled(pv, CornerRadius::same(6), p.canvas);
-                    let seed = name.bytes().fold(7u32, |a, b| a.wrapping_mul(31).wrapping_add(b as u32));
-                    for k in 0..5 {
-                        let y0 = pv.top() + 10.0 + k as f32 * 12.0 + ((seed >> k) % 5) as f32;
-                        let pts: Vec<egui::Pos2> = (0..=40)
-                            .map(|i| {
-                                let x = pv.left() + i as f32 / 40.0 * pv.width();
-                                let dip = (i as f32 / 40.0 - 0.5).powi(2) * (8.0 + k as f32 * 3.0);
-                                pos2(x, y0 + dip + ((i as f32 * 0.9 + k as f32).sin()) * 1.6)
-                            })
-                            .collect();
-                        painter.add(egui::Shape::line(pts, Stroke::new(1.3, with_alpha(p.text, 90 + k * 25))));
-                    }
-                    let clip = egui::Rect::from_min_max(pos2(rect.left() + 10.0, rect.top() + 76.0), pos2(rect.right() - 10.0, rect.bottom()));
-                    ui.painter().with_clip_rect(clip).text(pos2(rect.left() + 10.0, rect.top() + 82.0), egui::Align2::LEFT_TOP, &name, crate::theme::font_semibold(12.0), p.text);
-                    ui.painter().text(pos2(rect.left() + 10.0, rect.top() + 100.0), egui::Align2::LEFT_TOP, crate::data::fmt_bytes(size), egui::FontId::proportional(10.5), p.text_faint);
-                    if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text(f.display().to_string()).clicked() {
-                        open = Some(f.clone());
-                    }
-                }
-            });
-        }
-        if let Some(f) = open {
-            s.open_seismic(&f, None);
-        }
-    });
-}
-
-fn flows(s: &mut AppState, ui: &mut Ui, p: &Palette) {
-    let mut list: Vec<(PathBuf, std::time::SystemTime)> = flow_files(s).into_iter().map(|f| {
-        let t = std::fs::metadata(&f).and_then(|m| m.modified()).unwrap_or(std::time::UNIX_EPOCH);
-        (f, t)
-    }).collect();
-    list.sort_by(|a, b| b.1.cmp(&a.1));
-    card(ui, p, |ui| {
-        caps(ui, p, "FLOWS", Some("most recent first"));
-        if list.is_empty() {
-            ui.label(RichText::new("No flow files yet. Build one in the Process stage and save it.").size(11.5).color(p.text_muted));
-        }
-        let mut open: Option<PathBuf> = None;
-        for (f, t) in list.iter().take(8) {
-            let age = t.elapsed().map(|d| ago(d.as_secs())).unwrap_or_default();
-            if list_row(ui, p, icon::FLOW_ARROW, &flow_title(f), &age, s.flow.path.as_ref() == Some(f)).clicked() {
-                open = Some(f.clone());
-            }
-        }
-        if let Some(f) = open {
-            s.request_open_flow(f);
-        }
-    });
-}
-
-fn ago(secs: u64) -> String {
-    match secs {
-        0..=59 => "just now".into(),
-        60..=3599 => format!("{} min ago", secs / 60),
-        3600..=86_399 => format!("{} h ago", secs / 3600),
-        _ => format!("{} days ago", secs / 86_400),
+    // Subtle theme toggle anchored near the bottom of the rail.
+    let remaining = (ui.available_height() - 48.0).max(12.0);
+    ui.add_space(remaining);
+    let (ic, lbl) = match app.state.theme {
+        ThemeMode::Dark => (glyph::SUN, "Light mode"),
+        ThemeMode::Light => (glyph::MOON, "Dark mode"),
+    };
+    if rail_item(ui, Some(ic), lbl, false).clicked() {
+        app.state.theme = app.state.theme.toggled();
     }
 }
 
-/// Progress ring + per-stage checklist driven by the live stage status.
-fn checklist(s: &mut AppState, ui: &mut Ui, p: &Palette) {
-    let steps: Vec<(Workspace, &str, StageStatus)> = [
-        (Workspace::Data, "Bring in data and geometry"),
-        (Workspace::Process, "Run a processing flow"),
-        (Workspace::Statics, "Solve statics"),
-        (Workspace::Velocity, "Pick velocities"),
-        (Workspace::Imaging, "Stack and migrate"),
-        (Workspace::Qc, "Check the result"),
-    ]
-    .into_iter()
-    .map(|(w, t)| (w, t, s.stage_status(w)))
-    .collect();
-    let done = steps.iter().filter(|x| x.2 == StageStatus::Done).count();
-    card(ui, p, |ui| {
-        caps(ui, p, "YOUR FIRST LINE", None);
-        ui.horizontal(|ui| {
-            let (rect, _) = ui.allocate_exact_size(vec2(64.0, 64.0), Sense::hover());
-            let c = rect.center();
-            let r = 26.0;
-            ui.painter().circle_stroke(c, r, Stroke::new(6.0, p.sunken));
-            let frac = done as f32 / steps.len() as f32;
-            if frac > 0.0 {
-                let n = (64.0 * frac).ceil() as usize;
-                let pts: Vec<egui::Pos2> = (0..=n)
-                    .map(|i| {
-                        let a = -std::f32::consts::FRAC_PI_2 + i as f32 / 64.0 * std::f32::consts::TAU;
-                        c + vec2(a.cos(), a.sin()) * r
-                    })
-                    .collect();
-                ui.painter().add(egui::Shape::line(pts, Stroke::new(6.0, p.accent)));
-            }
-            ui.painter().text(c, egui::Align2::CENTER_CENTER, format!("{done}/{}", steps.len()), crate::theme::font_semibold(13.0), p.text);
-            ui.vertical(|ui| {
-                ui.label(RichText::new(if done == steps.len() { "All done. Nice work." } else { "From field records to an image" }).font(crate::theme::font_semibold(13.0)).color(p.text));
-                ui.label(RichText::new("Each step lights up as you go.").size(11.5).color(p.text_muted));
-            });
-        });
-        ui.add_space(4.0);
-        let mut go: Option<Workspace> = None;
-        for (w, t, st) in &steps {
-            let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 30.0), Sense::click());
-            if resp.hovered() {
-                ui.painter().rect_filled(rect, CornerRadius::same(6), p.sunken);
-            }
-            let c = pos2(rect.left() + 14.0, rect.center().y);
-            match st {
-                StageStatus::Done => {
-                    ui.painter().circle_filled(c, 8.0, p.accent);
-                    ui.painter().text(c, egui::Align2::CENTER_CENTER, icon::CHECK, egui::FontId::proportional(10.0), p.on_accent);
-                }
-                StageStatus::Attention => {
-                    ui.painter().circle_stroke(c, 7.0, Stroke::new(1.6, p.pick));
-                    ui.painter().circle_filled(c, 3.0, p.pick);
-                }
-                StageStatus::NotStarted => {
-                    ui.painter().circle_stroke(c, 7.0, Stroke::new(1.4, p.border_strong));
-                }
-            }
-            let fg = if *st == StageStatus::Done { p.text_muted } else { p.text };
-            ui.painter().text(pos2(rect.left() + 32.0, rect.center().y), egui::Align2::LEFT_CENTER, *t, egui::FontId::proportional(12.5), fg);
-            ui.painter().text(pos2(rect.right() - 8.0, rect.center().y), egui::Align2::RIGHT_CENTER, w.title(), egui::FontId::proportional(10.5), p.text_faint);
-            if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
-                go = Some(*w);
+fn rail_item(ui: &mut Ui, ic: Option<&str>, label: &str, active: bool) -> egui::Response {
+    let w = ui.available_width();
+    let (rect, resp) = ui.allocate_exact_size(vec2(w, 38.0), Sense::click());
+    if active {
+        ui.painter().rect_filled(rect, 0.0, Color32::from_rgba_unmultiplied(255, 255, 255, 38));
+    } else if resp.hovered() {
+        ui.painter().rect_filled(rect, 0.0, Color32::from_rgba_unmultiplied(255, 255, 255, 20));
+    }
+    match ic {
+        Some(icon_str) => {
+            ui.painter().text(
+                pos2(rect.left() + 20.0, rect.center().y),
+                Align2::LEFT_CENTER,
+                icon_str,
+                egui::FontId::proportional(15.0),
+                Color32::from_rgba_unmultiplied(255, 255, 255, 235),
+            );
+            ui.painter().text(
+                pos2(rect.left() + 44.0, rect.center().y),
+                Align2::LEFT_CENTER,
+                label,
+                if active { font_semibold(13.5) } else { egui::FontId::proportional(13.5) },
+                Color32::WHITE,
+            );
+        }
+        None => {
+            ui.painter().text(
+                pos2(rect.left() + 44.0, rect.center().y),
+                Align2::LEFT_CENTER,
+                label,
+                if active { font_semibold(13.5) } else { egui::FontId::proportional(13.5) },
+                Color32::WHITE,
+            );
+        }
+    }
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+fn start_content(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette, main_bg: Color32) {
+    ui.spacing_mut().item_spacing.y = 8.0;
+
+    // Header: RustSeis logo + Welcome title + concise subtitle.
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 12.0;
+        widgets::logo(ui, p, 42.0);
+        ui.label(RichText::new("Welcome to RustSeis").font(font_display(26.0)).color(p.text));
+    });
+    ui.label(
+        RichText::new("Create a new seismic processing flow, open field data, or start from a bundled sample.")
+            .size(13.0)
+            .color(p.text_muted),
+    );
+
+    ui.add_space(22.0);
+
+    // Section 1: New Project (5 clean uniform cards matching the RustGIS Backstage layout).
+    ui.label(RichText::new("New Project").font(font_semibold(14.5)).color(p.text));
+    ui.add_space(6.0);
+
+    let max_row_w = ui.available_width().min(1060.0);
+    let gap = 14.0;
+    let card_w = ((max_row_w - gap * 4.0) / 5.0).clamp(158.0, 206.0);
+
+    let demo_flow = find_demo_flow(&app.state);
+
+    ui.horizontal_wrapped(|ui| {
+        ui.spacing_mut().item_spacing = vec2(gap, gap);
+
+        // 1. Blank Flow
+        if project_card(
+            ui,
+            p,
+            main_bg,
+            card_w,
+            Icon::FlowBuilder,
+            "Blank Flow",
+            "Build a pipeline from scratch",
+        )
+        .clicked()
+        {
+            app.state.flow = Default::default();
+            app.state.flow_sel = None;
+            app.state.report_uids.clear();
+            app.open(Doc::Flow);
+        }
+
+        // 2. NIAS 2D Demo (bundled sample)
+        if project_card(
+            ui,
+            p,
+            main_bg,
+            card_w,
+            Icon::Gathers,
+            "NIAS 2D Demo",
+            "40-shot marine SEG-D & Radon QC",
+        )
+        .clicked()
+        {
+            if let Some(path) = demo_flow {
+                app.state.open_flow(&path);
+                app.state.run_current_flow();
+                app.open(Doc::Flow);
+            } else {
+                app.state.toast(Level::Warn, "Bundled demo flow not found next to executable");
             }
         }
-        if let Some(w) = go {
-            s.stage_request = Some(w);
+
+        // 3. Open Data...
+        if project_card(
+            ui,
+            p,
+            main_bg,
+            card_w,
+            Icon::OpenData,
+            "Open Data…",
+            "Open a SEG-Y or SEG-D file",
+        )
+        .clicked()
+        {
+            app.state.open_seismic_dialog();
+        }
+
+        // 4. Open Flow...
+        if project_card(
+            ui,
+            p,
+            main_bg,
+            card_w,
+            Icon::SegdFolder,
+            "Open Flow…",
+            "Open a .json processing flow",
+        )
+        .clicked()
+        {
+            app.state.open_flow_dialog();
+        }
+
+        // 5. Project DB...
+        if project_card(
+            ui,
+            p,
+            main_bg,
+            card_w,
+            Icon::Database,
+            "Project DB…",
+            "Open a .sqlite project database",
+        )
+        .clicked()
+        {
+            app.state.open_opf_dialog();
         }
     });
+
+    ui.add_space(28.0);
+
+    // Section 2: Current Project summary (exact minimal key-value grid from reference).
+    ui.label(RichText::new("Current Project").font(font_semibold(14.5)).color(p.text));
+    ui.add_space(6.0);
+
+    let (proj_name, proj_loc) = match &app.state.project.manifest {
+        Some(m) => {
+            let area = m.get("area").and_then(|v| v.as_str()).unwrap_or("Project");
+            let line = m.get("line").and_then(|v| v.as_str()).unwrap_or("");
+            let name = if line.is_empty() { area.to_string() } else { format!("{area} / {line}") };
+            let loc = app
+                .state
+                .project
+                .opf_path
+                .as_ref()
+                .map(|path| path.display().to_string())
+                .unwrap_or_else(|| "Not saved yet".into());
+            (name, loc)
+        }
+        None => {
+            let name = if !app.state.flow.name.is_empty() && app.state.flow.count() > 0 {
+                app.state.flow.name.replace('_', " ")
+            } else {
+                "Untitled project".into()
+            };
+            let loc = app
+                .state
+                .flow
+                .path
+                .as_ref()
+                .map(|path| path.display().to_string())
+                .unwrap_or_else(|| "Not saved yet".into());
+            (name, loc)
+        }
+    };
+
+    let traces_val = if app.state.summary.n_traces > 0 {
+        format!("{} traces", fmt_count(app.state.summary.n_traces))
+    } else {
+        "None loaded".into()
+    };
+    let flow_val = if app.state.flow.count() > 0 {
+        format!("{} ({} steps)", app.state.flow.name.replace('_', " "), app.state.flow.count())
+    } else {
+        "None".into()
+    };
+    let tables_count = app
+        .state
+        .session()
+        .map(|sess| {
+            let c = &sess.context;
+            c.velocities.len()
+                + c.velocity_grids.len()
+                + c.first_breaks.len()
+                + c.statics.len()
+                + c.sc_amps.len()
+                + c.mutes.len()
+        })
+        .unwrap_or(0);
+
+    egui::Grid::new("start_current_project_grid")
+        .num_columns(2)
+        .spacing(vec2(36.0, 8.0))
+        .show(ui, |ui| {
+            for (k, v) in [
+                ("Name", proj_name),
+                ("Location", proj_loc),
+                ("Traces", traces_val),
+                ("Active flow", flow_val),
+                ("Tables", tables_count.to_string()),
+            ] {
+                ui.label(RichText::new(k).size(12.5).color(p.text_muted));
+                ui.label(RichText::new(v).size(12.5).color(p.text));
+                ui.end_row();
+            }
+        });
+
+    ui.add_space(14.0);
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 10.0;
+        let btn_props = egui::Button::new(RichText::new("Project Properties…").size(12.5).color(p.text))
+            .fill(p.panel)
+            .stroke(Stroke::new(1.0, p.border_strong))
+            .corner_radius(CornerRadius::same(6))
+            .min_size(vec2(0.0, 30.0));
+        if ui.add(btn_props).clicked() {
+            app.state.project.new_project = Some(NewProject {
+                area: "Survey".into(),
+                line: "Line 01".into(),
+                ..Default::default()
+            });
+        }
+
+        let btn_open = egui::Button::new(RichText::new("Open Workspace →").size(12.5).color(p.text))
+            .fill(p.raised)
+            .stroke(Stroke::new(1.0, p.border_strong))
+            .corner_radius(CornerRadius::same(6))
+            .min_size(vec2(0.0, 30.0));
+        if ui.add(btn_open).clicked() {
+            let target = app.last_workspace_doc;
+            app.open(target);
+        }
+    });
+}
+
+fn project_card(
+    ui: &mut Ui,
+    p: &Palette,
+    main_bg: Color32,
+    w: f32,
+    icon: Icon,
+    title: &str,
+    subtitle: &str,
+) -> egui::Response {
+    let h = 166.0;
+    let (rect, resp) = ui.allocate_exact_size(vec2(w, h), Sense::click());
+    let hov = resp.hovered();
+    let painter = ui.painter();
+
+    let card_fill = if hov {
+        mix(main_bg, p.text, 0.05)
+    } else {
+        mix(main_bg, p.panel, 0.45)
+    };
+    let border_col = if hov {
+        with_alpha(p.info, 190)
+    } else {
+        with_alpha(p.border_strong, 170)
+    };
+    painter.rect(rect, CornerRadius::same(8), card_fill, Stroke::new(1.0, border_col), StrokeKind::Inside);
+
+    // Dark recessed preview box at the top of the card (matching RustGIS screenshot).
+    let well = egui::Rect::from_min_max(
+        rect.min + vec2(12.0, 12.0),
+        pos2(rect.right() - 12.0, rect.top() + 98.0),
+    );
+    let well_fill = match p.mode {
+        ThemeMode::Dark => Color32::from_rgb(20, 23, 29),
+        ThemeMode::Light => Color32::from_rgb(232, 236, 242),
+    };
+    painter.rect_filled(well, CornerRadius::same(5), well_fill);
+
+    let icon_rect = egui::Rect::from_center_size(well.center(), vec2(46.0, 46.0));
+    icons::paint(painter, icon_rect, icon, p);
+
+    // Title + muted 1-line subtitle underneath.
+    let clip = egui::Rect::from_min_max(pos2(rect.left() + 12.0, rect.top() + 106.0), pos2(rect.right() - 12.0, rect.bottom() - 8.0));
+    painter.with_clip_rect(clip).text(
+        pos2(rect.left() + 12.0, rect.top() + 112.0),
+        Align2::LEFT_TOP,
+        title,
+        font_semibold(13.0),
+        p.text,
+    );
+    painter.with_clip_rect(clip).text(
+        pos2(rect.left() + 12.0, rect.top() + 134.0),
+        Align2::LEFT_TOP,
+        subtitle,
+        egui::FontId::proportional(11.0),
+        p.text_muted,
+    );
+
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+fn about_content(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 12.0;
+        widgets::logo(ui, p, 42.0);
+        ui.label(RichText::new("About RustSeis").font(font_display(26.0)).color(p.text));
+    });
+    ui.label(
+        RichText::new("Pure-Rust 2D Seismic Processing & Depth Imaging Workstation")
+            .size(13.5)
+            .color(p.text_muted),
+    );
+    ui.add_space(20.0);
+
+    egui::Grid::new("about_grid")
+        .num_columns(2)
+        .spacing(vec2(32.0, 8.0))
+        .show(ui, |ui| {
+            for (k, v) in [
+                ("Processing tools", format!("{} built-in tools (Tiers 1, 2 & 3)", app.state.catalog.len())),
+                ("Depth imaging", "Dix V(x,z) grid · 2D Eikonal Kirchhoff PSDM · 2D Acoustic RTM (wgpu GPU + CPU)".into()),
+                ("Reservoir & logs", "Shuey AVO Intercept/Gradient · CWLS LAS 2.0/3.0 Well Tie · Crooked-Line Stack".into()),
+                ("Formats", "SEG-D · SEG-Y · RSDS · CWLS LAS · SQLite OPF Project Database".into()),
+                ("Shortcuts", "Ctrl+O Open · Ctrl+Enter Run · Ctrl+K Palette · Ctrl+1..7 Stages".into()),
+            ] {
+                ui.label(RichText::new(k).size(12.5).color(p.text_muted));
+                ui.label(RichText::new(v).font(font_mono(12.0)).color(p.text));
+                ui.end_row();
+            }
+        });
+}
+
+fn find_demo_flow(s: &crate::state::AppState) -> Option<std::path::PathBuf> {
+    let flows = flow_files(s);
+    flows
+        .iter()
+        .find(|f| f.file_name().is_some_and(|n| n.to_string_lossy().contains("ui_qc_prestack_demo")))
+        .or_else(|| flows.first())
+        .cloned()
 }
