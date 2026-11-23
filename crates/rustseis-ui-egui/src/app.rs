@@ -417,13 +417,6 @@ impl RustSeisApp {
                         pick = Some(d);
                     }
                 }
-                ui.menu_button(RichText::new(icon::PLUS).color(p.text_faint), |ui| {
-                    for d in [Doc::Viewer, Doc::Flow, Doc::Velocity, Doc::Spectral, Doc::Statics, Doc::Borehole, Doc::Survey, Doc::Start] {
-                        if ui.button(format!("{}  {}", d.icon(), d.title())).clicked() {
-                            pick = Some(d);
-                        }
-                    }
-                });
             });
             if let Some(d) = close {
                 self.close_doc(d);
