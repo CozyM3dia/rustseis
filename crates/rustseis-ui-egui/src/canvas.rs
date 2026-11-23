@@ -397,28 +397,14 @@ fn clamp_view(mut v: View2D, home: View2D) -> View2D {
         v.y0 = c - max_h * 0.5;
         v.y1 = c + max_h * 0.5;
     }
-    let slack_x = home.width() * 0.25;
-    let slack_y = home.height() * 0.25;
-    if v.x1 < home.x0 + slack_x * 0.2 {
-        let d = home.x0 + slack_x * 0.2 - v.x1;
-        v.x0 += d;
-        v.x1 += d;
-    }
-    if v.x0 > home.x1 - slack_x * 0.2 {
-        let d = v.x0 - (home.x1 - slack_x * 0.2);
-        v.x0 -= d;
-        v.x1 -= d;
-    }
-    if v.y1 < home.y0 + slack_y * 0.2 {
-        let d = home.y0 + slack_y * 0.2 - v.y1;
-        v.y0 += d;
-        v.y1 += d;
-    }
-    if v.y0 > home.y1 - slack_y * 0.2 {
-        let d = v.y0 - (home.y1 - slack_y * 0.2);
-        v.y0 -= d;
-        v.y1 -= d;
-    }
+    let cx = (v.x0 + v.x1) * 0.5;
+    let cy = (v.y0 + v.y1) * 0.5;
+    let dx = cx.clamp(home.x0.min(home.x1), home.x0.max(home.x1)) - cx;
+    let dy = cy.clamp(home.y0.min(home.y1), home.y0.max(home.y1)) - cy;
+    v.x0 += dx;
+    v.x1 += dx;
+    v.y0 += dy;
+    v.y1 += dy;
     v
 }
 
@@ -463,7 +449,7 @@ pub fn draw_wiggles(
     }
     let dt = traces[0].dt_ms() as f64;
     let px_per_trace = frame.px_per_x();
-    if px_per_trace < 2.5 {
+    if px_per_trace < 6.0 {
         return;
     }
     let i_lo = ((frame.view.x0 - first_x).floor().max(0.0)) as usize;

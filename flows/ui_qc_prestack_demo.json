@@ -1,0 +1,33 @@
+{
+  "name": "UI_QC_Prestack_Demo_40shots",
+  "description": "Desktop QC demo on real NIAS SEG-D (40 shots): first breaks, SC-amp, CDP-sorted buffers for IVA, auto velocities, max-power residual statics, parabolic Radon QC panel, before/after buffers, stack.",
+  "steps": [
+    { "tool": "segd_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik", "max_shots": 40, "live_only": true } },
+    { "tool": "trace_len", "params": { "length_ms": 3000.0 } },
+    { "tool": "debias", "params": {} },
+    {
+      "tool": "geomspread_marine",
+      "params": { "near_offset_m": 100.0, "receiver_interval_m": 12.5, "nominal_shot_interval_m": 25.0, "cdp_bin_size_m": 6.25, "chan1_is_near": true, "source_depth_m": 5.0, "streamer_depth_m": 6.0 }
+    },
+    { "tool": "fbpick", "params": { "save_table": "nias_fb" } },
+    { "tool": "filter", "params": { "spec_type": "Ormsby", "phase": "Zero", "freqs": [6.0, 12.0, 70.0, 90.0], "pad_pct": 25.0 } },
+    { "tool": "tar", "params": { "time_power": 1.5, "max_time_ms": 3000.0 } },
+    {
+      "tool": "scamp2",
+      "params": { "save_table": "nias_scamp", "params": { "gate_start_ms": 200.0, "gate_end_ms": 2800.0, "solve_source": true, "solve_receiver": true, "solve_offset": true, "apply_source": true, "apply_receiver": true, "apply_offset": false, "preserve_mean_amp": true } }
+    },
+    { "tool": "buffer_save", "params": { "name": "shot_gathers" } },
+    { "tool": "inline_sort", "params": { "primary": "CDP", "secondary": "AOFFSET" } },
+    { "tool": "buffer_save", "params": { "name": "cdp_gathers" } },
+    {
+      "tool": "vaprecom71",
+      "params": { "cdps": [], "save_table": "nias_vel", "auto_pick": true, "scan": { "v_min_mps": 1450.0, "v_max_mps": 3500.0, "dv_mps": 50.0, "window_ms": 30.0, "t_step_ms": 20.0, "stretch_mute_pct": 50.0 } }
+    },
+    { "tool": "nmo", "params": { "velocity_table": "nias_vel", "params": { "direction": "Forward", "stretch_mute_pct": 35.0, "stretch_taper_samples": 8 } } },
+    { "tool": "pwr_stat_new", "params": { "save_table": "nias_pwr_stat" } },
+    { "tool": "buffer_save", "params": { "name": "nmo_before_radon" } },
+    { "tool": "radon_filter", "params": { "ensemble_key": "CDP", "save_panel": "nias_radon_qc", "params": { "mode": "Parabolic", "q_min_ms": -100.0, "q_max_ms": 500.0, "n_q": 81, "q_zone_min_ms": 40.0, "q_zone_max_ms": 500.0, "sparse_iters": 2 } } },
+    { "tool": "buffer_save", "params": { "name": "nmo_after_radon" } },
+    { "tool": "stack", "params": {} }
+  ]
+}

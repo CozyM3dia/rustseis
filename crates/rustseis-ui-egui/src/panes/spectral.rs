@@ -42,6 +42,7 @@ pub struct SpectralState {
     radon_preview_key: u64,
     radon_preview_canvas: [CanvasState; 3],
     radon_drag: Option<u8>,
+    preview_requested: bool,
 }
 
 impl Default for SpectralState {
@@ -71,7 +72,15 @@ impl Default for SpectralState {
             radon_preview_key: 0,
             radon_preview_canvas: Default::default(),
             radon_drag: None,
+            preview_requested: false,
         }
+    }
+}
+
+impl SpectralState {
+    /// Ask the Radon pane to run a demultiple preview on its next frame.
+    pub fn request_radon_preview(&mut self) {
+        self.preview_requested = true;
     }
 }
 
@@ -257,6 +266,7 @@ struct FkResult {
     img: egui::ColorImage,
     extent: RasterExtent,
     gather: Option<egui::ColorImage>,
+    dt_ms: f64,
 }
 
 pub fn fk_ui(s: &mut AppState, ui: &mut Ui) {
@@ -315,7 +325,8 @@ pub fn fk_ui(s: &mut AppState, ui: &mut Ui) {
                         y1: *spec.freqs_hz.last().unwrap() as f64 + df / 2.0,
                     };
                     let gather = render_gather_raster(&filtered.traces, SeismicColormap::BlueWhiteRed, 98.0, data::MAX_RASTER_SIDE).ok();
-                    Ok(FkResult { key, img, extent, gather })
+                    let dt_ms = ens.first().map(|t| t.dt_ms() as f64).unwrap_or(4.0);
+                    Ok(FkResult { key, img, extent, gather, dt_ms })
                 });
             }
         }
@@ -453,7 +464,7 @@ pub fn radon_ui(s: &mut AppState, ui: &mut Ui) {
         v.sort();
         v
     }).unwrap_or_default();
-    let mut recompute = false;
+    let mut recompute = std::mem::take(&mut s.spectral.preview_requested);
     widgets::toolbar(ui, &p, |ui| {
         let label = s.spectral.radon_source.clone().map(|n| format!("panel · {n}")).unwrap_or_else(|| format!("compute · {}", ensemble_title(s)));
         egui::ComboBox::from_id_salt("radon_src").selected_text(RichText::new(label).size(12.0)).width(190.0).show_ui(ui, |ui| {
@@ -669,12 +680,12 @@ pub fn on_compute(s: &mut AppState, ctx: &egui::Context, key: &str, value: Box<d
                 if let Some(g) = r.gather {
                     let n = g.size[0] as f64;
                     let rows = g.size[1] as f64;
-                    let ext = RasterExtent { x0: 0.0, x1: n, y0: 0.0, y1: rows };
+                    let ext = RasterExtent { x0: 0.0, x1: n, y0: -0.5 * r.dt_ms, y1: (rows - 0.5) * r.dt_ms };
                     match &mut s.spectral.fk_gather {
                         Some(x) => x.replace(g, ext),
                         None => s.spectral.fk_gather = Some(Raster::new(ctx, "fk_gather", g, ext)),
                     }
-                    s.spectral.fk_gather_canvas.set_home(View2D::new(0.0, n, 0.0, rows), first);
+                    s.spectral.fk_gather_canvas.set_home(View2D::new(0.0, n, ext.y0, ext.y1), first);
                 }
             }
         }

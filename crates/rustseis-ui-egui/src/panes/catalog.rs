@@ -62,7 +62,7 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
         let r = ui.add(
             egui::TextEdit::singleline(&mut query)
                 .hint_text("Search 61 tools — name, id, category…")
-                .desired_width(f32::INFINITY),
+                .desired_width(ui.available_width()),
         );
         if ui.input(|i| i.modifiers.command && i.key_pressed(egui::Key::F)) {
             r.request_focus();
@@ -135,12 +135,18 @@ fn tool_row(ui: &mut Ui, p: &Palette, t: &ToolDescriptor, tier2: bool, color: eg
     ui.horizontal(|ui| {
         ui.set_min_width(ui.available_width());
         ui.label(RichText::new(archetype_icon(t.archetype)).color(color));
-        ui.label(RichText::new(&t.label).size(12.5));
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             if tier2 {
                 widgets::chip(ui, "T2", p.accent, with_alpha(p.accent, 22));
             }
-            ui.label(RichText::new(&t.menu_id).font(font_mono(10.5)).color(p.text_faint));
+            let id_w = ui.available_width() * 0.42;
+            ui.add_sized(
+                [id_w.min(130.0), 16.0],
+                egui::Label::new(RichText::new(&t.menu_id).font(font_mono(10.5)).color(p.text_faint)).truncate(),
+            );
+            ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                ui.add(egui::Label::new(RichText::new(&t.label).size(12.5)).truncate());
+            });
         });
     });
 }

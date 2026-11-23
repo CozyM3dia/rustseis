@@ -270,7 +270,8 @@ pub fn headers_ui(s: &mut AppState, ui: &mut Ui) {
     let mut q: String = ui.data(|d| d.get_temp(id)).unwrap_or_default();
     widgets::toolbar(ui, &p, |ui| {
         ui.label(RichText::new(icon::MAGNIFYING_GLASS).color(p.text_muted));
-        ui.add(egui::TextEdit::singleline(&mut q).hint_text("filter headers").desired_width(f32::INFINITY));
+        let w = ui.available_width();
+        ui.add(egui::TextEdit::singleline(&mut q).hint_text("filter headers").desired_width(w));
     });
     ui.data_mut(|d| d.insert_temp(id, q.clone()));
     let Some(sess) = s.session() else {

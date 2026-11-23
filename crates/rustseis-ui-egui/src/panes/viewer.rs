@@ -54,6 +54,7 @@ pub struct ViewerState {
     clip_amp: (u64, f32),
     clip_amp_b: (u64, f32),
     last_home_key: u64,
+    labels_cache: [(u64, String, std::sync::Arc<Vec<f64>>); 2],
     // Mute editing
     pub mute_table_name: String,
     pub mute_mode: MuteMode,
@@ -99,6 +100,7 @@ impl Default for ViewerState {
             clip_amp: (0, 1.0),
             clip_amp_b: (0, 1.0),
             last_home_key: 0,
+            labels_cache: Default::default(),
             mute_table_name: "ui_top_mute".into(),
             mute_mode: MuteMode::Top,
             mute_key: "AOFFSET".into(),
@@ -212,6 +214,9 @@ fn toolbar(s: &mut AppState, ui: &mut Ui, p: &Palette) {
                         s.focus.source = src.clone();
                         s.focus.ens = 0;
                         s.viewer.request_refit = true;
+                        if let Some(sess) = s.session() {
+                            s.focus.key = data::suggest_key(src.traces(sess)).to_string();
+                        }
                     }
                 }
             });
@@ -505,22 +510,39 @@ fn export_side_by_side(s: &mut AppState) {
 }
 
 fn gather_canvas(s: &mut AppState, ui: &mut Ui, p: &Palette, size: egui::Vec2, range: data::EnsRange, is_b: bool, busy: bool) {
-    // Labels need header access; take a light copy of label values for visible ticks.
-    let label_key = s.viewer.label_key.clone();
-    let labels: Vec<f64> = s
-        .session()
-        .map(|sess| {
-            let tr = if is_b {
-                let all = s.viewer.compare_source.traces(sess);
+    // Axis labels: cached per (data, ensemble, key); falls back to a header that varies
+    // (e.g. CHAN is constant on stacked sections, so CDP is shown instead).
+    let preferred = s.viewer.label_key.clone();
+    let slot = usize::from(is_b);
+    let src = if is_b { s.viewer.compare_source.clone() } else { s.focus.source.clone() };
+    let lkey = hash_of((s.rev, &src, range.start, range.end, preferred.as_str()));
+    if s.viewer.labels_cache[slot].0 != lkey {
+        let computed = s.session().map(|sess| {
+            let tr: &[Trace] = if is_b {
+                let all = src.traces(sess);
                 matching_range(s, all, range).map(|(a, b)| &all[a..b]).unwrap_or(&[])
             } else {
-                &s.focus.source.traces(sess)[range.start..range.end]
+                &src.traces(sess)[range.start..range.end]
             };
-            // Sampled labels (every trace up to 20k, else decimated) — cheap and only on this frame.
             let step = (tr.len() / 20_000).max(1);
-            tr.iter().step_by(step).map(|t| header_f64(t, &label_key)).collect()
-        })
-        .unwrap_or_default();
+            let varies = |k: &str| {
+                let probe: Vec<f64> = tr.iter().step_by((tr.len() / 64).max(1)).map(|t| header_f64(t, k)).collect();
+                probe.iter().any(|v| (*v - probe[0]).abs() > 1e-9)
+            };
+            let key = if tr.len() < 2 || varies(&preferred) {
+                preferred.clone()
+            } else {
+                ["CDP", "OFFSET", "TRACENO", "REC_DEP", "CHAN"].iter().find(|k| varies(k)).map(|k| k.to_string()).unwrap_or(preferred.clone())
+            };
+            let vals: Vec<f64> = tr.iter().step_by(step).map(|t| header_f64(t, &key)).collect();
+            (key, vals)
+        });
+        if let Some((key, vals)) = computed {
+            s.viewer.labels_cache[slot] = (lkey, key, std::sync::Arc::new(vals));
+        }
+    }
+    let label_key = s.viewer.labels_cache[slot].1.clone();
+    let labels = std::sync::Arc::clone(&s.viewer.labels_cache[slot].2);
     let label_step = ((range.len() / 20_000).max(1)) as f64;
     let mut opts = CanvasOpts::seismic(label_key.clone());
     opts.background = p.canvas;

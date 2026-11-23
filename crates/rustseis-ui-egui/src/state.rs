@@ -473,6 +473,15 @@ impl AppState {
         self.rev += 1;
         self.tables_rev += 1;
         self.after_data_change();
+        if self.focus.source == TraceSource::Active
+            && self.focus.key == "FFID"
+            && self.summary.n_traces > 1
+            && self.summary.ffid.is_some_and(|(a, b)| a == b)
+        {
+            // Post-stack output (single FFID): show it as a section.
+            self.focus.key = crate::data::SECTION_KEY.into();
+            self.focus.ens = 0;
+        }
         self.history.push(JobRecord { label: label.clone(), elapsed, ok, summary: summary.clone(), finished: chrono_like::Stamp::now() });
         if ok {
             self.log(Level::Ok, format!("✓ {label} · {}", crate::data::fmt_ms(elapsed.as_secs_f64() * 1000.0)));

@@ -111,6 +111,25 @@ impl EnsembleIndex {
     }
 }
 
+/// Pick a sensible ensemble key for a trace set: post-stack (single FFID) -> whole section,
+/// CDP-sorted prestack -> CDP, otherwise shot (FFID) gathers.
+pub fn suggest_key(traces: &[Trace]) -> &'static str {
+    if traces.len() < 2 {
+        return SECTION_KEY;
+    }
+    let n = traces.len().min(4000);
+    let f0 = traces[0].headers.ffid;
+    let ffid_varies = traces[..n].iter().any(|t| t.headers.ffid != f0) || traces[traces.len() - 1].headers.ffid != f0;
+    if !ffid_varies {
+        return SECTION_KEY;
+    }
+    if traces[..n].windows(2).all(|w| w[1].headers.cdp >= w[0].headers.cdp) {
+        "CDP"
+    } else {
+        "FFID"
+    }
+}
+
 /// Fast header access for common keys, falling back to the dynamic `get_f64` lookup.
 pub fn header_getter(key: &str) -> Box<dyn Fn(&Trace) -> i64 + Send + Sync> {
     match key.to_ascii_uppercase().as_str() {

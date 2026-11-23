@@ -20,6 +20,7 @@ pub struct RustSeisApp {
     palette_query: String,
     palette_sel: usize,
     frame_ms: VecDeque<f32>,
+    pub tour: Option<crate::tour::Tour>,
 }
 
 fn dock_for(ws: Workspace) -> DockState<Pane> {
@@ -89,6 +90,7 @@ impl RustSeisApp {
             palette_query: String::new(),
             palette_sel: 0,
             frame_ms: VecDeque::with_capacity(120),
+            tour: None,
         }
     }
 
@@ -161,6 +163,17 @@ impl RustSeisApp {
                 self.state.redo();
             }
         } else if !typing {
+            if pressed(egui::Key::F12) {
+                let dir = std::env::current_dir().unwrap_or_default().join("screenshots");
+                let stamp = crate::state::chrono_like::Stamp::now().0;
+                let name = self.workspace.title().replace([' ', '&'], "_");
+                let path = dir.join(format!("rustseis_{name}_{stamp}.png"));
+                let p2 = path.clone();
+                ctx.request_screenshot(move |img| {
+                    let _ = crate::tour::save_png(&img, &p2);
+                });
+                self.state.toast(Level::Ok, format!("Screenshot saved to {}", path.display()));
+            }
             if pressed(egui::Key::OpenBracket) {
                 self.state.step_ensemble(-1);
             }
@@ -235,8 +248,9 @@ impl RustSeisApp {
                 field(ui, "DEPTH", ch.depth_m.map(|v| format!("{v:.1} m")));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     let avg = if self.frame_ms.is_empty() { 0.0 } else { self.frame_ms.iter().sum::<f32>() / self.frame_ms.len() as f32 };
-                    let fps = if avg > 0.0 { 1000.0 / avg } else { 0.0 };
-                    ui.label(RichText::new(format!("{fps:.0} fps · {avg:.1} ms")).font(font_mono(10.5)).color(p.text_faint));
+                    let worst = self.frame_ms.iter().copied().fold(0.0f32, f32::max);
+                    ui.label(RichText::new(format!("ui {avg:.1} ms · max {worst:.1} ms")).font(font_mono(10.5)).color(if worst > 16.6 { p.pick } else { p.text_faint }))
+                        .on_hover_text("CPU time per UI frame (budget 16.6 ms for 60 FPS); egui repaints only on input or animation");
                     ui.label(RichText::new(format!("{} in session", fmt_bytes(self.state.summary.bytes))).font(font_mono(10.5)).color(p.text_faint));
                     if self.state.compute.any_busy() {
                         ui.add(egui::Spinner::new().size(10.0).color(p.text_faint));
@@ -394,17 +408,14 @@ impl RustSeisApp {
     /// One full UI pass (also used by headless tests).
     pub fn frame(&mut self, ui: &mut Ui) {
         let ctx = ui.ctx().clone();
+        let t_frame = std::time::Instant::now();
         self.state.time = ctx.input(|i| i.time);
-        let dt = ctx.input(|i| i.unstable_dt) * 1000.0;
-        if self.frame_ms.len() >= 90 {
-            self.frame_ms.pop_front();
-        }
-        self.frame_ms.push_back(dt);
 
         if self.state.poll_engine() {
             ctx.request_repaint();
         }
         self.route_compute(&ctx);
+        crate::tour::Tour::tick(self, &ctx);
         if self.applied_theme != Some(self.state.theme) {
             theme::apply(&ctx, self.state.theme);
             self.applied_theme = Some(self.state.theme);
@@ -438,6 +449,10 @@ impl RustSeisApp {
         if self.state.is_busy() || self.state.compute.any_busy() {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
         }
+        if self.frame_ms.len() >= 90 {
+            self.frame_ms.pop_front();
+        }
+        self.frame_ms.push_back(t_frame.elapsed().as_secs_f32() * 1000.0);
     }
 }
 
@@ -530,6 +545,6 @@ fn job_pill(ui: &mut Ui, p: &Palette, s: &AppState) {
     } else {
         ui.painter().circle_filled(dot, 3.0, if color == p.danger { p.danger } else { p.success });
     }
-    let clip = rect.shrink2(vec2(22.0, 0.0));
+    let clip = egui::Rect::from_min_max(pos2(rect.left() + 20.0, rect.top()), pos2(rect.right() - 9.0, rect.bottom()));
     ui.painter().with_clip_rect(clip).galley(pos2(rect.left() + 22.0, rect.center().y - g.size().y / 2.0), g, color);
 }

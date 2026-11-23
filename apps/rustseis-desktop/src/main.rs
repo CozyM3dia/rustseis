@@ -1,6 +1,6 @@
 //! `rustseis-desktop.exe` — native eframe host for the RustSeis workstation.
 //!
-//! Usage: `rustseis-desktop [file]` where `file` is seismic data (.sgy/.segd/.rsds), a flow
+//! Usage: `rustseis-desktop [file] [--tour <screenshot-dir>]` where `file` is seismic data (.sgy/.segd/.rsds), a flow
 //! (.json/.toml) or an OPF database (.opf.sqlite).
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -37,12 +37,17 @@ fn icon() -> eframe::egui::IconData {
 }
 
 fn main() -> eframe::Result<()> {
-    let initial = std::env::args().nth(1).map(std::path::PathBuf::from);
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let tour_dir = args.iter().position(|a| a == "--tour").map(|i| {
+        std::path::PathBuf::from(args.get(i + 1).cloned().unwrap_or_else(|| "screenshots".into()))
+    });
+    let initial = args.iter().find(|a| !a.starts_with("--") && Some(std::path::PathBuf::from(a.as_str())) != tour_dir).map(std::path::PathBuf::from);
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
             .with_title("RustSeis — 2D Seismic Processing Workstation")
             .with_inner_size([1600.0, 960.0])
             .with_min_inner_size([1100.0, 680.0])
+            .with_maximized(tour_dir.is_some())
             .with_icon(icon()),
         ..Default::default()
     };
@@ -53,6 +58,10 @@ fn main() -> eframe::Result<()> {
             let mut app = RustSeisApp::new(cc);
             if let Some(p) = initial.as_ref() {
                 app.open_path(p);
+            }
+            if let Some(dir) = tour_dir.as_ref() {
+                let flows = std::env::current_dir().unwrap_or_default().join("flows");
+                app.tour = Some(rustseis_ui_egui::tour::Tour::standard(dir.clone(), &flows));
             }
             Ok(Box::new(app))
         }),

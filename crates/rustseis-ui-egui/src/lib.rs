@@ -12,6 +12,7 @@ pub mod panes;
 pub mod specs;
 pub mod state;
 pub mod theme;
+pub mod tour;
 pub mod widgets;
 pub mod worker;
 

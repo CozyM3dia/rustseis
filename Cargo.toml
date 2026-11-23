@@ -46,11 +46,11 @@ rustseis-engine = { path = "crates/rustseis-engine" }
 rustseis-mcp = { path = "crates/rustseis-mcp" }
 rustseis-ui-egui = { path = "crates/rustseis-ui-egui" }
 
-eframe = { version = "0.37", default-features = false, features = ["default_fonts", "wgpu", "accesskit", "persistence"] }
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "accesskit"] }
 egui = "0.37"
 egui_dock = "0.22"
 egui_plot = "0.38"
 egui_extras = "0.37"
 egui-phosphor = "0.14"
-egui_kittest = { version = "0.37", features = ["wgpu", "snapshot"] }
+egui_kittest = "0.37"
 rfd = "0.18"

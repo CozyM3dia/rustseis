@@ -13,6 +13,7 @@ use serde_json::{Map, Value, json};
 #[derive(Clone, Debug)]
 pub enum Status {
     AwaitingApproval,
+    Queued,
     Declined,
     Running,
     Done(Result<Value, String>),
@@ -96,11 +97,27 @@ fn propose(s: &mut AppState, tool: String, args: Value, typed: String) {
     let id = s.copilot.next_id + 1;
     s.copilot.next_id = id;
     let policy = policy_of(&tool);
-    let status = if policy == CommandPolicy::Mutating { Status::AwaitingApproval } else { Status::Running };
+    let status = if policy == CommandPolicy::Mutating { Status::AwaitingApproval } else { Status::Queued };
     s.copilot.calls.push(Call { id, tool: tool.clone(), args: args.clone(), policy, status, typed });
-    if policy == CommandPolicy::ReadOnly {
+    pump(s);
+}
+
+/// Start the oldest queued call if the engine is free (calls run one at a time, in order).
+pub fn pump(s: &mut AppState) {
+    if s.is_busy() {
+        return;
+    }
+    if let Some(id) = s.copilot.calls.iter().find(|c| matches!(c.status, Status::Queued)).map(|c| c.id) {
         execute(s, id);
     }
+}
+
+/// Seed the transcript for the screenshot tour: two read-only calls and one pending approval.
+pub fn tour_seed(s: &mut AppState) {
+    propose(s, "inspect_tables".into(), json!({}), "inspect_tables".into());
+    propose(s, "inspect_active_traces".into(), json!({}), String::new());
+    let spec = serde_json::to_value(s.flow.to_spec()).unwrap_or(json!({}));
+    propose(s, "run_flow".into(), json!({"flow": spec}), String::new());
 }
 
 fn execute(s: &mut AppState, id: u64) {
@@ -110,7 +127,7 @@ fn execute(s: &mut AppState, id: u64) {
             cm.status = Status::Running;
         }
     } else if let Some(cm) = s.copilot.calls.iter_mut().find(|x| x.id == id) {
-        cm.status = Status::Done(Err("engine busy — run again when the current job finishes".into()));
+        cm.status = Status::Queued;
     }
 }
 
@@ -175,8 +192,11 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     });
     if let Some(id) = approve {
         s.log(Level::Info, format!("Copilot: user approved mutating call #{id}"));
-        execute(s, id);
+        if let Some(c) = s.copilot.calls.iter_mut().find(|c| c.id == id) {
+            c.status = Status::Queued;
+        }
     }
+    pump(s);
     if let Some(id) = decline {
         if let Some(c) = s.copilot.calls.iter_mut().find(|c| c.id == id) {
             c.status = Status::Declined;
@@ -253,6 +273,9 @@ fn call_card(ui: &mut Ui, p: &Palette, c: &Call, approve: &mut Option<u64>, decl
                 }
                 Status::Declined => {
                     ui.label(RichText::new(format!("{} declined — nothing was changed", icon::PROHIBIT)).color(p.text_faint).size(11.5));
+                }
+                Status::Queued => {
+                    ui.label(RichText::new(format!("{} queued — waiting for the engine", icon::HOURGLASS)).size(11.5).color(p.text_muted));
                 }
                 Status::Running => {
                     ui.horizontal(|ui| {
