@@ -161,10 +161,16 @@ impl RustSeisApp {
                 self.jobs_open = !self.jobs_open;
             }
             if !typing && pressed(egui::Key::Z) {
-                if shift { self.state.redo() } else { self.state.undo() }
+                if shift {
+                    if self.active == Doc::Flow { self.state.redo_flow() } else { self.state.redo() }
+                } else if self.active == Doc::Flow {
+                    self.state.undo_flow()
+                } else {
+                    self.state.undo()
+                }
             }
             if !typing && pressed(egui::Key::Y) {
-                self.state.redo();
+                if self.active == Doc::Flow { self.state.redo_flow() } else { self.state.redo() }
             }
         } else if !typing {
             if pressed(egui::Key::F12) {
@@ -528,29 +534,94 @@ impl RustSeisApp {
         if self.state.toasts.is_empty() {
             return;
         }
-        egui::Area::new(egui::Id::unique("toasts")).anchor(Align2::CENTER_BOTTOM, vec2(0.0, -40.0)).order(egui::Order::Foreground).show(ctx, |ui| {
-            for t in self.state.toasts.iter().rev() {
-                let (ic, c) = match t.level {
-                    Level::Info => (icon::INFO, p.info),
-                    Level::Ok => (icon::CHECK_CIRCLE, p.success),
-                    Level::Warn => (icon::WARNING, p.pick),
-                    Level::Error => (icon::WARNING_OCTAGON, p.danger),
-                };
-                let alpha = ((4.5 - (now - t.born) as f32) / 0.4).clamp(0.0, 1.0);
-                ui.scope(|ui| {
-                    ui.multiply_opacity(alpha);
-                    widgets::glass_frame(p).inner_margin(Margin::symmetric(12, 9)).show(ui, |ui| {
-                        ui.set_max_width(440.0);
-                        ui.horizontal(|ui| {
-                            ui.label(RichText::new(ic).color(c));
-                            ui.label(RichText::new(&t.text).size(12.5).color(p.text));
+        let mut dismiss: Option<usize> = None;
+        egui::Area::new(egui::Id::unique("toasts"))
+            .anchor(Align2::RIGHT_BOTTOM, vec2(-16.0, -34.0))
+            .order(egui::Order::Foreground)
+            .show(ctx, |ui| {
+                for (rev_i, t) in self.state.toasts.iter().enumerate().rev() {
+                    let (ic, c) = match t.level {
+                        Level::Info => (icon::INFO, p.info),
+                        Level::Ok => (icon::CHECK_CIRCLE, p.success),
+                        Level::Warn => (icon::WARNING, p.pick),
+                        Level::Error => (icon::WARNING_OCTAGON, p.danger),
+                    };
+                    let alpha = ((4.5 - (now - t.born) as f32) / 0.4).clamp(0.0, 1.0);
+                    ui.scope(|ui| {
+                        ui.multiply_opacity(alpha);
+                        widgets::glass_frame(p).inner_margin(Margin::symmetric(12, 8)).show(ui, |ui| {
+                            ui.set_max_width(420.0);
+                            ui.horizontal(|ui| {
+                                ui.label(RichText::new(ic).color(c));
+                                ui.label(RichText::new(&t.text).size(12.5).color(p.text));
+                                if ui
+                                    .add(egui::Button::new(RichText::new(icon::X).size(11.0).color(p.text_faint)).frame(false))
+                                    .on_hover_text("Dismiss")
+                                    .clicked()
+                                {
+                                    dismiss = Some(rev_i);
+                                }
+                            });
                         });
                     });
-                });
-                ui.add_space(6.0);
+                    ui.add_space(6.0);
+                }
+            });
+        if let Some(i) = dismiss {
+            if i < self.state.toasts.len() {
+                self.state.toasts.remove(i);
             }
-        });
+        }
         ctx.request_repaint_after(std::time::Duration::from_millis(120));
+    }
+
+    fn unsaved_flow_modal(&mut self, ctx: &egui::Context, p: &Palette) {
+        let Some(next_path) = self.state.pending_open_flow.clone() else { return };
+        let next_name = crate::panes::project::flow_title(&next_path);
+        let cur_name = self.state.flow.name.replace('_', " ");
+        let mut choice: Option<u8> = None;
+        let modal = egui::Modal::new(egui::Id::unique("unsaved_flow_guard")).show(ctx, |ui| {
+            ui.set_width(420.0);
+            ui.spacing_mut().item_spacing.y = 8.0;
+            ui.label(RichText::new("Unsaved flow changes").font(crate::theme::font_display(18.0)).color(p.text));
+            ui.label(
+                RichText::new(format!("“{cur_name}” has unsaved edits. What would you like to do before opening “{next_name}”?"))
+                    .size(12.5)
+                    .color(p.text_muted),
+            );
+            ui.add_space(6.0);
+            ui.horizontal(|ui| {
+                if widgets::cmd_primary(ui, p, icon::FLOPPY_DISK, "Save & open").clicked() {
+                    choice = Some(1);
+                }
+                if widgets::cmd(ui, p, icon::TRASH, "Discard & open", false).clicked() {
+                    choice = Some(2);
+                }
+                if widgets::cmd(ui, p, "", "Cancel", false).clicked() {
+                    choice = Some(0);
+                }
+            });
+        });
+        if modal.should_close() {
+            choice = Some(0);
+        }
+        match choice {
+            Some(1) => {
+                self.state.save_flow(false);
+                if !self.state.flow.dirty {
+                    self.state.pending_open_flow = None;
+                    self.state.open_flow(&next_path);
+                }
+            }
+            Some(2) => {
+                self.state.pending_open_flow = None;
+                self.state.open_flow(&next_path);
+            }
+            Some(0) => {
+                self.state.pending_open_flow = None;
+            }
+            _ => {}
+        }
     }
 
     fn command_palette(&mut self, ctx: &egui::Context, p: &Palette) {
@@ -661,8 +732,12 @@ impl RustSeisApp {
                 Cmd::LoadDb => self.state.open_opf_dialog(),
                 Cmd::SaveDb => self.state.save_opf_dialog(),
                 Cmd::Theme => self.state.theme = self.state.theme.toggled(),
-                Cmd::Undo => self.state.undo(),
-                Cmd::Redo => self.state.redo(),
+                Cmd::Undo => {
+                    if self.active == Doc::Flow { self.state.undo_flow() } else { self.state.undo() }
+                }
+                Cmd::Redo => {
+                    if self.active == Doc::Flow { self.state.redo_flow() } else { self.state.redo() }
+                }
                 Cmd::AddTool(id) => {
                     self.state.insert_tool(&id);
                     self.open(Doc::Flow);
@@ -689,6 +764,9 @@ impl RustSeisApp {
             self.applied_theme = Some(self.state.theme);
         }
         self.shortcuts(&ctx);
+        if let Some(w) = self.state.stage_request.take() {
+            self.set_stage(w);
+        }
         if let Some(d) = self.state.doc_request.take() {
             self.open(d);
         }
@@ -733,6 +811,7 @@ impl RustSeisApp {
 
         self.toasts(&ctx, &p);
         self.command_palette(&ctx, &p);
+        self.unsaved_flow_modal(&ctx, &p);
         crate::panes::project::new_project_modal(&mut self.state, &ctx);
 
         if self.state.is_busy() || self.state.compute.any_busy() {
@@ -826,4 +905,45 @@ fn doc_pill(ui: &mut Ui, p: &Palette, d: Doc, on: bool, closable: bool) -> (egui
         closed = xresp.clicked();
     }
     (resp, closed)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn flow_undo_redo_and_unsaved_guard() {
+        let ctx = egui::Context::default();
+        let mut app = RustSeisApp::with_context(&ctx, false);
+        assert_eq!(app.state.flow.count(), 0);
+        app.state.insert_tool("agc");
+        assert_eq!(app.state.flow.count(), 1);
+        assert!(app.state.flow.dirty);
+
+        // Requesting another flow while dirty triggers confirmation modal instead of discarding.
+        let dummy = std::path::PathBuf::from("nonexistent_other_flow.json");
+        app.state.request_open_flow(dummy.clone());
+        assert_eq!(app.state.pending_open_flow, Some(dummy));
+        assert_eq!(app.state.flow.count(), 1);
+
+        // Undo / redo restores the flow document cleanly.
+        app.state.undo_flow();
+        assert_eq!(app.state.flow.count(), 0);
+        app.state.redo_flow();
+        assert_eq!(app.state.flow.count(), 1);
+    }
+
+    #[test]
+    fn stage_request_preserves_imaging_stage() {
+        let ctx = egui::Context::default();
+        let mut app = RustSeisApp::with_context(&ctx, false);
+        app.state.stage_request = Some(Workspace::Imaging);
+        let input = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, vec2(1280.0, 800.0))),
+            ..Default::default()
+        };
+        let _ = ctx.run_ui(input, |ui| app.frame(ui));
+        assert_eq!(app.stage, Workspace::Imaging);
+        assert_eq!(app.active, Doc::Viewer);
+    }
 }

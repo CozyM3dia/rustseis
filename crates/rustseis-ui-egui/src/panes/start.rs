@@ -167,7 +167,7 @@ fn flows(s: &mut AppState, ui: &mut Ui, p: &Palette) {
             }
         }
         if let Some(f) = open {
-            s.open_flow(&f);
+            s.request_open_flow(f);
         }
     });
 }
@@ -248,7 +248,7 @@ fn checklist(s: &mut AppState, ui: &mut Ui, p: &Palette) {
             }
         }
         if let Some(w) = go {
-            s.doc_request = Some(w.doc());
+            s.stage_request = Some(w);
         }
     });
 }

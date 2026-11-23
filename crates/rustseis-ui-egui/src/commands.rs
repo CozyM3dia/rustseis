@@ -22,7 +22,7 @@ pub fn bar(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
         let left_rect = egui::Rect::from_min_max(full.min, egui::pos2((full.right() - used - 12.0).max(full.left()), full.bottom()));
         let mut left = ui.new_child(egui::UiBuilder::new().max_rect(left_rect).layout(egui::Layout::left_to_right(egui::Align::Center)));
         left.set_clip_rect(left_rect.intersect(ui.clip_rect()));
-        egui::ScrollArea::horizontal()
+        let scroll_out = egui::ScrollArea::horizontal()
             .id_salt("cmd_stage")
             .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden)
             .show(&mut left, |ui| {
@@ -32,6 +32,21 @@ pub fn bar(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                     stage_commands(app, ui, p);
                 });
             });
+        let overflow_right = scroll_out.content_size.x > left_rect.width() + 2.0
+            && scroll_out.state.clamped_offset().x + left_rect.width() < scroll_out.content_size.x - 2.0;
+        if overflow_right {
+            let fade = egui::Rect::from_min_max(egui::pos2(left_rect.right() - 24.0, left_rect.top()), left_rect.max);
+            ui.painter().rect_filled(fade, 0.0, crate::theme::with_alpha(p.panel, 225));
+            ui.painter().text(
+                fade.center(),
+                egui::Align2::CENTER_CENTER,
+                icon::CARET_RIGHT,
+                egui::FontId::proportional(13.0),
+                p.text_muted,
+            );
+            ui.interact(fade, egui::Id::unique("cmd_stage_more"), egui::Sense::hover())
+                .on_hover_text("More commands — scroll horizontally here");
+        }
         ui.allocate_rect(full, egui::Sense::hover());
     });
 }
@@ -106,13 +121,13 @@ fn stage_commands(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
             }
             cmd_sep(ui, p);
             dim_label(ui, p, "ADD");
-            add_menu(app, ui, p, icon::WAVE_SINE, "Filter & gain", &["Filtering", "Amplitude"]);
+            add_menu(app, ui, p, icon::WAVE_SINE, "Filter", &["Filtering", "Amplitude"]);
             add_menu(app, ui, p, icon::ARROWS_IN_LINE_VERTICAL, "Decon", &["Deconvolution"]);
             add_menu(app, ui, p, icon::WAVES, "Noise", &["Editing", "Data Enhancement"]);
             add_menu(app, ui, p, icon::RULER, "Statics", &["Statics"]);
             add_menu(app, ui, p, icon::CHART_LINE_UP, "Velocity", &["Velocity"]);
             add_menu(app, ui, p, icon::STACK, "Imaging", &["Stacking", "Migration", "Modeling"]);
-            add_menu(app, ui, p, icon::GIT_BRANCH, "Branch & script", &["Flow Control", "Extensibility"]);
+            add_menu(app, ui, p, icon::GIT_BRANCH, "Branch", &["Flow Control", "Extensibility"]);
         }
         Workspace::Velocity => {
             let iva = &mut app.state.iva;

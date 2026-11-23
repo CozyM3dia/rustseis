@@ -164,6 +164,7 @@ fn fb_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
                 ui.selectable_value(&mut fp.method, rustseis_imaging::FirstBreakMethod::ModifiedCoppens, "Energy ratio");
             });
         });
+        // widgets::row lays children right-to-left, so add right-side DragValue first.
         widgets::row(ui, p, "Velocity range", |ui| {
             ui.add(egui::DragValue::new(&mut fp.v_max_mps).range(100.0..=12000.0).speed(10.0).suffix(" m/s"));
             ui.label("–");
@@ -226,6 +227,22 @@ fn fb_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
 
 fn kill_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
     title(ui, p, "Edit traces", "Click traces to mark them. Nothing changes until you press Done; every edit can be undone.");
+    if s.focus.source != crate::data::TraceSource::Active {
+        let (go, _) = widgets::insight(
+            ui,
+            p,
+            "Viewing a saved buffer (read-only)",
+            "Trace edits only apply to Latest result (Active). Switch to Latest result before marking traces.",
+            "Switch to Latest result",
+            "",
+        );
+        if go {
+            s.focus.source = crate::data::TraceSource::Active;
+            s.focus.ens = 0;
+            s.viewer.request_refit = true;
+        }
+        return;
+    }
     let fmt = |set: &std::collections::BTreeSet<i32>| -> String {
         if set.is_empty() { "none".into() } else { set.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", ") }
     };

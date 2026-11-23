@@ -193,7 +193,9 @@ fn stem_plot(ui: &mut Ui, p: &Palette, rect: egui::Rect, src: &BTreeMap<i32, f32
             let yy = mid - sign * half * 0.5 - (v / amax) * half * 0.45;
             painter.circle_stroke(pos2(x, yy), 8.0, Stroke::new(1.4, p.pick));
             let label = format!("{} {k} · {v:+.1} ms", if sign > 0.0 { "shot" } else { "receiver" });
-            crate::canvas::badge(&painter, pos2(x + 12.0, yy), &label, p, egui::Align2::LEFT_CENTER);
+            let flip_left = x > rect.left() + rect.width() * 0.62;
+            let (bx, align) = if flip_left { (x - 12.0, egui::Align2::RIGHT_CENTER) } else { (x + 12.0, egui::Align2::LEFT_CENTER) };
+            crate::canvas::badge(&painter, pos2(bx, yy), &label, p, align);
         }
     };
     draw(src, 1.0, p.info, src_out);

@@ -331,12 +331,13 @@ fn fk_card(s: &mut AppState, ui: &mut Ui) {
 }
 
 fn fk_canvas(s: &mut AppState, ui: &mut Ui, p: &Palette, size: egui::Vec2, extent: RasterExtent) {
-    let mut opts = CanvasOpts::seismic("wavenumber (cycles/m)");
+    let mut opts = CanvasOpts::seismic("k (cyc/m)");
     opts.y_down = false;
     opts.x_axis_top = false;
     opts.y_title = "Hz".into();
     opts.primary_pans = false;
     opts.background = p.canvas;
+    opts.x_ticks = 5;
     opts.x_label = Box::new(|x| Some(format!("{x:.3}")));
     let raster = s.spectral.fk_raster.as_ref();
     let out = canvas::canvas(ui, egui::Id::unique("fk_canvas"), &mut s.spectral.fk_canvas, p, size, opts, |painter, frame| {

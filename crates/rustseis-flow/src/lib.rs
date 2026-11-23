@@ -435,8 +435,21 @@ pub fn execute_flow(
                     .and_then(|v| v.as_str())
                     .unwrap_or(&ctx.ensemble_key);
                 let ensembles = Ensemble::group_by_header(traces, key);
-                if let Some(first) = ensembles.first() {
-                    let panel = rustseis_dsp::forward_radon_gather(&first.traces, &p)?;
+                let mid = ensembles.len() / 2;
+                let qc_idx = ensembles
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, e)| e.traces.len() >= 3)
+                    .max_by(|(i, a), (j, b)| {
+                        a.traces
+                            .len()
+                            .cmp(&b.traces.len())
+                            .then_with(|| j.abs_diff(mid).cmp(&i.abs_diff(mid)))
+                    })
+                    .map(|(i, _)| i)
+                    .or_else(|| (!ensembles.is_empty()).then_some(0));
+                if let Some(ei) = qc_idx {
+                    let panel = rustseis_dsp::forward_radon_gather(&ensembles[ei].traces, &p)?;
                     ctx.radon_panels.insert(save_name.to_string(), panel.clone());
                     radon_panels.push(panel);
                 }
@@ -454,6 +467,20 @@ pub fn execute_flow(
                     .get("save_panel")
                     .and_then(|v| v.as_str());
                 let mut ensembles = Ensemble::group_by_header(traces, key);
+                // Pick the highest-fold ensemble nearest the middle of the line for QC panel output
+                // (avoids marine/land fold taper-in ensembles where ei == 0 has fold < 3).
+                let mid = ensembles.len() / 2;
+                let qc_idx = ensembles
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, e)| e.traces.len() >= 3)
+                    .max_by(|(i, a), (j, b)| {
+                        a.traces
+                            .len()
+                            .cmp(&b.traces.len())
+                            .then_with(|| j.abs_diff(mid).cmp(&i.abs_diff(mid)))
+                    })
+                    .map(|(i, _)| i);
                 let panels: Vec<Option<RadonPanel>> = ensembles
                     .par_iter_mut()
                     .enumerate()
@@ -462,7 +489,7 @@ pub fn execute_flow(
                             return Ok(None);
                         }
                         let panel = rustseis_dsp::apply_radon_filter_gather(&mut ens.traces, &p)?;
-                        Ok(if ei == 0 { Some(panel) } else { None })
+                        Ok(if qc_idx == Some(ei) { Some(panel) } else { None })
                     })
                     .collect::<Result<Vec<_>>>()?;
                 if let Some(first_panel) = panels.into_iter().flatten().next() {
@@ -855,4 +882,44 @@ pub fn execute_flow(
     };
 
     Ok((traces, report))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn radon_filter_saves_qc_panel_when_first_cdp_has_low_fold() {
+        let mut traces = Vec::new();
+        let make_trace = |cdp: i32, offset: f32| {
+            let mut samples = vec![0.0f32; 64];
+            samples[20] = 1.0;
+            let mut tr = Trace::new(4000, samples);
+            tr.headers.cdp = cdp;
+            tr.headers.offset = offset;
+            tr
+        };
+        // CDP 1 has fold 1 (taper-in), CDP 2 has fold 6 (full fold).
+        traces.push(make_trace(1, 100.0));
+        for k in 0..6 {
+            traces.push(make_trace(2, 100.0 + k as f32 * 50.0));
+        }
+        let spec: FlowSpec = serde_json::from_value(json!({
+            "name": "radon_taper_qc",
+            "steps": [{
+                "tool": "radon_filter",
+                "params": {
+                    "ensemble_key": "CDP",
+                    "save_panel": "qc_panel",
+                    "params": { "mode": "Parabolic", "q_min_ms": -50.0, "q_max_ms": 150.0, "n_q": 21, "q_zone_min_ms": 30.0, "q_zone_max_ms": 150.0, "sparse_iters": 1 }
+                }
+            }]
+        }))
+        .unwrap();
+        let mut ctx = FlowContext::new();
+        let (_out, rep) = execute_flow(&spec, traces, &mut ctx).unwrap();
+        assert!(ctx.radon_panels.contains_key("qc_panel"), "expected Radon QC panel to be saved from full-fold CDP");
+        assert_eq!(rep.radon_panels.len(), 1);
+    }
 }

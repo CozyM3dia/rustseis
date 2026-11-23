@@ -32,6 +32,7 @@ const COLS: &[(&str, &str, u8)] = &[
 #[derive(Default)]
 pub struct GeometryState {
     pub source: TraceSource,
+    user_picked_source: bool,
     pub scroll_to: Option<usize>,
     map: Option<MapData>,
     map_key: (u64, Option<TraceSource>),
@@ -162,12 +163,56 @@ fn build_map(traces: &[rustseis_core::Trace]) -> MapData {
     MapData { sources, receivers, cdps, crooked, has_coords }
 }
 
+/// If Active is post-stack (<= 1 unique FFID), prefer a pre-stack gather buffer for the survey map.
+fn best_survey_buffer(sess: &rustseis_engine::EngineSession) -> Option<TraceSource> {
+    let unique_ffids = |tr: &[rustseis_core::Trace]| -> usize {
+        let mut s = HashSet::new();
+        for t in tr.iter().step_by((tr.len() / 2000).max(1)) {
+            s.insert(t.headers.ffid);
+            if s.len() > 2 {
+                break;
+            }
+        }
+        s.len()
+    };
+    if unique_ffids(&sess.active_traces) > 1 {
+        return None;
+    }
+    let mut cands: Vec<(i32, usize, String)> = sess
+        .context
+        .buffers
+        .iter()
+        .filter_map(|(name, tr)| {
+            let nf = unique_ffids(tr);
+            if nf <= 1 {
+                return None;
+            }
+            let low = name.to_ascii_lowercase();
+            let rank = if low.contains("shot") {
+                30
+            } else if low.contains("cdp") {
+                20
+            } else {
+                10
+            };
+            Some((rank, tr.len(), name.clone()))
+        })
+        .collect();
+    cands.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| b.1.cmp(&a.1)).then_with(|| a.2.cmp(&b.2)));
+    cands.into_iter().next().map(|(_, _, n)| TraceSource::Buffer(n))
+}
+
 pub fn basemap_ui(s: &mut AppState, ui: &mut Ui) {
     let p = *palette(s.theme);
     if s.geometry.corridor_half_width == 0.0 {
         s.geometry.corridor_half_width = 250.0;
         s.geometry.show_sources = true;
         s.geometry.show_receivers = true;
+    }
+    if !s.geometry.user_picked_source && s.geometry.source == TraceSource::Active {
+        if let Some(best) = s.session().and_then(best_survey_buffer) {
+            s.geometry.source = best;
+        }
     }
     let Some(sess) = s.session() else {
         if s.geometry.map.is_none() {
@@ -369,7 +414,9 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
             widgets::row(ui, &p, "Data", |ui| {
                 egui::ComboBox::from_id_salt("geom_src").selected_text(s.geometry.source.label()).width(150.0).show_ui(ui, |ui| {
                     for src in &sources {
-                        ui.selectable_value(&mut s.geometry.source, src.clone(), src.label());
+                        if ui.selectable_value(&mut s.geometry.source, src.clone(), src.label()).clicked() {
+                            s.geometry.user_picked_source = true;
+                        }
                     }
                 });
             });

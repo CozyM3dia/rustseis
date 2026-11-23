@@ -264,6 +264,9 @@ pub struct AppState {
     pub specs: SpecLibrary,
     pub flow: FlowDoc,
     pub flow_sel: Option<StepPath>,
+    pub flow_undo: Vec<FlowDoc>,
+    pub flow_redo: Vec<FlowDoc>,
+    pub pending_open_flow: Option<PathBuf>,
     pub report: Option<FlowReport>,
     /// Top-level node uids at the time `report` was produced (maps step telemetry to cards).
     pub report_uids: Vec<u64>,
@@ -278,6 +281,7 @@ pub struct AppState {
     pub flow_eta: HashMap<String, u128>,
     pub busy_purpose: Option<JobPurpose>,
     pub doc_request: Option<Doc>,
+    pub stage_request: Option<Workspace>,
     pub flow_dirs: Vec<PathBuf>,
     pub time: f64,
     pub viewer: ViewerState,
@@ -318,6 +322,9 @@ impl AppState {
             specs,
             flow: FlowDoc::default(),
             flow_sel: None,
+            flow_undo: Vec::new(),
+            flow_redo: Vec::new(),
+            pending_open_flow: None,
             report: None,
             report_uids: Vec::new(),
             history: Vec::new(),
@@ -331,6 +338,7 @@ impl AppState {
             flow_eta: HashMap::new(),
             busy_purpose: None,
             doc_request: None,
+            stage_request: None,
             flow_dirs,
             time: 0.0,
             viewer: ViewerState::default(),
@@ -464,6 +472,50 @@ impl AppState {
             self.toast(Level::Info, "Redo");
         } else {
             self.toast(Level::Warn, "Nothing to redo");
+        }
+    }
+
+    /// Snapshot the flow before a structural/parameter edit so Ctrl+Z in the Flow editor undoes it.
+    pub fn push_flow_undo(&mut self) {
+        self.flow_undo.push(self.flow.clone());
+        if self.flow_undo.len() > 64 {
+            self.flow_undo.remove(0);
+        }
+        self.flow_redo.clear();
+    }
+
+    pub fn undo_flow(&mut self) {
+        if let Some(prev) = self.flow_undo.pop() {
+            self.flow_redo.push(self.flow.clone());
+            self.flow = prev;
+            if self.flow_sel.as_ref().is_some_and(|p| self.flow.get(p).is_none()) {
+                self.flow_sel = None;
+            }
+            self.toast(Level::Info, "Undo flow edit");
+        } else {
+            self.toast(Level::Warn, "Nothing to undo in this flow");
+        }
+    }
+
+    pub fn redo_flow(&mut self) {
+        if let Some(next) = self.flow_redo.pop() {
+            self.flow_undo.push(self.flow.clone());
+            self.flow = next;
+            if self.flow_sel.as_ref().is_some_and(|p| self.flow.get(p).is_none()) {
+                self.flow_sel = None;
+            }
+            self.toast(Level::Info, "Redo flow edit");
+        } else {
+            self.toast(Level::Warn, "Nothing to redo in this flow");
+        }
+    }
+
+    /// Open a flow immediately if the current flow is clean, or prompt if there are unsaved edits.
+    pub fn request_open_flow(&mut self, path: PathBuf) {
+        if self.flow.dirty && self.flow.path.as_ref() != Some(&path) {
+            self.pending_open_flow = Some(path);
+        } else {
+            self.open_flow(&path);
         }
     }
 
@@ -788,6 +840,8 @@ impl AppState {
                 self.toast(Level::Ok, format!("Opened flow {} · {} steps", doc.name, doc.count()));
                 self.flow = doc;
                 self.flow_sel = None;
+                self.flow_undo.clear();
+                self.flow_redo.clear();
                 self.report_uids.clear();
                 self.doc_request = Some(Doc::Flow);
             }
@@ -845,6 +899,7 @@ impl AppState {
     /// Insert a catalog tool after the selected step (or at the end).
     pub fn insert_tool(&mut self, menu_id: &str) {
         let Some(desc) = self.catalog.iter().find(|t| t.menu_id == menu_id).cloned() else { return };
+        self.push_flow_undo();
         let node = self.flow.new_node(&desc.menu_id, desc.default_params.clone());
         let sel = self.flow_sel.clone();
         let path = self.flow.insert_after(sel.as_ref(), node);

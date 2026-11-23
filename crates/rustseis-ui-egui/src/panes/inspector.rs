@@ -14,6 +14,7 @@ pub struct InspectorState {
     /// Show the whole flow as editable text instead of cards.
     pub flow_json: bool,
     raw_text: Option<(u64, String)>,
+    last_undo_at: f64,
 }
 
 /// Known enum choices for string params, keyed by (tool, field) with field-only fallback.
@@ -134,6 +135,10 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     });
 
     if changed {
+        if s.time - s.inspector.last_undo_at > 0.6 || s.flow_undo.is_empty() {
+            s.push_flow_undo();
+            s.inspector.last_undo_at = s.time;
+        }
         if let Some(n) = s.flow.get_mut(&path) {
             *n = node_mut;
             s.flow.dirty = true;
@@ -337,7 +342,7 @@ fn edit_value(ui: &mut Ui, p: &Palette, tool: &str, key: &str, v: &mut Value, na
             ui.horizontal(|ui| {
                 ui.label(RichText::new("auto").font(font_mono(11.0)).color(p.text_faint));
                 if ui.small_button("set").on_hover_text("Replace the default `null` with an explicit value").clicked() {
-                    *v = if key.starts_with("max_") || key.contains("count") { json!(100) } else { json!(0.0) };
+                    *v = default_for_null_key(key);
                     changed = true;
                 }
             });
@@ -345,6 +350,31 @@ fn edit_value(ui: &mut Ui, p: &Palette, tool: &str, key: &str, v: &mut Value, na
         }
         Value::Array(arr) => edit_array(ui, p, key, arr),
         Value::Object(_) => false,
+    }
+}
+
+/// Infer a sensible non-null default JSON value for an optional parameter key.
+pub fn default_for_null_key(key: &str) -> Value {
+    let k = key.to_ascii_lowercase();
+    if k.starts_with("save_")
+        || k.ends_with("_table")
+        || k.ends_with("_panel")
+        || k.ends_with("_name")
+        || k.ends_with("_path")
+        || k.ends_with("_key")
+        || k.ends_with("_header")
+        || k.ends_with("_buffer")
+        || k.ends_with("_code")
+        || matches!(
+            k.as_str(),
+            "path" | "name" | "header" | "key" | "method" | "mode" | "output" | "direction" | "basis" | "anchor" | "python_exe" | "label"
+        )
+    {
+        json!("")
+    } else if k.starts_with("max_") || k.starts_with("min_") && k.contains("traces") || k.contains("count") || k.contains("shots") || k.contains("iters") {
+        json!(100)
+    } else {
+        json!(0.0)
     }
 }
 
@@ -574,5 +604,15 @@ mod tests {
         assert_eq!(humanize("operator_ms"), "Operator (ms)");
         assert_eq!(humanize("vel_cut_mps"), "Vel cut (m/s)");
         assert_eq!(humanize("chan1_is_near"), "Chan1 is near");
+    }
+
+    #[test]
+    fn null_defaults_match_field_types() {
+        assert_eq!(default_for_null_key("save_table"), json!(""));
+        assert_eq!(default_for_null_key("save_panel"), json!(""));
+        assert_eq!(default_for_null_key("velocity_table"), json!(""));
+        assert_eq!(default_for_null_key("path"), json!(""));
+        assert_eq!(default_for_null_key("max_shots"), json!(100));
+        assert_eq!(default_for_null_key("length_ms"), json!(0.0));
     }
 }

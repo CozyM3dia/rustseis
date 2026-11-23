@@ -58,7 +58,69 @@ fn tool_defs() -> Vec<Value> {
     rustseis_mcp::mcp_tool_definitions().as_array().cloned().unwrap_or_default()
 }
 
-/// Parse `tool {json}` or `tool key=value key2=value2`.
+/// Try to map a plain-English multi-word request into a safe MCP tool call.
+fn try_natural_language(line: &str) -> Option<(String, Value)> {
+    if !line.contains(char::is_whitespace) {
+        return None;
+    }
+    let low = line.to_ascii_lowercase();
+    let nums: Vec<f64> = low
+        .split(|c: char| !c.is_ascii_digit() && c != '.')
+        .filter(|s| !s.is_empty())
+        .filter_map(|s| s.parse::<f64>().ok())
+        .collect();
+    if low.contains("table") || low.contains("loaded") || low.contains("summary") || low.contains("session") {
+        return Some(("inspect_tables".into(), json!({})));
+    }
+    if low.contains("header") || low.contains("trace") && (low.contains("show") || low.contains("inspect") || low.contains("list")) {
+        return Some(("inspect_headers".into(), json!({})));
+    }
+    if low.contains("tool") || low.contains("catalog") || low.contains("what can") {
+        return Some(("list_tools".into(), json!({})));
+    }
+    if low.contains("bandpass") || (low.contains("filter") && nums.len() >= 2) {
+        let freqs = if nums.len() >= 4 {
+            [nums[0], nums[1], nums[2], nums[3]]
+        } else if nums.len() >= 2 {
+            let (lo, hi) = (nums[0].min(nums[1]), nums[0].max(nums[1]));
+            [(lo * 0.65).max(1.0), lo, hi, hi * 1.25]
+        } else {
+            [6.0, 12.0, 60.0, 80.0]
+        };
+        return Some((
+            "run_flow".into(),
+            json!({
+                "flow": {
+                    "name": "assistant_bandpass",
+                    "description": line,
+                    "steps": [{
+                        "tool": "filter",
+                        "params": { "spec_type": "Ormsby", "phase": "Zero", "freqs": freqs, "pad_pct": 25.0 }
+                    }]
+                }
+            }),
+        ));
+    }
+    if low.contains("agc") || low.contains("gain") {
+        let win = nums.first().copied().unwrap_or(500.0);
+        return Some((
+            "run_flow".into(),
+            json!({
+                "flow": {
+                    "name": "assistant_agc",
+                    "description": line,
+                    "steps": [{ "tool": "agc", "params": { "window_ms": win, "basis": "Rms" } }]
+                }
+            }),
+        ));
+    }
+    if low.contains("undo") {
+        return Some(("undo".into(), json!({})));
+    }
+    None
+}
+
+/// Parse `tool {json}`, `tool key=value`, or a plain-English request.
 pub fn parse_command(line: &str) -> Result<(String, Value), String> {
     let line = line.trim();
     if line.is_empty() {
@@ -70,9 +132,12 @@ pub fn parse_command(line: &str) -> Result<(String, Value), String> {
     };
     let names: Vec<String> = tool_defs().iter().filter_map(|d| d.get("name").and_then(|n| n.as_str()).map(String::from)).collect();
     if !names.iter().any(|n| n == name) {
+        if let Some(mapped) = try_natural_language(line) {
+            return Ok(mapped);
+        }
         let close: Vec<&String> = names.iter().filter(|n| n.contains(name) || name.contains(n.as_str())).collect();
         return Err(if close.is_empty() {
-            format!("I don't know “{name}”. The panel above lists what I can do.")
+            format!("I don't know “{name}”. Try plain phrases like “show tables” or “bandpass 10 to 60 Hz”, or pick a tool name above.")
         } else {
             format!("I don't know “{name}”. Did you mean {}?", close.iter().map(|s| format!("“{s}”")).collect::<Vec<_>>().join(", "))
         });
@@ -238,7 +303,7 @@ fn pill(ui: &mut Ui, p: &Palette, ic: &str, label: &str) -> egui::Response {
 
 fn intro(ui: &mut Ui, p: &Palette, defs: &[Value]) {
     ui.label(RichText::new("Ask with a button above, or type a request below.").color(p.text));
-    ui.label(RichText::new("Typed requests use a tool name, for example “inspect_tables” or “render_gather_png output_path=qc/gather.png”. Press Tab to complete a name.").size(11.5).color(p.text_muted));
+    ui.label(RichText::new("Type plain requests like “show tables” or “bandpass 10 to 60 Hz”, or an exact MCP tool such as “render_gather_png output_path=qc/gather.png”. Press Tab to complete a tool name.").size(11.5).color(p.text_muted));
     ui.add_space(8.0);
     ui.label(RichText::new("WHAT IT CAN DO").font(crate::theme::font_semibold(10.5)).color(p.text_faint));
     for d in defs {
@@ -422,7 +487,7 @@ fn composer(s: &mut AppState, ui: &mut Ui, p: &Palette, defs: &[Value]) {
                     egui::TextEdit::singleline(&mut s.copilot.input)
                         .font(egui::FontId::proportional(13.0))
                         .frame(egui::Frame::NONE)
-                        .hint_text("Type a tool name, e.g. inspect_tables")
+                        .hint_text("Try “show tables”, “bandpass 10 60”, or a tool name…")
                         .desired_width(ui.available_width() - 34.0),
                 );
                 let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
@@ -560,5 +625,18 @@ mod tests {
         assert_eq!(policy_of("run_flow"), CommandPolicy::Mutating);
         assert_eq!(policy_of("load_opf_db"), CommandPolicy::Mutating);
         assert_eq!(policy_of("inspect_tables"), CommandPolicy::ReadOnly);
+    }
+
+    #[test]
+    fn parses_plain_english_requests() {
+        let (t, _) = parse_command("show tables").unwrap();
+        assert_eq!(t, "inspect_tables");
+        let (t, a) = parse_command("apply bandpass 10 to 60 Hz").unwrap();
+        assert_eq!(t, "run_flow");
+        assert_eq!(a["flow"]["steps"][0]["tool"], "filter");
+        assert_eq!(policy_of(&t), CommandPolicy::Mutating);
+        let (t, a) = parse_command("apply agc 400").unwrap();
+        assert_eq!(t, "run_flow");
+        assert_eq!(a["flow"]["steps"][0]["tool"], "agc");
     }
 }

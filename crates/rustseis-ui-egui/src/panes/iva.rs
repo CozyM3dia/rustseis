@@ -19,6 +19,7 @@ use std::hash::{Hash, Hasher};
 
 pub struct IvaState {
     pub source: TraceSource,
+    user_picked_source: bool,
     pub table_name: String,
     pub functions: BTreeMap<i32, Vec<(f32, f32)>>,
     pub pos: usize,
@@ -63,6 +64,7 @@ impl Default for IvaState {
     fn default() -> Self {
         Self {
             source: TraceSource::Active,
+            user_picked_source: false,
             table_name: "ui_velocity".into(),
             functions: BTreeMap::new(),
             pos: 0,
@@ -355,9 +357,55 @@ pub fn save_table(s: &mut AppState, persist: bool) {
     }
 }
 
+/// Pick the best pre-stack CDP gather buffer when Active is post-stack (fold < 3).
+fn best_cdp_buffer(sess: &rustseis_engine::EngineSession) -> Option<TraceSource> {
+    let score_traces = |tr: &[Trace]| -> usize {
+        if tr.len() < 4 {
+            return 0;
+        }
+        let idx = EnsembleIndex::build(tr, TraceSource::Active, "CDP", 0);
+        idx.ranges.iter().map(|r| r.len()).max().unwrap_or(0)
+    };
+    if score_traces(&sess.active_traces) >= 3 {
+        return None;
+    }
+    let mut cands: Vec<(i32, usize, String)> = sess
+        .context
+        .buffers
+        .iter()
+        .filter_map(|(name, tr)| {
+            let max_fold = score_traces(tr);
+            if max_fold < 3 {
+                return None;
+            }
+            let low = name.to_ascii_lowercase();
+            let rank = if low.contains("cdp") && !low.contains("nmo") {
+                30
+            } else if low.contains("cdp") {
+                20
+            } else if low.contains("before") || low.contains("nmo") {
+                10
+            } else {
+                0
+            };
+            Some((rank, max_fold, name.clone()))
+        })
+        .collect();
+    cands.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| b.1.cmp(&a.1)).then_with(|| a.2.cmp(&b.2)));
+    cands.into_iter().next().map(|(_, _, n)| TraceSource::Buffer(n))
+}
+
 fn prepare(s: &mut AppState, ctx: &egui::Context) {
     if s.session().is_none() {
         return;
+    }
+    // If the user hasn't explicitly chosen a source and Active is post-stack (e.g. after a stack
+    // step), automatically switch to a pre-stack CDP gather buffer when one exists.
+    if !s.iva.user_picked_source && s.iva.source == TraceSource::Active {
+        if let Some(best) = s.session().and_then(best_cdp_buffer) {
+            s.iva.source = best;
+            s.iva.gather_key = 0;
+        }
     }
     if !s.iva.index.matches(&s.iva.source, "CDP", s.rev) {
         let idx = {
@@ -1022,6 +1070,7 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                     for src in &sources {
                         if ui.selectable_label(*src == s.iva.source, src.label()).clicked() {
                             s.iva.source = src.clone();
+                            s.iva.user_picked_source = true;
                             s.iva.pos = 0;
                         }
                     }

@@ -2,7 +2,7 @@
 //! tables and the project database).
 
 use crate::data::{self, TraceSource, fmt_bytes, fmt_count};
-use crate::state::{AppState, Doc, JobPurpose, Level};
+use crate::state::{AppState, Doc, JobPurpose};
 use crate::theme::{Palette, font_mono, mix, palette, with_alpha};
 use crate::widgets::{self, caps, cmd, cmd_primary, mono};
 use crate::worker::EngineJob;
@@ -260,10 +260,7 @@ fn flows(s: &mut AppState, ui: &mut Ui, p: &Palette) {
         s.open_flow_dialog();
     }
     if let Some(f) = open {
-        if s.flow.dirty {
-            s.toast(Level::Warn, "Unsaved changes to the previous flow were discarded");
-        }
-        s.open_flow(&f);
+        s.request_open_flow(f);
     }
 }
 
@@ -286,18 +283,33 @@ fn samples(s: &mut AppState, ui: &mut Ui, p: &Palette) {
     }
 }
 
-/// Full-width clickable list row: icon, label, trailing detail.
+/// Full-width clickable list row: icon, label (truncated with ellipsis if needed), trailing detail.
 pub fn list_row(ui: &mut Ui, p: &Palette, ic: &str, label: &str, detail: &str, selected: bool) -> egui::Response {
     let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 28.0), Sense::click());
     let fill = if selected { p.accent_soft } else if resp.hovered() { p.raised } else { egui::Color32::TRANSPARENT };
     ui.painter().rect_filled(rect, CornerRadius::same(6), fill);
     let fg = if selected { p.accent_text } else { p.text };
-    ui.painter().text(pos2(rect.left() + 10.0, rect.center().y), egui::Align2::LEFT_CENTER, ic, egui::FontId::proportional(14.0), if selected { p.accent } else { p.text_muted });
-    let clip = egui::Rect::from_min_max(pos2(rect.left() + 32.0, rect.top()), pos2(rect.right() - 60.0, rect.bottom()));
-    ui.painter().with_clip_rect(clip).text(pos2(rect.left() + 32.0, rect.center().y), egui::Align2::LEFT_CENTER, label, egui::FontId::proportional(12.5), fg);
-    if !detail.is_empty() {
-        ui.painter().text(pos2(rect.right() - 8.0, rect.center().y), egui::Align2::RIGHT_CENTER, detail, egui::FontId::proportional(10.5), p.text_faint);
-    }
+    let text_x = if ic.is_empty() {
+        rect.left() + 10.0
+    } else {
+        ui.painter().text(pos2(rect.left() + 10.0, rect.center().y), egui::Align2::LEFT_CENTER, ic, egui::FontId::proportional(14.0), if selected { p.accent } else { p.text_muted });
+        rect.left() + 32.0
+    };
+    let detail_w = if detail.is_empty() {
+        8.0
+    } else {
+        let g = ui.painter().layout_no_wrap(detail.to_string(), egui::FontId::proportional(10.5), p.text_faint);
+        ui.painter().galley(pos2(rect.right() - 8.0 - g.size().x, rect.center().y - g.size().y * 0.5), g.clone(), p.text_faint);
+        g.size().x + 16.0
+    };
+    let max_w = (rect.right() - detail_w - text_x).max(16.0);
+    let mut job = egui::text::LayoutJob::single_section(
+        label.to_string(),
+        egui::TextFormat { font_id: egui::FontId::proportional(12.5), color: fg, ..Default::default() },
+    );
+    job.wrap = egui::text::TextWrapping { max_width: max_w, max_rows: 1, break_anywhere: true, overflow_character: Some('…') };
+    let galley = ui.fonts_mut(|f| f.layout_job(job));
+    ui.painter().galley(pos2(text_x, rect.center().y - galley.size().y * 0.5), galley, fg);
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 

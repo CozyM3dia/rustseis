@@ -46,6 +46,7 @@ pub struct ViewerState {
     pub compare_source: TraceSource,
     pub request_refit: bool,
     pub show_tracks: bool,
+    pub show_overlays: bool,
     pub stats: GatherStats,
     raster: Option<Raster>,
     raster_key: u64,
@@ -94,6 +95,7 @@ impl Default for ViewerState {
             compare_source: TraceSource::Active,
             request_refit: true,
             show_tracks: true,
+            show_overlays: true,
             stats: GatherStats::default(),
             raster: None,
             raster_key: 0,
@@ -499,6 +501,9 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
             });
             widgets::row(ui, &p, "Header tracks", |ui| {
                 widgets::toggle(ui, &p, &mut s.viewer.show_tracks);
+            });
+            widgets::row(ui, &p, "Show picks & mute", |ui| {
+                widgets::toggle(ui, &p, &mut s.viewer.show_overlays);
             });
             widgets::row(ui, &p, "Compare side by side", |ui| {
                 let mut c = s.viewer.compare;
@@ -1017,8 +1022,11 @@ fn overlays(s: &AppState, painter: &egui::Painter, frame: &canvas::PlotFrame, tr
     let n = traces.len();
     let step = ((n as f32 / frame.rect.width().max(1.0)).ceil() as usize).max(1);
 
+    let show_mute = v.mode == PickMode::Mute || (v.show_overlays && !v.compare);
+    let show_fb = v.mode == PickMode::FirstBreak || (v.show_overlays && !v.compare);
+
     // Mute curve + shaded region
-    if !v.mute_picks.is_empty() || !v.surgical_picks.is_empty() {
+    if show_mute && (!v.mute_picks.is_empty() || !v.surgical_picks.is_empty()) {
         let table = v.mute_table();
         let mut top_pts = Vec::new();
         let mut bot_pts = Vec::new();
@@ -1087,6 +1095,7 @@ fn overlays(s: &AppState, painter: &egui::Painter, frame: &canvas::PlotFrame, tr
     }
 
     // First breaks: picked (bright) and header FB_PICK (dim).
+    if show_fb {
     let mut fb_line = Vec::new();
     for i in (0..n).step_by(step) {
         if !visible(i) {
@@ -1113,6 +1122,7 @@ fn overlays(s: &AppState, painter: &egui::Painter, frame: &canvas::PlotFrame, tr
     }
     if fb_line.len() > 1 {
         painter.add(egui::Shape::line(fb_line, Stroke::new(1.5, with_alpha(p.pick, 220))));
+    }
     }
 
     // Pending kills / reversals.
@@ -1179,6 +1189,10 @@ fn interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsRange)
         }
         PickMode::Kill => {
             if resp.clicked() && in_trace {
+                if s.focus.source != TraceSource::Active {
+                    s.toast(Level::Warn, "Switch source to Latest result (Active) to edit traces");
+                    return;
+                }
                 let Some(sess) = s.session() else { return };
                 let h = s.focus.source.traces(sess)[abs].headers.clone();
                 let v = &mut s.viewer;
@@ -1292,7 +1306,7 @@ pub fn save_mute(s: &mut AppState) {
     let t = s.viewer.mute_table();
     let name = t.name.clone();
     match s.dispatch_now(rustseis_engine::EngineCommand::UpsertMuteTable(t)) {
-        Ok(_) => s.toast(Level::Ok, format!("UpsertMuteTable · {name}")),
+        Ok(_) => s.toast(Level::Ok, format!("Saved mute “{name}”")),
         Err(e) => s.toast(Level::Error, e),
     }
 }
@@ -1309,9 +1323,10 @@ pub fn save_first_breaks(s: &mut AppState) {
         }
     }
     let n = picks.len();
-    let table = rustseis_core::FirstBreakTable { name: s.viewer.fb_table_name.clone(), picks };
+    let tbl_name = s.viewer.fb_table_name.clone();
+    let table = rustseis_core::FirstBreakTable { name: tbl_name.clone(), picks };
     match s.dispatch_now(rustseis_engine::EngineCommand::UpsertFirstBreakTable(table)) {
-        Ok(_) => s.toast(Level::Ok, format!("UpsertFirstBreakTable · {n} picks")),
+        Ok(_) => s.toast(Level::Ok, format!("Saved {n} first breaks to “{tbl_name}”")),
         Err(e) => s.toast(Level::Error, e),
     }
 }

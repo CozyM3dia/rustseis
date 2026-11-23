@@ -502,6 +502,7 @@ fn json_editor(s: &mut AppState, ui: &mut Ui, p: &Palette) {
     if apply {
         match serde_json::from_str::<rustseis_flow::FlowSpec>(&text) {
             Ok(spec) => {
+                s.push_flow_undo();
                 let path = s.flow.path.clone();
                 s.flow = crate::flowdoc::FlowDoc::from_spec(&spec, path);
                 s.flow.dirty = true;
@@ -521,23 +522,33 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
         match a {
             Action::Select(p) => s.flow_sel = Some(p),
             Action::Toggle(p) => {
+                if s.flow.get(&p).is_some() {
+                    s.push_flow_undo();
+                }
                 if let Some(n) = s.flow.get_mut(&p) {
                     n.enabled = !n.enabled;
                     s.flow.dirty = true;
                 }
             }
             Action::Remove(p) => {
+                if s.flow.get(&p).is_some() {
+                    s.push_flow_undo();
+                }
                 s.flow.remove(&p);
                 if s.flow_sel.as_ref().is_some_and(|sel| sel.starts_with(&p)) {
                     s.flow_sel = None;
                 }
             }
             Action::Duplicate(p) => {
+                if s.flow.get(&p).is_some() {
+                    s.push_flow_undo();
+                }
                 if let Some(np) = s.flow.duplicate(&p) {
                     s.flow_sel = Some(np);
                 }
             }
             Action::Move { from, parent, index } => {
+                s.push_flow_undo();
                 let (from_parent, from_idx) = from.split_at(from.len() - 1);
                 if from_parent == parent.as_slice() {
                     let to = if index > from_idx[0] { index - 1 } else { index };
@@ -564,6 +575,7 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
             }
             Action::Insert { parent, index, tool } => {
                 let Some(desc) = s.tool(&tool).cloned() else { continue };
+                s.push_flow_undo();
                 let node = s.flow.new_node(&desc.menu_id, desc.default_params.clone());
                 if let Some(list) = s.flow.container_mut(&parent) {
                     let idx = index.min(list.len());
@@ -575,12 +587,18 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
                 }
             }
             Action::AddBranch(p) => {
+                if s.flow.get(&p).is_some() {
+                    s.push_flow_undo();
+                }
                 if let Some(n) = s.flow.get_mut(&p) {
                     n.branches.push(Vec::new());
                     s.flow.dirty = true;
                 }
             }
             Action::RemoveBranch(p, b) => {
+                if s.flow.get(&p).is_some_and(|n| b < n.branches.len()) {
+                    s.push_flow_undo();
+                }
                 if let Some(n) = s.flow.get_mut(&p) {
                     if b < n.branches.len() {
                         n.branches.remove(b);
