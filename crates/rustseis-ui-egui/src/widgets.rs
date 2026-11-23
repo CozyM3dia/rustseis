@@ -209,3 +209,178 @@ pub fn progress_line(ui: &mut Ui, p: &Palette, width: f32, fraction: Option<f32>
 pub fn fill_remaining(ui: &mut Ui) -> Vec2 {
     ui.available_size_before_wrap().max(vec2(64.0, 64.0))
 }
+
+// ------------------------------------------------------------------------------------------
+// Interface v2 primitives
+// ------------------------------------------------------------------------------------------
+
+/// Floating panel surface (Explorer, documents, Inspector).
+pub fn panel_frame(p: &Palette) -> Frame {
+    Frame::new()
+        .fill(p.panel)
+        .stroke(Stroke::new(1.0, p.border))
+        .corner_radius(CornerRadius::same(crate::theme::RADIUS_LG))
+}
+
+/// Translucent overlay used on top of seismic canvases.
+pub fn glass_frame(p: &Palette) -> Frame {
+    let fill = if p.mode == crate::theme::ThemeMode::Dark {
+        Color32::from_rgba_unmultiplied(15, 18, 22, 214)
+    } else {
+        Color32::from_rgba_unmultiplied(255, 255, 255, 228)
+    };
+    Frame::new()
+        .fill(fill)
+        .stroke(Stroke::new(1.0, with_alpha(p.text, 24)))
+        .corner_radius(CornerRadius::same(10))
+        .inner_margin(Margin::symmetric(10, 6))
+        .shadow(egui::Shadow { offset: [0, 8], blur: 22, spread: 0, color: Color32::from_black_alpha(90) })
+}
+
+/// Command-bar button: phosphor icon + label.
+pub fn cmd(ui: &mut Ui, p: &Palette, icon: &str, label: &str, active: bool) -> Response {
+    let font = egui::FontId::proportional(12.5);
+    // A trailing "▾" marks a menu; draw it with the icon font's caret.
+    let label = label.replace('▾', egui_phosphor::regular::CARET_DOWN);
+    let text = if icon.is_empty() { label } else { format!("{icon}  {label}") };
+    let g = ui.painter().layout_no_wrap(text.clone(), font.clone(), p.text);
+    let size = vec2(g.size().x + 20.0, 32.0);
+    let (rect, resp) = ui.allocate_exact_size(size, Sense::click());
+    let enabled = ui.is_enabled();
+    let hovered = resp.hovered() && enabled;
+    let (fill, stroke, fg) = if active {
+        (p.accent_soft, Stroke::new(1.0, p.accent_line), p.accent_text)
+    } else if hovered {
+        (p.raised, Stroke::NONE, p.text)
+    } else {
+        (Color32::TRANSPARENT, Stroke::NONE, if enabled { mix(p.text, p.text_muted, 0.25) } else { p.text_faint })
+    };
+    ui.painter().rect(rect, CornerRadius::same(7), fill, stroke, StrokeKind::Inside);
+    ui.painter().text(rect.center(), Align2::CENTER_CENTER, text, font, fg);
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+/// Primary command (accent fill).
+pub fn cmd_primary(ui: &mut Ui, p: &Palette, icon: &str, label: &str) -> Response {
+    let font = crate::theme::font_semibold(12.5);
+    let text = if icon.is_empty() { label.to_string() } else { format!("{icon}  {label}") };
+    let g = ui.painter().layout_no_wrap(text.clone(), font.clone(), p.on_accent);
+    let (rect, resp) = ui.allocate_exact_size(vec2(g.size().x + 22.0, 32.0), Sense::click());
+    let enabled = ui.is_enabled();
+    let fill = if !enabled { mix(p.raised, p.accent, 0.3) } else if resp.hovered() { mix(p.accent, p.text, 0.12) } else { p.accent };
+    ui.painter().rect_filled(rect, CornerRadius::same(7), fill);
+    ui.painter().text(rect.center(), Align2::CENTER_CENTER, text, font, p.on_accent);
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+pub fn cmd_sep(ui: &mut Ui, p: &Palette) {
+    let (rect, _) = ui.allocate_exact_size(vec2(13.0, 22.0), Sense::hover());
+    ui.painter().vline(rect.center().x, rect.y_range(), Stroke::new(1.0, p.border_strong));
+}
+
+/// Small caps label inside the command bar (e.g. "ADD").
+pub fn dim_label(ui: &mut Ui, p: &Palette, text: &str) {
+    ui.label(RichText::new(text).font(crate::theme::font_semibold(10.5)).color(p.text_faint));
+}
+
+/// Amber contextual label (e.g. "GATHER", "PICKING").
+pub fn ctx_label(ui: &mut Ui, p: &Palette, text: &str) {
+    ui.label(RichText::new(text).font(crate::theme::font_semibold(10.5)).color(p.pick));
+}
+
+/// Section header inside panels: small caps, optional trailing hint.
+pub fn caps(ui: &mut Ui, p: &Palette, text: &str, hint: Option<&str>) {
+    ui.horizontal(|ui| {
+        ui.label(RichText::new(text).font(crate::theme::font_semibold(11.0)).color(p.text_faint));
+        if let Some(h) = hint {
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                ui.label(RichText::new(h).size(11.5).color(p.text_muted));
+            });
+        }
+    });
+}
+
+/// Switch control.
+pub fn toggle(ui: &mut Ui, p: &Palette, on: &mut bool) -> Response {
+    let (rect, mut resp) = ui.allocate_exact_size(vec2(32.0, 18.0), Sense::click());
+    if resp.clicked() {
+        *on = !*on;
+        resp.mark_changed();
+    }
+    let t = ui.ctx().animate_bool_responsive(resp.id, *on);
+    let fill = mix(p.border_strong, p.accent, t);
+    ui.painter().rect_filled(rect, CornerRadius::same(9), fill);
+    let x = egui::lerp(rect.left() + 9.0..=rect.right() - 9.0, t);
+    let knob = if *on { p.on_accent } else { p.text_muted };
+    ui.painter().circle_filled(pos2(x, rect.center().y), 7.0, knob);
+    resp
+}
+
+/// Labelled row with content aligned right.
+pub fn row(ui: &mut Ui, p: &Palette, key: &str, add: impl FnOnce(&mut Ui)) {
+    ui.horizontal(|ui| {
+        ui.label(RichText::new(key).color(p.text_muted));
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), add);
+    });
+}
+
+/// Mono value text helper.
+pub fn mono(text: impl Into<String>, size: f32, color: Color32) -> RichText {
+    RichText::new(text.into()).font(font_mono(size)).color(color)
+}
+
+/// Small coloured status dot.
+pub fn dot(ui: &mut Ui, color: Color32, r: f32) {
+    let (rect, _) = ui.allocate_exact_size(vec2(r * 2.0 + 2.0, r * 2.0 + 2.0), Sense::hover());
+    ui.painter().circle_filled(rect.center(), r, color);
+}
+
+/// Insight card: something RustSeis noticed, with up to two actions. Returns (primary, secondary).
+pub fn insight(ui: &mut Ui, p: &Palette, title: &str, body: &str, primary: &str, secondary: &str) -> (bool, bool) {
+    let mut out = (false, false);
+    Frame::new()
+        .fill(mix(p.panel, p.accent, if p.mode == crate::theme::ThemeMode::Dark { 0.07 } else { 0.06 }))
+        .stroke(Stroke::new(1.0, p.accent_line))
+        .corner_radius(CornerRadius::same(10))
+        .inner_margin(Margin::same(12))
+        .show(ui, |ui| {
+            ui.set_min_width(ui.available_width());
+            ui.horizontal(|ui| {
+                ui.label(RichText::new(egui_phosphor::regular::LIGHTBULB).color(p.accent));
+                ui.label(RichText::new(title).font(crate::theme::font_semibold(12.5)).color(p.accent_text));
+            });
+            ui.label(RichText::new(body).size(12.0).color(p.text_muted));
+            ui.horizontal(|ui| {
+                if !primary.is_empty() && cmd_primary(ui, p, "", primary).clicked() {
+                    out.0 = true;
+                }
+                if !secondary.is_empty() && cmd(ui, p, "", secondary, false).clicked() {
+                    out.1 = true;
+                }
+            });
+        });
+    out
+}
+
+/// The RustSeis mark: brand disc with a wavelet.
+pub fn logo(ui: &mut Ui, p: &Palette, size: f32) {
+    let (rect, _) = ui.allocate_exact_size(vec2(size, size), Sense::hover());
+    let painter = ui.painter();
+    let c = rect.center();
+    let r = size * 0.5 - 0.5;
+    let steps = 14;
+    for i in 0..steps {
+        let t = i as f32 / (steps - 1) as f32;
+        let off = -0.14 * r * t;
+        painter.circle_filled(c + vec2(off, off), r * (1.0 - t * 0.6), mix(p.brand_b, p.brand_a, t));
+    }
+    let pts: Vec<egui::Pos2> = (0..=28)
+        .map(|i| {
+            let x = i as f32 / 28.0;
+            let tt = (x - 0.42) * 5.5;
+            let a = (1.0 - 2.0 * tt * tt) * (-tt * tt).exp();
+            pos2(rect.left() + size * 0.18 + x * size * 0.64, c.y - a * size * 0.26)
+        })
+        .collect();
+    painter.add(egui::Shape::line(pts, Stroke::new(size * 0.075, Color32::WHITE)));
+}

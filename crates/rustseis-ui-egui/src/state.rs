@@ -23,49 +23,113 @@ use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+/// Workflow stages shown in the top bar, in processing order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Workspace {
-    Flow,
-    Viewer,
+    Data,
+    Process,
     Velocity,
-    Spectral,
     Statics,
-    Survey,
+    Imaging,
+    Qc,
+    Borehole,
 }
 
 impl Workspace {
-    pub const ALL: [Workspace; 6] = [Self::Flow, Self::Viewer, Self::Velocity, Self::Spectral, Self::Statics, Self::Survey];
+    pub const ALL: [Workspace; 7] = [Self::Data, Self::Process, Self::Velocity, Self::Statics, Self::Imaging, Self::Qc, Self::Borehole];
     pub fn title(self) -> &'static str {
         match self {
-            Self::Flow => "Flow Studio",
-            Self::Viewer => "Trace Viewer",
+            Self::Data => "Data",
+            Self::Process => "Process",
             Self::Velocity => "Velocity",
+            Self::Statics => "Statics",
+            Self::Imaging => "Imaging",
+            Self::Qc => "QC",
+            Self::Borehole => "Borehole",
+        }
+    }
+    pub fn hint(self) -> &'static str {
+        match self {
+            Self::Data => "Bring in data, assign geometry and check the survey",
+            Self::Process => "Build and run processing flows",
+            Self::Velocity => "Pick velocities on semblance while gathers flatten live",
+            Self::Statics => "First breaks, statics and amplitude corrections",
+            Self::Imaging => "Stack and migrate, then inspect the image",
+            Self::Qc => "Look at gathers, spectra, F-K and Radon panels",
+            Self::Borehole => "Fibre and borehole VSP records",
+        }
+    }
+    /// The document a stage opens.
+    pub fn doc(self) -> Doc {
+        match self {
+            Self::Data => Doc::Survey,
+            Self::Process => Doc::Flow,
+            Self::Velocity => Doc::Velocity,
+            Self::Statics => Doc::Statics,
+            Self::Imaging | Self::Qc => Doc::Viewer,
+            Self::Borehole => Doc::Borehole,
+        }
+    }
+}
+
+/// Documents shown in the centre panel.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Doc {
+    Start,
+    Viewer,
+    Flow,
+    Velocity,
+    Spectral,
+    Statics,
+    Borehole,
+    Survey,
+}
+
+impl Doc {
+    pub fn title(self) -> &'static str {
+        match self {
+            Self::Start => "Start",
+            Self::Viewer => "Gathers",
+            Self::Flow => "Flow",
+            Self::Velocity => "Velocity analysis",
             Self::Spectral => "Spectral QC",
-            Self::Statics => "Statics & VSP",
-            Self::Survey => "Survey & Copilot",
+            Self::Statics => "Statics QC",
+            Self::Borehole => "Borehole",
+            Self::Survey => "Survey",
         }
     }
     pub fn icon(self) -> &'static str {
         use egui_phosphor::regular as i;
         match self {
-            Self::Flow => i::FLOW_ARROW,
+            Self::Start => i::HOUSE,
             Self::Viewer => i::WAVEFORM,
+            Self::Flow => i::FLOW_ARROW,
             Self::Velocity => i::CHART_LINE_UP,
-            Self::Spectral => i::EQUALIZER,
-            Self::Statics => i::DROP,
+            Self::Spectral => i::WAVE_SINE,
+            Self::Statics => i::RULER,
+            Self::Borehole => i::DROP,
             Self::Survey => i::MAP_TRIFOLD,
         }
     }
-    pub fn hint(self) -> &'static str {
+    /// Stage a document belongs to by default.
+    pub fn stage(self) -> Workspace {
         match self {
-            Self::Flow => "Project, OPF database, 61-tool library and branching flow editor",
-            Self::Viewer => "Gathers and sections, before/after compare, mute / first-break / kill picking",
-            Self::Velocity => "Semblance, live-NMO supergather or PSTM CIG, CVS strips and Dix QC",
-            Self::Spectral => "Amplitude spectrum, F-K fan / polygon, Radon tau-q demultiple",
-            Self::Statics => "Refraction / residual statics, surface-consistent amplitude, VSP / DAS",
-            Self::Survey => "Trace-header spreadsheet, crooked-line basemap and MCP copilot",
+            Self::Start | Self::Survey => Workspace::Data,
+            Self::Flow => Workspace::Process,
+            Self::Velocity => Workspace::Velocity,
+            Self::Statics => Workspace::Statics,
+            Self::Viewer | Self::Spectral => Workspace::Qc,
+            Self::Borehole => Workspace::Borehole,
         }
     }
+}
+
+/// Progress shown as a dot on each stage.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum StageStatus {
+    NotStarted,
+    Attention,
+    Done,
 }
 
 pub enum EngineSlot {
@@ -213,7 +277,7 @@ pub struct AppState {
     pub summary: DataSummary,
     pub flow_eta: HashMap<String, u128>,
     pub busy_purpose: Option<JobPurpose>,
-    pub workspace_request: Option<Workspace>,
+    pub doc_request: Option<Doc>,
     pub flow_dirs: Vec<PathBuf>,
     pub time: f64,
     pub viewer: ViewerState,
@@ -266,7 +330,7 @@ impl AppState {
             summary: DataSummary::default(),
             flow_eta: HashMap::new(),
             busy_purpose: None,
-            workspace_request: None,
+            doc_request: None,
             flow_dirs,
             time: 0.0,
             viewer: ViewerState::default(),
@@ -280,10 +344,8 @@ impl AppState {
             inspector: InspectorState::default(),
         };
         s.log(Level::Info, format!(
-            "RustSeis workstation ready · {} tools ({} Tier 2) · {} ProMAX specs",
-            s.catalog.len(),
-            s.tier2.len(),
-            s.specs.len()
+            "RustSeis ready · {} processing steps",
+            s.catalog.len()
         ));
         s
     }
@@ -490,7 +552,7 @@ impl AppState {
                     self.focus.ens = 0;
                     self.viewer.request_refit = true;
                     self.toast(Level::Ok, format!("Loaded {label} · {}", self.summary.headline()));
-                    self.workspace_request = Some(Workspace::Viewer);
+                    self.doc_request = Some(Doc::Viewer);
                 }
                 Some(JobPurpose::Flow { .. }) => {
                     self.viewer.request_refit = true;
@@ -505,6 +567,73 @@ impl AppState {
             self.toast(Level::Error, format!("{label} failed: {summary}"));
         }
         true
+    }
+
+    /// Live status dot for a stage, derived from what the session holds.
+    pub fn stage_status(&self, w: Workspace) -> StageStatus {
+        let ran = |tools: &[&str]| -> bool {
+            self.report.as_ref().is_some_and(|r| r.steps.iter().any(|st| st.enabled && tools.contains(&st.tool.as_str())))
+        };
+        let ctx = self.session().map(|x| &x.context);
+        match w {
+            Workspace::Data => {
+                if self.summary.n_traces == 0 {
+                    StageStatus::NotStarted
+                } else if self.summary.cdp.is_some_and(|(a, b)| a != b) {
+                    StageStatus::Done
+                } else {
+                    StageStatus::Attention
+                }
+            }
+            Workspace::Process => match self.history.iter().rev().find(|j| j.label.starts_with("Run flow")) {
+                Some(j) if j.ok => StageStatus::Done,
+                Some(_) => StageStatus::Attention,
+                None => StageStatus::NotStarted,
+            },
+            Workspace::Velocity => {
+                if self.iva.has_unsaved() {
+                    StageStatus::Attention
+                } else if ctx.is_some_and(|c| !c.velocities.is_empty()) {
+                    StageStatus::Done
+                } else {
+                    StageStatus::NotStarted
+                }
+            }
+            Workspace::Statics => {
+                if ctx.is_some_and(|c| !c.statics.is_empty()) {
+                    StageStatus::Done
+                } else if ctx.is_some_and(|c| !c.first_breaks.is_empty()) {
+                    StageStatus::Attention
+                } else {
+                    StageStatus::NotStarted
+                }
+            }
+            Workspace::Imaging => {
+                if ran(&["kirtime2d", "kirtime2dstk", "fdmig", "fkmig2d", "dmofkpanel"]) {
+                    StageStatus::Done
+                } else if ran(&["stack"]) {
+                    StageStatus::Attention
+                } else {
+                    StageStatus::NotStarted
+                }
+            }
+            Workspace::Qc => {
+                if self.summary.n_traces == 0 {
+                    StageStatus::NotStarted
+                } else if self.viewer.has_insight() {
+                    StageStatus::Attention
+                } else {
+                    StageStatus::Done
+                }
+            }
+            Workspace::Borehole => {
+                if ctx.is_some_and(|c| !c.vsp_profiles.is_empty()) || ran(&["vsp_wavefield_sep", "vsp_geom"]) {
+                    StageStatus::Done
+                } else {
+                    StageStatus::NotStarted
+                }
+            }
+        }
     }
 
     // ---------------------------------------------------------------- data focus
@@ -660,7 +789,7 @@ impl AppState {
                 self.flow = doc;
                 self.flow_sel = None;
                 self.report_uids.clear();
-                self.workspace_request = Some(Workspace::Flow);
+                self.doc_request = Some(Doc::Flow);
             }
             Err(e) => self.toast(Level::Error, format!("Cannot open flow: {e}")),
         }

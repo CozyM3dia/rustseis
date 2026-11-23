@@ -5,7 +5,7 @@
 use crate::app::RustSeisApp;
 use crate::data::TraceSource;
 use crate::panes::viewer::PickMode;
-use crate::state::Workspace;
+use crate::state::Doc;
 use crate::theme::ThemeMode;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -48,11 +48,14 @@ impl Tour {
         let vsp = flows_dir.join("otway_das_vsp_demo.json");
         let buf = |n: &str| TraceSource::Buffer(n.to_string());
         let mut s: Vec<Step> = vec![
+            Step::Do(Box::new(|a| a.open(Doc::Start))),
+            Step::Pause(0.8),
+            Step::Shot("00_start".into()),
             Step::OpenFlow(prestack),
             Step::Run,
             Step::Settle,
             Step::Do(Box::new(|a| {
-                a.workspace = Workspace::Flow;
+                a.open(Doc::Flow);
                 a.state.flow_sel = Some(vec![11]);
             })),
             Step::Pause(0.6),
@@ -61,7 +64,7 @@ impl Tour {
         // Trace viewer: shot gather with first-break picks.
         let b = buf("shot_gathers");
         s.push(Step::Do(Box::new(move |a| {
-            a.workspace = Workspace::Viewer;
+            a.open(Doc::Viewer);
             let st = &mut a.state;
             st.focus.source = b.clone();
             st.focus.key = "FFID".into();
@@ -103,7 +106,7 @@ impl Tour {
         // Velocity analysis on CDP gathers with the auto-picked table.
         let b = buf("cdp_gathers");
         s.push(Step::Do(Box::new(move |a| {
-            a.workspace = Workspace::Velocity;
+            a.open(Doc::Velocity);
             a.state.viewer.compare = false;
             a.state.iva.source = b.clone();
             a.state.iva.select_table("nias_vel");
@@ -112,7 +115,7 @@ impl Tour {
         // Spectral QC on a shot gather + the flow's Radon panel.
         let b = buf("shot_gathers");
         s.push(Step::Do(Box::new(move |a| {
-            a.workspace = Workspace::Spectral;
+            a.open(Doc::Spectral);
             let st = &mut a.state;
             st.focus.source = b.clone();
             st.focus.key = "FFID".into();
@@ -132,23 +135,28 @@ impl Tour {
         })));
         s.extend([Step::Pause(0.3), Step::Settle, Step::Pause(0.4), Step::Shot("07_spectral_radon_demultiple".into())]);
         // Statics workspace.
-        s.push(Step::Do(Box::new(|a| a.workspace = Workspace::Statics)));
-        s.extend([Step::Pause(0.3), Step::Settle, Step::Shot("08_statics_scamp_fb".into())]);
+        s.push(Step::Do(Box::new(|a| a.open(Doc::Statics))));
+        s.extend([Step::Pause(0.3), Step::Settle, Step::Pause(0.3), Step::Shot("08_statics".into())]);
+        // Start page with a project loaded.
+        s.push(Step::Do(Box::new(|a| a.open(Doc::Start))));
+        s.extend([Step::Pause(0.5), Step::Shot("08b_start_after_run".into())]);
         // Survey: geometry, basemap, copilot.
         let b = buf("shot_gathers");
         s.push(Step::Do(Box::new(move |a| {
-            a.workspace = Workspace::Survey;
+            a.open(Doc::Survey);
             a.state.geometry.source = b.clone();
             a.state.focus.source = b.clone();
             a.state.focus_trace(1500);
+            a.right_mode = crate::app::RightMode::Assistant;
             crate::panes::copilot::tour_seed(&mut a.state);
         })));
         s.extend([Step::Pause(0.3), Step::Settle, Step::Pause(0.6), Step::Shot("09_survey_geometry_copilot".into())]);
         // Light theme, viewer.
         let b = buf("shot_gathers");
         s.push(Step::Do(Box::new(move |a| {
+            a.right_mode = crate::app::RightMode::Inspector;
             a.state.theme = ThemeMode::Light;
-            a.workspace = Workspace::Viewer;
+            a.open(Doc::Viewer);
             a.state.focus.source = b.clone();
             a.state.focus.key = "FFID".into();
             a.state.focus.ens = 20;
@@ -165,7 +173,7 @@ impl Tour {
         if vsp.exists() {
             s.extend([Step::OpenFlow(vsp), Step::Run, Step::Settle]);
             s.push(Step::Do(Box::new(|a| {
-                a.workspace = Workspace::Statics;
+                a.open(Doc::Borehole);
                 a.state.vsp.source = TraceSource::Active;
             })));
             s.extend([Step::Pause(0.3), Step::Settle, Step::Pause(0.5), Step::Shot("11_vsp_das".into())]);

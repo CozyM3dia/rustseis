@@ -319,6 +319,12 @@ pub fn canvas(
         }
     }
     let mut last_label_right = f32::NEG_INFINITY;
+    // Keep tick labels clear of the x-axis title in the corner.
+    let title_left = if opts.x_title.is_empty() {
+        outer.right()
+    } else {
+        data_rect.right() - painter.layout_no_wrap(opts.x_title.clone(), egui::FontId::proportional(10.5), p.text_faint).size().x - 10.0
+    };
     for &x in &xt {
         let sx = frame.x_to_screen(x);
         if opts.show_grid {
@@ -329,14 +335,14 @@ pub fn canvas(
             let align = if opts.x_axis_top { egui::Align2::CENTER_BOTTOM } else { egui::Align2::CENTER_TOP };
             let galley = painter.layout_no_wrap(label.clone(), tick_font.clone(), p.text_muted);
             let half = galley.size().x * 0.5;
-            if sx - half > last_label_right + 6.0 && sx + half < outer.right() {
+            if sx - half > last_label_right + 6.0 && sx + half < title_left {
                 painter.text(pos2(sx, ly), align, label, tick_font.clone(), p.text_muted);
                 last_label_right = sx + half;
             }
         }
     }
     // Axis titles
-    let title_font = font_mono(10.0);
+    let title_font = egui::FontId::proportional(10.5);
     if !opts.y_title.is_empty() {
         painter.text(
             pos2(outer.left() + 2.0, data_rect.top() - if opts.x_axis_top { 6.0 } else { 0.0 }),
@@ -476,13 +482,35 @@ pub fn draw_wiggles(
         if s_lo >= s_end {
             continue;
         }
+        // Split the trace into runs of non-zero samples so muted zones stay clean.
+        let mut runs: Vec<Vec<Pos2>> = Vec::new();
         let mut pts: Vec<Pos2> = Vec::with_capacity((s_end - s_lo) / stride + 2);
         let mut s = s_lo;
+        let mut zeros = 0usize;
         while s < s_end {
-            let a = (tr.samples[s] * amp_px).clamp(-max_dev, max_dev);
+            let v = tr.samples[s];
+            if v == 0.0 {
+                zeros += 1;
+                if zeros >= 2 {
+                    if pts.len() > 1 {
+                        runs.push(std::mem::take(&mut pts));
+                    } else {
+                        pts.clear();
+                    }
+                    s += stride;
+                    continue;
+                }
+            } else {
+                zeros = 0;
+            }
+            let a = (v * amp_px).clamp(-max_dev, max_dev);
             pts.push(pos2(x0 + a, frame.y_to_screen(s as f64 * dt)));
             s += stride;
         }
+        if pts.len() > 1 {
+            runs.push(pts);
+        }
+        for pts in runs {
         if let Some(fc) = fill {
             for w in pts.windows(2) {
                 let (a, b) = (w[0], w[1]);
@@ -501,6 +529,7 @@ pub fn draw_wiggles(
             }
         }
         painter.add(Shape::line(pts, stroke));
+        }
     }
     if !mesh.is_empty() {
         painter.add(Shape::mesh(mesh));

@@ -1,13 +1,15 @@
-//! Workspace 1 · left: Area → Line → Flows / Datasets / OPF tables, plus the SQLite OPF browser.
+//! Left panel: Explorer (project, data with thumbnails, flows, sample data) and Tables (session
+//! tables and the project database).
 
-use crate::data::{TraceSource, fmt_bytes, fmt_count};
-use crate::state::{AppState, JobPurpose, Level, Workspace};
-use crate::theme::{font_mono, palette};
-use crate::widgets::{self, chip, icon_button, kv, section};
+use crate::data::{self, TraceSource, fmt_bytes, fmt_count};
+use crate::state::{AppState, Doc, JobPurpose, Level};
+use crate::theme::{Palette, font_mono, mix, palette, with_alpha};
+use crate::widgets::{self, caps, cmd, cmd_primary, mono};
 use crate::worker::EngineJob;
-use egui::{CollapsingHeader, RichText, ScrollArea, Ui};
+use egui::{CornerRadius, RichText, ScrollArea, Sense, Stroke, Ui, pos2, vec2};
 use egui_phosphor::regular as icon;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 pub struct ProjectState {
@@ -17,11 +19,12 @@ pub struct ProjectState {
     pub segd_max_shots: usize,
     pub new_project: Option<NewProject>,
     files_cache: Option<(f64, Vec<PathBuf>, Vec<PathBuf>)>,
+    thumbs: HashMap<String, (u64, egui::TextureHandle)>,
 }
 
 impl Default for ProjectState {
     fn default() -> Self {
-        Self { manifest: None, opf_path: None, opf_entries: None, segd_max_shots: 40, new_project: None, files_cache: None }
+        Self { manifest: None, opf_path: None, opf_entries: None, segd_max_shots: 40, new_project: None, files_cache: None, thumbs: HashMap::new() }
     }
 }
 
@@ -32,180 +35,332 @@ pub struct NewProject {
     pub line: String,
 }
 
-pub fn ui(s: &mut AppState, ui: &mut Ui) {
-    let p = *palette(s.theme);
-    widgets::toolbar(ui, &p, |ui| {
-        ui.menu_button(format!("{}  Open data", icon::FOLDER_OPEN), |ui| {
-            if ui.button(format!("{}  SEG-Y / SEG-D / .rsds file…", icon::FILE)).clicked() {
-                ui.close();
-                s.open_seismic_dialog();
-            }
-            ui.horizontal(|ui| {
-                if ui.button(format!("{}  SEG-D shot directory…", icon::FOLDERS)).clicked() {
-                    ui.close();
-                    s.open_segd_dir_dialog();
-                }
-                ui.add(egui::DragValue::new(&mut s.project.segd_max_shots).range(1..=5000).suffix(" shots"));
-            });
-        });
-        if icon_button(ui, &p, icon::FILE_CODE, "Open flow (.json / .toml)", false).clicked() {
-            s.open_flow_dialog();
-        }
-        if icon_button(ui, &p, icon::DATABASE, "Load OPF database (.opf.sqlite)", false).clicked() {
-            s.open_opf_dialog();
-        }
-        if icon_button(ui, &p, icon::FLOPPY_DISK, "Save session tables to OPF database", false).clicked() {
-            s.save_opf_dialog();
-        }
-        if icon_button(ui, &p, icon::PLUS, "New Area / Line project", false).clicked() {
-            s.project.new_project = Some(NewProject { area: "NIAS".into(), line: "LINE_01".into(), ..Default::default() });
-        }
+fn pad(ui: &mut Ui, add: impl FnOnce(&mut Ui)) {
+    egui::Frame::new().inner_margin(egui::Margin::symmetric(12, 10)).show(ui, |ui| {
+        ui.spacing_mut().item_spacing.y = 6.0;
+        ui.set_min_width(ui.available_width());
+        add(ui);
     });
+}
 
-    new_project_modal(s, ui);
+/// Rescan flow and sample-data folders every few seconds.
+pub fn refresh_files(s: &mut AppState) {
+    let now = s.time;
+    if s.project.files_cache.as_ref().is_some_and(|(t, _, _)| now - *t < 5.0) {
+        return;
+    }
+    let mut flows = Vec::new();
+    let mut samples = Vec::new();
+    for dir in &s.flow_dirs {
+        if let Ok(rd) = std::fs::read_dir(dir) {
+            for e in rd.flatten() {
+                let path = e.path();
+                if matches!(path.extension().and_then(|x| x.to_str()), Some("json" | "toml")) {
+                    flows.push(path);
+                }
+            }
+        }
+        if let Some(out) = dir.parent().map(|d| d.join("out")) {
+            if let Ok(rd) = std::fs::read_dir(out) {
+                for e in rd.flatten() {
+                    let path = e.path();
+                    if matches!(path.extension().and_then(|x| x.to_str()), Some("sgy" | "segy")) {
+                        samples.push(path);
+                    }
+                }
+            }
+        }
+    }
+    flows.sort();
+    flows.dedup();
+    samples.sort();
+    samples.dedup();
+    s.project.files_cache = Some((now, flows, samples));
+}
 
+pub fn flow_files(s: &AppState) -> Vec<PathBuf> {
+    s.project.files_cache.as_ref().map(|c| c.1.clone()).unwrap_or_default()
+}
+
+pub fn sample_files(s: &AppState) -> Vec<PathBuf> {
+    s.project.files_cache.as_ref().map(|c| c.2.clone()).unwrap_or_default()
+}
+
+/// Friendly name for a flow file: `ui_qc_prestack_demo.json` → "Ui qc prestack demo".
+pub fn flow_title(path: &std::path::Path) -> String {
+    let stem = path.file_stem().map(|x| x.to_string_lossy().into_owned()).unwrap_or_default();
+    let s = stem.replace(['_', '-'], " ");
+    let mut c = s.chars();
+    match c.next() {
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+        None => s,
+    }
+}
+
+/// Small cached preview of the first ensemble of a source.
+pub fn thumbnail(s: &mut AppState, ctx: &egui::Context, src: &TraceSource) -> Option<egui::TextureId> {
+    let name = format!("{src:?}");
+    let key = {
+        let sess = s.session()?;
+        let t = src.traces(sess);
+        if t.is_empty() {
+            return None;
+        }
+        crate::data::hash_parts(&(s.rev, t.len(), &name))
+    };
+    if let Some((k, tex)) = s.project.thumbs.get(&name) {
+        if *k == key {
+            return Some(tex.id());
+        }
+    }
+    let img = {
+        let sess = s.session()?;
+        let t = src.traces(sess);
+        let key_name = data::suggest_key(t);
+        let end = if key_name == data::SECTION_KEY {
+            t.len()
+        } else {
+            let g = data::header_getter(key_name);
+            let first = g(&t[0]);
+            t.iter().position(|x| g(x) != first).unwrap_or(t.len())
+        };
+        let sub = data::decimated_clone(t, 0, end, 120);
+        data::render_gather_raster(&sub, rustseis_render::SeismicColormap::Greyscale, 97.0, 160).ok()?
+    };
+    let tex = ctx.load_texture(format!("thumb_{name}"), img, egui::TextureOptions::LINEAR);
+    let id = tex.id();
+    s.project.thumbs.insert(name, (key, tex));
+    Some(id)
+}
+
+pub fn explorer_ui(s: &mut AppState, ui: &mut Ui) {
+    let p = *palette(s.theme);
+    refresh_files(s);
     ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
-        widgets::body(ui, |ui| {
+        pad(ui, |ui| {
             project_header(s, ui, &p);
+            ui.add_space(6.0);
             datasets(s, ui, &p);
-            tables(s, ui, &p);
-            opf_browser(s, ui, &p);
-            flow_files(s, ui, &p);
+            ui.add_space(6.0);
+            flows(s, ui, &p);
+            ui.add_space(6.0);
+            samples(s, ui, &p);
         });
     });
 }
 
-fn project_header(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
-    section(ui, p, "Project", None);
+fn project_header(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    caps(ui, p, "PROJECT", None);
     match &s.project.manifest {
         Some(m) => {
-            let area = m.get("area").and_then(|v| v.as_str()).unwrap_or("?");
-            let line = m.get("line").and_then(|v| v.as_str()).unwrap_or("?");
+            let area = m.get("area").and_then(|v| v.as_str()).unwrap_or("?").to_string();
+            let line = m.get("line").and_then(|v| v.as_str()).unwrap_or("?").to_string();
             ui.horizontal(|ui| {
                 ui.label(RichText::new(icon::MOUNTAINS).color(p.accent));
-                ui.label(RichText::new(area).strong());
+                ui.label(RichText::new(area).font(crate::theme::font_semibold(13.0)).color(p.text));
                 ui.label(RichText::new("›").color(p.text_faint));
-                ui.label(RichText::new(line).strong());
+                ui.label(RichText::new(line).font(crate::theme::font_semibold(13.0)).color(p.text));
             });
             if let Some(root) = s.session().and_then(|x| x.root_dir.clone()) {
                 ui.label(RichText::new(root.display().to_string()).font(font_mono(10.5)).color(p.text_faint));
             }
         }
         None => {
-            widgets::hint(ui, p, icon::INFO, "Session-only workspace. Create an Area / Line project to get datasets/, flows/, tables/ and qc/ folders.");
+            ui.label(RichText::new("Working without a project. Results stay in this session until you save them.").size(11.5).color(p.text_muted));
+            if cmd(ui, p, icon::PLUS, "Create a project", false).clicked() {
+                s.project.new_project = Some(NewProject { area: "Survey".into(), line: "Line 01".into(), ..Default::default() });
+            }
         }
     }
 }
 
-fn datasets(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
-    section(ui, p, "Datasets", Some("click to focus all viewers"));
+fn datasets(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    caps(ui, p, "DATA", None);
     let Some(session) = s.session() else {
-        widgets::hint(ui, p, icon::HOURGLASS, "Engine busy — dataset list refreshes when the job finishes.");
+        ui.label(RichText::new("Working… the list refreshes when the job finishes.").size(11.5).color(p.text_muted));
         return;
     };
-    let mut sources: Vec<(TraceSource, usize, usize)> = TraceSource::all(session)
+    let list: Vec<(TraceSource, usize, usize)> = TraceSource::all(session)
         .into_iter()
         .map(|src| {
             let t = src.traces(session);
             (src, t.len(), crate::data::traces_bytes(t))
         })
+        .filter(|(_, n, _)| *n > 0)
         .collect();
+    if list.is_empty() {
+        ui.label(RichText::new("Nothing loaded yet.").size(11.5).color(p.text_muted));
+        let r = cmd(ui, p, icon::FOLDER_OPEN, "Open data…", false);
+        if r.clicked() {
+            s.open_seismic_dialog();
+        }
+        return;
+    }
     let summary = s.summary.clone();
     let mut clicked: Option<TraceSource> = None;
-    for (src, n, bytes) in sources.drain(..) {
+    let ctx = ui.ctx().clone();
+    for (src, n, bytes) in list {
         let selected = s.focus.source == src;
-        let frame = egui::Frame::new()
-            .fill(if selected { crate::theme::mix(p.raised, p.accent, 0.07) } else { p.raised })
-            .stroke(egui::Stroke::new(1.0, if selected { crate::theme::with_alpha(p.accent, 150) } else { p.border }))
-            .corner_radius(egui::CornerRadius::same(crate::theme::RADIUS_MD))
-            .inner_margin(egui::Margin::same(8));
-        let resp = frame.show(ui, |ui| {
+        let thumb = thumbnail(s, &ctx, &src);
+        let fill = if selected { mix(p.raised, p.accent, 0.08) } else { p.raised };
+        let stroke = Stroke::new(1.0, if selected { p.accent_line } else { p.border });
+        let resp = egui::Frame::new().fill(fill).stroke(stroke).corner_radius(CornerRadius::same(10)).inner_margin(egui::Margin::same(6)).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
             ui.horizontal(|ui| {
-                let ic = if src == TraceSource::Active { icon::WAVEFORM } else { icon::STACK };
-                ui.label(RichText::new(ic).color(if selected { p.accent } else { p.text_muted }));
-                ui.label(RichText::new(src.label()).strong().color(if selected { p.accent } else { p.text }));
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    chip(ui, &fmt_bytes(bytes), p.text_muted, p.sunken);
-                    chip(ui, &format!("{} tr", fmt_count(n)), p.text_muted, p.sunken);
+                let (r, _) = ui.allocate_exact_size(vec2(54.0, 40.0), Sense::hover());
+                match thumb {
+                    Some(id) => {
+                        ui.painter().image(id, r, egui::Rect::from_min_max(pos2(0.0, 0.0), pos2(1.0, 1.0)), egui::Color32::WHITE);
+                    }
+                    None => {
+                        ui.painter().rect_filled(r, CornerRadius::same(6), p.sunken);
+                    }
+                }
+                ui.painter().rect_stroke(r, CornerRadius::same(6), Stroke::new(1.0, with_alpha(p.text, 20)), egui::StrokeKind::Inside);
+                ui.vertical(|ui| {
+                    ui.spacing_mut().item_spacing.y = 1.0;
+                    ui.label(RichText::new(src.label()).font(crate::theme::font_semibold(12.5)).color(if selected { p.accent_text } else { p.text }));
+                    ui.label(RichText::new(format!("{} traces · {}", fmt_count(n), fmt_bytes(bytes))).size(11.0).color(p.text_muted));
+                    if src == TraceSource::Active {
+                        if let Some((a, b)) = summary.ffid {
+                            ui.label(RichText::new(format!("shots {a}–{b}")).size(10.5).color(p.text_faint));
+                        }
+                    }
                 });
             });
-            if src == TraceSource::Active && n > 0 {
-                ui.label(RichText::new(summary.headline()).font(font_mono(11.0)).color(p.text_muted));
-                ui.horizontal(|ui| {
-                    if let Some((a, b)) = summary.ffid {
-                        ui.label(RichText::new(format!("FFID {a}–{b}")).font(font_mono(10.5)).color(p.text_faint));
-                    }
-                    if let Some((a, b)) = summary.cdp {
-                        ui.label(RichText::new(format!("CDP {a}–{b}")).font(font_mono(10.5)).color(p.text_faint));
-                    }
-                });
-            }
         });
-        let r = resp.response.interact(egui::Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);
+        let r = resp.response.interact(Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);
         if r.clicked() {
             clicked = Some(src);
         }
-        ui.add_space(4.0);
     }
     if let Some(src) = clicked {
+        if let Some(sess) = s.session() {
+            s.focus.key = data::suggest_key(src.traces(sess)).to_string();
+        }
         s.focus.source = src;
         s.focus.ens = 0;
         s.viewer.request_refit = true;
+        s.doc_request = Some(Doc::Viewer);
     }
 }
 
-fn tables(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
-    section(ui, p, "OPF tables", Some("session context"));
-    let Some(session) = s.session() else { return };
-    let ctx = &session.context;
-    let mut nav: Option<(Workspace, &'static str, String)> = None;
-    let mut group = |ui: &mut Ui, title: &str, ic: &str, names: Vec<(String, String)>, ws: Workspace, kind: &'static str| {
-        let n = names.len();
-        CollapsingHeader::new(RichText::new(format!("{ic}  {title}")).strong())
-            .id_salt(("opf", title))
-            .default_open(n > 0)
-            .show(ui, |ui| {
-                if names.is_empty() {
-                    ui.label(RichText::new("—").color(p.text_faint));
-                }
-                for (name, info) in names {
-                    ui.horizontal(|ui| {
-                        if ui.link(RichText::new(&name).font(font_mono(11.5))).on_hover_text("Open in its workspace").clicked() {
-                            nav = Some((ws, kind, name.clone()));
-                        }
-                        ui.label(RichText::new(info).size(11.0).color(p.text_faint));
-                    });
-                }
-            });
-    };
-    let mut vel: Vec<(String, String)> = ctx.velocities.iter().map(|(k, v)| (k.clone(), format!("{} fn", v.functions.len()))).collect();
-    vel.sort();
-    group(ui, "VEL · velocity", icon::CHART_LINE_UP, vel, Workspace::Velocity, "vel");
-    let mut mutes: Vec<(String, String)> = ctx.mutes.iter().map(|(k, v)| (k.clone(), format!("{:?} · {} picks", v.mode, v.picks.len().max(v.surgical_picks.len())))).collect();
-    mutes.sort();
-    group(ui, "MUTE", icon::SCISSORS, mutes, Workspace::Viewer, "mute");
-    let mut fb: Vec<(String, String)> = ctx.first_breaks.iter().map(|(k, v)| (k.clone(), format!("{} picks", fmt_count(v.picks.len())))).collect();
-    fb.sort();
-    group(ui, "FBPICK", icon::LIGHTNING, fb, Workspace::Statics, "fb");
-    let mut st: Vec<(String, String)> = ctx.statics.iter().map(|(k, v)| (k.clone(), format!("{} · rms {:.2} ms", v.kind, v.rms_residual_ms))).collect();
-    st.sort();
-    group(ui, "STAT", icon::RULER, st, Workspace::Statics, "stat");
-    let mut sc: Vec<(String, String)> = ctx.sc_amps.iter().map(|(k, v)| (k.clone(), format!("{} src · {} rec", v.source_factors.len(), v.receiver_factors.len()))).collect();
-    sc.sort();
-    group(ui, "SCAMP", icon::GAUGE, sc, Workspace::Statics, "scamp");
-    let mut rd: Vec<(String, String)> = ctx.radon_panels.iter().map(|(k, v)| (k.clone(), format!("{} q × {} t", v.q_values_ms.len(), v.times_ms.len()))).collect();
-    rd.sort();
-    group(ui, "Radon panels", icon::FUNNEL, rd, Workspace::Spectral, "radon");
-    let mut vp: Vec<(String, String)> = ctx.vsp_profiles.iter().map(|(k, v)| (k.clone(), format!("{} depths", v.depths_m.len()))).collect();
-    vp.sort();
-    group(ui, "VSP profiles", icon::DROP, vp, Workspace::Statics, "vsp");
+fn flows(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    let list = flow_files(s);
+    caps(ui, p, "FLOWS", Some(&list.len().to_string()));
+    let mut open: Option<PathBuf> = None;
+    for f in &list {
+        let current = s.flow.path.as_ref() == Some(f);
+        let r = list_row(ui, p, icon::FLOW_ARROW, &flow_title(f), "", current);
+        if r.on_hover_text(f.display().to_string()).clicked() {
+            open = Some(f.clone());
+        }
+    }
+    if cmd(ui, p, icon::FOLDER_OPEN, "Open a flow file…", false).clicked() {
+        s.open_flow_dialog();
+    }
+    if let Some(f) = open {
+        if s.flow.dirty {
+            s.toast(Level::Warn, "Unsaved changes to the previous flow were discarded");
+        }
+        s.open_flow(&f);
+    }
+}
 
-    if let Some((ws, kind, name)) = nav {
-        s.workspace_request = Some(ws);
+fn samples(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    let list = sample_files(s);
+    if list.is_empty() {
+        return;
+    }
+    caps(ui, p, "SAMPLE DATA", None);
+    let mut open: Option<PathBuf> = None;
+    for d in &list {
+        let name = d.file_name().map(|x| x.to_string_lossy().into_owned()).unwrap_or_default();
+        let size = std::fs::metadata(d).map(|m| m.len() as usize).unwrap_or(0);
+        if list_row(ui, p, icon::FILE, &name, &fmt_bytes(size), false).on_hover_text(format!("Open {}", d.display())).clicked() {
+            open = Some(d.clone());
+        }
+    }
+    if let Some(d) = open {
+        s.open_seismic(&d, None);
+    }
+}
+
+/// Full-width clickable list row: icon, label, trailing detail.
+pub fn list_row(ui: &mut Ui, p: &Palette, ic: &str, label: &str, detail: &str, selected: bool) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 28.0), Sense::click());
+    let fill = if selected { p.accent_soft } else if resp.hovered() { p.raised } else { egui::Color32::TRANSPARENT };
+    ui.painter().rect_filled(rect, CornerRadius::same(6), fill);
+    let fg = if selected { p.accent_text } else { p.text };
+    ui.painter().text(pos2(rect.left() + 10.0, rect.center().y), egui::Align2::LEFT_CENTER, ic, egui::FontId::proportional(14.0), if selected { p.accent } else { p.text_muted });
+    let clip = egui::Rect::from_min_max(pos2(rect.left() + 32.0, rect.top()), pos2(rect.right() - 60.0, rect.bottom()));
+    ui.painter().with_clip_rect(clip).text(pos2(rect.left() + 32.0, rect.center().y), egui::Align2::LEFT_CENTER, label, egui::FontId::proportional(12.5), fg);
+    if !detail.is_empty() {
+        ui.painter().text(pos2(rect.right() - 8.0, rect.center().y), egui::Align2::RIGHT_CENTER, detail, egui::FontId::proportional(10.5), p.text_faint);
+    }
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+pub fn tables_ui(s: &mut AppState, ui: &mut Ui) {
+    let p = *palette(s.theme);
+    ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+        pad(ui, |ui| {
+            tables(s, ui, &p);
+            ui.add_space(8.0);
+            database(s, ui, &p);
+        });
+    });
+}
+
+fn tables(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    let Some(session) = s.session() else {
+        ui.label(RichText::new("Working… tables refresh when the job finishes.").size(11.5).color(p.text_muted));
+        return;
+    };
+    let ctx = &session.context;
+    let mut groups: Vec<(&str, &str, Doc, &'static str, Vec<(String, String)>)> = Vec::new();
+    let sorted = |mut v: Vec<(String, String)>| {
+        v.sort();
+        v
+    };
+    groups.push(("Velocities", icon::CHART_LINE_UP, Doc::Velocity, "vel", sorted(ctx.velocities.iter().map(|(k, v)| (k.clone(), format!("{} locations", v.functions.len()))).collect())));
+    groups.push(("Mutes", icon::SCISSORS, Doc::Viewer, "mute", sorted(ctx.mutes.iter().map(|(k, v)| (k.clone(), format!("{} points", v.picks.len().max(v.surgical_picks.len())))).collect())));
+    groups.push(("First breaks", icon::LIGHTNING, Doc::Statics, "fb", sorted(ctx.first_breaks.iter().map(|(k, v)| (k.clone(), format!("{} picks", fmt_count(v.picks.len())))).collect())));
+    groups.push(("Statics", icon::RULER, Doc::Statics, "stat", sorted(ctx.statics.iter().map(|(k, v)| (k.clone(), format!("misfit {:.2} ms", v.rms_residual_ms))).collect())));
+    groups.push(("Amplitude terms", icon::GAUGE, Doc::Statics, "scamp", sorted(ctx.sc_amps.iter().map(|(k, v)| (k.clone(), format!("{} shots · {} receivers", v.source_factors.len(), v.receiver_factors.len()))).collect())));
+    groups.push(("Radon panels", icon::FUNNEL, Doc::Spectral, "radon", sorted(ctx.radon_panels.iter().map(|(k, v)| (k.clone(), format!("{} curvatures", v.q_values_ms.len()))).collect())));
+    groups.push(("Borehole profiles", icon::DROP, Doc::Borehole, "vsp", sorted(ctx.vsp_profiles.iter().map(|(k, v)| (k.clone(), format!("{} depths", v.depths_m.len()))).collect())));
+    let total: usize = groups.iter().map(|g| g.4.len()).sum();
+    caps(ui, p, "IN THIS SESSION", Some(&total.to_string()));
+    if total == 0 {
+        ui.label(RichText::new("Velocities, mutes, picks and other tables appear here once a flow or a picking tool creates them.").size(11.5).color(p.text_muted));
+    }
+    let mut nav: Option<(Doc, &'static str, String)> = None;
+    for (title, ic, doc, kind, names) in groups {
+        if names.is_empty() {
+            continue;
+        }
+        ui.add_space(2.0);
+        ui.horizontal(|ui| {
+            ui.label(RichText::new(ic).color(p.text_muted));
+            ui.label(RichText::new(title).font(crate::theme::font_semibold(12.0)).color(p.text));
+            ui.label(RichText::new(names.len().to_string()).size(11.0).color(p.text_faint));
+        });
+        for (name, info) in names {
+            if list_row(ui, p, "", &name, &info, false).on_hover_text("Open where it is used").clicked() {
+                nav = Some((doc, kind, name));
+            }
+        }
+    }
+    if let Some((doc, kind, name)) = nav {
+        s.doc_request = Some(doc);
         match kind {
             "vel" => s.iva.select_table(&name),
-            "mute" => s.viewer.mute_table_name = name,
+            "mute" => {
+                if let Some(t) = s.session().and_then(|x| x.context.mutes.get(&name)).cloned() {
+                    s.viewer.load_mute(&t);
+                }
+            }
             "fb" => s.statics.fb_table = Some(name),
             "stat" => s.statics.statics_table = Some(name),
             "scamp" => s.statics.scamp_table = Some(name),
@@ -216,41 +371,40 @@ fn tables(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
     }
 }
 
-fn opf_browser(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
-    section(ui, p, "OPF database", Some("SQLite"));
+fn database(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    caps(ui, p, "PROJECT DATABASE", None);
     let path = s.project.opf_path.clone();
-    ui.horizontal(|ui| {
-        match &path {
-            Some(pth) => {
+    match &path {
+        Some(pth) => {
+            ui.horizontal(|ui| {
                 ui.label(RichText::new(icon::DATABASE).color(p.accent));
-                ui.label(RichText::new(pth.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()).font(font_mono(11.5)))
-                    .on_hover_text(pth.display().to_string());
-            }
-            None => {
-                ui.label(RichText::new("No database attached").color(p.text_faint));
-            }
+                ui.label(mono(pth.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default(), 11.5, p.text)).on_hover_text(pth.display().to_string());
+            });
         }
-    });
-    ui.horizontal(|ui| {
-        if ui.button(format!("{}  Attach…", icon::FOLDER_OPEN)).on_hover_text("Choose a database to browse (does not load it)").clicked() {
-            if let Some(pth) = rfd::FileDialog::new().add_filter("OPF SQLite", &["sqlite", "db"]).pick_file() {
+        None => {
+            ui.label(RichText::new("Save the session's tables into one file you can reopen later.").size(11.5).color(p.text_muted));
+        }
+    }
+    ui.horizontal_wrapped(|ui| {
+        ui.add_enabled_ui(!s.is_busy(), |ui| {
+            if cmd_primary(ui, p, icon::FLOPPY_DISK, "Save tables").clicked() {
+                s.save_opf_dialog();
+            }
+        });
+        if cmd(ui, p, icon::FOLDER_OPEN, "Choose…", false).on_hover_text("Choose a database to look inside").clicked() {
+            if let Some(pth) = rfd::FileDialog::new().add_filter("Project database", &["sqlite", "db"]).pick_file() {
                 s.project.opf_path = Some(pth);
                 s.project.opf_entries = None;
             }
         }
-        let has = path.is_some();
-        if ui.add_enabled(has && !s.is_busy(), egui::Button::new(format!("{}  Load", icon::DOWNLOAD))).on_hover_text("LoadOpfDatabase into the session").clicked() {
+        if path.is_some() && cmd(ui, p, icon::DOWNLOAD, "Load", false).on_hover_text("Bring its tables into the session").clicked() {
             if let Some(pth) = path.clone() {
                 s.load_opf(pth);
             }
         }
-        if ui.add_enabled(!s.is_busy(), egui::Button::new(format!("{}  Save", icon::FLOPPY_DISK))).on_hover_text("SaveOpfDatabase from the session").clicked() {
-            s.save_opf_dialog();
-        }
     });
     if let Some(pth) = &path {
-        let stale = s.project.opf_entries.as_ref().is_none_or(|(p0, _)| p0 != pth);
-        if stale || ui.small_button(format!("{} refresh", icon::ARROW_CLOCKWISE)).clicked() {
+        if s.project.opf_entries.as_ref().is_none_or(|(p0, _)| p0 != pth) {
             let entries = rustseis_io::OpfDatabase::open(pth).and_then(|db| db.list_entries()).map_err(|e| e.to_string());
             s.project.opf_entries = Some((pth.clone(), entries));
         }
@@ -258,16 +412,18 @@ fn opf_browser(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
     if let Some((_, entries)) = &s.project.opf_entries {
         match entries {
             Ok(list) if list.is_empty() => {
-                ui.label(RichText::new("Database is empty").color(p.text_faint));
+                ui.label(RichText::new("The database is empty").size(11.5).color(p.text_faint));
             }
             Ok(list) => {
-                egui::Grid::new("opf_entries").striped(true).num_columns(3).spacing([10.0, 3.0]).show(ui, |ui| {
-                    for (kind, name, updated) in list.iter().take(200) {
-                        ui.label(RichText::new(kind).font(font_mono(10.5)).color(p.accent));
-                        ui.label(RichText::new(name).font(font_mono(11.0)));
-                        ui.label(RichText::new(updated).size(10.5).color(p.text_faint));
-                        ui.end_row();
-                    }
+                egui::Frame::new().fill(p.sunken).corner_radius(CornerRadius::same(8)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+                    ui.set_min_width(ui.available_width());
+                    egui::Grid::new("opf_entries").num_columns(2).spacing([10.0, 3.0]).show(ui, |ui| {
+                        for (kind, name, _updated) in list.iter().take(200) {
+                            ui.label(RichText::new(kind.to_lowercase()).size(10.5).color(p.text_faint));
+                            ui.label(mono(name, 11.0, p.text));
+                            ui.end_row();
+                        }
+                    });
                 });
             }
             Err(e) => {
@@ -277,87 +433,21 @@ fn opf_browser(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
     }
 }
 
-fn flow_files(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
-    section(ui, p, "Flows & sample data", None);
-    let now = s.time;
-    let refresh = s.project.files_cache.as_ref().is_none_or(|(t, _, _)| now - *t > 5.0);
-    if refresh {
-        let mut flows = Vec::new();
-        let mut data = Vec::new();
-        for dir in &s.flow_dirs {
-            if let Ok(rd) = std::fs::read_dir(dir) {
-                for e in rd.flatten() {
-                    let path = e.path();
-                    if matches!(path.extension().and_then(|x| x.to_str()), Some("json" | "toml")) {
-                        flows.push(path);
-                    }
-                }
-            }
-            if let Some(out) = dir.parent().map(|d| d.join("out")) {
-                if let Ok(rd) = std::fs::read_dir(out) {
-                    for e in rd.flatten() {
-                        let path = e.path();
-                        if matches!(path.extension().and_then(|x| x.to_str()), Some("sgy" | "segy")) {
-                            data.push(path);
-                        }
-                    }
-                }
-            }
-        }
-        flows.sort();
-        data.sort();
-        s.project.files_cache = Some((now, flows, data));
-    }
-    let Some((_, flows, data)) = s.project.files_cache.clone() else { return };
-    let mut open_flow: Option<PathBuf> = None;
-    let mut open_data: Option<PathBuf> = None;
-    for f in &flows {
-        let name = f.file_stem().map(|x| x.to_string_lossy().into_owned()).unwrap_or_default();
-        let current = s.flow.path.as_ref() == Some(f);
-        let r = ui.selectable_label(current, RichText::new(format!("{}  {name}", icon::FLOW_ARROW)).size(12.0));
-        if r.on_hover_text(f.display().to_string()).clicked() {
-            open_flow = Some(f.clone());
-        }
-    }
-    if !data.is_empty() {
-        ui.add_space(4.0);
-        for d in &data {
-            let name = d.file_name().map(|x| x.to_string_lossy().into_owned()).unwrap_or_default();
-            let size = std::fs::metadata(d).map(|m| m.len() as usize).unwrap_or(0);
-            ui.horizontal(|ui| {
-                let r = ui.selectable_label(false, RichText::new(format!("{}  {name}", icon::FILE)).size(12.0));
-                ui.label(RichText::new(fmt_bytes(size)).size(10.5).color(p.text_faint));
-                if r.on_hover_text(format!("Open {}", d.display())).clicked() {
-                    open_data = Some(d.clone());
-                }
-            });
-        }
-    }
-    if let Some(f) = open_flow {
-        if s.flow.dirty {
-            s.toast(Level::Warn, "Unsaved flow replaced — previous edits discarded");
-        }
-        s.open_flow(&f);
-    }
-    if let Some(d) = open_data {
-        s.open_seismic(&d, None);
-    }
-}
-
-fn new_project_modal(s: &mut AppState, ui: &mut Ui) {
+pub fn new_project_modal(s: &mut AppState, ctx: &egui::Context) {
     let Some(mut form) = s.project.new_project.clone() else { return };
     let p = *palette(s.theme);
     let mut close = false;
     let mut submit = false;
-    egui::Modal::new(egui::Id::unique("new_project")).show(ui.ctx(), |ui| {
-        ui.set_width(420.0);
-        ui.label(RichText::new("New project").font(crate::theme::font_display(17.0)));
-        ui.label(RichText::new("Creates datasets/, flows/, tables/ (with project.opf.sqlite) and qc/ under the root folder.").color(p.text_muted).size(12.0));
-        ui.add_space(8.0);
-        egui::Grid::new("np_grid").num_columns(2).spacing([10.0, 6.0]).show(ui, |ui| {
-            ui.label("Root folder");
+    egui::Modal::new(egui::Id::unique("new_project")).show(ctx, |ui| {
+        ui.set_width(440.0);
+        ui.spacing_mut().item_spacing.y = 8.0;
+        ui.label(RichText::new("New project").font(crate::theme::font_display(20.0)).color(p.text));
+        ui.label(RichText::new("A project keeps data, flows, tables and QC images for one line together in a folder.").color(p.text_muted).size(12.0));
+        ui.add_space(6.0);
+        egui::Grid::new("np_grid").num_columns(2).spacing([12.0, 8.0]).show(ui, |ui| {
+            ui.label("Folder");
             ui.horizontal(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut form.root).desired_width(250.0));
+                ui.add(egui::TextEdit::singleline(&mut form.root).desired_width(260.0).hint_text("Where to create it"));
                 if ui.button(icon::FOLDER_OPEN).clicked() {
                     if let Some(d) = rfd::FileDialog::new().pick_folder() {
                         form.root = d.display().to_string();
@@ -365,22 +455,22 @@ fn new_project_modal(s: &mut AppState, ui: &mut Ui) {
                 }
             });
             ui.end_row();
-            ui.label("Area");
-            ui.text_edit_singleline(&mut form.area);
+            ui.label("Survey");
+            ui.add(egui::TextEdit::singleline(&mut form.area).desired_width(260.0));
             ui.end_row();
             ui.label("Line");
-            ui.text_edit_singleline(&mut form.line);
+            ui.add(egui::TextEdit::singleline(&mut form.line).desired_width(260.0));
             ui.end_row();
         });
-        ui.add_space(10.0);
+        ui.add_space(8.0);
         ui.horizontal(|ui| {
             let ok = !form.root.trim().is_empty() && !form.area.trim().is_empty() && !form.line.trim().is_empty();
             ui.add_enabled_ui(ok && !s.is_busy(), |ui| {
-                if widgets::primary_button(ui, &p, icon::CHECK, "Create").clicked() {
+                if cmd_primary(ui, &p, icon::CHECK, "Create project").clicked() {
                     submit = true;
                 }
             });
-            if ui.button("Cancel").clicked() {
+            if cmd(ui, &p, "", "Cancel", false).clicked() {
                 close = true;
             }
         });
@@ -396,10 +486,10 @@ fn new_project_modal(s: &mut AppState, ui: &mut Ui) {
     }
 }
 
-pub fn kv_grid(ui: &mut Ui, p: &crate::theme::Palette, id: &str, rows: &[(&str, String)]) {
+pub fn kv_grid(ui: &mut Ui, p: &Palette, id: &str, rows: &[(&str, String)]) {
     egui::Grid::new(id).num_columns(2).spacing([12.0, 2.0]).show(ui, |ui| {
         for (k, v) in rows {
-            kv(ui, p, k, v.clone());
+            widgets::kv(ui, p, k, v.clone());
         }
     });
 }

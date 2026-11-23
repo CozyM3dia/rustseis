@@ -1,9 +1,9 @@
-//! Workspace 1 · right: dynamic parameter inspector for the selected flow step.
+//! Step inspector: typed controls for the selected flow step.
 
 use crate::specs::{SpecParam, ToolSpec};
 use crate::state::AppState;
 use crate::theme::{Palette, font_mono, palette, with_alpha};
-use crate::widgets::{self, chip, section};
+use crate::widgets::{self, chip};
 use egui::{CollapsingHeader, RichText, ScrollArea, Ui};
 use egui_phosphor::regular as icon;
 use serde_json::{Value, json};
@@ -11,6 +11,8 @@ use serde_json::{Value, json};
 #[derive(Default)]
 pub struct InspectorState {
     pub raw_json: bool,
+    /// Show the whole flow as editable text instead of cards.
+    pub flow_json: bool,
     raw_text: Option<(u64, String)>,
 }
 
@@ -49,7 +51,7 @@ pub const HEADER_NAMES: &[&str] = &[
 pub fn ui(s: &mut AppState, ui: &mut Ui) {
     let p = *palette(s.theme);
     let Some(path) = s.flow_sel.clone() else {
-        crate::canvas::empty_state(ui, &p, icon::SLIDERS_HORIZONTAL, "No step selected", "Select a step in the flow to edit its parameters");
+        crate::canvas::empty_state(ui, &p, icon::SLIDERS_HORIZONTAL, "Nothing selected", "Click a step in the flow to change its settings.");
         return;
     };
     let Some(node) = s.flow.get(&path).cloned() else {
@@ -60,15 +62,20 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     let spec = s.specs.get(&node.tool).cloned();
     let names = TableNames::from(s);
 
-    widgets::toolbar(ui, &p, |ui| {
-        ui.label(RichText::new(desc.as_ref().map(|d| d.label.clone()).unwrap_or(node.tool.clone())).font(crate::theme::font_display(14.0)));
-        ui.label(RichText::new(&node.tool).font(font_mono(11.0)).color(p.accent));
-        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            let mut raw = s.inspector.raw_json;
-            if crate::widgets::segmented(ui, &p, &mut raw, &[(false, "Form", "Typed controls"), (true, "JSON", "Raw params JSON")]) {
-                s.inspector.raw_json = raw;
-                s.inspector.raw_text = None;
+    egui::Frame::new().inner_margin(egui::Margin { left: 14, right: 14, top: 12, bottom: 4 }).show(ui, |ui| {
+        ui.label(RichText::new(desc.as_ref().map(|d| d.label.clone()).unwrap_or(node.tool.clone())).font(crate::theme::font_display(17.0)).color(p.text));
+        ui.horizontal(|ui| {
+            if let Some(d) = &desc {
+                let col = super::catalog::category_color(&p, &d.category);
+                chip(ui, &d.category, col, with_alpha(col, 22));
             }
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let mut raw = s.inspector.raw_json;
+                if crate::widgets::segmented(ui, &p, &mut raw, &[(true, "Text", "Edit the settings as text"), (false, "Form", "Controls")]) {
+                    s.inspector.raw_json = raw;
+                    s.inspector.raw_text = None;
+                }
+            });
         });
     });
 
@@ -77,30 +84,36 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
         widgets::body(ui, |ui| {
             if let Some(d) = &desc {
-                ui.label(RichText::new(&d.description).size(12.0).color(p.text_muted));
-                ui.horizontal(|ui| {
-                    chip(ui, &d.category, p.text_muted, p.sunken);
-                    chip(ui, &format!("{:?}", d.archetype), p.text_muted, p.sunken);
-                    if s.tier2.contains(&d.menu_id) {
-                        chip(ui, "Tier 2", p.accent, with_alpha(p.accent, 22));
+                ui.label(RichText::new(crate::ui_copy::clean(&d.description)).size(12.0).color(p.text_muted));
+            }
+            if let Some(r) = last_run(s, &path) {
+                ui.add_space(4.0);
+                egui::Frame::new().fill(p.sunken).corner_radius(egui::CornerRadius::same(8)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+                    ui.set_min_width(ui.available_width());
+                    ui.label(RichText::new("LAST RUN").font(crate::theme::font_semibold(10.5)).color(p.text_faint));
+                    let traces = if r.traces_in == r.traces_out { format!("{} traces", crate::data::fmt_count(r.traces_out)) } else { format!("{} → {} traces", crate::data::fmt_count(r.traces_in), crate::data::fmt_count(r.traces_out)) };
+                    ui.label(RichText::new(format!("{traces} · {}", crate::data::fmt_ms(r.elapsed_ms as f64))).font(font_mono(11.5)).color(p.text));
+                    if let Some(st) = &r.sample_stats {
+                        ui.label(RichText::new(format!("signal level (rms) {:.4}", st.rms)).size(11.0).color(p.text_muted));
                     }
                 });
             }
             ui.add_space(6.0);
             egui::Grid::new("step_meta").num_columns(2).spacing([10.0, 6.0]).show(ui, |ui| {
-                ui.label("Enabled");
-                changed |= ui.checkbox(&mut node_mut.enabled, "").changed();
+                ui.label(RichText::new("Use this step").color(p.text_muted));
+                changed |= widgets::toggle(ui, &p, &mut node_mut.enabled).changed();
                 ui.end_row();
-                ui.label("Label");
+                ui.label(RichText::new("Name in the flow").color(p.text_muted));
                 let mut label = node_mut.label.clone().unwrap_or_default();
-                if ui.add(egui::TextEdit::singleline(&mut label).hint_text("optional display name")).changed() {
+                if ui.add(egui::TextEdit::singleline(&mut label).hint_text("optional")).changed() {
                     node_mut.label = if label.trim().is_empty() { None } else { Some(label) };
                     changed = true;
                 }
                 ui.end_row();
             });
 
-            section(ui, &p, "Parameters", None);
+            ui.add_space(4.0);
+            widgets::caps(ui, &p, "SETTINGS", None);
             if s.inspector.raw_json {
                 changed |= raw_editor(s, ui, &p, &mut node_mut);
             } else {
@@ -126,6 +139,19 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
             s.flow.dirty = true;
         }
     }
+}
+
+/// Telemetry for a top-level step from the last run, if the flow has not changed shape since.
+fn last_run(s: &AppState, path: &[usize]) -> Option<rustseis_flow::StepReport> {
+    if path.len() != 1 {
+        return None;
+    }
+    let i = path[0];
+    let uid = s.flow.nodes.get(i)?.uid;
+    if s.report_uids.get(i) != Some(&uid) {
+        return None;
+    }
+    s.report.as_ref()?.steps.get(i).cloned()
 }
 
 /// Names of session tables for reference-field suggestions.
@@ -202,7 +228,7 @@ fn unit_suffix(key: &str) -> &'static str {
     if k.ends_with("_ms") { " ms" } else if k.ends_with("_mps") { " m/s" } else if k.ends_with("_hz") { " Hz" } else if k.ends_with("_pct") { " %" } else if k.ends_with("_us") { " µs" } else if k.ends_with("_deg") { "°" } else if k.ends_with("_m") { " m" } else { "" }
 }
 
-/// Fuzzy match of a JSON key to a harvested ProMAX parameter (shared word stems).
+/// Fuzzy match of a JSON key to a documented parameter (shared word stems).
 fn match_spec<'a>(spec: Option<&'a ToolSpec>, key: &str) -> Option<&'a SpecParam> {
     let spec = spec?;
     let toks: Vec<String> = key
@@ -253,11 +279,16 @@ fn edit_object(
             let sp = match_spec(spec, k);
             let lbl = ui.label(RichText::new(humanize(k)).color(p.text_muted));
             lbl.on_hover_ui(|ui| {
-                ui.label(RichText::new(format!("{prefix}{k}")).font(font_mono(11.0)).color(p.accent));
-                if let Some(sp) = sp {
-                    ui.label(RichText::new(format!("ProMAX {} — {}", sp.name, sp.prompt)).strong());
-                    if !sp.help.is_empty() {
-                        ui.label(&sp.help);
+                ui.set_max_width(320.0);
+                match sp {
+                    Some(sp) => {
+                        ui.label(RichText::new(&sp.prompt).strong());
+                        if !sp.help.is_empty() {
+                            ui.label(crate::ui_copy::clean(&sp.help));
+                        }
+                    }
+                    None => {
+                        ui.label(RichText::new(humanize(k)).strong());
                     }
                 }
             });
@@ -500,7 +531,7 @@ fn raw_editor(s: &mut AppState, ui: &mut Ui, p: &Palette, node: &mut crate::flow
                 node.params = v.clone();
                 changed = true;
             }
-            ui.label(RichText::new("valid JSON").color(p.success).size(11.0));
+            ui.label(RichText::new("looks valid").color(p.success).size(11.0));
         }
         Err(e) => {
             ui.label(RichText::new(format!("{} {e}", icon::WARNING)).color(p.danger).size(11.0));
@@ -512,22 +543,20 @@ fn raw_editor(s: &mut AppState, ui: &mut Ui, p: &Palette, node: &mut crate::flow
 
 fn reference(ui: &mut Ui, p: &Palette, spec: &ToolSpec) {
     ui.add_space(8.0);
-    CollapsingHeader::new(RichText::new(format!("{}  ProMAX reference · {} ({} params)", icon::INFO, spec.label, spec.params.len())).color(p.text_muted))
+    CollapsingHeader::new(RichText::new(format!("{}  About these settings", icon::INFO)).color(p.text_muted))
         .id_salt(("ref", &spec.menu_id))
         .default_open(false)
         .show(ui, |ui| {
-            ui.label(RichText::new(&spec.source).size(10.5).color(p.text_faint));
             for prm in &spec.params {
                 ui.add_space(3.0);
                 ui.horizontal_wrapped(|ui| {
-                    ui.label(RichText::new(&prm.name).font(font_mono(11.0)).color(p.accent));
-                    ui.label(RichText::new(&prm.prompt).strong().size(12.0));
+                    ui.label(RichText::new(crate::ui_copy::clean(&prm.prompt)).strong().size(12.0));
                     if let Some(d) = &prm.default {
                         ui.label(RichText::new(format!("= {d}")).font(font_mono(10.5)).color(p.text_faint));
                     }
                 });
                 if !prm.help.is_empty() {
-                    ui.label(RichText::new(&prm.help).size(11.0).color(p.text_muted));
+                    ui.label(RichText::new(crate::ui_copy::clean(&prm.help)).size(11.0).color(p.text_muted));
                 }
                 if !prm.choices.is_empty() {
                     ui.label(RichText::new(prm.choices.iter().map(|c| c.0.as_str()).collect::<Vec<_>>().join(" · ")).size(10.5).color(p.text_faint));

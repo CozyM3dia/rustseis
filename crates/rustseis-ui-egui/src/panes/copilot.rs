@@ -1,9 +1,9 @@
-//! Workspace 6 · Copilot: an offline MCP tool console over the live session, reusing
-//! `rustseis_mcp::handle_tool_call` with explicit approval for mutating commands.
+//! Assistant panel: an offline tool console over the live session (the same tools the MCP server
+//! exposes), with an approval card before anything changes the data.
 
 use crate::state::{AppState, JobPurpose, Level, compact_json};
-use crate::theme::{Palette, RADIUS_MD, font_mono, mix, palette, with_alpha};
-use crate::widgets::{self, chip, primary_button};
+use crate::theme::{Palette, font_mono, palette, with_alpha};
+use crate::widgets;
 use crate::worker::EngineJob;
 use egui::{CornerRadius, Frame, Margin, RichText, ScrollArea, Stroke, Ui};
 use egui_phosphor::regular as icon;
@@ -72,9 +72,9 @@ pub fn parse_command(line: &str) -> Result<(String, Value), String> {
     if !names.iter().any(|n| n == name) {
         let close: Vec<&String> = names.iter().filter(|n| n.contains(name) || name.contains(n.as_str())).collect();
         return Err(if close.is_empty() {
-            format!("unknown tool `{name}` — type `help` for the 13 MCP tools")
+            format!("I don't know “{name}”. The panel above lists what I can do.")
         } else {
-            format!("unknown tool `{name}` — did you mean {}?", close.iter().map(|s| format!("`{s}`")).collect::<Vec<_>>().join(", "))
+            format!("I don't know “{name}”. Did you mean {}?", close.iter().map(|s| format!("“{s}”")).collect::<Vec<_>>().join(", "))
         });
     }
     if rest.is_empty() {
@@ -114,8 +114,8 @@ pub fn pump(s: &mut AppState) {
 
 /// Seed the transcript for the screenshot tour: two read-only calls and one pending approval.
 pub fn tour_seed(s: &mut AppState) {
-    propose(s, "inspect_tables".into(), json!({}), "inspect_tables".into());
-    propose(s, "inspect_active_traces".into(), json!({}), String::new());
+    propose(s, "inspect_tables".into(), json!({}), "What's in this session?".into());
+    propose(s, "list_processing_tools".into(), json!({}), String::new());
     let spec = serde_json::to_value(s.flow.to_spec()).unwrap_or(json!({}));
     propose(s, "run_flow".into(), json!({"flow": spec}), String::new());
 }
@@ -131,67 +131,85 @@ fn execute(s: &mut AppState, id: u64) {
     }
 }
 
+/// Plain name for an assistant tool.
+fn friendly(tool: &str) -> String {
+    match tool {
+        "inspect_tables" => "Look at the session's tables".into(),
+        "inspect_active_traces" => "Describe the current traces".into(),
+        "list_processing_tools" => "List the processing steps".into(),
+        "run_flow" => "Run a flow".into(),
+        "load_opf_db" => "Load a project database".into(),
+        "undo" => "Undo the last change".into(),
+        "inspect_seismic_file" => "Look inside a seismic file".into(),
+        "parse" => "Didn't understand that".into(),
+        t => crate::panes::inspector::humanize(t),
+    }
+}
+
 pub fn ui(s: &mut AppState, ui: &mut Ui) {
     let p = *palette(s.theme);
     let defs = tool_defs();
-    widgets::toolbar(ui, &p, |ui| {
-        ui.label(RichText::new(icon::ROBOT).color(p.accent));
-        ui.label(RichText::new("MCP tool console").font(crate::theme::font_display(13.0)));
-        chip(ui, &format!("{} tools", defs.len()), p.text_muted, p.sunken);
-        chip(ui, "offline", p.success, with_alpha(p.success, 20));
-        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            if ui.small_button("clear").clicked() {
-                s.copilot.calls.clear();
-            }
+    Frame::new().inner_margin(Margin { left: 14, right: 14, top: 12, bottom: 6 }).show(ui, |ui| {
+        ui.horizontal(|ui| {
+            ui.label(RichText::new(icon::SPARKLE).size(16.0).color(p.accent));
+            ui.label(RichText::new("Assistant").font(crate::theme::font_display(17.0)).color(p.text));
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if !s.copilot.calls.is_empty() && widgets::cmd(ui, &p, icon::ERASER, "Clear", false).clicked() {
+                    s.copilot.calls.clear();
+                }
+            });
         });
-    });
-
-    // Quick actions
-    widgets::body(ui, |ui| {
+        ui.label(RichText::new("Works offline on this session. Anything that changes your data asks first.").size(11.5).color(p.text_muted));
+        ui.add_space(4.0);
         ui.horizontal_wrapped(|ui| {
-            let quick: [(&str, &str, Value); 5] = [
-                (icon::TABLE, "inspect_tables", json!({})),
-                (icon::WAVEFORM, "inspect_active_traces", json!({})),
-                (icon::PUZZLE_PIECE, "list_processing_tools", json!({})),
-                (icon::ARROW_COUNTER_CLOCKWISE, "undo", json!({})),
-                (icon::FILE, "inspect_seismic_file", json!({"path": ""})),
+            ui.spacing_mut().item_spacing = egui::vec2(6.0, 6.0);
+            let quick: [(&str, &str, &str); 5] = [
+                (icon::TABLE, "What's in this session?", "inspect_tables"),
+                (icon::WAVEFORM, "Describe the traces", "inspect_active_traces"),
+                (icon::PUZZLE_PIECE, "List processing steps", "list_processing_tools"),
+                (icon::FILE, "Look inside a file…", "inspect_seismic_file"),
+                (icon::ARROW_COUNTER_CLOCKWISE, "Undo the last change", "undo"),
             ];
-            for (ic, name, args) in quick {
-                if ui.button(RichText::new(format!("{ic}  {name}")).size(11.5)).clicked() {
+            for (ic, label, name) in quick {
+                if pill(ui, &p, ic, label).clicked() {
                     if name == "inspect_seismic_file" {
                         if let Some(f) = rfd::FileDialog::new().add_filter("Seismic", &["sgy", "segy", "segd"]).pick_file() {
-                            propose(s, name.into(), json!({"path": f.display().to_string()}), String::new());
+                            propose(s, name.into(), json!({"path": f.display().to_string()}), label.into());
                         }
                     } else {
-                        propose(s, name.into(), args, String::new());
+                        propose(s, name.into(), json!({}), label.into());
                     }
                 }
             }
-            if ui.button(RichText::new(format!("{}  run_flow ← editor", icon::PLAY)).size(11.5)).on_hover_text("Send the Flow Studio document through MCP run_flow").clicked() {
+            if pill(ui, &p, icon::PLAY, "Run the open flow").clicked() {
                 let spec = serde_json::to_value(s.flow.to_spec()).unwrap_or(json!({}));
-                propose(s, "run_flow".into(), json!({"flow": spec}), String::new());
+                propose(s, "run_flow".into(), json!({"flow": spec}), "Run the open flow".into());
             }
         });
     });
+    ui.painter().hline(ui.max_rect().x_range(), ui.cursor().top(), Stroke::new(1.0, p.border));
 
-    let input_h = 118.0;
+    let input_h = 64.0;
     let avail = ui.available_height() - input_h;
     let mut approve: Option<u64> = None;
     let mut decline: Option<u64> = None;
     let mut undo = false;
+    let flow_name = s.flow.name.replace('_', " ");
+    let flow_steps = s.flow.count();
     ScrollArea::vertical().max_height(avail.max(80.0)).auto_shrink([false, false]).stick_to_bottom(true).show(ui, |ui| {
-        widgets::body(ui, |ui| {
+        Frame::new().inner_margin(Margin::symmetric(14, 10)).show(ui, |ui| {
+            ui.set_min_width(ui.available_width());
             if s.copilot.calls.is_empty() {
                 intro(ui, &p, &defs);
             }
             for c in &s.copilot.calls {
-                call_card(ui, &p, c, &mut approve, &mut decline, &mut undo);
-                ui.add_space(6.0);
+                call_card(ui, &p, c, &flow_name, flow_steps, &mut approve, &mut decline, &mut undo);
+                ui.add_space(10.0);
             }
         });
     });
     if let Some(id) = approve {
-        s.log(Level::Info, format!("Copilot: user approved mutating call #{id}"));
+        s.log(Level::Info, format!("Assistant: change #{id} approved"));
         if let Some(c) = s.copilot.calls.iter_mut().find(|c| c.id == id) {
             c.status = Status::Queued;
         }
@@ -208,114 +226,178 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     composer(s, ui, &p, &defs);
 }
 
-fn intro(ui: &mut Ui, p: &Palette, defs: &[Value]) {
-    ui.label(RichText::new("Drive the live session with the same 13 tools the stdio MCP server exposes.").color(p.text_muted));
-    ui.label(RichText::new("Type `tool {json}` or `tool key=value`, or build a call from the form below. Mutating calls (run_flow, load_opf_db, undo) wait for your approval.").size(11.5).color(p.text_faint));
-    ui.add_space(6.0);
-    egui::Grid::new("mcp_tools").num_columns(2).spacing([10.0, 3.0]).show(ui, |ui| {
-        for d in defs {
-            let name = d.get("name").and_then(|v| v.as_str()).unwrap_or("");
-            let desc = d.get("description").and_then(|v| v.as_str()).unwrap_or("");
-            let mutating = policy_of(name) == CommandPolicy::Mutating;
-            ui.label(RichText::new(name).font(font_mono(11.5)).color(if mutating { p.pick } else { p.accent }));
-            ui.label(RichText::new(desc).size(11.5).color(p.text_muted));
-            ui.end_row();
-        }
-    });
+fn pill(ui: &mut Ui, p: &Palette, ic: &str, label: &str) -> egui::Response {
+    let text = format!("{ic}  {label}");
+    let g = ui.painter().layout_no_wrap(text.clone(), egui::FontId::proportional(12.0), p.text);
+    let (rect, resp) = ui.allocate_exact_size(egui::vec2(g.size().x + 20.0, 28.0), egui::Sense::click());
+    let hov = resp.hovered();
+    ui.painter().rect(rect, CornerRadius::same(14), if hov { p.accent_soft } else { p.raised }, Stroke::new(1.0, if hov { p.accent_line } else { p.border }), egui::StrokeKind::Inside);
+    ui.painter().text(rect.center(), egui::Align2::CENTER_CENTER, text, egui::FontId::proportional(12.0), if hov { p.accent_text } else { p.text });
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
-fn call_card(ui: &mut Ui, p: &Palette, c: &Call, approve: &mut Option<u64>, decline: &mut Option<u64>, undo: &mut bool) {
-    let mutating = c.policy == CommandPolicy::Mutating;
-    let border = match &c.status {
-        Status::AwaitingApproval => p.pick,
-        Status::Done(Err(_)) => p.danger,
-        Status::Declined => p.border,
-        _ => p.border,
-    };
-    if !c.typed.is_empty() {
-        ui.horizontal(|ui| {
-            ui.label(RichText::new("›").font(font_mono(12.0)).color(p.text_faint));
-            ui.label(RichText::new(&c.typed).font(font_mono(11.5)).color(p.text_muted));
+fn intro(ui: &mut Ui, p: &Palette, defs: &[Value]) {
+    ui.label(RichText::new("Ask with a button above, or type a request below.").color(p.text));
+    ui.label(RichText::new("Typed requests use a tool name, for example “inspect_tables” or “render_gather_png output_path=qc/gather.png”. Press Tab to complete a name.").size(11.5).color(p.text_muted));
+    ui.add_space(8.0);
+    ui.label(RichText::new("WHAT IT CAN DO").font(crate::theme::font_semibold(10.5)).color(p.text_faint));
+    for d in defs {
+        let name = d.get("name").and_then(|v| v.as_str()).unwrap_or("");
+        let desc = crate::ui_copy::clean(d.get("description").and_then(|v| v.as_str()).unwrap_or(""));
+        let mutating = policy_of(name) == CommandPolicy::Mutating;
+        ui.add_space(2.0);
+        ui.horizontal_wrapped(|ui| {
+            widgets::dot(ui, if mutating { p.pick } else { p.accent }, 3.0);
+            ui.label(RichText::new(friendly(name)).size(12.0).color(p.text));
+            ui.label(RichText::new(name).font(font_mono(10.5)).color(p.text_faint));
         });
+        ui.label(RichText::new(desc).size(11.0).color(p.text_muted));
     }
-    Frame::new()
-        .fill(p.raised)
-        .stroke(Stroke::new(1.0, border))
-        .corner_radius(CornerRadius::same(RADIUS_MD))
-        .inner_margin(Margin::same(8))
-        .show(ui, |ui| {
-            ui.set_min_width(ui.available_width());
-            ui.horizontal(|ui| {
-                ui.label(RichText::new(icon::LIGHTNING).color(if mutating { p.pick } else { p.accent }));
-                ui.label(RichText::new(&c.tool).font(font_mono(12.0)).strong());
-                if mutating {
-                    chip(ui, "mutating", p.pick, with_alpha(p.pick, 22));
-                } else {
-                    chip(ui, "read-only", p.text_muted, p.sunken);
-                }
-                ui.label(RichText::new(format!("#{}", c.id)).font(font_mono(10.5)).color(p.text_faint));
-            });
-            let args = compact_json(&c.args, 240);
-            if args != "{}" {
-                ui.label(RichText::new(args).font(font_mono(10.5)).color(p.text_muted));
-            }
-            match &c.status {
-                Status::AwaitingApproval => {
-                    widgets::banner(ui, p, p.pick, icon::SHIELD_CHECK, "This call changes the session (traces or OPF tables). Allow it?");
-                    ui.horizontal(|ui| {
-                        if primary_button(ui, p, icon::CHECK, "Allow").clicked() {
-                            *approve = Some(c.id);
-                        }
-                        if ui.button(format!("{}  Decline", icon::X)).clicked() {
-                            *decline = Some(c.id);
-                        }
-                    });
-                }
-                Status::Declined => {
-                    ui.label(RichText::new(format!("{} declined — nothing was changed", icon::PROHIBIT)).color(p.text_faint).size(11.5));
-                }
-                Status::Queued => {
-                    ui.label(RichText::new(format!("{} queued — waiting for the engine", icon::HOURGLASS)).size(11.5).color(p.text_muted));
-                }
-                Status::Running => {
-                    ui.horizontal(|ui| {
-                        ui.add(egui::Spinner::new().size(12.0));
-                        ui.label(RichText::new("running on the engine worker…").size(11.5).color(p.text_muted));
-                    });
-                }
-                Status::Done(Ok(v)) => result_view(ui, p, c, v, undo),
-                Status::Done(Err(e)) => {
-                    ui.label(RichText::new(format!("{} {e}", icon::WARNING)).color(p.danger).font(font_mono(11.0)));
-                }
-            }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn call_card(ui: &mut Ui, p: &Palette, c: &Call, flow_name: &str, flow_steps: usize, approve: &mut Option<u64>, decline: &mut Option<u64>, undo: &mut bool) {
+    let mutating = c.policy == CommandPolicy::Mutating;
+    // The request, as a bubble on the right.
+    let asked = if c.typed.is_empty() { friendly(&c.tool) } else { c.typed.clone() };
+    ui.with_layout(egui::Layout::right_to_left(egui::Align::Min), |ui| {
+        Frame::new().fill(p.accent_soft).corner_radius(CornerRadius { nw: 12, ne: 12, sw: 12, se: 4 }).inner_margin(Margin::symmetric(12, 7)).show(ui, |ui| {
+            ui.set_max_width(260.0);
+            ui.label(RichText::new(asked).size(12.0).color(p.accent_text));
         });
+    });
+    ui.add_space(6.0);
+    // Tool chip
+    ui.horizontal(|ui| {
+        let col = if mutating { p.pick } else { p.accent };
+        Frame::new().fill(with_alpha(col, 20)).stroke(Stroke::new(1.0, with_alpha(col, 90))).corner_radius(CornerRadius::same(10)).inner_margin(Margin::symmetric(8, 2)).show(ui, |ui| {
+            ui.label(RichText::new(format!("{}  {}", icon::WRENCH, c.tool)).font(font_mono(10.5)).color(col));
+        });
+        match &c.status {
+            Status::Running => {
+                ui.add(egui::Spinner::new().size(12.0));
+            }
+            Status::Done(Ok(_)) => {
+                ui.label(RichText::new(icon::CHECK).color(p.success));
+            }
+            _ => {}
+        }
+    });
+    ui.add_space(4.0);
+    match &c.status {
+        Status::AwaitingApproval => {
+            Frame::new().fill(with_alpha(p.pick, 16)).stroke(Stroke::new(1.0, with_alpha(p.pick, 140))).corner_radius(CornerRadius::same(10)).inner_margin(Margin::same(12)).show(ui, |ui| {
+                ui.set_min_width(ui.available_width());
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(icon::SHIELD_CHECK).color(p.pick));
+                    ui.label(RichText::new("This will change your data").font(crate::theme::font_semibold(12.5)).color(p.text));
+                });
+                let what = match c.tool.as_str() {
+                    "run_flow" => format!("Run “{flow_name}” ({flow_steps} steps) on the loaded traces. You can undo it afterwards."),
+                    "load_opf_db" => "Replace the session's tables with the ones in the chosen database.".to_string(),
+                    "undo" => "Step back to the state before the last change.".to_string(),
+                    _ => "Change the session.".to_string(),
+                };
+                ui.label(RichText::new(what).size(12.0).color(p.text_muted));
+                ui.add_space(4.0);
+                ui.horizontal(|ui| {
+                    if widgets::cmd_primary(ui, p, icon::CHECK, "Run it").clicked() {
+                        *approve = Some(c.id);
+                    }
+                    if widgets::cmd(ui, p, "", "Not now", false).clicked() {
+                        *decline = Some(c.id);
+                    }
+                });
+            });
+        }
+        Status::Declined => {
+            ui.label(RichText::new("Skipped. Nothing was changed.").size(12.0).color(p.text_faint));
+        }
+        Status::Queued => {
+            ui.label(RichText::new("Waiting for the current job to finish…").size(12.0).color(p.text_muted));
+        }
+        Status::Running => {
+            ui.label(RichText::new("Working on it…").size(12.0).color(p.text_muted));
+        }
+        Status::Done(Ok(v)) => result_view(ui, p, c, v, undo),
+        Status::Done(Err(e)) => {
+            ui.label(RichText::new(e).size(12.0).color(p.danger));
+        }
+    }
 }
 
 fn result_view(ui: &mut Ui, p: &Palette, c: &Call, v: &Value, undo: &mut bool) {
-    // Friendly summaries for the chattiest tools.
-    let summary: Option<String> = match c.tool.as_str() {
-        "list_processing_tools" => v.get("count").map(|n| {
-            let names: Vec<&str> = v.get("tools").and_then(|t| t.as_array()).map(|a| a.iter().filter_map(|t| t.get("menu_id").and_then(|m| m.as_str())).collect()).unwrap_or_default();
-            format!("{n} tools: {}", names.join(", "))
-        }),
-        "inspect_active_traces" => Some(format!(
-            "{} traces · {} samples · dt {} µs · dominant {:.1} Hz · CDP {}–{}",
+    let summary: String = match c.tool.as_str() {
+        "list_processing_tools" => format!("There are {} processing steps. Here is how they spread across categories:", v.get("count").and_then(|n| n.as_u64()).unwrap_or(0)),
+        "inspect_active_traces" => format!(
+            "{} traces of {} samples every {} µs. The strongest frequency is about {:.0} Hz, covering CDP {} to {}.",
             v.get("trace_count").and_then(|x| x.as_u64()).unwrap_or(0),
             v.get("n_samples").and_then(|x| x.as_u64()).unwrap_or(0),
             v.get("dt_us").and_then(|x| x.as_u64()).unwrap_or(0),
             v.get("dominant_freq_hz").and_then(|x| x.as_f64()).unwrap_or(0.0),
             v.get("first_cdp").and_then(|x| x.as_i64()).unwrap_or(0),
             v.get("last_cdp").and_then(|x| x.as_i64()).unwrap_or(0),
-        )),
-        "run_flow" => v.get("final_trace_count").map(|n| format!("flow finished · {n} traces · {} ms", v.get("total_elapsed_ms").and_then(|x| x.as_u64()).unwrap_or(0))),
-        _ => None,
+        ),
+        "run_flow" => format!(
+            "Done. The flow produced {} traces in {:.1} s.",
+            v.get("final_trace_count").and_then(|x| x.as_u64()).unwrap_or(0),
+            v.get("total_elapsed_ms").and_then(|x| x.as_f64()).unwrap_or(0.0) / 1000.0
+        ),
+        "inspect_tables" => {
+            let parts: Vec<String> = v
+                .as_object()
+                .map(|o| o.iter().filter_map(|(k, x)| x.as_array().map(|a| (k, a.len()))).filter(|(_, n)| *n > 0).map(|(k, n)| {
+                    let what = match k.as_str() {
+                        "buffers" => "saved gather sets",
+                        "velocities" => "velocity tables",
+                        "mutes" => "mute tables",
+                        "first_breaks" => "first-break tables",
+                        "statics" => "statics solutions",
+                        "sc_amps" => "amplitude-term tables",
+                        "radon_panels" => "Radon panels",
+                        "vsp_profiles" => "borehole profiles",
+                        other => other,
+                    };
+                    format!("{n} {what}")
+                }).collect())
+                .unwrap_or_default();
+            if parts.is_empty() { "The session has no tables yet.".to_string() } else { format!("The session holds {}.", parts.join(", ")) }
+        }
+        _ => compact_json(v, 200),
     };
+    ui.label(RichText::new(summary).size(12.5).color(p.text));
+    // Inline chart: steps per category.
+    if c.tool == "list_processing_tools" {
+        if let Some(tools) = v.get("tools").and_then(|t| t.as_array()) {
+            let mut counts: Vec<(String, usize)> = Vec::new();
+            for t in tools {
+                let cat = t.get("category").and_then(|c| c.as_str()).unwrap_or("Other").to_string();
+                match counts.iter_mut().find(|(c, _)| *c == cat) {
+                    Some((_, n)) => *n += 1,
+                    None => counts.push((cat, 1)),
+                }
+            }
+            counts.sort_by(|a, b| b.1.cmp(&a.1));
+            let max = counts.first().map(|c| c.1).unwrap_or(1).max(1) as f32;
+            Frame::new().fill(p.sunken).corner_radius(CornerRadius::same(8)).inner_margin(Margin::same(8)).show(ui, |ui| {
+                ui.set_min_width(ui.available_width());
+                for (cat, n) in counts.iter().take(10) {
+                    ui.horizontal(|ui| {
+                        let (r, _) = ui.allocate_exact_size(egui::vec2(110.0, 14.0), egui::Sense::hover());
+                        ui.painter().with_clip_rect(r).text(r.left_center(), egui::Align2::LEFT_CENTER, cat, egui::FontId::proportional(11.0), p.text_muted);
+                        let w = ui.available_width() - 30.0;
+                        let (b, _) = ui.allocate_exact_size(egui::vec2(w, 8.0), egui::Sense::hover());
+                        let mut f = b;
+                        f.set_width(w * *n as f32 / max);
+                        ui.painter().rect_filled(f, CornerRadius::same(4), crate::panes::catalog::category_color(p, cat));
+                        ui.label(RichText::new(n.to_string()).font(font_mono(10.5)).color(p.text_faint));
+                    });
+                }
+            });
+        }
+    }
     ui.horizontal(|ui| {
-        ui.label(RichText::new(icon::CHECK).color(p.success));
-        ui.label(RichText::new(summary.clone().unwrap_or_else(|| compact_json(v, 160))).size(11.5));
-    });
-    ui.horizontal(|ui| {
-        egui::CollapsingHeader::new(RichText::new("result JSON").size(11.0).color(p.text_faint)).id_salt(("res", c.id)).show(ui, |ui| {
+        egui::CollapsingHeader::new(RichText::new("Details").size(11.0).color(p.text_faint)).id_salt(("res", c.id)).show(ui, |ui| {
             let pretty = serde_json::to_string_pretty(v).unwrap_or_default();
             let shown: String = pretty.chars().take(20_000).collect();
             ScrollArea::vertical().max_height(220.0).show(ui, |ui| {
@@ -325,120 +407,126 @@ fn result_view(ui: &mut Ui, p: &Palette, c: &Call, v: &Value, undo: &mut bool) {
                 ui.ctx().copy_text(pretty);
             }
         });
-        if c.policy == CommandPolicy::Mutating && c.tool != "undo" && ui.small_button(format!("{} undo (Ctrl+Z)", icon::ARROW_COUNTER_CLOCKWISE)).clicked() {
+        if c.policy == CommandPolicy::Mutating && c.tool != "undo" && ui.small_button(format!("{} Undo", icon::ARROW_COUNTER_CLOCKWISE)).clicked() {
             *undo = true;
         }
     });
 }
 
 fn composer(s: &mut AppState, ui: &mut Ui, p: &Palette, defs: &[Value]) {
-    Frame::new().fill(mix(p.panel, p.chrome, 0.5)).inner_margin(Margin::symmetric(8, 6)).show(ui, |ui| {
+    Frame::new().inner_margin(Margin::symmetric(12, 10)).show(ui, |ui| {
         ui.set_min_width(ui.available_width());
-        // Form builder
-        ui.horizontal(|ui| {
-            ui.label(RichText::new("Form").size(11.0).color(p.text_faint));
-            let current = s.copilot.form_tool.clone().unwrap_or_else(|| "choose tool…".into());
-            egui::ComboBox::from_id_salt("cp_form_tool").selected_text(RichText::new(current).font(font_mono(11.5))).width(190.0).show_ui(ui, |ui| {
-                for d in defs {
-                    let name = d.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                    if ui.selectable_label(s.copilot.form_tool.as_deref() == Some(&name), &name).clicked() {
-                        s.copilot.form = default_form(d);
-                        s.copilot.form_tool = Some(name);
+        Frame::new().fill(p.sunken).stroke(Stroke::new(1.0, p.border_strong)).corner_radius(CornerRadius::same(12)).inner_margin(Margin::symmetric(10, 6)).show(ui, |ui| {
+            ui.horizontal(|ui| {
+                let r = ui.add(
+                    egui::TextEdit::singleline(&mut s.copilot.input)
+                        .font(egui::FontId::proportional(13.0))
+                        .frame(egui::Frame::NONE)
+                        .hint_text("Type a tool name, e.g. inspect_tables")
+                        .desired_width(ui.available_width() - 34.0),
+                );
+                let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+                if r.has_focus() {
+                    let typed: Vec<String> = s.copilot.calls.iter().filter(|c| !c.typed.is_empty()).map(|c| c.typed.clone()).collect();
+                    if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) && !typed.is_empty() {
+                        let pos = s.copilot.history_pos.map(|x| x.saturating_sub(1)).unwrap_or(typed.len() - 1);
+                        s.copilot.history_pos = Some(pos);
+                        s.copilot.input = typed[pos].clone();
+                    }
+                }
+                let send = widgets::cmd(ui, p, icon::PAPER_PLANE_RIGHT, "", false).on_hover_text("Send (Enter)").clicked() || enter;
+                if send && !s.copilot.input.trim().is_empty() {
+                    let line = std::mem::take(&mut s.copilot.input);
+                    s.copilot.history_pos = None;
+                    if line.trim() == "help" {
+                        s.copilot.calls.clear();
+                    } else {
+                        match parse_command(&line) {
+                            Ok((tool, args)) => propose(s, tool, args, line),
+                            Err(e) => {
+                                let id = s.copilot.next_id + 1;
+                                s.copilot.next_id = id;
+                                s.copilot.calls.push(Call { id, tool: "parse".into(), args: json!({}), policy: CommandPolicy::ReadOnly, status: Status::Done(Err(e)), typed: line });
+                            }
+                        }
+                    }
+                    r.request_focus();
+                }
+                let first = s.copilot.input.split_whitespace().next().unwrap_or("").to_string();
+                if !first.is_empty() && !s.copilot.input.contains(' ') {
+                    let matches: Vec<String> = defs.iter().filter_map(|d| d.get("name").and_then(|n| n.as_str())).filter(|n| n.starts_with(&first) && *n != first).map(String::from).collect();
+                    if let Some(m) = matches.first() {
+                        if ui.input(|i| i.key_pressed(egui::Key::Tab)) {
+                            s.copilot.input = format!("{m} ");
+                        }
                     }
                 }
             });
-            if let Some(tool) = s.copilot.form_tool.clone() {
-                let schema = defs.iter().find(|d| d.get("name").and_then(|n| n.as_str()) == Some(tool.as_str())).cloned().unwrap_or(json!({}));
-                let props = schema.pointer("/inputSchema/properties").and_then(|x| x.as_object()).cloned().unwrap_or_default();
-                for (k, spec) in &props {
-                    let ty = spec.get("type").and_then(|t| t.as_str()).unwrap_or("string");
-                    let entry = s.copilot.form.entry(k.clone()).or_insert(Value::Null);
-                    ui.label(RichText::new(k).font(font_mono(10.5)).color(p.text_muted));
-                    match ty {
-                        "integer" | "number" => {
-                            let mut f = entry.as_f64().unwrap_or(0.0);
-                            if ui.add(egui::DragValue::new(&mut f).speed(1.0)).changed() {
-                                *entry = if ty == "integer" { json!(f.round() as i64) } else { json!(f) };
-                            }
-                        }
-                        "boolean" => {
-                            let mut b = entry.as_bool().unwrap_or(false);
-                            if ui.checkbox(&mut b, "").changed() {
-                                *entry = json!(b);
-                            }
-                        }
-                        "object" => {
-                            ui.label(RichText::new("(object — use the command line)").size(10.5).color(p.text_faint));
-                        }
-                        _ => {
-                            let mut st = entry.as_str().unwrap_or("").to_string();
-                            if ui.add(egui::TextEdit::singleline(&mut st).desired_width(150.0).font(font_mono(11.0))).changed() {
-                                *entry = json!(st);
-                            }
-                            if k.contains("path") && ui.small_button(icon::FOLDER_OPEN).clicked() {
-                                let dlg = rfd::FileDialog::new();
-                                let f = if k == "output_path" || tool.starts_with("save") { dlg.save_file() } else { dlg.pick_file() };
-                                if let Some(f) = f {
-                                    *entry = json!(f.display().to_string());
-                                }
-                            }
-                        }
-                    }
-                }
-                if ui.button(format!("{} call", icon::PAPER_PLANE_RIGHT)).clicked() {
-                    let args: Map<String, Value> = s.copilot.form.iter().filter(|(_, v)| !v.is_null() && v.as_str() != Some("")).map(|(k, v)| (k.clone(), v.clone())).collect();
-                    propose(s, tool.clone(), Value::Object(args), String::new());
-                }
-            }
         });
-        // Command line
-        ui.horizontal(|ui| {
-            ui.label(RichText::new("›").font(font_mono(14.0)).color(p.accent));
-            let r = ui.add(
-                egui::TextEdit::singleline(&mut s.copilot.input)
-                    .font(font_mono(12.5))
-                    .hint_text("inspect_tables   ·   render_gather_png output_path=qc/gather.png width=1600   ·   help")
-                    .desired_width(ui.available_width() - 70.0),
-            );
-            let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-            if r.has_focus() {
-                let typed: Vec<String> = s.copilot.calls.iter().filter(|c| !c.typed.is_empty()).map(|c| c.typed.clone()).collect();
-                if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) && !typed.is_empty() {
-                    let pos = s.copilot.history_pos.map(|x| x.saturating_sub(1)).unwrap_or(typed.len() - 1);
-                    s.copilot.history_pos = Some(pos);
-                    s.copilot.input = typed[pos].clone();
-                }
-            }
-            let send = ui.button(format!("{}", icon::PAPER_PLANE_RIGHT)).clicked() || enter;
-            if send && !s.copilot.input.trim().is_empty() {
-                let line = std::mem::take(&mut s.copilot.input);
-                s.copilot.history_pos = None;
-                if line.trim() == "help" {
-                    s.copilot.calls.clear();
-                } else {
-                    match parse_command(&line) {
-                        Ok((tool, args)) => propose(s, tool, args, line),
-                        Err(e) => {
-                            let id = s.copilot.next_id + 1;
-                            s.copilot.next_id = id;
-                            s.copilot.calls.push(Call { id, tool: "parse".into(), args: json!({}), policy: CommandPolicy::ReadOnly, status: Status::Done(Err(e)), typed: line });
-                        }
-                    }
-                }
-                r.request_focus();
-            }
-            // Autocomplete hint
-            let first = s.copilot.input.split_whitespace().next().unwrap_or("").to_string();
-            if !first.is_empty() && !s.copilot.input.contains(' ') {
-                let matches: Vec<String> = defs.iter().filter_map(|d| d.get("name").and_then(|n| n.as_str())).filter(|n| n.starts_with(&first) && *n != first).map(String::from).collect();
-                if let Some(m) = matches.first() {
-                    if ui.input(|i| i.key_pressed(egui::Key::Tab)) {
-                        s.copilot.input = format!("{m} ");
-                    }
-                }
-            }
+        egui::CollapsingHeader::new(RichText::new("Build a request with a form").size(11.0).color(p.text_faint)).id_salt("cp_form").show(ui, |ui| {
+            form_builder(s, ui, p, defs);
         });
     });
+}
+
+fn form_builder(s: &mut AppState, ui: &mut Ui, p: &Palette, defs: &[Value]) {
+    let current = s.copilot.form_tool.clone().map(|t| friendly(&t)).unwrap_or_else(|| "Choose…".into());
+    egui::ComboBox::from_id_salt("cp_form_tool").selected_text(current).width(220.0).show_ui(ui, |ui| {
+        for d in defs {
+            let name = d.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            if ui.selectable_label(s.copilot.form_tool.as_deref() == Some(&name), friendly(&name)).clicked() {
+                s.copilot.form = default_form(d);
+                s.copilot.form_tool = Some(name);
+            }
+        }
+    });
+    let Some(tool) = s.copilot.form_tool.clone() else { return };
+    let schema = defs.iter().find(|d| d.get("name").and_then(|n| n.as_str()) == Some(tool.as_str())).cloned().unwrap_or(json!({}));
+    let props = schema.pointer("/inputSchema/properties").and_then(|x| x.as_object()).cloned().unwrap_or_default();
+    egui::Grid::new("cp_form_grid").num_columns(2).spacing([10.0, 4.0]).show(ui, |ui| {
+        for (k, spec) in &props {
+            let ty = spec.get("type").and_then(|t| t.as_str()).unwrap_or("string");
+            let entry = s.copilot.form.entry(k.clone()).or_insert(Value::Null);
+            ui.label(RichText::new(crate::panes::inspector::humanize(k)).size(11.5).color(p.text_muted));
+            match ty {
+                "integer" | "number" => {
+                    let mut f = entry.as_f64().unwrap_or(0.0);
+                    if ui.add(egui::DragValue::new(&mut f).speed(1.0)).changed() {
+                        *entry = if ty == "integer" { json!(f.round() as i64) } else { json!(f) };
+                    }
+                }
+                "boolean" => {
+                    let mut b = entry.as_bool().unwrap_or(false);
+                    if ui.checkbox(&mut b, "").changed() {
+                        *entry = json!(b);
+                    }
+                }
+                "object" => {
+                    ui.label(RichText::new("type it in the box above").size(10.5).color(p.text_faint));
+                }
+                _ => {
+                    ui.horizontal(|ui| {
+                        let mut st = entry.as_str().unwrap_or("").to_string();
+                        if ui.add(egui::TextEdit::singleline(&mut st).desired_width(150.0).font(font_mono(11.0))).changed() {
+                            *entry = json!(st);
+                        }
+                        if k.contains("path") && ui.small_button(icon::FOLDER_OPEN).clicked() {
+                            let dlg = rfd::FileDialog::new();
+                            let f = if k == "output_path" || tool.starts_with("save") { dlg.save_file() } else { dlg.pick_file() };
+                            if let Some(f) = f {
+                                *entry = json!(f.display().to_string());
+                            }
+                        }
+                    });
+                }
+            }
+            ui.end_row();
+        }
+    });
+    if widgets::cmd_primary(ui, p, icon::PAPER_PLANE_RIGHT, "Send").clicked() {
+        let args: Map<String, Value> = s.copilot.form.iter().filter(|(_, v)| !v.is_null() && v.as_str() != Some("")).map(|(k, v)| (k.clone(), v.clone())).collect();
+        propose(s, tool.clone(), Value::Object(args), friendly(&tool));
+    }
 }
 
 fn default_form(def: &Value) -> Map<String, Value> {
@@ -464,7 +552,7 @@ mod tests {
         assert_eq!(t, "render_fk_png");
         assert_eq!(a["dx_m"], 12.5);
         assert_eq!(a["output_path"], "fk.png");
-        assert!(parse_command("inspect").unwrap_err().contains("did you mean"));
+        assert!(parse_command("inspect").unwrap_err().contains("Did you mean"));
     }
 
     #[test]

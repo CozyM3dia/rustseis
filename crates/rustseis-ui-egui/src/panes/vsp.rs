@@ -1,13 +1,14 @@
-//! Workspace 5 · VSP / borehole DAS: total | separated | corridor stack | velocity vs depth.
+//! Borehole view: receiver depth track, total and separated wavefields, corridor stack and an
+//! interval-velocity log, all sharing one depth cursor.
 
 use crate::canvas::{self, CanvasOpts, CanvasState, Raster, View2D, badge, clip_amplitude, draw_raster, draw_wiggles};
 use crate::data::{self, RasterExtent, TraceSource, render_gather_raster};
 use crate::state::AppState;
-use crate::theme::{Palette, font_mono, palette, with_alpha};
-use crate::widgets::{self, chip, primary_button, segmented, vsep};
-use egui::{Color32, RichText, Stroke, Ui, vec2};
+use crate::theme::{Palette, palette, with_alpha};
+use crate::widgets::{self, caps, cmd_primary, segmented};
+use egui::{Color32, RichText, Stroke, Ui, pos2, vec2};
 use egui_phosphor::regular as icon;
-use egui_plot::{Legend, Line, Plot, PlotPoints};
+use egui_plot::{Line, Plot, PlotPoints};
 use rustseis_core::Trace;
 use rustseis_imaging::{VspCorridorStackParams, VspSepMethod, VspSlownessParams, VspSlownessProfile, VspWavefieldSepParams};
 use rustseis_render::SeismicColormap;
@@ -28,6 +29,7 @@ pub struct VspState {
     pub profile_name: Option<String>,
     pub sep_view: SepView,
     pub colormap: SeismicColormap,
+    pub rerun: bool,
     key: u64,
     total: Option<Raster>,
     seps: [Option<Raster>; 3],
@@ -50,6 +52,7 @@ impl Default for VspState {
             profile_name: None,
             sep_view: SepView::Up,
             colormap: SeismicColormap::Greyscale,
+            rerun: false,
             key: 0,
             total: None,
             seps: [None, None, None],
@@ -86,85 +89,144 @@ fn hash_of(parts: impl Hash) -> u64 {
 
 pub fn ui(s: &mut AppState, ui: &mut Ui) {
     let p = *palette(s.theme);
-    let sources = s.session().map(TraceSource::all).unwrap_or_default();
-    let profiles: Vec<String> = s.session().map(|x| {
-        let mut v: Vec<String> = x.context.vsp_profiles.keys().cloned().collect();
-        v.sort();
-        v
-    }).unwrap_or_default();
-    let mut force = false;
-    widgets::toolbar(ui, &p, |ui| {
-        egui::ComboBox::from_id_salt("vsp_src").selected_text(RichText::new(s.vsp.source.label()).size(12.0)).width(140.0).show_ui(ui, |ui| {
-            for src in &sources {
-                ui.selectable_value(&mut s.vsp.source, src.clone(), src.label());
-            }
-        });
-        vsep(ui, &p);
-        segmented(ui, &p, &mut s.vsp.sep.method, &[(VspSepMethod::MedianAlign, "Median", "FB-aligned spatial median"), (VspSepMethod::FkDip, "F-K dip", "Dip-sign separation in F-K")]);
-        match s.vsp.sep.method {
-            VspSepMethod::MedianAlign => {
-                ui.add(egui::DragValue::new(&mut s.vsp.sep.median_len).range(3..=51).prefix("len "));
-            }
-            VspSepMethod::FkDip => {
-                ui.add(egui::DragValue::new(&mut s.vsp.sep.fk_taper_frac).range(0.0..=0.5).speed(0.005).prefix("taper "));
-            }
-        }
-        vsep(ui, &p);
-        ui.label(RichText::new("corridor").size(11.5));
-        ui.add(egui::DragValue::new(&mut s.vsp.corridor.corridor_start_ms).range(0.0..=500.0).suffix(" ms"));
-        ui.add(egui::DragValue::new(&mut s.vsp.corridor.corridor_width_ms).range(10.0..=1000.0).prefix("w ").suffix(" ms"));
-        if primary_button(ui, &p, icon::PLAY, "Separate").on_hover_text("vsp_slowness + wavefield separation + corridor stack on a copy").clicked() {
-            force = true;
-        }
-        vsep(ui, &p);
-        segmented(ui, &p, &mut s.vsp.colormap, &[(SeismicColormap::Greyscale, "Grey", ""), (SeismicColormap::BlueWhiteRed, "BWR", "")]);
-        if !profiles.is_empty() {
-            egui::ComboBox::from_id_salt("vsp_prof").selected_text(s.vsp.profile_name.clone().map(|n| format!("profile · {n}")).unwrap_or_else(|| "profile · computed".into())).show_ui(ui, |ui| {
-                ui.selectable_value(&mut s.vsp.profile_name, None, "computed here");
-                for n in &profiles {
-                    ui.selectable_value(&mut s.vsp.profile_name, Some(n.clone()), n);
-                }
-            });
-        }
-    });
-
+    let force = std::mem::take(&mut s.vsp.rerun);
     submit(s, force);
-
     if s.vsp.total.is_none() {
         if !super::busy_notice(s, ui) {
             if s.compute.is_busy("vsp.compute") {
-                canvas::empty_state(ui, &p, icon::HOURGLASS, "Separating wavefields…", "Running on the compute pool");
+                canvas::empty_state(ui, &p, icon::HOURGLASS, "Separating wavefields…", "This runs in the background; keep working meanwhile.");
             } else {
-                canvas::empty_state(ui, &p, icon::DROP, "No borehole data", "Run a VSP / DAS flow (e.g. otway_das_vsp_demo) — traces should carry REC_DEP");
+                canvas::empty_state(ui, &p, icon::DROP, "No borehole data yet", "Load a borehole or fibre record whose traces carry receiver depths.");
             }
         }
         return;
     }
-    if let Some(e) = &s.vsp.error {
-        widgets::banner(ui, &p, p.pick, icon::WARNING, e);
+    let full = ui.available_rect_before_wrap().shrink2(vec2(8.0, 6.0));
+    let gap = 6.0;
+    let track_h = 46.0;
+    let w = full.width() - 3.0 * gap;
+    let ws = [w * 0.30, w * 0.30, w * 0.12, w * 0.28];
+    let mut x = full.left();
+    let mut rects = Vec::new();
+    for c in ws {
+        rects.push(egui::Rect::from_min_max(pos2(x, full.top() + track_h + gap), pos2(x + c, full.bottom())));
+        x += c + gap;
     }
-    let avail = ui.available_size();
-    let w_total = avail.x * 0.32;
-    let w_sep = avail.x * 0.32;
-    let w_cor = avail.x * 0.12;
-    let w_plot = avail.x - w_total - w_sep - w_cor - 20.0;
-    ui.horizontal_top(|ui| {
-        ui.spacing_mut().item_spacing.x = 6.0;
-        ui.vertical(|ui| {
-            ui.set_width(w_total);
-            panel(s, ui, &p, 0, vec2(w_total, avail.y));
-        });
-        ui.vertical(|ui| {
-            ui.set_width(w_sep);
-            panel(s, ui, &p, 1, vec2(w_sep, avail.y));
-        });
-        ui.vertical(|ui| {
-            ui.set_width(w_cor);
-            panel(s, ui, &p, 2, vec2(w_cor, avail.y));
-        });
-        ui.vertical(|ui| {
-            ui.set_width(w_plot);
-            velocity_plot(s, ui, &p, vec2(w_plot, avail.y));
+    let track = egui::Rect::from_min_max(full.min, pos2(rects[1].right(), full.top() + track_h));
+    let mut child = |r: egui::Rect| ui.new_child(egui::UiBuilder::new().max_rect(r).layout(egui::Layout::top_down(egui::Align::Min)));
+    for i in 0..3 {
+        let r = rects[i];
+        panel(s, &mut child(r), &p, i, r.size());
+    }
+    depth_track(s, &mut child(track), &p, track, rects[0], rects[1]);
+    let r = rects[3];
+    velocity_plot(s, &mut child(r), &p, r.size());
+    if let Some(e) = s.vsp.error.clone() {
+        let r = egui::Rect::from_center_size(pos2(full.center().x, full.bottom() - 24.0), vec2(520.0, 30.0));
+        widgets::banner(&mut child(r), &p, p.pick, icon::WARNING, &e);
+    }
+    ui.allocate_rect(full, egui::Sense::hover());
+}
+
+/// Receiver positions along the well with the shared depth cursor.
+fn depth_track(s: &mut AppState, ui: &mut Ui, p: &Palette, rect: egui::Rect, total: egui::Rect, sep: egui::Rect) {
+    let painter = ui.painter_at(rect);
+    painter.rect(rect, egui::CornerRadius::same(8), p.sunken, Stroke::new(1.0, p.border), egui::StrokeKind::Inside);
+    let n = s.vsp.depths.len();
+    if n == 0 {
+        return;
+    }
+    let (dmin, dmax) = s.vsp.depths.iter().fold((f32::MAX, f32::MIN), |(a, b), d| (a.min(*d), b.max(*d)));
+    painter.text(rect.left_top() + vec2(12.0, 8.0), egui::Align2::LEFT_TOP, "Well", crate::theme::font_semibold(12.0), p.text);
+    painter.text(rect.left_top() + vec2(12.0, 26.0), egui::Align2::LEFT_TOP, format!("{n} receivers · {dmin:.0}–{dmax:.0} m"), egui::FontId::proportional(10.5), p.text_muted);
+    // Casing line under each wavefield panel, receivers as ticks.
+    for pr in [total, sep] {
+        let y = rect.center().y;
+        let x0 = (pr.left() + 48.0).max(rect.left() + 180.0).min(pr.right() - 20.0);
+        let x1 = pr.right() - 8.0;
+        if x1 <= x0 {
+            continue;
+        }
+        painter.line_segment([pos2(x0, y), pos2(x1, y)], Stroke::new(4.0, with_alpha(p.text_muted, 70)));
+        let step = (n / ((x1 - x0) as usize / 3).max(1)).max(1);
+        for i in (0..n).step_by(step) {
+            let x = x0 + (i as f32 + 0.5) / n as f32 * (x1 - x0);
+            painter.line_segment([pos2(x, y - 5.0), pos2(x, y + 5.0)], Stroke::new(1.0, with_alpha(p.info, 160)));
+        }
+        if let Some(d) = s.crosshair.depth_m.filter(|d| *d >= dmin && *d <= dmax) {
+            if let Some(i) = s.vsp.depths.iter().position(|x| *x >= d) {
+                let x = x0 + (i as f32 + 0.5) / n as f32 * (x1 - x0);
+                painter.circle_filled(pos2(x, y), 5.0, p.accent);
+                badge(&painter, pos2(x, rect.top() + 4.0), &format!("{d:.0} m"), p, egui::Align2::CENTER_TOP);
+            }
+        }
+    }
+}
+
+/// Inspector for the borehole view.
+pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
+    let p = *palette(s.theme);
+    let sources = s.session().map(TraceSource::all).unwrap_or_default();
+    let profiles: Vec<String> = s
+        .session()
+        .map(|x| {
+            let mut v: Vec<String> = x.context.vsp_profiles.keys().cloned().collect();
+            v.sort();
+            v
+        })
+        .unwrap_or_default();
+    egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+        egui::Frame::new().inner_margin(egui::Margin::symmetric(14, 12)).show(ui, |ui| {
+            ui.spacing_mut().item_spacing.y = 8.0;
+            ui.label(RichText::new("Borehole").font(crate::theme::font_display(18.0)).color(p.text));
+            ui.label(RichText::new("Splits the record into waves travelling down from the surface and waves reflected back up.").size(11.5).color(p.text_muted));
+            widgets::row(ui, &p, "Data", |ui| {
+                egui::ComboBox::from_id_salt("vsp_src").selected_text(s.vsp.source.label()).width(150.0).show_ui(ui, |ui| {
+                    for src in &sources {
+                        ui.selectable_value(&mut s.vsp.source, src.clone(), src.label());
+                    }
+                });
+            });
+            caps(ui, &p, "SEPARATION", None);
+            widgets::row(ui, &p, "Method", |ui| {
+                egui::ComboBox::from_id_salt("vsp_method").selected_text(if s.vsp.sep.method == VspSepMethod::FkDip { "By dip direction" } else { "Median after aligning" }).width(160.0).show_ui(ui, |ui| {
+                    ui.selectable_value(&mut s.vsp.sep.method, VspSepMethod::FkDip, "By dip direction");
+                    ui.selectable_value(&mut s.vsp.sep.method, VspSepMethod::MedianAlign, "Median after aligning");
+                });
+            });
+            match s.vsp.sep.method {
+                VspSepMethod::MedianAlign => widgets::row(ui, &p, "Median length", |ui| {
+                    ui.add(egui::DragValue::new(&mut s.vsp.sep.median_len).range(3..=51).suffix(" traces"));
+                }),
+                VspSepMethod::FkDip => widgets::row(ui, &p, "Taper", |ui| {
+                    ui.add(egui::DragValue::new(&mut s.vsp.sep.fk_taper_frac).range(0.0..=0.5).speed(0.005));
+                }),
+            }
+            caps(ui, &p, "CORRIDOR STACK", None);
+            widgets::row(ui, &p, "Starts after first break", |ui| {
+                ui.add(egui::DragValue::new(&mut s.vsp.corridor.corridor_start_ms).range(0.0..=500.0).suffix(" ms"));
+            });
+            widgets::row(ui, &p, "Width", |ui| {
+                ui.add(egui::DragValue::new(&mut s.vsp.corridor.corridor_width_ms).range(10.0..=1000.0).suffix(" ms"));
+            });
+            caps(ui, &p, "DISPLAY", None);
+            widgets::row(ui, &p, "Colours", |ui| {
+                segmented(ui, &p, &mut s.vsp.colormap, &[(SeismicColormap::Greyscale, "Grey", ""), (SeismicColormap::BlueWhiteRed, "Red and blue", "")]);
+            });
+            if !profiles.is_empty() {
+                widgets::row(ui, &p, "Velocity log from", |ui| {
+                    egui::ComboBox::from_id_salt("vsp_prof").selected_text(s.vsp.profile_name.clone().unwrap_or_else(|| "this view".into())).width(150.0).show_ui(ui, |ui| {
+                        ui.selectable_value(&mut s.vsp.profile_name, None, "this view");
+                        for n in &profiles {
+                            ui.selectable_value(&mut s.vsp.profile_name, Some(n.clone()), n);
+                        }
+                    });
+                });
+            }
+            ui.add_space(4.0);
+            if cmd_primary(ui, &p, icon::ARROW_CLOCKWISE, "Separate again").clicked() {
+                s.vsp.rerun = true;
+            }
         });
     });
 }
@@ -316,23 +378,24 @@ fn panel(s: &mut AppState, ui: &mut Ui, p: &Palette, which: usize, size: egui::V
             if pts.len() > 1 {
                 painter.add(egui::Shape::line(pts, Stroke::new(1.4, p.pick)));
             }
-            badge(&painter, out.frame.rect.left_top() + vec2(6.0, 6.0), &format!("Total wavefield · {} ch", s.vsp.depths.len()), p, egui::Align2::LEFT_TOP);
+            badge(&painter, out.frame.rect.center_top() + vec2(0.0, 8.0), "Total", p, egui::Align2::CENTER_TOP);
         }
         1 => {
-            let label = match s.vsp.sep_view {
-                SepView::Down => "Downgoing",
-                SepView::Up => "Upgoing",
-                SepView::UpTwoWay => "Upgoing · two-way aligned",
-            };
-            badge(&painter, out.frame.rect.left_top() + vec2(6.0, 6.0), label, p, egui::Align2::LEFT_TOP);
-            // Inline view switcher in the panel's corner.
-            let r = egui::Rect::from_min_size(out.frame.rect.right_top() + vec2(-206.0, 4.0), vec2(200.0, 22.0));
-            let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r));
-            segmented(&mut child, p, &mut s.vsp.sep_view, &[(SepView::Down, "Down", "Downgoing"), (SepView::Up, "Up", "Upgoing"), (SepView::UpTwoWay, "Up 2-way", "Upgoing aligned in two-way time")]);
+            // Glass tabs for the separated wavefields.
+            let r = egui::Rect::from_min_size(out.frame.rect.center_top() + vec2(-130.0, 6.0), vec2(260.0, 34.0));
+            let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r).layout(egui::Layout::left_to_right(egui::Align::Center)));
+            widgets::glass_frame(p).inner_margin(egui::Margin::same(3)).show(&mut child, |ui| {
+                ui.spacing_mut().item_spacing.x = 2.0;
+                for (v, label) in [(SepView::Down, "Down"), (SepView::Up, "Up"), (SepView::UpTwoWay, "Up, two-way")] {
+                    if widgets::cmd(ui, p, "", label, s.vsp.sep_view == v).clicked() {
+                        s.vsp.sep_view = v;
+                    }
+                }
+            });
         }
         _ => {
             draw_wiggles(&painter, &out.frame, &s.vsp.corridor_traces, 0.0, s.vsp.corridor_clip, 1.6, p.text, Some(with_alpha(p.text, 160)));
-            badge(&painter, out.frame.rect.left_top() + vec2(4.0, 6.0), "Corridor", p, egui::Align2::LEFT_TOP);
+            badge(&painter, out.frame.rect.center_top() + vec2(0.0, 8.0), "Corridor", p, egui::Align2::CENTER_TOP);
         }
     }
     // Depth crosshair
@@ -360,21 +423,21 @@ fn velocity_plot(s: &mut AppState, ui: &mut Ui, p: &Palette, size: egui::Vec2) {
     };
     ui.allocate_ui(size, |ui| {
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Interval velocity").font(crate::theme::font_display(12.0)));
+            ui.label(RichText::new("Velocity log").font(crate::theme::font_semibold(12.5)).color(p.text));
             if let Some(pr) = &prof {
                 let finite: Vec<f32> = pr.interval_vel_mps.iter().copied().filter(|v| v.is_finite() && *v > 0.0).collect();
                 if !finite.is_empty() {
                     let mean = finite.iter().sum::<f32>() / finite.len() as f32;
-                    chip(ui, &format!("mean {mean:.0} m/s"), p.accent, with_alpha(p.accent, 22));
+                    ui.label(RichText::new(format!("average {mean:.0} m/s")).size(11.0).color(p.text_muted));
                 }
             }
         });
         let Some(pr) = prof else {
-            ui.label(RichText::new("No slowness profile").color(p.text_faint));
+            ui.label(RichText::new("No velocity log yet").color(p.text_faint));
             return;
         };
         let vint: Vec<[f64; 2]> = pr.depths_m.iter().zip(&pr.interval_vel_mps).filter(|(_, v)| v.is_finite() && **v > 0.0).map(|(d, v)| [*v as f64, *d as f64]).collect();
-        let fbt: Vec<[f64; 2]> = pr.depths_m.iter().zip(&pr.fb_times_ms).map(|(d, t)| [*t as f64, *d as f64]).collect();
+        let fbt: Vec<[f64; 2]> = pr.depths_m.iter().zip(&pr.fb_times_ms).filter(|(_, t)| **t > 0.0).map(|(d, t)| [*t as f64, *d as f64]).collect();
         let depth = s.crosshair.depth_m;
         Plot::new("vsp_vel")
             .height(size.y * 0.62)
@@ -382,21 +445,20 @@ fn velocity_plot(s: &mut AppState, ui: &mut Ui, p: &Palette, size: egui::Vec2) {
             .x_axis_label("m/s")
             .y_axis_label("depth (m)")
             .show_background(false)
-            .legend(Legend::default())
             .show(ui, |pu| {
-                pu.line(Line::new("V interval", PlotPoints::from(vint)).color(p.accent).width(1.6));
+                pu.line(Line::new("interval velocity", PlotPoints::from(vint)).color(p.accent).width(1.8));
                 if let Some(d) = depth {
                     pu.hline(egui_plot::HLine::new("crosshair", d as f64).color(with_alpha(p.accent, 120)));
                 }
             });
-        ui.label(RichText::new("First-break time").font(font_mono(10.5)).color(p.text_faint));
+        ui.label(RichText::new("First arrival time").size(11.0).color(p.text_muted));
         Plot::new("vsp_fb")
             .invert_y(true)
             .x_axis_label("ms")
             .y_axis_label("depth (m)")
             .show_background(false)
             .show(ui, |pu| {
-                pu.line(Line::new("FB", PlotPoints::from(fbt)).color(p.pick).width(1.4));
+                pu.points(egui_plot::Points::new("first arrival", PlotPoints::from(fbt)).color(p.pick).radius(1.6));
                 if let Some(d) = depth {
                     pu.hline(egui_plot::HLine::new("crosshair", d as f64).color(with_alpha(p.accent, 120)));
                 }

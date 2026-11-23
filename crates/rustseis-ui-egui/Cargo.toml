@@ -2,12 +2,11 @@
 name = "rustseis-ui-egui"
 version.workspace = true
 edition.workspace = true
-description = "RustSeis L6 egui workstation: theme, dock workspaces, viewers, pickers, OPF browser and MCP copilot."
+description = "RustSeis desktop interface: workflow stages, gather and velocity views, spectral, statics, borehole and survey QC, and an offline assistant."
 
 [dependencies]
 eframe.workspace = true
 egui.workspace = true
-egui_dock.workspace = true
 egui_plot.workspace = true
 egui_extras.workspace = true
 egui-phosphor.workspace = true

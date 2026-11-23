@@ -1,20 +1,36 @@
-//! Application shell: title bar, workspace switcher, dock presets, status bar, toasts and the
-//! command palette.
+//! Application shell (interface v2): top bar with workflow stages, command bar, floating
+//! Explorer / document / Inspector panels, status line, toasts and the command palette.
 
 use crate::data::{fmt_bytes, fmt_ms};
-use crate::panes::{Pane, PaneViewer};
-use crate::state::{AppState, Level, Workspace};
-use crate::theme::{self, Palette, ThemeMode, font_display, font_mono, mix, palette, with_alpha};
-use crate::widgets::icon_button;
+use crate::state::{AppState, Doc, Level, StageStatus, Workspace};
+use crate::theme::{self, Palette, ThemeMode, font_mono, font_semibold, mix, palette, space, with_alpha};
+use crate::widgets::{self, panel_frame};
 use egui::{Align2, CornerRadius, Frame, Margin, RichText, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
-use egui_dock::{DockArea, DockState, NodeIndex};
 use egui_phosphor::regular as icon;
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LeftTab {
+    Explorer,
+    Library,
+    Tables,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RightMode {
+    Inspector,
+    Assistant,
+}
 
 pub struct RustSeisApp {
     pub state: AppState,
-    pub workspace: Workspace,
-    docks: HashMap<Workspace, DockState<Pane>>,
+    pub stage: Workspace,
+    pub docs: Vec<Doc>,
+    pub active: Doc,
+    pub left_tab: LeftTab,
+    pub left_open: bool,
+    pub right_mode: RightMode,
+    pub jobs_open: bool,
     applied_theme: Option<ThemeMode>,
     palette_open: bool,
     palette_query: String,
@@ -23,68 +39,24 @@ pub struct RustSeisApp {
     pub tour: Option<crate::tour::Tour>,
 }
 
-fn dock_for(ws: Workspace) -> DockState<Pane> {
-    match ws {
-        Workspace::Flow => {
-            let mut d = DockState::new(vec![Pane::FlowEditor]);
-            let t = d.main_surface_mut();
-            let [center, _left] = t.split_left(NodeIndex::root(), 0.21, vec![Pane::Catalog, Pane::Project]);
-            let [center, _right] = t.split_right(center, 0.66, vec![Pane::Inspector]);
-            let [_c, _bottom] = t.split_below(center, 0.70, vec![Pane::Console]);
-            d
-        }
-        Workspace::Viewer => {
-            let mut d = DockState::new(vec![Pane::Viewer]);
-            let t = d.main_surface_mut();
-            let [_c, right] = t.split_right(NodeIndex::root(), 0.77, vec![Pane::Picks]);
-            let [_r, _h] = t.split_below(right, 0.58, vec![Pane::Headers]);
-            d
-        }
-        Workspace::Velocity => {
-            let mut d = DockState::new(vec![Pane::Iva]);
-            let t = d.main_surface_mut();
-            let [_c, _r] = t.split_right(NodeIndex::root(), 0.84, vec![Pane::VelTable]);
-            d
-        }
-        Workspace::Spectral => {
-            let mut d = DockState::new(vec![Pane::Radon]);
-            let t = d.main_surface_mut();
-            let [_radon, top] = t.split_above(NodeIndex::root(), 0.52, vec![Pane::Spectrum]);
-            let [_s, _fk] = t.split_right(top, 0.40, vec![Pane::Fk]);
-            d
-        }
-        Workspace::Statics => {
-            let mut d = DockState::new(vec![Pane::Vsp]);
-            let t = d.main_surface_mut();
-            let [_vsp, top] = t.split_above(NodeIndex::root(), 0.56, vec![Pane::Statics]);
-            let [_st, rest] = t.split_right(top, 0.36, vec![Pane::ScAmp]);
-            let [_sc, _fb] = t.split_right(rest, 0.52, vec![Pane::FbQc]);
-            d
-        }
-        Workspace::Survey => {
-            let mut d = DockState::new(vec![Pane::Basemap]);
-            let t = d.main_surface_mut();
-            let [base, _cop] = t.split_right(NodeIndex::root(), 0.63, vec![Pane::Copilot]);
-            let [_b, _g] = t.split_below(base, 0.52, vec![Pane::GeomTable]);
-            d
-        }
-    }
-}
-
 impl RustSeisApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self::with_context(&cc.egui_ctx, true)
     }
 
-    /// Construct against any egui context (used by headless tests with `fonts = false`).
+    /// Construct against any egui context (headless tests pass `install_fonts = false`).
     pub fn with_context(ctx: &egui::Context, install_fonts: bool) -> Self {
         theme::install(ctx, ThemeMode::Dark, install_fonts);
         egui_extras::install_image_loaders(ctx);
-        let docks = Workspace::ALL.iter().map(|w| (*w, dock_for(*w))).collect();
         Self {
             state: AppState::new(ctx),
-            workspace: Workspace::Flow,
-            docks,
+            stage: Workspace::Data,
+            docs: vec![Doc::Start],
+            active: Doc::Start,
+            left_tab: LeftTab::Explorer,
+            left_open: true,
+            right_mode: RightMode::Inspector,
+            jobs_open: false,
             applied_theme: Some(ThemeMode::Dark),
             palette_open: false,
             palette_query: String::new(),
@@ -94,7 +66,7 @@ impl RustSeisApp {
         }
     }
 
-    /// Open a file passed on the command line (`.sgy/.segd/.rsds` data, `.json/.toml` flow, `.sqlite` OPF).
+    /// Open a file passed on the command line (seismic data, a flow, or a project database).
     pub fn open_path(&mut self, path: &std::path::Path) {
         let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
         match ext.as_str() {
@@ -104,13 +76,41 @@ impl RustSeisApp {
         }
     }
 
-    pub fn reset_layout(&mut self) {
-        self.docks.insert(self.workspace, dock_for(self.workspace));
+    /// Show a document (opening its tab if needed) and move the stage bar to match.
+    pub fn open(&mut self, doc: Doc) {
+        if !self.docs.contains(&doc) {
+            self.docs.push(doc);
+        }
+        self.active = doc;
+        let keep_stage = matches!((self.stage, doc), (Workspace::Imaging, Doc::Viewer) | (Workspace::Statics, Doc::Viewer) | (Workspace::Process, Doc::Viewer));
+        if !keep_stage {
+            self.stage = doc.stage();
+        }
+    }
+
+    pub fn set_stage(&mut self, w: Workspace) {
+        self.stage = w;
+        let d = w.doc();
+        if !self.docs.contains(&d) {
+            self.docs.push(d);
+        }
+        self.active = d;
+    }
+
+    fn close_doc(&mut self, doc: Doc) {
+        if let Some(i) = self.docs.iter().position(|d| *d == doc) {
+            self.docs.remove(i);
+            if self.docs.is_empty() {
+                self.docs.push(Doc::Start);
+            }
+            if self.active == doc {
+                self.active = self.docs.get(i.saturating_sub(1)).copied().unwrap_or(Doc::Start);
+            }
+        }
     }
 
     fn route_compute(&mut self, ctx: &egui::Context) {
-        let done = self.state.compute.drain();
-        for d in done {
+        for d in self.state.compute.drain() {
             match d.result {
                 Ok(v) => {
                     let key = d.key;
@@ -134,9 +134,10 @@ impl RustSeisApp {
         let (cmd, shift) = ctx.input(|i| (i.modifiers.command, i.modifiers.shift));
         let pressed = |k: egui::Key| ctx.input(|i| i.key_pressed(k));
         if cmd {
-            for (i, k) in [egui::Key::Num1, egui::Key::Num2, egui::Key::Num3, egui::Key::Num4, egui::Key::Num5, egui::Key::Num6].iter().enumerate() {
+            let keys = [egui::Key::Num1, egui::Key::Num2, egui::Key::Num3, egui::Key::Num4, egui::Key::Num5, egui::Key::Num6, egui::Key::Num7];
+            for (i, k) in keys.iter().enumerate() {
                 if pressed(*k) {
-                    self.workspace = Workspace::ALL[i];
+                    self.set_stage(Workspace::ALL[i]);
                 }
             }
             if pressed(egui::Key::K) {
@@ -153,8 +154,11 @@ impl RustSeisApp {
             if pressed(egui::Key::O) {
                 self.state.open_seismic_dialog();
             }
-            if pressed(egui::Key::T) && !typing {
-                self.state.theme = self.state.theme.toggled();
+            if pressed(egui::Key::B) {
+                self.left_open = !self.left_open;
+            }
+            if pressed(egui::Key::J) {
+                self.jobs_open = !self.jobs_open;
             }
             if !typing && pressed(egui::Key::Z) {
                 if shift { self.state.redo() } else { self.state.undo() }
@@ -166,8 +170,7 @@ impl RustSeisApp {
             if pressed(egui::Key::F12) {
                 let dir = std::env::current_dir().unwrap_or_default().join("screenshots");
                 let stamp = crate::state::chrono_like::Stamp::now().0;
-                let name = self.workspace.title().replace([' ', '&'], "_");
-                let path = dir.join(format!("rustseis_{name}_{stamp}.png"));
+                let path = dir.join(format!("rustseis_{}_{stamp}.png", self.active.title().replace(' ', "_")));
                 let p2 = path.clone();
                 ctx.request_screenshot(move |img| {
                     let _ = crate::tour::save_png(&img, &p2);
@@ -180,83 +183,341 @@ impl RustSeisApp {
             if pressed(egui::Key::CloseBracket) {
                 self.state.step_ensemble(1);
             }
-            if pressed(egui::Key::F) && self.workspace == Workspace::Viewer {
-                self.state.viewer.canvas.reset();
+            if pressed(egui::Key::Escape) && self.state.viewer.mode != crate::panes::viewer::PickMode::Navigate {
+                self.state.viewer.mode = crate::panes::viewer::PickMode::Navigate;
             }
         }
     }
 
-    fn title_bar(&mut self, ui: &mut Ui, p: &Palette) {
-        Frame::new().fill(p.chrome).inner_margin(Margin { left: 10, right: 10, top: 6, bottom: 0 }).show(ui, |ui| {
-            ui.set_height(34.0);
+    // ------------------------------------------------------------------ top bar
+
+    fn top_bar(&mut self, ui: &mut Ui, p: &Palette) {
+        ui.horizontal_centered(|ui| {
+            ui.spacing_mut().item_spacing.x = 10.0;
+            ui.add_space(4.0);
+            widgets::logo(ui, p, 24.0);
+            ui.label(RichText::new("RustSeis").font(font_semibold(15.0)).color(p.text));
+            self.project_chip(ui, p);
+
+            let pills_w = stage_pills_width(ui, p);
+            let right_w = 470.0;
+            let free = ui.available_width() - right_w;
+            ui.add_space(((free - pills_w) * 0.5).max(8.0));
+            self.stage_pills(ui, p);
+
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                ui.spacing_mut().item_spacing.x = 6.0;
+                ui.add_space(4.0);
+                let assist = self.right_mode == RightMode::Assistant;
+                if top_icon(ui, p, icon::SPARKLE, "Assistant", assist).clicked() {
+                    self.right_mode = if assist { RightMode::Inspector } else { RightMode::Assistant };
+                }
+                let theme_icon = if self.state.theme == ThemeMode::Dark { icon::SUN } else { icon::MOON };
+                if top_icon(ui, p, theme_icon, "Light or dark", false).clicked() {
+                    self.state.theme = self.state.theme.toggled();
+                }
+                if self.run_pill(ui, p).clicked() {
+                    self.jobs_open = !self.jobs_open;
+                }
+                if search_box(ui, p).clicked() {
+                    self.palette_open = true;
+                    self.palette_query.clear();
+                    self.palette_sel = 0;
+                }
+            });
+        });
+    }
+
+    fn project_chip(&mut self, ui: &mut Ui, p: &Palette) {
+        let (area, line) = match &self.state.project.manifest {
+            Some(m) => (
+                m.get("area").and_then(|v| v.as_str()).unwrap_or("Project").to_string(),
+                m.get("line").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+            ),
+            None => ("Untitled project".to_string(), if self.state.summary.n_traces > 0 { self.state.focus.source.label() } else { String::new() }),
+        };
+        let text = if line.is_empty() { format!("{}  {area}  {}", icon::STACK, icon::CARET_DOWN) } else { format!("{}  {area}  /  {line}  {}", icon::STACK, icon::CARET_DOWN) };
+        let btn = egui::Button::new(RichText::new(text).size(12.5).color(p.text_muted))
+            .fill(p.panel)
+            .stroke(Stroke::new(1.0, p.border))
+            .corner_radius(CornerRadius::same(8))
+            .min_size(vec2(0.0, 30.0));
+        let resp = ui.add(btn);
+        egui::Popup::menu(&resp).show(|ui| {
+            ui.set_min_width(240.0);
+            if ui.button(format!("{}  Start page", icon::HOUSE)).clicked() {
+                self.open(Doc::Start);
+            }
+            ui.separator();
+            if ui.button(format!("{}  Open seismic data…", icon::FOLDER_OPEN)).clicked() {
+                self.state.open_seismic_dialog();
+            }
+            if ui.button(format!("{}  Open SEG-D shot folder…", icon::FOLDERS)).clicked() {
+                self.state.open_segd_dir_dialog();
+            }
+            if ui.button(format!("{}  Open flow…", icon::FLOW_ARROW)).clicked() {
+                self.state.open_flow_dialog();
+            }
+            ui.separator();
+            if ui.button(format!("{}  New project…", icon::PLUS)).clicked() {
+                self.state.project.new_project = Some(crate::panes::project::NewProject { area: "Survey".into(), line: "Line 01".into(), ..Default::default() });
+            }
+            if ui.button(format!("{}  Open project database…", icon::DATABASE)).clicked() {
+                self.state.open_opf_dialog();
+            }
+            if ui.button(format!("{}  Save project database", icon::FLOPPY_DISK)).clicked() {
+                self.state.save_opf_dialog();
+            }
+        });
+    }
+
+    fn stage_pills(&mut self, ui: &mut Ui, p: &Palette) {
+        let font = egui::FontId::proportional(13.0);
+        let widths: Vec<f32> = Workspace::ALL.iter().map(|w| ui.painter().layout_no_wrap(w.title().to_string(), font.clone(), p.text).size().x + 34.0).collect();
+        let total = vec2(widths.iter().sum::<f32>() + 8.0, 34.0);
+        let (outer, _) = ui.allocate_exact_size(total, Sense::hover());
+        ui.painter().rect(outer, CornerRadius::same(10), p.panel, Stroke::new(1.0, p.border), StrokeKind::Inside);
+        let mut x = outer.left() + 4.0;
+        for (i, (w, wd)) in Workspace::ALL.iter().zip(widths).enumerate() {
+            let r = egui::Rect::from_min_size(pos2(x, outer.top() + 3.0), vec2(wd, outer.height() - 6.0));
+            let resp = ui.interact(r, egui::Id::unique(("stage", i)), Sense::click()).on_hover_text(format!("{} — {} (Ctrl+{})", w.title(), w.hint(), i + 1));
+            let on = self.stage == *w;
+            if on {
+                ui.painter().rect(r, CornerRadius::same(7), p.raised, Stroke::new(1.0, p.border_strong), StrokeKind::Inside);
+            } else if resp.hovered() {
+                ui.painter().rect_filled(r, CornerRadius::same(7), with_alpha(p.raised, 160));
+            }
+            let dot = match self.state.stage_status(*w) {
+                StageStatus::Done => p.success,
+                StageStatus::Attention => p.pick,
+                StageStatus::NotStarted => p.border_strong,
+            };
+            ui.painter().circle_filled(pos2(r.left() + 14.0, r.center().y), 3.2, dot);
+            let col = if on || resp.hovered() { p.text } else { p.text_muted };
+            ui.painter().text(pos2(r.left() + 24.0, r.center().y), Align2::LEFT_CENTER, w.title(), font.clone(), col);
+            if resp.clicked() {
+                self.set_stage(*w);
+            }
+            x += wd;
+        }
+    }
+
+    fn run_pill(&self, ui: &mut Ui, p: &Palette) -> egui::Response {
+        let (text, dot, busy) = match self.state.busy_info() {
+            Some((label, el, eta)) => {
+                let t = match eta {
+                    Some(e) => format!("{label} · {} of ~{}", fmt_ms(el.as_secs_f64() * 1000.0), fmt_ms(e as f64)),
+                    None => format!("{label} · {}", fmt_ms(el.as_secs_f64() * 1000.0)),
+                };
+                (t, p.accent, true)
+            }
+            None => match self.state.history.last() {
+                Some(j) if !j.ok => ("Last job failed".to_string(), p.danger, false),
+                Some(j) => (format!("Ready · {}", fmt_ms(j.elapsed.as_secs_f64() * 1000.0)), p.success, false),
+                None => ("Ready".to_string(), p.success, false),
+            },
+        };
+        let font = egui::FontId::proportional(12.0);
+        let g = ui.painter().layout_no_wrap(text, font, p.text_muted);
+        let w = (g.size().x + 32.0).min(300.0);
+        let (rect, resp) = ui.allocate_exact_size(vec2(w, 30.0), Sense::click());
+        let fill = if busy { p.accent_soft } else { p.panel };
+        let stroke = if busy { p.accent_line } else { p.border };
+        ui.painter().rect(rect, CornerRadius::same(8), fill, Stroke::new(1.0, stroke), StrokeKind::Inside);
+        let c = rect.left_center() + vec2(13.0, 0.0);
+        if busy {
+            let t = ui.input(|i| i.time) as f32;
+            ui.painter().circle_filled(c, 3.0 + (t * 4.0).sin().abs() * 1.3, dot);
+            if let Some((_, el, Some(eta))) = self.state.busy_info() {
+                let f = (el.as_secs_f64() * 1000.0 / eta.max(1) as f64).min(0.97) as f32;
+                let mut bar = egui::Rect::from_min_max(pos2(rect.left() + 8.0, rect.bottom() - 3.0), pos2(rect.right() - 8.0, rect.bottom() - 1.5));
+                ui.painter().rect_filled(bar, 1.0, with_alpha(p.accent, 50));
+                bar.set_width(bar.width() * f);
+                ui.painter().rect_filled(bar, 1.0, p.accent);
+            }
+            ui.ctx().request_repaint();
+        } else {
+            ui.painter().circle_filled(c, 3.5, dot);
+        }
+        let clip = egui::Rect::from_min_max(pos2(rect.left() + 22.0, rect.top()), pos2(rect.right() - 8.0, rect.bottom()));
+        ui.painter().with_clip_rect(clip).galley(pos2(rect.left() + 23.0, rect.center().y - g.size().y * 0.5), g, p.text_muted);
+        resp.on_hover_text("Engine status · click for the job list (Ctrl+J)")
+    }
+
+    // ------------------------------------------------------------------ panels
+
+    fn left_panel(&mut self, ui: &mut Ui, p: &Palette) {
+        let slot = ui.available_rect_before_wrap();
+        ui.allocate_rect(slot, Sense::hover());
+        let mut ui = ui.new_child(egui::UiBuilder::new().max_rect(slot).layout(egui::Layout::top_down(egui::Align::Min)));
+        ui.set_clip_rect(slot.intersect(ui.clip_rect()));
+        let ui = &mut ui;
+        panel_frame(p).show(ui, |ui| {
+            ui.set_max_width(ui.available_width());
+            ui.set_min_size(ui.available_size());
             ui.horizontal(|ui| {
-                brand(ui, p);
-                ui.add_space(14.0);
-                for (i, ws) in Workspace::ALL.iter().enumerate() {
-                    if workspace_tab(ui, p, *ws, self.workspace == *ws, i + 1).clicked() {
-                        self.workspace = *ws;
+                ui.set_height(40.0);
+                ui.add_space(8.0);
+                for (t, label) in [(LeftTab::Explorer, "Explorer"), (LeftTab::Library, "Library"), (LeftTab::Tables, "Tables")] {
+                    if tab_pill(ui, p, label, self.left_tab == t).clicked() {
+                        self.left_tab = t;
                     }
                 }
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    ui.spacing_mut().item_spacing.x = 4.0;
-                    let theme_icon = if self.state.theme == ThemeMode::Dark { icon::SUN } else { icon::MOON };
-                    if icon_button(ui, p, theme_icon, "Toggle Abyssal / Survey theme (Ctrl+T)", false).clicked() {
-                        self.state.theme = self.state.theme.toggled();
-                    }
-                    if icon_button(ui, p, icon::COMMAND, "Command palette (Ctrl+K)", self.palette_open).clicked() {
-                        self.palette_open = !self.palette_open;
-                        self.palette_query.clear();
-                    }
-                    if icon_button(ui, p, icon::ARROW_CLOCKWISE, "Redo (Ctrl+Y)", false).clicked() {
-                        self.state.redo();
-                    }
-                    if icon_button(ui, p, icon::ARROW_COUNTER_CLOCKWISE, "Undo last flow (Ctrl+Z)", false).clicked() {
-                        self.state.undo();
-                    }
                     ui.add_space(6.0);
-                    job_pill(ui, p, &self.state);
-                    ui.add_space(6.0);
-                    data_chip(ui, p, &self.state);
+                    if top_icon(ui, p, icon::SIDEBAR_SIMPLE, "Hide panel (Ctrl+B)", false).clicked() {
+                        self.left_open = false;
+                    }
                 });
             });
+            hline(ui, p);
+            match self.left_tab {
+                LeftTab::Explorer => crate::panes::project::explorer_ui(&mut self.state, ui),
+                LeftTab::Library => crate::panes::catalog::ui(&mut self.state, ui),
+                LeftTab::Tables => crate::panes::project::tables_ui(&mut self.state, ui),
+            }
         });
-        let r = ui.min_rect();
-        ui.painter().hline(r.x_range(), r.bottom(), Stroke::new(1.0, p.border));
     }
 
-    fn status_bar(&mut self, ui: &mut Ui, p: &Palette) {
-        Frame::new().fill(p.chrome).inner_margin(Margin::symmetric(10, 3)).show(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.spacing_mut().item_spacing.x = 14.0;
-                let ch = &self.state.crosshair;
-                let field = |ui: &mut Ui, k: &str, v: Option<String>| {
-                    ui.horizontal(|ui| {
-                        ui.spacing_mut().item_spacing.x = 4.0;
-                        ui.label(RichText::new(k).font(font_mono(10.0)).color(p.text_faint));
-                        ui.label(RichText::new(v.unwrap_or_else(|| "—".into())).font(font_mono(11.0)).color(p.text));
-                    });
-                };
-                ui.label(RichText::new(icon::CROSSHAIR).color(p.accent));
-                field(ui, "TRACE", ch.trace_index.map(|v| v.to_string()));
-                field(ui, "FFID", ch.ffid.map(|v| v.to_string()));
-                field(ui, "CHAN", ch.chan.map(|v| v.to_string()));
-                field(ui, "CDP", ch.cdp.map(|v| v.to_string()));
-                field(ui, "OFFSET", ch.offset_m.map(|v| format!("{v:.1} m")));
-                field(ui, "TIME", ch.time_ms.map(|v| format!("{v:.1} ms")));
-                field(ui, "X", ch.map_x.filter(|v| *v != 0.0).map(|v| format!("{v:.1}")));
-                field(ui, "Y", ch.map_y.filter(|v| *v != 0.0).map(|v| format!("{v:.1}")));
-                field(ui, "DEPTH", ch.depth_m.map(|v| format!("{v:.1} m")));
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    let avg = if self.frame_ms.is_empty() { 0.0 } else { self.frame_ms.iter().sum::<f32>() / self.frame_ms.len() as f32 };
-                    let worst = self.frame_ms.iter().copied().fold(0.0f32, f32::max);
-                    ui.label(RichText::new(format!("ui {avg:.1} ms · max {worst:.1} ms")).font(font_mono(10.5)).color(if worst > 16.6 { p.pick } else { p.text_faint }))
-                        .on_hover_text("CPU time per UI frame (budget 16.6 ms for 60 FPS); egui repaints only on input or animation");
-                    ui.label(RichText::new(format!("{} in session", fmt_bytes(self.state.summary.bytes))).font(font_mono(10.5)).color(p.text_faint));
-                    if self.state.compute.any_busy() {
-                        ui.add(egui::Spinner::new().size(10.0).color(p.text_faint));
+    fn rail(&mut self, ui: &mut Ui, p: &Palette) {
+        panel_frame(p).inner_margin(Margin::symmetric(6, 8)).show(ui, |ui| {
+            ui.set_min_height(ui.available_height());
+            ui.vertical_centered(|ui| {
+                for (t, ic, tip) in [(LeftTab::Explorer, icon::STACK, "Explorer"), (LeftTab::Library, icon::SQUARES_FOUR, "Library"), (LeftTab::Tables, icon::TABLE, "Tables")] {
+                    if top_icon(ui, p, ic, tip, false).clicked() {
+                        self.left_tab = t;
+                        self.left_open = true;
                     }
-                    ui.label(RichText::new(self.workspace.hint()).size(11.0).color(p.text_faint));
+                }
+            });
+        });
+    }
+
+    fn center_panel(&mut self, ui: &mut Ui, p: &Palette) {
+        panel_frame(p).show(ui, |ui| {
+            ui.set_min_size(ui.available_size());
+            let mut close: Option<Doc> = None;
+            let mut pick: Option<Doc> = None;
+            ui.horizontal(|ui| {
+                ui.set_height(38.0);
+                ui.add_space(6.0);
+                if !self.left_open && top_icon(ui, p, icon::SIDEBAR_SIMPLE, "Show panel (Ctrl+B)", false).clicked() {
+                    self.left_open = true;
+                }
+                for d in self.docs.clone() {
+                    let (r, x) = doc_pill(ui, p, d, self.active == d, self.docs.len() > 1);
+                    if x {
+                        close = Some(d);
+                    } else if r.clicked() {
+                        pick = Some(d);
+                    }
+                }
+                ui.menu_button(RichText::new(icon::PLUS).color(p.text_faint), |ui| {
+                    for d in [Doc::Viewer, Doc::Flow, Doc::Velocity, Doc::Spectral, Doc::Statics, Doc::Borehole, Doc::Survey, Doc::Start] {
+                        if ui.button(format!("{}  {}", d.icon(), d.title())).clicked() {
+                            pick = Some(d);
+                        }
+                    }
                 });
+            });
+            if let Some(d) = close {
+                self.close_doc(d);
+            }
+            if let Some(d) = pick {
+                self.open(d);
+            }
+            hline(ui, p);
+            let jobs_h = if self.jobs_open { 230.0 } else { 0.0 };
+            let avail = ui.available_size();
+            let doc_rect = egui::Rect::from_min_size(ui.cursor().min, vec2(avail.x, (avail.y - jobs_h).max(80.0)));
+            let mut doc_ui = ui.new_child(egui::UiBuilder::new().max_rect(doc_rect).layout(egui::Layout::top_down(egui::Align::Min)));
+            doc_ui.set_clip_rect(doc_rect);
+            self.doc_content(&mut doc_ui);
+            if self.jobs_open {
+                let jr = egui::Rect::from_min_max(pos2(doc_rect.left(), doc_rect.bottom()), pos2(doc_rect.right(), doc_rect.bottom() + jobs_h));
+                ui.painter().hline(jr.x_range(), jr.top(), Stroke::new(1.0, p.border));
+                let mut ju = ui.new_child(egui::UiBuilder::new().max_rect(jr).layout(egui::Layout::top_down(egui::Align::Min)));
+                ju.set_clip_rect(jr);
+                crate::panes::console::ui(&mut self.state, &mut ju);
+            }
+            ui.allocate_rect(egui::Rect::from_min_size(doc_rect.min, avail), Sense::hover());
+        });
+    }
+
+    fn doc_content(&mut self, ui: &mut Ui) {
+        let s = &mut self.state;
+        match self.active {
+            Doc::Start => crate::panes::start::ui(s, ui),
+            Doc::Viewer => crate::panes::viewer::ui(s, ui),
+            Doc::Flow => crate::panes::flow_editor::ui(s, ui),
+            Doc::Velocity => crate::panes::iva::ui(s, ui),
+            Doc::Spectral => crate::panes::spectral::board_ui(s, ui),
+            Doc::Statics => crate::panes::statics::board_ui(s, ui),
+            Doc::Borehole => crate::panes::vsp::ui(s, ui),
+            Doc::Survey => crate::panes::geometry::survey_ui(s, ui),
+        }
+    }
+
+    fn right_panel(&mut self, ui: &mut Ui, p: &Palette) {
+        let slot = ui.available_rect_before_wrap();
+        ui.allocate_rect(slot, Sense::hover());
+        let mut ui = ui.new_child(egui::UiBuilder::new().max_rect(slot).layout(egui::Layout::top_down(egui::Align::Min)));
+        ui.set_clip_rect(slot.intersect(ui.clip_rect()));
+        let ui = &mut ui;
+        panel_frame(p).show(ui, |ui| {
+            ui.set_max_width(ui.available_width());
+            ui.set_min_size(ui.available_size());
+            if self.right_mode == RightMode::Assistant {
+                crate::panes::copilot::ui(&mut self.state, ui);
+                return;
+            }
+            let s = &mut self.state;
+            match self.active {
+                Doc::Viewer => crate::panes::picks::inspector_ui(s, ui),
+                Doc::Flow => crate::panes::inspector::ui(s, ui),
+                Doc::Velocity => crate::panes::iva::inspector_ui(s, ui),
+                Doc::Spectral => crate::panes::spectral::inspector_ui(s, ui),
+                Doc::Statics => crate::panes::statics::inspector_ui(s, ui),
+                Doc::Borehole => crate::panes::vsp::inspector_ui(s, ui),
+                Doc::Survey => crate::panes::geometry::inspector_ui(s, ui),
+                Doc::Start => {}
+            }
+        });
+    }
+
+    fn status_line(&mut self, ui: &mut Ui, p: &Palette) {
+        ui.horizontal_centered(|ui| {
+            ui.spacing_mut().item_spacing.x = 16.0;
+            ui.add_space(10.0);
+            let ch = &self.state.crosshair;
+            let field = |ui: &mut Ui, k: &str, v: Option<String>| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 5.0;
+                    ui.label(RichText::new(k).size(11.5).color(p.text_faint));
+                    ui.label(RichText::new(v.unwrap_or_else(|| "—".into())).font(font_mono(11.0)).color(p.text));
+                });
+            };
+            field(ui, "Trace", ch.trace_index.map(crate::data::fmt_count));
+            field(ui, "Shot", ch.ffid.map(|v| v.to_string()));
+            field(ui, "Channel", ch.chan.map(|v| v.to_string()));
+            field(ui, "CDP", ch.cdp.map(|v| v.to_string()));
+            field(ui, "Offset", ch.offset_m.map(|v| format!("{v:.1} m")));
+            field(ui, "Time", ch.time_ms.map(|v| format!("{v:.0} ms")));
+            if ch.depth_m.is_some() {
+                field(ui, "Depth", ch.depth_m.map(|v| format!("{v:.1} m")));
+            }
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                ui.add_space(10.0);
+                let avg = if self.frame_ms.is_empty() { 0.0 } else { self.frame_ms.iter().sum::<f32>() / self.frame_ms.len() as f32 };
+                let worst = self.frame_ms.iter().copied().fold(0.0f32, f32::max);
+                ui.label(RichText::new(format!("{avg:.1} ms")).font(font_mono(11.0)).color(if worst > 16.6 { p.pick } else { p.text }))
+                    .on_hover_text(format!("UI time per frame (worst {worst:.1} ms of the last 90; 16.6 ms keeps 60 FPS)"));
+                ui.label(RichText::new("Frame").size(11.5).color(p.text_faint));
+                ui.label(RichText::new(fmt_bytes(self.state.summary.bytes)).font(font_mono(11.0)).color(p.text));
+                ui.label(RichText::new("Memory").size(11.5).color(p.text_faint));
+                if self.state.compute.any_busy() {
+                    ui.add(egui::Spinner::new().size(10.0).color(p.text_faint));
+                }
             });
         });
     }
@@ -267,31 +528,24 @@ impl RustSeisApp {
         if self.state.toasts.is_empty() {
             return;
         }
-        egui::Area::new(egui::Id::unique("toasts")).anchor(Align2::RIGHT_BOTTOM, vec2(-14.0, -34.0)).order(egui::Order::Foreground).show(ctx, |ui| {
+        egui::Area::new(egui::Id::unique("toasts")).anchor(Align2::CENTER_BOTTOM, vec2(0.0, -40.0)).order(egui::Order::Foreground).show(ctx, |ui| {
             for t in self.state.toasts.iter().rev() {
                 let (ic, c) = match t.level {
                     Level::Info => (icon::INFO, p.info),
-                    Level::Ok => (icon::CHECK, p.success),
+                    Level::Ok => (icon::CHECK_CIRCLE, p.success),
                     Level::Warn => (icon::WARNING, p.pick),
-                    Level::Error => (icon::WARNING, p.danger),
+                    Level::Error => (icon::WARNING_OCTAGON, p.danger),
                 };
-                let age = (now - t.born) as f32;
-                let alpha = ((4.5 - age) / 0.4).clamp(0.0, 1.0);
+                let alpha = ((4.5 - (now - t.born) as f32) / 0.4).clamp(0.0, 1.0);
                 ui.scope(|ui| {
                     ui.multiply_opacity(alpha);
-                    Frame::new()
-                        .fill(p.raised)
-                        .stroke(Stroke::new(1.0, with_alpha(c, 140)))
-                        .corner_radius(CornerRadius::same(theme::RADIUS_MD))
-                        .inner_margin(Margin::symmetric(10, 7))
-                        .shadow(ui.visuals().popup_shadow)
-                        .show(ui, |ui| {
-                            ui.set_max_width(420.0);
-                            ui.horizontal(|ui| {
-                                ui.label(RichText::new(ic).color(c));
-                                ui.label(RichText::new(&t.text).size(12.5));
-                            });
+                    widgets::glass_frame(p).inner_margin(Margin::symmetric(12, 9)).show(ui, |ui| {
+                        ui.set_max_width(440.0);
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new(ic).color(c));
+                            ui.label(RichText::new(&t.text).size(12.5).color(p.text));
                         });
+                    });
                 });
                 ui.add_space(6.0);
             }
@@ -305,42 +559,58 @@ impl RustSeisApp {
         }
         #[derive(Clone)]
         enum Cmd {
-            Ws(Workspace),
+            Stage(Workspace),
+            Doc(Doc),
             OpenData,
             OpenFlow,
             SaveFlow,
             RunFlow,
-            LoadOpf,
-            SaveOpf,
+            LoadDb,
+            SaveDb,
             Theme,
             Undo,
             Redo,
-            ResetLayout,
             AddTool(String),
         }
-        let mut cmds: Vec<(String, String, Cmd)> = Workspace::ALL.iter().enumerate().map(|(i, w)| (format!("{}  Go to {}", w.icon(), w.title()), format!("Ctrl+{}", i + 1), Cmd::Ws(*w))).collect();
+        let mut cmds: Vec<(String, String, Cmd)> = Workspace::ALL
+            .iter()
+            .enumerate()
+            .map(|(i, w)| (format!("{}  Go to {}", icon::ARROW_RIGHT, w.title()), format!("Ctrl+{}", i + 1), Cmd::Stage(*w)))
+            .collect();
+        for d in [Doc::Spectral, Doc::Survey, Doc::Start] {
+            cmds.push((format!("{}  Open {}", d.icon(), d.title()), String::new(), Cmd::Doc(d)));
+        }
         cmds.extend([
             (format!("{}  Open seismic data…", icon::FOLDER_OPEN), "Ctrl+O".into(), Cmd::OpenData),
-            (format!("{}  Open flow…", icon::FILE_CODE), String::new(), Cmd::OpenFlow),
+            (format!("{}  Open flow…", icon::FLOW_ARROW), String::new(), Cmd::OpenFlow),
             (format!("{}  Save flow", icon::FLOPPY_DISK), "Ctrl+S".into(), Cmd::SaveFlow),
             (format!("{}  Run flow", icon::PLAY), "Ctrl+Enter".into(), Cmd::RunFlow),
-            (format!("{}  Load OPF database…", icon::DATABASE), String::new(), Cmd::LoadOpf),
-            (format!("{}  Save OPF database", icon::DATABASE), String::new(), Cmd::SaveOpf),
-            (format!("{}  Toggle theme", icon::CIRCLE_HALF), "Ctrl+T".into(), Cmd::Theme),
+            (format!("{}  Open project database…", icon::DATABASE), String::new(), Cmd::LoadDb),
+            (format!("{}  Save project database", icon::DATABASE), String::new(), Cmd::SaveDb),
+            (format!("{}  Switch light / dark", icon::CIRCLE_HALF), String::new(), Cmd::Theme),
             (format!("{}  Undo", icon::ARROW_COUNTER_CLOCKWISE), "Ctrl+Z".into(), Cmd::Undo),
             (format!("{}  Redo", icon::ARROW_CLOCKWISE), "Ctrl+Y".into(), Cmd::Redo),
-            (format!("{}  Reset workspace layout", icon::FRAME_CORNERS), String::new(), Cmd::ResetLayout),
         ]);
         for t in &self.state.catalog {
-            cmds.push((format!("{}  Add tool · {}", icon::PLUS, t.label), t.menu_id.clone(), Cmd::AddTool(t.menu_id.clone())));
+            cmds.push((format!("{}  Add step · {}", icon::PLUS, t.label), t.category.clone(), Cmd::AddTool(t.menu_id.clone())));
         }
         let q = self.palette_query.to_ascii_lowercase();
-        let hits: Vec<(String, String, Cmd)> = cmds.into_iter().filter(|(l, k, _)| q.is_empty() || l.to_ascii_lowercase().contains(&q) || k.to_ascii_lowercase().contains(&q)).take(14).collect();
+        let hits: Vec<(String, String, Cmd)> = cmds
+            .into_iter()
+            .filter(|(l, k, _)| q.is_empty() || l.to_ascii_lowercase().contains(&q) || k.to_ascii_lowercase().contains(&q))
+            .take(12)
+            .collect();
         let mut run: Option<Cmd> = None;
         let mut close = false;
         let modal = egui::Modal::new(egui::Id::unique("cmd_palette")).show(ctx, |ui| {
-            ui.set_width(520.0);
-            let r = ui.add(egui::TextEdit::singleline(&mut self.palette_query).hint_text("Type a command or tool name…").font(egui::FontId::proportional(15.0)).desired_width(f32::INFINITY));
+            ui.set_width(560.0);
+            let r = ui.add(
+                egui::TextEdit::singleline(&mut self.palette_query)
+                    .hint_text("Go to a stage, open something, or add a step…")
+                    .font(egui::FontId::proportional(15.0))
+                    .desired_width(f32::INFINITY)
+                    .margin(Margin::symmetric(10, 8)),
+            );
             r.request_focus();
             if r.changed() {
                 self.palette_sel = 0;
@@ -359,21 +629,21 @@ impl RustSeisApp {
                     run = hits.get(self.palette_sel).map(|h| h.2.clone());
                 }
             });
-            ui.add_space(4.0);
+            ui.add_space(6.0);
             for (i, (label, key, cmd)) in hits.iter().enumerate() {
                 let sel = i == self.palette_sel;
-                let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 26.0), Sense::click());
+                let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width(), 30.0), Sense::click());
                 if sel || resp.hovered() {
-                    ui.painter().rect_filled(rect, CornerRadius::same(4), if sel { p.accent_soft } else { with_alpha(p.raised, 200) });
+                    ui.painter().rect_filled(rect, CornerRadius::same(7), if sel { p.accent_soft } else { p.raised });
                 }
-                ui.painter().text(rect.left_center() + vec2(8.0, 0.0), Align2::LEFT_CENTER, label, egui::FontId::proportional(13.0), if sel { p.text } else { p.text_muted });
-                ui.painter().text(rect.right_center() - vec2(8.0, 0.0), Align2::RIGHT_CENTER, key, font_mono(10.5), p.text_faint);
+                ui.painter().text(rect.left_center() + vec2(10.0, 0.0), Align2::LEFT_CENTER, label, egui::FontId::proportional(13.0), if sel { p.text } else { p.text_muted });
+                ui.painter().text(rect.right_center() - vec2(10.0, 0.0), Align2::RIGHT_CENTER, key, egui::FontId::proportional(11.5), p.text_faint);
                 if resp.clicked() {
                     run = Some(cmd.clone());
                 }
             }
             if hits.is_empty() {
-                ui.label(RichText::new("No matches").color(p.text_faint));
+                ui.label(RichText::new("Nothing matches").color(p.text_faint));
             }
         });
         if modal.should_close() {
@@ -381,22 +651,21 @@ impl RustSeisApp {
         }
         if let Some(cmd) = run {
             close = true;
-            let s = &mut self.state;
             match cmd {
-                Cmd::Ws(w) => self.workspace = w,
-                Cmd::OpenData => s.open_seismic_dialog(),
-                Cmd::OpenFlow => s.open_flow_dialog(),
-                Cmd::SaveFlow => s.save_flow(false),
-                Cmd::RunFlow => s.run_current_flow(),
-                Cmd::LoadOpf => s.open_opf_dialog(),
-                Cmd::SaveOpf => s.save_opf_dialog(),
-                Cmd::Theme => s.theme = s.theme.toggled(),
-                Cmd::Undo => s.undo(),
-                Cmd::Redo => s.redo(),
-                Cmd::ResetLayout => self.reset_layout(),
+                Cmd::Stage(w) => self.set_stage(w),
+                Cmd::Doc(d) => self.open(d),
+                Cmd::OpenData => self.state.open_seismic_dialog(),
+                Cmd::OpenFlow => self.state.open_flow_dialog(),
+                Cmd::SaveFlow => self.state.save_flow(false),
+                Cmd::RunFlow => self.state.run_current_flow(),
+                Cmd::LoadDb => self.state.open_opf_dialog(),
+                Cmd::SaveDb => self.state.save_opf_dialog(),
+                Cmd::Theme => self.state.theme = self.state.theme.toggled(),
+                Cmd::Undo => self.state.undo(),
+                Cmd::Redo => self.state.redo(),
                 Cmd::AddTool(id) => {
-                    s.insert_tool(&id);
-                    self.workspace = Workspace::Flow;
+                    self.state.insert_tool(&id);
+                    self.open(Doc::Flow);
                 }
             }
         }
@@ -405,12 +674,11 @@ impl RustSeisApp {
         }
     }
 
-    /// One full UI pass (also used by headless tests).
+    /// One full UI pass (also driven by headless tests).
     pub fn frame(&mut self, ui: &mut Ui) {
         let ctx = ui.ctx().clone();
         let t_frame = std::time::Instant::now();
         self.state.time = ctx.input(|i| i.time);
-
         if self.state.poll_engine() {
             ctx.request_repaint();
         }
@@ -421,30 +689,51 @@ impl RustSeisApp {
             self.applied_theme = Some(self.state.theme);
         }
         self.shortcuts(&ctx);
-        if let Some(ws) = self.state.workspace_request.take() {
-            self.workspace = ws;
+        if let Some(d) = self.state.doc_request.take() {
+            self.open(d);
         }
         let p = *palette(self.state.theme);
+        let g = space::GUTTER as i8;
 
-        egui::Panel::top("rs_title").frame(Frame::NONE).show_separator_line(false).show(ui, |ui| self.title_bar(ui, &p));
-        egui::Panel::bottom("rs_status").frame(Frame::NONE).show_separator_line(false).show(ui, |ui| self.status_bar(ui, &p));
-        egui::CentralPanel::default().frame(Frame::new().fill(p.chrome)).show(ui, |ui| {
-            let style = theme::dock_style(ui.style(), &p);
-            let ws = self.workspace;
-            let dock = self.docks.entry(ws).or_insert_with(|| dock_for(ws));
-            let mut viewer = PaneViewer { state: &mut self.state };
-            DockArea::new(dock)
-                .id(egui::Id::unique(("dock", ws as u8)))
-                .style(style)
-                .show_close_buttons(false)
-                .show_add_buttons(false)
-                .tab_context_menus(false)
-                .show_leaf_close_all_buttons(false)
-                .show_leaf_collapse_buttons(false)
-                .show_inside(ui, &mut viewer);
+        egui::Panel::top("rs_top").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 8, right: 8, top: 4, bottom: 2 })).exact_size(50.0).show_separator_line(false).show(ui, |ui| self.top_bar(ui, &p));
+        egui::Panel::top("rs_cmd").frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: g, top: 2, bottom: 0 })).exact_size(46.0).show_separator_line(false).show(ui, |ui| {
+            crate::commands::bar(self, ui, &p);
         });
+        egui::Panel::bottom("rs_status").frame(Frame::NONE.fill(p.chrome)).exact_size(26.0).show_separator_line(false).show(ui, |ui| self.status_line(ui, &p));
+
+        let picking = self.state.viewer.mode != crate::panes::viewer::PickMode::Navigate && self.active == Doc::Viewer;
+        if self.active != Doc::Start {
+            if self.left_open && !picking {
+                egui::Panel::left("rs_left")
+                    .frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: 0, top: g, bottom: 0 }))
+                    .resizable(true)
+                    .default_size(266.0)
+                    .size_range(210.0..=440.0)
+                    .show_separator_line(false)
+                    .show(ui, |ui| self.left_panel(ui, &p));
+            } else {
+                egui::Panel::left("rs_rail")
+                    .frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: g, right: 0, top: g, bottom: 0 }))
+                    .exact_size(52.0)
+                    .show_separator_line(false)
+                    .show(ui, |ui| self.rail(ui, &p));
+            }
+        }
+        if self.active != Doc::Start || self.right_mode == RightMode::Assistant {
+            let w = if self.right_mode == RightMode::Assistant { 380.0 } else { 316.0 };
+            egui::Panel::right("rs_right")
+                .frame(Frame::NONE.fill(p.chrome).inner_margin(Margin { left: 0, right: g, top: g, bottom: 0 }))
+                .resizable(true)
+                .default_size(w)
+                .size_range(260.0..=520.0)
+                .show_separator_line(false)
+                .show(ui, |ui| self.right_panel(ui, &p));
+        }
+        egui::CentralPanel::default().frame(Frame::NONE.fill(p.chrome).inner_margin(Margin::same(g))).show(ui, |ui| self.center_panel(ui, &p));
+
         self.toasts(&ctx, &p);
         self.command_palette(&ctx, &p);
+        crate::panes::project::new_project_modal(&mut self.state, &ctx);
 
         if self.state.is_busy() || self.state.compute.any_busy() {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
@@ -466,85 +755,75 @@ impl eframe::App for RustSeisApp {
     }
 }
 
-fn brand(ui: &mut Ui, p: &Palette) {
-    let (rect, _) = ui.allocate_exact_size(vec2(24.0, 24.0), Sense::hover());
-    let painter = ui.painter();
-    painter.rect(rect, CornerRadius::same(6), mix(p.chrome, p.accent, 0.16), Stroke::new(1.0, with_alpha(p.accent, 150)), StrokeKind::Inside);
-    // A tiny wavelet with a positive VA lobe: the mark.
-    let c = rect.center();
-    let pts: Vec<egui::Pos2> = (0..=24)
-        .map(|i| {
-            let x = i as f32 / 24.0;
-            let t = (x - 0.5) * 6.0;
-            let a = (1.0 - 2.0 * t * t) * (-t * t).exp();
-            pos2(rect.left() + 3.0 + x * (rect.width() - 6.0), c.y - a * 7.0)
-        })
-        .collect();
-    painter.add(egui::Shape::line(pts, Stroke::new(1.8, p.accent)));
-    ui.add_space(2.0);
-    ui.label(RichText::new("RustSeis").font(font_display(17.0)).color(p.text));
-    ui.label(RichText::new("2D").font(font_mono(10.0)).color(p.text_faint));
+fn stage_pills_width(ui: &Ui, p: &Palette) -> f32 {
+    let font = egui::FontId::proportional(13.0);
+    Workspace::ALL.iter().map(|w| ui.painter().layout_no_wrap(w.title().to_string(), font.clone(), p.text).size().x + 34.0).sum::<f32>() + 8.0
 }
 
-fn workspace_tab(ui: &mut Ui, p: &Palette, ws: Workspace, active: bool, n: usize) -> egui::Response {
-    let label = format!("{}  {}", ws.icon(), ws.title());
+fn hline(ui: &mut Ui, p: &Palette) {
+    let r = ui.available_rect_before_wrap();
+    ui.painter().hline(r.x_range(), r.top(), Stroke::new(1.0, p.border));
+    ui.add_space(1.0);
+}
+
+/// Square icon button used in the top bar and rails.
+pub fn top_icon(ui: &mut Ui, p: &Palette, ic: &str, tip: &str, active: bool) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(32.0, 30.0), Sense::click());
+    let fill = if active { p.accent_soft } else if resp.hovered() { p.raised } else { egui::Color32::TRANSPARENT };
+    let stroke = if active { Stroke::new(1.0, p.accent_line) } else { Stroke::NONE };
+    ui.painter().rect(rect, CornerRadius::same(8), fill, stroke, StrokeKind::Inside);
+    let col = if active { p.accent_text } else if resp.hovered() { p.text } else { p.text_muted };
+    ui.painter().text(rect.center(), Align2::CENTER_CENTER, ic, egui::FontId::proportional(16.0), col);
+    resp.on_hover_text(tip)
+}
+
+fn search_box(ui: &mut Ui, p: &Palette) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(230.0, 30.0), Sense::click());
+    ui.painter().rect(rect, CornerRadius::same(8), p.panel, Stroke::new(1.0, if resp.hovered() { p.border_strong } else { p.border }), StrokeKind::Inside);
+    ui.painter().text(rect.left_center() + vec2(12.0, 0.0), Align2::LEFT_CENTER, icon::MAGNIFYING_GLASS, egui::FontId::proportional(13.0), p.text_faint);
+    ui.painter().text(rect.left_center() + vec2(32.0, 0.0), Align2::LEFT_CENTER, "Go to anything", egui::FontId::proportional(12.5), p.text_faint);
+    let k = egui::Rect::from_center_size(rect.right_center() - vec2(30.0, 0.0), vec2(44.0, 18.0));
+    ui.painter().rect(k, CornerRadius::same(4), egui::Color32::TRANSPARENT, Stroke::new(1.0, p.border_strong), StrokeKind::Inside);
+    ui.painter().text(k.center(), Align2::CENTER_CENTER, "Ctrl K", font_mono(10.5), p.text_faint);
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
+}
+
+fn tab_pill(ui: &mut Ui, p: &Palette, label: &str, on: bool) -> egui::Response {
+    let font = if on { font_semibold(12.5) } else { egui::FontId::proportional(12.5) };
+    let g = ui.painter().layout_no_wrap(label.to_string(), font.clone(), p.text);
+    let (rect, resp) = ui.allocate_exact_size(vec2(g.size().x + 18.0, 26.0), Sense::click());
+    if on {
+        ui.painter().rect_filled(rect, CornerRadius::same(7), p.raised);
+    } else if resp.hovered() {
+        ui.painter().rect_filled(rect, CornerRadius::same(7), with_alpha(p.raised, 140));
+    }
+    ui.painter().text(rect.center(), Align2::CENTER_CENTER, label, font, if on { p.text } else { p.text_faint });
+    resp
+}
+
+/// Document tab pill; returns (response, close-clicked).
+fn doc_pill(ui: &mut Ui, p: &Palette, d: Doc, on: bool, closable: bool) -> (egui::Response, bool) {
+    let label = format!("{}  {}", d.icon(), d.title());
     let font = egui::FontId::proportional(12.5);
     let g = ui.painter().layout_no_wrap(label.clone(), font.clone(), p.text);
-    let size = vec2(g.size().x + 22.0, 28.0);
-    let (rect, resp) = ui.allocate_exact_size(size, Sense::click());
-    let hovered = resp.hovered();
-    if active {
-        let r = egui::Rect::from_min_max(rect.min, pos2(rect.max.x, rect.max.y + 1.0));
-        ui.painter().rect(r, CornerRadius { nw: 5, ne: 5, sw: 0, se: 0 }, p.panel, Stroke::new(1.0, p.border), StrokeKind::Inside);
-        ui.painter().hline(rect.x_range().shrink(6.0), rect.top() + 1.0, Stroke::new(2.0, p.accent));
-    } else if hovered {
-        ui.painter().rect_filled(rect.shrink2(vec2(0.0, 3.0)), CornerRadius::same(4), mix(p.chrome, p.panel, 0.7));
+    let extra = if closable && on { 22.0 } else { 0.0 };
+    let (rect, resp) = ui.allocate_exact_size(vec2(g.size().x + 22.0 + extra, 28.0), Sense::click());
+    if on {
+        ui.painter().rect_filled(rect, CornerRadius::same(7), p.raised);
+    } else if resp.hovered() {
+        ui.painter().rect_filled(rect, CornerRadius::same(7), with_alpha(p.raised, 140));
     }
-    let color = if active { p.text } else if hovered { p.text } else { p.text_muted };
-    ui.painter().text(rect.center(), Align2::CENTER_CENTER, label, font, color);
-    resp.on_hover_text(format!("{} — {} (Ctrl+{n})", ws.title(), ws.hint()))
-}
-
-fn data_chip(ui: &mut Ui, p: &Palette, s: &AppState) {
-    let text = if s.summary.n_traces > 0 { s.summary.headline() } else { "no data loaded".into() };
-    let font = font_mono(11.0);
-    let g = ui.painter().layout_no_wrap(text, font, if s.summary.n_traces > 0 { p.text } else { p.text_faint });
-    let (rect, resp) = ui.allocate_exact_size(g.size() + vec2(30.0, 10.0), Sense::hover());
-    ui.painter().rect(rect, CornerRadius::same(5), p.sunken, Stroke::new(1.0, p.border), StrokeKind::Inside);
-    ui.painter().text(rect.left_center() + vec2(9.0, 0.0), Align2::CENTER_CENTER, icon::WAVEFORM, egui::FontId::proportional(12.0), p.accent);
-    ui.painter().galley(rect.min + vec2(20.0, 5.0), g, p.text);
-    resp.on_hover_text(format!("Active traces · {} buffers in FlowContext", s.summary.buffers));
-}
-
-fn job_pill(ui: &mut Ui, p: &Palette, s: &AppState) {
-    let (text, color, busy) = match s.busy_info() {
-        Some((label, el, eta)) => {
-            let t = match eta {
-                Some(e) => format!("{label} · {} / ~{}", fmt_ms(el.as_secs_f64() * 1000.0), fmt_ms(e as f64)),
-                None => format!("{label} · {}", fmt_ms(el.as_secs_f64() * 1000.0)),
-            };
-            (t, p.accent, true)
+    let col = if on { p.text } else { p.text_muted };
+    ui.painter().text(pos2(rect.left() + 11.0, rect.center().y), Align2::LEFT_CENTER, label, font, col);
+    let mut closed = false;
+    if closable && on {
+        let xr = egui::Rect::from_center_size(pos2(rect.right() - 14.0, rect.center().y), vec2(16.0, 16.0));
+        let xresp = ui.interact(xr, egui::Id::unique(("doc_close", d as u8)), Sense::click());
+        if xresp.hovered() {
+            ui.painter().rect_filled(xr, CornerRadius::same(4), mix(p.raised, p.text, 0.1));
         }
-        None => match s.history.last() {
-            Some(j) if !j.ok => ("last job failed".to_string(), p.danger, false),
-            Some(j) => (format!("idle · last {}", fmt_ms(j.elapsed.as_secs_f64() * 1000.0)), p.text_muted, false),
-            None => ("engine idle".to_string(), p.text_muted, false),
-        },
-    };
-    let font = egui::FontId::proportional(11.5);
-    let g = ui.painter().layout_no_wrap(text, font, color);
-    let w = (g.size().x + 30.0).min(360.0);
-    let (rect, _) = ui.allocate_exact_size(vec2(w, 24.0), Sense::hover());
-    ui.painter().rect(rect, CornerRadius::same(12), if busy { with_alpha(p.accent, 26) } else { p.sunken }, Stroke::new(1.0, if busy { with_alpha(p.accent, 120) } else { p.border }), StrokeKind::Inside);
-    let dot = rect.left_center() + vec2(12.0, 0.0);
-    if busy {
-        let t = ui.input(|i| i.time) as f32;
-        let r = 3.0 + (t * 4.0).sin().abs() * 1.5;
-        ui.painter().circle_filled(dot, r, p.accent);
-        ui.ctx().request_repaint();
-    } else {
-        ui.painter().circle_filled(dot, 3.0, if color == p.danger { p.danger } else { p.success });
+        ui.painter().text(xr.center(), Align2::CENTER_CENTER, icon::X, egui::FontId::proportional(11.0), p.text_faint);
+        closed = xresp.clicked();
     }
-    let clip = egui::Rect::from_min_max(pos2(rect.left() + 20.0, rect.top()), pos2(rect.right() - 9.0, rect.bottom()));
-    ui.painter().with_clip_rect(clip).galley(pos2(rect.left() + 22.0, rect.center().y - g.size().y / 2.0), g, color);
+    (resp, closed)
 }

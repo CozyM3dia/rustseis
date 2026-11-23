@@ -16,8 +16,15 @@ pub enum TraceSource {
 impl TraceSource {
     pub fn label(&self) -> String {
         match self {
-            Self::Active => "Active traces".into(),
-            Self::Buffer(n) => format!("Buffer · {n}"),
+            Self::Active => "Latest result".into(),
+            Self::Buffer(n) => {
+                let t = n.replace(['_', '-'], " ");
+                let mut c = t.chars();
+                match c.next() {
+                    Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+                    None => t,
+                }
+            }
         }
     }
 
@@ -344,4 +351,12 @@ mod tests {
         assert_eq!(fmt_count(121152), "121,152");
         assert_eq!(fmt_count(96), "96");
     }
+}
+
+/// Hash any hashable value (cache keys).
+pub fn hash_parts(v: &impl std::hash::Hash) -> u64 {
+    use std::hash::Hasher;
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    v.hash(&mut h);
+    h.finish()
 }

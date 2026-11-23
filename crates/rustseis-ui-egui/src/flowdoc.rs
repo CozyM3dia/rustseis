@@ -261,6 +261,20 @@ impl FlowDoc {
     }
 }
 
+/// A nested step as JSON without default fields (`enabled: true`, `label: null`).
+fn compact(st: &FlowStep) -> serde_json::Value {
+    let mut v = serde_json::to_value(st).unwrap_or(json!({}));
+    if let Some(o) = v.as_object_mut() {
+        if o.get("enabled") == Some(&json!(true)) {
+            o.remove("enabled");
+        }
+        if o.get("label").is_some_and(|l| l.is_null()) {
+            o.remove("label");
+        }
+    }
+    v
+}
+
 pub fn lower(n: &FlowNode) -> FlowStep {
     let mut params = n.params.clone();
     if !params.is_object() {
@@ -268,13 +282,13 @@ pub fn lower(n: &FlowNode) -> FlowStep {
     }
     match n.tool.to_ascii_lowercase().as_str() {
         "flow_if" => {
-            let get = |i: usize| -> Vec<FlowStep> { n.branches.get(i).map(|b| b.iter().map(lower).collect()).unwrap_or_default() };
-            params["then_steps"] = serde_json::to_value(get(0)).unwrap_or(json!([]));
-            params["else_steps"] = serde_json::to_value(get(1)).unwrap_or(json!([]));
+            let get = |i: usize| -> Vec<serde_json::Value> { n.branches.get(i).map(|b| b.iter().map(|c| compact(&lower(c))).collect()).unwrap_or_default() };
+            params["then_steps"] = serde_json::Value::Array(get(0));
+            params["else_steps"] = serde_json::Value::Array(get(1));
         }
         "flow_split" => {
-            let bs: Vec<Vec<FlowStep>> = n.branches.iter().map(|b| b.iter().map(lower).collect()).collect();
-            params["branches"] = serde_json::to_value(bs).unwrap_or(json!([]));
+            let bs: Vec<serde_json::Value> = n.branches.iter().map(|b| serde_json::Value::Array(b.iter().map(|c| compact(&lower(c))).collect())).collect();
+            params["branches"] = serde_json::Value::Array(bs);
         }
         _ => {}
     }
