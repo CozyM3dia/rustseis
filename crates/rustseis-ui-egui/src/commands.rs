@@ -69,10 +69,27 @@ pub fn bar(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
 fn add_step(app: &mut RustSeisApp, id: &str) {
     app.state.insert_tool(id);
     app.open(Doc::Flow);
+    let linked = app
+        .state
+        .flow_sel
+        .as_ref()
+        .and_then(|p| app.state.flow.get(p))
+        .and_then(|n| {
+            let get = |k: &str| n.params.get(k).and_then(|v| v.as_str()).filter(|v| !v.is_empty() && *v != "default").map(str::to_string);
+            get("velocity_table").map(|v| format!(" · uses velocities “{v}”")).or_else(|| get("mute_table").map(|m| format!(" · uses mute “{m}”")))
+        })
+        .unwrap_or_default();
     app.state.toast(
         Level::Ok,
-        format!("Added “{}” to the flow", app.state.tool(id).map(|t| t.label.clone()).unwrap_or_default()),
+        format!("Added “{}” to the flow{linked}", app.state.tool(id).map(|t| t.label.clone()).unwrap_or_default()),
     );
+}
+
+/// Compact ribbon button that adds one library tool to the flow.
+fn tool_button(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette, ic: Icon, label: &str, tip: &str, id: &str) {
+    if ribbon::small_button(ui, p, ic, label, false, false).on_hover_text(tip).clicked() {
+        add_step(app, id);
+    }
 }
 
 fn catalog_tools_for(app: &RustSeisApp, cats: &[&str]) -> Vec<(String, String, String)> {
@@ -194,6 +211,13 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                 }
             });
             ribbon::divider(ui, p);
+            ribbon::group(ui, p, "Modeling", None, |ui| {
+                ribbon::stack(ui, |ui| {
+                    tool_button(app, ui, p, Icon::Wiggles, "Synthetic gathers", "Add a 2D synthetic seismic modeller as the flow input", "synth");
+                    tool_button(app, ui, p, Icon::RtmGpu, "FD wave modeling", "Add 2D acoustic finite-difference modelling as the flow input", "afd");
+                });
+            });
+            ribbon::divider(ui, p);
             ribbon::group(ui, p, "Views", None, |ui| {
                 if ribbon::large_button(ui, p, Icon::SurveyMap, "Survey", "Map", app.active == Doc::Survey, false, false)
                     .on_hover_text("Inspect shot/receiver coordinates, fold, and geometry")
@@ -254,6 +278,55 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                 large_add_menu(app, ui, p, Icon::Filter, "Filter &", "Gain", &["Filtering", "Amplitude"]);
                 large_add_menu(app, ui, p, Icon::Decon, "Decon", "", &["Deconvolution"]);
                 large_add_menu(app, ui, p, Icon::Noise, "Noise &", "Edit", &["Editing", "Data Enhancement"]);
+                ribbon::stack(ui, |ui| {
+                    if ribbon::small_button(ui, p, Icon::Spectra, "Spectral / F-K QC", app.active == Doc::Spectral, false)
+                        .on_hover_text("Design band-pass, F-K and decon on the gather on screen, then add them to the flow")
+                        .clicked()
+                    {
+                        app.open(Doc::Spectral);
+                    }
+                    if ribbon::small_button(ui, p, Icon::Mute, "Pick mute", false, false)
+                        .on_hover_text("Open the gather view in mute picking mode")
+                        .clicked()
+                    {
+                        app.state.viewer.mode = PickMode::Mute;
+                        app.open(Doc::Viewer);
+                    }
+                    if ribbon::small_button(ui, p, Icon::Decon, "Decon gate", false, false)
+                        .on_hover_text("Open the gather view to pick the decon design gate")
+                        .clicked()
+                    {
+                        app.state.viewer.mode = PickMode::DeconGate;
+                        app.open(Doc::Viewer);
+                    }
+                });
+            });
+            ribbon::divider(ui, p);
+            ribbon::group(ui, p, "Noise & Multiples", None, |ui| {
+                if ribbon::large_button(ui, p, Icon::Noise, "Ground", "roll", false, false, false)
+                    .on_hover_text("Add low-frequency array filter (LFAF) ground-roll attenuation")
+                    .clicked()
+                {
+                    add_step(app, "lfaf");
+                }
+                ribbon::stack(ui, |ui| {
+                    tool_button(app, ui, p, Icon::Noise, "Air blast", "Add air-blast (acoustic wave) attenuation", "airblast");
+                    tool_button(app, ui, p, Icon::Filter, "F-X decon", "Add F-X deconvolution random-noise attenuation", "fxdecon");
+                    tool_button(app, ui, p, Icon::Spectra, "Curvelet denoise", "Add multiscale curvelet thresholding denoise", "curvelet_denoise");
+                });
+                ribbon::stack(ui, |ui| {
+                    tool_button(app, ui, p, Icon::Stack, "SRME multiples", "Add 2D SRME: predicts surface multiples (kept in buffer “srme_model”) and subtracts them", "w_srme_v3");
+                    tool_button(app, ui, p, Icon::Compare, "Adaptive subtract", "Add adaptive subtraction of a multiple model buffer (links to the SRME model)", "w_asub");
+                    tool_button(app, ui, p, Icon::Spectra, "Radon transform", "Add Radon / tau-p transform that saves a panel for Spectral QC", "radon_trans");
+                });
+            });
+            ribbon::divider(ui, p);
+            ribbon::group(ui, p, "Wavelet", None, |ui| {
+                ribbon::stack(ui, |ui| {
+                    tool_button(app, ui, p, Icon::Decon, "SC decon", "Add surface-consistent deconvolution (shot / receiver / offset terms)", "scdecon");
+                    tool_button(app, ui, p, Icon::Amplitude, "Inverse-Q", "Add inverse-Q absorption compensation", "qcomp");
+                    tool_button(app, ui, p, Icon::Wiggles, "Phase rotation", "Add constant phase rotation, time shift and polarity", "phase_rot");
+                });
             });
             ribbon::divider(ui, p);
             ribbon::group(ui, p, "Subsurface", None, |ui| {
@@ -294,6 +367,14 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                         app.left_open = true;
                     }
                 });
+                ribbon::stack(ui, |ui| {
+                    tool_button(app, ui, p, Icon::SaveFile, "Checkpoint", "Add a named trace buffer you can compare in the gather view", "buffer_save");
+                    tool_button(app, ui, p, Icon::Branch, "IF / ELSE", "Add a branch that runs steps only on traces whose header is in a range", "flow_if");
+                    tool_button(app, ui, p, Icon::Branch, "Split", "Add parallel branches and keep one branch's output", "flow_split");
+                });
+                ribbon::stack(ui, |ui| {
+                    tool_button(app, ui, p, Icon::CodeJson, "Python step", "Add a custom Python step: def process(traces, params)", "python_node");
+                });
             });
         }
 
@@ -326,6 +407,23 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                         .clicked()
                     {
                         app.state.iva.clear_current();
+                    }
+                });
+                ribbon::stack(ui, |ui| {
+                    ui.add_enabled_ui(!busy, |ui| {
+                        if ribbon::small_button(ui, p, Icon::FlowBuilder, "Apply to flow", false, false)
+                            .on_hover_text("Save, then link these velocities into every NMO / migration step of the flow")
+                            .clicked()
+                        {
+                            crate::panes::iva::apply_to_flow(&mut app.state);
+                        }
+                    });
+                    if ribbon::small_button(ui, p, Icon::VelocityField, "Smooth field", false, false)
+                        .on_hover_text("Laterally smooth the picked velocity field")
+                        .clicked()
+                    {
+                        let n = app.state.iva.smooth_field(1);
+                        app.state.toast(Level::Ok, format!("Smoothed the velocity field across {n} locations · Save to keep it"));
                     }
                 });
             });
@@ -361,11 +459,28 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                     let super_label = format!("Supergather · {} CDPs", app.state.iva.super_half * 2 + 1);
                     let r = ribbon::small_button(ui, p, Icon::Gathers, &super_label, false, true);
                     egui::Popup::menu(&r).show(|ui| {
-                        for n in [1usize, 3, 5, 7, 9] {
+                        for n in [1usize, 3, 5, 7, 9, 11, 15, 21] {
                             if ui.selectable_label(app.state.iva.super_half * 2 + 1 == n, format!("{n} CDPs")).clicked() {
                                 app.state.iva.super_half = n / 2;
                             }
                         }
+                    });
+                    let stride = app.state.iva.cdp_stride;
+                    let step_label = if stride == 0 { format!("Every {} CDPs · auto", app.state.iva.stride()) } else { format!("Every {stride} CDPs") };
+                    let r = ribbon::small_button(ui, p, Icon::RunToHere, &step_label, false, true);
+                    egui::Popup::menu(&r).show(|ui| {
+                        if ui.selectable_label(stride == 0, "Auto (about 40 locations)").clicked() {
+                            app.state.iva.cdp_stride = 0;
+                        }
+                        for n in [16usize, 32, 64, 128, 256] {
+                            if ui.selectable_label(stride == n, format!("Every {n} CDPs")).clicked() {
+                                app.state.iva.cdp_stride = n;
+                            }
+                        }
+                        ui.horizontal(|ui| {
+                            ui.label("Custom");
+                            ui.add(egui::DragValue::new(&mut app.state.iva.cdp_stride).range(0..=5000).suffix(" CDPs"));
+                        });
                     });
                 });
             });
@@ -516,17 +631,31 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                     }
                 });
                 ribbon::stack(ui, |ui| {
-                    if ribbon::small_button(ui, p, Icon::TimeMig, "Time migration", false, false)
-                        .on_hover_text("Add 2D Kirchhoff time migration step")
+                    if ribbon::small_button(ui, p, Icon::TimeMig, "Post-stack Kirchhoff", false, false)
+                        .on_hover_text("Add post-stack 2D Kirchhoff time migration (runs on the stacked section, after CDP stack)")
+                        .clicked()
+                    {
+                        add_step(app, "kirtime2dstk");
+                    }
+                    if ribbon::small_button(ui, p, Icon::TimeMig, "Pre-stack PSTM", false, false)
+                        .on_hover_text("Add pre-stack Kirchhoff time migration (runs on CDP gathers, before stacking)")
                         .clicked()
                     {
                         add_step(app, "kirtime2d");
                     }
-                    if ribbon::small_button(ui, p, Icon::Spectra, "F-K migration", false, false)
-                        .on_hover_text("Add Stolt F-K post-stack migration step")
+                    if ribbon::small_button(ui, p, Icon::Spectra, "F-K / Stolt mig", false, false)
+                        .on_hover_text("Add post-stack Stolt F-K or phase-shift migration")
                         .clicked()
                     {
                         add_step(app, "fkmig2d");
+                    }
+                });
+                ribbon::stack(ui, |ui| {
+                    if ribbon::small_button(ui, p, Icon::TimeMig, "FD migration", false, false)
+                        .on_hover_text("Add post-stack 45° finite-difference time migration (lateral V(x,t))")
+                        .clicked()
+                    {
+                        add_step(app, "fdmig");
                     }
                     if ribbon::small_button(ui, p, Icon::TimeMig, "DMO panel", false, false)
                         .on_hover_text("Add Dip Moveout F-K correction step")
@@ -658,9 +787,14 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                         .clicked()
                     {
                         match app.state.viewer.mode {
-                            PickMode::Mute => crate::panes::viewer::save_mute(&mut app.state),
+                            PickMode::Mute => {
+                                crate::panes::viewer::save_mute(&mut app.state);
+                            }
                             PickMode::FirstBreak => crate::panes::viewer::save_first_breaks(&mut app.state),
                             PickMode::Kill => crate::panes::viewer::apply_trace_edits(&mut app.state),
+                            PickMode::DeconGate => {
+                                crate::panes::viewer::save_gate(&mut app.state);
+                            }
                             PickMode::Navigate => {}
                         }
                         app.state.viewer.mode = PickMode::Navigate;
@@ -675,6 +809,34 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                         }
                         if ribbon::small_button(ui, p, Icon::KillTrace, "Edit traces", mode == PickMode::Kill, false).clicked() {
                             app.state.viewer.mode = PickMode::Kill;
+                        }
+                    });
+                    ribbon::stack(ui, |ui| {
+                        let mode = app.state.viewer.mode;
+                        if ribbon::small_button(ui, p, Icon::Decon, "Decon gate", mode == PickMode::DeconGate, false)
+                            .on_hover_text("Pick the time window the decon operator is designed in")
+                            .clicked()
+                        {
+                            app.state.viewer.mode = PickMode::DeconGate;
+                        }
+                        match mode {
+                            PickMode::Mute => {
+                                if ribbon::small_button(ui, p, Icon::FlowBuilder, "Add to flow", false, false)
+                                    .on_hover_text("Save the mute and link it into the flow's mute step")
+                                    .clicked()
+                                {
+                                    crate::panes::viewer::add_mute_to_flow(&mut app.state);
+                                }
+                            }
+                            PickMode::DeconGate => {
+                                if ribbon::small_button(ui, p, Icon::FlowBuilder, "Apply to decon", false, false)
+                                    .on_hover_text("Save the gate and use it as the flow's decon design gate")
+                                    .clicked()
+                                {
+                                    crate::panes::viewer::apply_gate_to_decon(&mut app.state);
+                                }
+                            }
+                            _ => {}
                         }
                     });
                     ribbon::stack(ui, |ui| {
@@ -694,7 +856,7 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                                         (rustseis_core::MuteMode::Surgical, "Surgical window"),
                                     ] {
                                         if ui.selectable_label(app.state.viewer.mute_mode == m, lbl).clicked() {
-                                            app.state.viewer.mute_mode = m;
+                                            app.state.viewer.set_mute_mode(m);
                                         }
                                     }
                                 });
@@ -728,7 +890,7 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                                     }
                                 });
                             }
-                            PickMode::Navigate => {}
+                            PickMode::DeconGate | PickMode::Navigate => {}
                         }
                         if ribbon::small_button(ui, p, Icon::CancelJob, "Cancel", false, false)
                             .on_hover_text("Discard active picking mode (Esc)")
@@ -758,6 +920,12 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                             .clicked()
                         {
                             app.state.viewer.mode = PickMode::Kill;
+                        }
+                        if ribbon::small_button(ui, p, Icon::Decon, "Decon gate", false, false)
+                            .on_hover_text("Pick the reflection window the decon operator is designed in")
+                            .clicked()
+                        {
+                            app.state.viewer.mode = PickMode::DeconGate;
                         }
                         let wiggles = app.state.viewer.wiggles;
                         if ribbon::small_button(ui, p, Icon::Wiggles, "Wiggles", wiggles, false)
@@ -853,7 +1021,7 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
     }
 }
 
-fn run_to_selection(s: &mut AppState) {
+pub(crate) fn run_to_selection(s: &mut AppState) {
     let Some(sel) = s.flow_sel.clone() else {
         s.toast(Level::Warn, "Select a step first");
         return;

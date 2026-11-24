@@ -355,9 +355,19 @@ pub fn execute_flow(
                 rustseis_dsp::apply_trace_edit(&mut traces, &p);
             }
             "mute" => {
-                let table: MuteTable = if let Some(name) = step.params.get("mute_table").and_then(|v| v.as_str()) {
+                let table_name = step
+                    .params
+                    .get("mute_table")
+                    .and_then(|v| v.as_str())
+                    .map(str::trim)
+                    .filter(|s| !s.is_empty());
+                let table: MuteTable = if let Some(name) = table_name {
                     ctx.mutes.get(name).cloned().ok_or_else(|| {
-                        SeismicError::NotFound(format!("Mute table '{name}' not found"))
+                        let avail: Vec<&str> = ctx.mutes.keys().map(String::as_str).collect();
+                        SeismicError::NotFound(format!(
+                            "Mute table '{name}' not found (available: {})",
+                            if avail.is_empty() { "none".into() } else { avail.join(", ") }
+                        ))
                     })?
                 } else {
                     parse_param(&step.params, "mute")?
@@ -413,7 +423,20 @@ pub fn execute_flow(
             }
             "decon" => {
                 let p: DeconParams = parse_param(&step.params, "decon")?;
-                rustseis_dsp::apply_decon(&mut traces, &p)?;
+                let gate_name = step
+                    .params
+                    .get("design_gate_table")
+                    .and_then(|v| v.as_str())
+                    .map(str::trim)
+                    .filter(|s| !s.is_empty());
+                let gate = if let Some(name) = gate_name {
+                    Some(ctx.mutes.get(name).ok_or_else(|| {
+                        SeismicError::NotFound(format!("Decon gate table '{name}' not found"))
+                    })?)
+                } else {
+                    None
+                };
+                rustseis_dsp::apply_decon_with_gate(&mut traces, &p, gate)?;
             }
             "scdecon" => {
                 let p: ScDeconParams = parse_nested_or_flat(&step.params, "scdecon")?;
@@ -644,18 +667,40 @@ pub fn execute_flow(
                     cdp_ranges.push((cdp, start, i));
                 }
 
+                let cdp_increment = step
+                    .params
+                    .get("cdp_increment")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(0) as usize;
+                let super_cdps = step
+                    .params
+                    .get("supergather_cdps")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(1)
+                    .max(1) as usize;
+                let super_half = super_cdps / 2;
+
                 let mut picked_funcs = Vec::new();
                 let n_cdps = cdp_ranges.len();
-                let stride = (n_cdps / 8).max(1);
+                let stride = if cdp_increment > 0 {
+                    cdp_increment
+                } else {
+                    (n_cdps / 8).max(1)
+                };
                 for (ei, &(cdp, start, end)) in cdp_ranges.iter().enumerate() {
-                    let fold = end - start;
+                    let lo_i = ei.saturating_sub(super_half);
+                    let hi_i = (ei + super_half).min(n_cdps.saturating_sub(1));
+                    let sg_start = cdp_ranges[lo_i].1;
+                    let sg_end = cdp_ranges[hi_i].2;
+                    let fold = sg_end - sg_start;
                     let selected = if target_cdps.is_empty() {
                         ei % stride == 0 && fold >= 8
                     } else {
                         target_cdps.contains(&cdp)
                     };
                     if selected {
-                        let ens = Ensemble::new("CDP", cdp, traces[start..end].to_vec());
+                        let _ = (start, end);
+                        let ens = Ensemble::new("CDP", cdp, traces[sg_start..sg_end].to_vec());
                         let panel = rustseis_imaging::compute_semblance_panel(&ens, &scan)?;
                         if auto_pick {
                             picked_funcs.push(panel.auto_pick(1200.0, 0.05, 250.0));

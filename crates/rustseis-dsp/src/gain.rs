@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-use rustseis_core::{Trace, VelocityTable};
+use rustseis_core::{Trace, VelocityFunction, VelocityTable};
 use serde::{Deserialize, Serialize};
 
 /// ProMAX True Amplitude Recovery (`tar`) parameters.
@@ -14,6 +14,10 @@ pub struct TarParams {
     /// Spherical divergence basis (`None`, `OneOverDist` -> `t*v(t)`, `OneOverTV2` -> `t*v(t)^2`).
     #[serde(default)]
     pub spherical: SphericalBasis,
+    /// Optional inline `(time_ms, vel_mps)` function used for spherical spreading when no velocity table is linked
+    /// (e.g., `[[0, 1480], [1000, 2500], [2000, 3200]]`).
+    #[serde(default)]
+    pub velocity_pairs: Vec<(f32, f32)>,
     /// Inelastic attenuation constant `alpha` (`exp(alpha * t * v(t))`).
     #[serde(default)]
     pub inelastic_alpha: f32,
@@ -42,6 +46,7 @@ impl Default for TarParams {
             time_power: 1.5,
             db_per_sec: 0.0,
             spherical: SphericalBasis::None,
+            velocity_pairs: Vec::new(),
             inelastic_alpha: 0.0,
             max_time_ms: None,
             normalize_ref_time_ms: None,
@@ -53,10 +58,24 @@ pub fn apply_tar_trace(trace: &mut Trace, params: &TarParams, vel: Option<&Veloc
     if !trace.is_live() || trace.samples.is_empty() {
         return;
     }
+    let inline_vf = if vel.is_none() && !params.velocity_pairs.is_empty() {
+        Some(VelocityFunction::new(0, params.velocity_pairs.clone()))
+    } else {
+        None
+    };
     let dt_s = trace.dt_s();
     let max_t_s = params.max_time_ms.map(|m| m / 1000.0);
     let cdp = trace.headers.cdp;
-    let v0 = vel.map(|vt| vt.velocity_at(cdp, 0.0)).unwrap_or(1500.0).max(1.0);
+    let vel_at_ms = |t_ms: f32| -> f32 {
+        if let Some(vt) = vel {
+            vt.velocity_at(cdp, t_ms).max(1.0)
+        } else if let Some(vf) = &inline_vf {
+            vf.velocity_at(t_ms).max(1.0)
+        } else {
+            1500.0
+        }
+    };
+    let v0 = vel_at_ms(0.0);
 
     let eval_gain = |raw_t: f32| -> f64 {
         let t = match max_t_s {
@@ -70,7 +89,7 @@ pub fn apply_tar_trace(trace: &mut Trace, params: &TarParams, vel: Option<&Veloc
         if params.db_per_sec != 0.0 {
             g *= 10.0_f64.powf((params.db_per_sec as f64 * t as f64) / 20.0);
         }
-        let v = vel.map(|vt| vt.velocity_at(cdp, t * 1000.0)).unwrap_or(1500.0).max(1.0);
+        let v = vel_at_ms(t * 1000.0);
         match params.spherical {
             SphericalBasis::None => {}
             SphericalBasis::OneOverDist => {

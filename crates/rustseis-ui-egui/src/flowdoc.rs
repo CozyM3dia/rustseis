@@ -253,6 +253,27 @@ impl FlowDoc {
         }
     }
 
+    /// Paths of every node (depth-first, nested branches included) for which `pred` holds.
+    pub fn find_paths(&self, pred: impl Fn(&FlowNode) -> bool) -> Vec<StepPath> {
+        fn walk(list: &[FlowNode], prefix: &mut StepPath, pred: &dyn Fn(&FlowNode) -> bool, out: &mut Vec<StepPath>) {
+            for (i, n) in list.iter().enumerate() {
+                prefix.push(i);
+                if pred(n) {
+                    out.push(prefix.clone());
+                }
+                for (b, branch) in n.branches.iter().enumerate() {
+                    prefix.push(b);
+                    walk(branch, prefix, pred, out);
+                    prefix.pop();
+                }
+                prefix.pop();
+            }
+        }
+        let mut out = Vec::new();
+        walk(&self.nodes, &mut Vec::new(), &pred, &mut out);
+        out
+    }
+
     pub fn count(&self) -> usize {
         fn c(list: &[FlowNode]) -> usize {
             list.iter().map(|n| 1 + n.branches.iter().map(|b| c(b)).sum::<usize>()).sum()
@@ -340,5 +361,13 @@ mod tests {
         let ins = doc.insert_into_branch(&[1, 1, 0], 1, doc.clone().new_node("tar", json!({}))).unwrap();
         assert_eq!(ins, vec![1, 1, 0, 1, 0]);
         assert!(doc.dirty);
+    }
+
+    #[test]
+    fn find_paths_reaches_nested_steps() {
+        let doc = FlowDoc::from_spec(&sample(), None);
+        assert_eq!(doc.find_paths(|n| n.tool == "debias"), vec![vec![1, 1, 0, 0, 0]]);
+        assert_eq!(doc.find_paths(|n| n.tool == "stack"), vec![vec![2]]);
+        assert!(doc.find_paths(|n| n.tool == "nmo").is_empty());
     }
 }

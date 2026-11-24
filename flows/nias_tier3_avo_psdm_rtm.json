@@ -2,18 +2,153 @@
   "name": "NIAS_Tier3_AVO_PSDM_GPU_RTM",
   "description": "Tier 3 Wave 3A+3B demo on real NIAS marine shots: velocity picking, Dix V(x,z) depth grid, AVO Intercept/Gradient/Fluid Factor, Kirchhoff PSDM, and RTX GPU 2D Acoustic RTM.",
   "steps": [
-    { "tool": "segd_read", "params": { "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik", "max_shots": 24, "live_only": true } },
-    { "tool": "trace_len", "params": { "length_ms": 2000.0 } },
-    { "tool": "debias", "params": {} },
-    { "tool": "geomspread_marine", "params": { "near_offset_m": 100.0, "receiver_interval_m": 12.5, "nominal_shot_interval_m": 25.0, "cdp_bin_size_m": 6.25, "chan1_is_near": true, "source_depth_m": 5.0, "streamer_depth_m": 6.0 } },
-    { "tool": "filter", "params": { "spec_type": "Ormsby", "phase": "Zero", "freqs": [6.0, 12.0, 50.0, 65.0], "pad_pct": 25.0 } },
-    { "tool": "tar", "params": { "time_power": 1.4, "max_time_ms": 2000.0 } },
-    { "tool": "buffer_save", "params": { "name": "nias_shots" } },
-    { "tool": "inline_sort", "params": { "primary": "CDP", "secondary": "AOFFSET" } },
-    { "tool": "vaprecom71", "params": { "cdps": [], "save_table": "nias_vel", "auto_pick": true, "scan": { "v_min_mps": 1450.0, "v_max_mps": 3200.0, "dv_mps": 50.0, "window_ms": 30.0, "t_step_ms": 20.0, "stretch_mute_pct": 50.0 } } },
-    { "tool": "vel_to_depth", "params": { "velocity_table": "nias_vel", "save_grid": "nias_depth_vel", "dx_m": 15.0, "dz_m": 12.0, "z_max_m": 1800.0, "smooth_x": 3, "smooth_z": 3 } },
-    { "tool": "nmo", "params": { "velocity_table": "nias_vel", "params": { "direction": "Forward", "stretch_mute_pct": 35.0 } } },
-    { "tool": "avo_analysis", "params": { "velocity_table": "nias_vel", "save_summary": "nias_avo", "save_gradient_buffer": "avo_gradient", "save_fluid_buffer": "avo_fluid_factor", "params": { "output": "Intercept", "min_angle_deg": 4.0, "max_angle_deg": 35.0 } } },
-    { "tool": "buffer_save", "params": { "name": "avo_intercept" } }
+    {
+      "tool": "segd_read",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "live_only": true,
+        "max_shots": 24,
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik"
+      }
+    },
+    {
+      "tool": "trace_len",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "length_ms": 2000.0
+      }
+    },
+    {
+      "tool": "debias",
+      "enabled": true,
+      "label": null,
+      "params": {}
+    },
+    {
+      "tool": "geomspread_marine",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "cdp_bin_size_m": 6.25,
+        "chan1_is_near": true,
+        "near_offset_m": 100.0,
+        "nominal_shot_interval_m": 25.0,
+        "receiver_interval_m": 12.5,
+        "source_depth_m": 5.0,
+        "streamer_depth_m": 6.0
+      }
+    },
+    {
+      "tool": "filter",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "freqs": [
+          6.0,
+          12.0,
+          50.0,
+          65.0
+        ],
+        "pad_pct": 25.0,
+        "phase": "Zero",
+        "spec_type": "Ormsby"
+      }
+    },
+    {
+      "tool": "tar",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "max_time_ms": 2000.0,
+        "time_power": 1.4
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "name": "nias_shots"
+      }
+    },
+    {
+      "tool": "inline_sort",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "primary": "CDP",
+        "secondary": "AOFFSET"
+      }
+    },
+    {
+      "tool": "vaprecom71",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "auto_pick": true,
+        "cdps": [],
+        "save_table": "nias_vel",
+        "scan": {
+          "dv_mps": 50.0,
+          "stretch_mute_pct": 50.0,
+          "t_step_ms": 20.0,
+          "v_max_mps": 3200.0,
+          "v_min_mps": 1450.0,
+          "window_ms": 30.0
+        }
+      }
+    },
+    {
+      "tool": "vel_to_depth",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "dx_m": 15.0,
+        "dz_m": 12.0,
+        "save_grid": "nias_depth_vel",
+        "smooth_x": 3,
+        "smooth_z": 3,
+        "velocity_table": "nias_vel",
+        "z_max_m": 1800.0
+      }
+    },
+    {
+      "tool": "nmo",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "params": {
+          "direction": "Forward",
+          "stretch_mute_pct": 35.0
+        },
+        "velocity_table": "nias_vel"
+      }
+    },
+    {
+      "tool": "avo_analysis",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "params": {
+          "max_angle_deg": 35.0,
+          "min_angle_deg": 4.0,
+          "output": "Intercept"
+        },
+        "save_fluid_buffer": "avo_fluid_factor",
+        "save_gradient_buffer": "avo_gradient",
+        "save_summary": "nias_avo",
+        "velocity_table": "nias_vel"
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "enabled": true,
+      "label": null,
+      "params": {
+        "name": "avo_intercept"
+      }
+    }
   ]
 }

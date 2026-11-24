@@ -17,6 +17,7 @@ struct StepDrag(StepPath);
 
 enum Action {
     Select(StepPath),
+    RunTo(StepPath),
     Toggle(StepPath),
     Remove(StepPath),
     Duplicate(StepPath),
@@ -317,6 +318,28 @@ fn card(
     if resp.clicked() {
         actions.push(Action::Select(path.clone()));
     }
+    resp.context_menu(|ui| {
+        ui.set_min_width(170.0);
+        let busy = s.is_busy();
+        if ui.add_enabled(!busy && depth == 0, egui::Button::new(format!("{}  Run to here", icon::PLAY))).on_disabled_hover_text("Available on top-level steps while the engine is idle").clicked() {
+            actions.push(Action::RunTo(path.clone()));
+            ui.close();
+        }
+        let toggle_label = if enabled { format!("{}  Skip this step", icon::EYE_SLASH) } else { format!("{}  Use this step", icon::EYE) };
+        if ui.button(toggle_label).clicked() {
+            actions.push(Action::Toggle(path.clone()));
+            ui.close();
+        }
+        if ui.button(format!("{}  Duplicate", icon::COPY)).clicked() {
+            actions.push(Action::Duplicate(path.clone()));
+            ui.close();
+        }
+        ui.separator();
+        if ui.button(RichText::new(format!("{}  Remove", icon::TRASH)).color(p.danger)).clicked() {
+            actions.push(Action::Remove(path.clone()));
+            ui.close();
+        }
+    });
     // Drop handling: upper half inserts before, lower half after.
     let pointer = ui.input(|i| i.pointer.hover_pos());
     let over = pointer.is_some_and(|pt| rect.contains(pt));
@@ -541,6 +564,10 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
     for a in actions {
         match a {
             Action::Select(p) => s.flow_sel = Some(p),
+            Action::RunTo(p) => {
+                s.flow_sel = Some(p);
+                crate::commands::run_to_selection(s);
+            }
             Action::Toggle(p) => {
                 if s.flow.get(&p).is_some() {
                     s.push_flow_undo();
@@ -594,9 +621,8 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
                 s.report_uids.clear();
             }
             Action::Insert { parent, index, tool } => {
-                let Some(desc) = s.tool(&tool).cloned() else { continue };
+                let Some(node) = s.tool(&tool).map(|d| d.menu_id.clone()).and_then(|id| s.new_linked_node(&id)) else { continue };
                 s.push_flow_undo();
-                let node = s.flow.new_node(&desc.menu_id, desc.default_params.clone());
                 if let Some(list) = s.flow.container_mut(&parent) {
                     let idx = index.min(list.len());
                     list.insert(idx, node);

@@ -1,7 +1,8 @@
 //! `rustseis-desktop.exe` — native eframe host for the RustSeis workstation.
 //!
-//! Usage: `rustseis-desktop [file] [--tour <screenshot-dir>]` where `file` is seismic data (.sgy/.segd/.rsds), a flow
-//! (.json/.toml) or an OPF database (.opf.sqlite).
+//! Usage: `rustseis-desktop [file] [--tour <screenshot-dir> | --tour-practicum <screenshot-dir>]` where `file` is
+//! seismic data (.sgy/.segd/.rsds), a flow (.json/.toml) or an OPF database (.opf.sqlite). `--tour-practicum` runs
+//! `flows/praktikum_2d_marine_modul_1_7.json` and captures the Modules 1–7 controls.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -38,7 +39,8 @@ fn icon() -> eframe::egui::IconData {
 
 fn main() -> eframe::Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let tour_dir = args.iter().position(|a| a == "--tour").map(|i| {
+    let practicum = args.iter().any(|a| a == "--tour-practicum");
+    let tour_dir = args.iter().position(|a| a == "--tour" || a == "--tour-practicum").map(|i| {
         std::path::PathBuf::from(args.get(i + 1).cloned().unwrap_or_else(|| "screenshots".into()))
     });
     let initial = args.iter().find(|a| !a.starts_with("--") && Some(std::path::PathBuf::from(a.as_str())) != tour_dir).map(std::path::PathBuf::from);
@@ -61,7 +63,11 @@ fn main() -> eframe::Result<()> {
             }
             if let Some(dir) = tour_dir.as_ref() {
                 let flows = std::env::current_dir().unwrap_or_default().join("flows");
-                app.tour = Some(rustseis_ui_egui::tour::Tour::standard(dir.clone(), &flows));
+                app.tour = Some(if practicum {
+                    rustseis_ui_egui::tour::Tour::practicum(dir.clone(), &flows)
+                } else {
+                    rustseis_ui_egui::tour::Tour::standard(dir.clone(), &flows)
+                });
             }
             Ok(Box::new(app))
         }),

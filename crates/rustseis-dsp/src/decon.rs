@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-use rustseis_core::{Result, SeismicError, Trace};
+use rustseis_core::{MuteTable, Result, SeismicError, Trace};
 use serde::{Deserialize, Serialize};
 
 /// Wiener-Levinson Spiking / Predictive Deconvolution (`decon`).
@@ -232,11 +232,88 @@ pub fn apply_decon_trace(trace: &mut Trace, params: &DeconParams) -> Result<()> 
 }
 
 pub fn apply_decon(traces: &mut [Trace], params: &DeconParams) -> Result<()> {
+    apply_decon_with_gate(traces, params, None)
+}
+
+/// Apply spiking or predictive decon, optionally resolving a per-trace design window `(t_start, t_end)`
+/// from a picked surgical `MuteTable` (ProMAX Miscellaneous Time Gate).
+pub fn apply_decon_with_gate(
+    traces: &mut [Trace],
+    params: &DeconParams,
+    gate: Option<&MuteTable>,
+) -> Result<()> {
     if params.operator_ms <= 0.0 {
         return Err(SeismicError::InvalidParameter {
             param: "operator_ms".into(),
             message: "Decon operator length must be > 0".into(),
         });
     }
-    traces.par_iter_mut().try_for_each(|tr| apply_decon_trace(tr, params))
+    match gate {
+        None => traces.par_iter_mut().try_for_each(|tr| apply_decon_trace(tr, params)),
+        Some(gt) => traces.par_iter_mut().try_for_each(|tr| {
+            let key = tr.headers.get_f64(&gt.key_header).unwrap_or(tr.headers.aoffset as f64) as f32;
+            if let Some((t0, t1)) = gt.surgical_window_at(key) {
+                let mut local = params.clone();
+                local.design_windows_ms = vec![(t0.min(t1), t0.max(t1))];
+                apply_decon_trace(tr, &local)
+            } else {
+                apply_decon_trace(tr, params)
+            }
+        }),
+    }
+}
+
+/// Compute normalized average autocorrelation `(lags_ms, corr)` across live traces for Decon QC
+/// (inspecting first zero-crossing / second zero-crossing for prediction lag and reverberation decay for operator length).
+pub fn compute_average_autocorrelation(
+    traces: &[Trace],
+    max_lag_ms: f32,
+    window_ms: Option<(f32, f32)>,
+) -> (Vec<f32>, Vec<f32>) {
+    let Some(first) = traces.iter().find(|t| t.is_live() && !t.samples.is_empty()) else {
+        return (Vec::new(), Vec::new());
+    };
+    let dt_ms = first.dt_ms().max(1e-6);
+    let max_lag = ((max_lag_ms / dt_ms).round() as usize).clamp(4, 2000);
+    let mut acc = vec![0.0f64; max_lag + 1];
+    let mut used = 0usize;
+    for tr in traces.iter().filter(|t| t.is_live() && !t.samples.is_empty()) {
+        let (ls, le) = tr.live_sample_range();
+        let n = tr.samples.len();
+        let (w0, w1) = match window_ms {
+            Some((a, b)) => (
+                ((a.min(b) / dt_ms).floor() as usize).max(ls).min(n),
+                ((a.max(b) / dt_ms).ceil() as usize + 1).min(le).min(n),
+            ),
+            None => (ls, le),
+        };
+        if w1 <= w0 + 4 {
+            continue;
+        }
+        let s = &tr.samples[w0..w1];
+        let lim = max_lag.min(s.len().saturating_sub(1));
+        let mut r0 = 0.0f64;
+        for &v in s {
+            r0 += (v as f64) * (v as f64);
+        }
+        if r0 <= 1e-24 {
+            continue;
+        }
+        let inv = 1.0 / r0;
+        for l in 0..=lim {
+            let mut sum = 0.0f64;
+            for i in 0..(s.len() - l) {
+                sum += (s[i] as f64) * (s[i + l] as f64);
+            }
+            acc[l] += sum * inv;
+        }
+        used += 1;
+    }
+    if used == 0 {
+        return (Vec::new(), Vec::new());
+    }
+    let lags: Vec<f32> = (0..=max_lag).map(|l| l as f32 * dt_ms).collect();
+    let norm = acc[0].abs().max(1e-12);
+    let corr: Vec<f32> = acc.iter().map(|&v| (v / norm) as f32).collect();
+    (lags, corr)
 }

@@ -131,6 +131,8 @@ impl RustSeisApp {
                         crate::panes::iva::on_compute(&mut self.state, ctx, key, v);
                     } else if key.starts_with("spec.") {
                         crate::panes::spectral::on_compute(&mut self.state, ctx, key, v);
+                    } else if key.starts_with("preview.") {
+                        crate::panes::preview::on_compute(&mut self.state, key, v);
                     } else if key.starts_with("vsp.") {
                         crate::panes::vsp::on_compute(&mut self.state, ctx, key, v);
                     }
@@ -1024,8 +1026,230 @@ mod tests {
             screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, vec2(1280.0, 800.0))),
             ..Default::default()
         };
-        let _ = ctx.run_ui(input, |ui| app.frame(ui));
+        ctx.run_ui(input, |ui| app.frame(ui)).textures_delta.clear();
         assert_eq!(app.stage, Workspace::Imaging);
         assert_eq!(app.active, Doc::Viewer);
+    }
+
+    fn app() -> RustSeisApp {
+        RustSeisApp::with_context(&egui::Context::default(), false)
+    }
+
+    fn flow_of(tools: &[&str]) -> crate::flowdoc::FlowDoc {
+        let steps: Vec<serde_json::Value> = tools.iter().map(|t| serde_json::json!({"tool": t, "params": {}})).collect();
+        let spec: rustseis_flow::FlowSpec = serde_json::from_value(serde_json::json!({"name": "t", "steps": steps})).unwrap();
+        crate::flowdoc::FlowDoc::from_spec(&spec, None)
+    }
+
+    fn save_velocities(app: &mut RustSeisApp, name: &str) {
+        let f = rustseis_core::VelocityFunction::new(100, vec![(0.0, 1500.0), (2000.0, 2500.0)]);
+        app.state.dispatch_now(rustseis_engine::EngineCommand::UpsertVelocityTable(rustseis_core::VelocityTable::new(name, vec![f]))).unwrap();
+    }
+
+    #[test]
+    fn new_steps_link_to_session_tables() {
+        let mut app = app();
+        app.state.insert_tool("nmo");
+        assert_eq!(app.state.flow.nodes[0].params["velocity_table"], "default", "nothing saved yet keeps the catalog default");
+        save_velocities(&mut app, "my_vel");
+        for tool in crate::state::VELOCITY_TOOLS {
+            app.state.insert_tool(tool);
+            let n = app.state.flow.get(app.state.flow_sel.as_ref().unwrap()).unwrap();
+            assert_eq!(n.params["velocity_table"], "my_vel", "{tool}");
+        }
+        app.state.viewer.mute_picks = vec![(0.0, 100.0), (1000.0, 600.0)];
+        assert!(crate::panes::viewer::save_mute(&mut app.state));
+        app.state.insert_tool("mute");
+        let n = app.state.flow.get(app.state.flow_sel.as_ref().unwrap()).unwrap();
+        assert_eq!(n.params["mute_table"], "top_mute");
+    }
+
+    #[test]
+    fn mute_mode_switch_renames_only_default_names() {
+        let mut app = app();
+        app.state.viewer.set_mute_mode(rustseis_core::MuteMode::Bottom);
+        assert_eq!(app.state.viewer.mute_table_name, "bottom_mute");
+        app.state.viewer.mute_table_name = "my_mute".into();
+        app.state.viewer.set_mute_mode(rustseis_core::MuteMode::Surgical);
+        assert_eq!(app.state.viewer.mute_table_name, "my_mute");
+    }
+
+    #[test]
+    fn add_mute_to_flow_reuses_inline_mute_then_its_table() {
+        let mut app = app();
+        app.state.flow = flow_of(&["segd_read", "filter", "tar", "decon"]);
+        app.state.viewer.mute_picks = vec![(0.0, 100.0), (1000.0, 600.0)];
+        crate::panes::viewer::add_mute_to_flow(&mut app.state);
+        let mutes = app.state.flow.find_paths(|n| n.tool == "mute");
+        assert_eq!(mutes, vec![vec![2]], "new mute goes before TAR");
+        assert_eq!(app.state.flow.nodes[2].params["mute_table"], "top_mute");
+        assert_eq!(app.state.flow.nodes[2].label.as_deref(), Some("Top Mute (top_mute)"));
+        crate::panes::viewer::add_mute_to_flow(&mut app.state);
+        assert_eq!(app.state.flow.find_paths(|n| n.tool == "mute").len(), 1, "same table updates the same step");
+        app.state.undo_flow();
+        app.state.undo_flow();
+        assert!(app.state.flow.find_paths(|n| n.tool == "mute").is_empty(), "both edits undo");
+    }
+
+    #[test]
+    fn trace_edits_merge_into_one_trc_edit_step() {
+        let mut app = app();
+        app.state.flow = flow_of(&["segd_read", "geomspread_marine", "filter", "mute", "tar"]);
+        app.state.viewer.kill_tracenos.insert(5);
+        assert!(crate::panes::viewer::merge_trace_edits_into_flow(&mut app.state));
+        assert_eq!(app.state.flow.nodes[3].tool, "trc_edit", "edits sit right after input, geometry and filtering");
+        app.state.viewer.kill_tracenos.insert(7);
+        app.state.viewer.reverse_channels.insert(12);
+        assert!(crate::panes::viewer::merge_trace_edits_into_flow(&mut app.state));
+        let edits = app.state.flow.find_paths(|n| n.tool == "trc_edit");
+        assert_eq!(edits.len(), 1);
+        let p = &app.state.flow.nodes[3].params;
+        assert_eq!(p["kill_tracenos"], serde_json::json!([5, 7]));
+        assert_eq!(p["reverse_channels"], serde_json::json!([12]));
+    }
+
+    #[test]
+    fn decon_gate_applies_to_flow_decon() {
+        let mut app = app();
+        app.state.flow = flow_of(&["segd_read", "tar", "decon", "inline_sort"]);
+        app.state.viewer.gate_picks = vec![(100.0, 300.0, 1800.0)];
+        crate::panes::viewer::apply_gate_to_decon(&mut app.state);
+        assert_eq!(app.state.flow.nodes[2].params["design_gate_table"], "decon_gate_1");
+        assert!(app.state.session().unwrap().context.mutes.contains_key("decon_gate_1"));
+        assert_eq!(app.state.preferred_mute_table(), None, "gates are not offered as mutes");
+    }
+
+    #[test]
+    fn velocity_apply_links_every_velocity_step_and_eta() {
+        let mut app = app();
+        app.state.flow = flow_of(&["inline_sort", "vaprecom71", "nmo", "stack", "kirtime2dstk", "fdmig"]);
+        app.state.flow.nodes[1].params["save_table"] = serde_json::json!("picked");
+        app.state.iva.table_name = "picked".into();
+        app.state.iva.functions.insert(100, vec![(0.0, 1500.0), (2000.0, 2600.0)]);
+        app.state.iva.nmo_eta = 0.05;
+        crate::panes::iva::apply_to_flow(&mut app.state);
+        assert!(!app.state.flow.nodes[1].enabled, "auto-pick vaprecom71 paused so manual picks are not overwritten");
+        for i in [2, 4, 5] {
+            assert_eq!(app.state.flow.nodes[i].params["velocity_table"], "picked");
+        }
+        let eta = app.state.flow.nodes[2].params["params"]["eta"].as_f64().unwrap();
+        assert!((eta - 0.05).abs() < 1e-6);
+        assert!(app.state.flow.nodes[4].params.get("params").and_then(|p| p.get("eta")).is_none(), "eta only goes to NMO");
+    }
+
+    #[test]
+    fn practicum_starter_flow_uses_known_tools() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../flows/praktikum_2d_marine_modul_1_7.json");
+        let doc = crate::flowdoc::FlowDoc::load(&path).unwrap();
+        let app = app();
+        for n in &doc.nodes {
+            assert!(app.state.tool(&n.tool).is_some(), "unknown tool {}", n.tool);
+        }
+        let checkpoints: Vec<&str> = doc.nodes.iter().filter(|n| n.tool == "buffer_save").filter_map(|n| n.params["name"].as_str()).collect();
+        assert_eq!(checkpoints, ["01_geometry", "02_filtered", "03_edited", "04_tar_decon", "05_cdp_gathers", "06_stack"]);
+    }
+
+    #[test]
+    fn srme_model_buffer_links_into_adaptive_subtraction() {
+        let mut app = app();
+        app.state.insert_tool("w_srme_v3");
+        assert_eq!(app.state.flow.nodes[0].params["save_model_buffer"], crate::state::SRME_MODEL_BUFFER);
+        app.state.flow.nodes[0].params["save_model_buffer"] = serde_json::json!("mult_model");
+        app.state.insert_tool("w_asub");
+        assert_eq!(app.state.flow.nodes[1].params["model_buffer"], "mult_model");
+    }
+
+    #[test]
+    fn preview_runs_selected_step_on_focus_gather() {
+        use crate::panes::preview;
+        let mut app = app();
+        let spec: rustseis_flow::FlowSpec = serde_json::from_value(serde_json::json!({"name": "s", "steps": [{"tool": "synth", "params": {}}]})).unwrap();
+        app.state.dispatch_now(rustseis_engine::EngineCommand::RunFlow(spec)).unwrap();
+        app.state.rev += 1;
+        app.state.summary = crate::state::DataSummary::of(app.state.session().unwrap());
+        assert!(app.state.summary.n_traces > 0);
+        app.state.insert_tool("agc");
+        preview::request(&mut app.state, &vec![0]);
+        let t0 = std::time::Instant::now();
+        while app.state.preview.last.is_none() && t0.elapsed().as_secs() < 30 {
+            for d in app.state.compute.drain() {
+                if let Ok(v) = d.result {
+                    preview::on_compute(&mut app.state, d.key, v);
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        let sum = app.state.preview.last.clone().expect("preview finished");
+        assert!(sum.error.is_none(), "{:?}", sum.error);
+        assert_eq!(sum.traces_in, sum.traces_out);
+        let bufs = &app.state.session().unwrap().context.buffers;
+        assert!(bufs.contains_key(preview::AFTER_BUFFER) && bufs.contains_key(preview::REMOVED_BUFFER));
+        assert!(app.state.viewer.compare);
+        assert_eq!(app.state.flow.count(), 1, "preview leaves the flow alone");
+        assert!(!preview::can_preview("rtm2d", Some(rustseis_flow::ToolArchetype::Complex)));
+        assert!(!preview::can_preview("segd_read", Some(rustseis_flow::ToolArchetype::Input)));
+    }
+
+    #[test]
+    fn preview_w_asub_slices_full_model_buffer_to_gather() {
+        use crate::panes::preview;
+        let mut app = app();
+        let spec: rustseis_flow::FlowSpec = serde_json::from_value(serde_json::json!({"name": "s", "steps": [{"tool": "synth", "params": {}}]})).unwrap();
+        app.state.dispatch_now(rustseis_engine::EngineCommand::RunFlow(spec)).unwrap();
+        // Store a full multi-shot model buffer matching active_traces length.
+        let full = app.state.session().unwrap().active_traces.clone();
+        app.state.session_mut().unwrap().context.buffers.insert("srme_model".into(), full);
+        app.state.rev += 1;
+        app.state.summary = crate::state::DataSummary::of(app.state.session().unwrap());
+        app.state.insert_tool("w_asub");
+        preview::request(&mut app.state, &vec![0]);
+        let t0 = std::time::Instant::now();
+        while app.state.preview.last.is_none() && t0.elapsed().as_secs() < 30 {
+            for d in app.state.compute.drain() {
+                if let Ok(v) = d.result {
+                    preview::on_compute(&mut app.state, d.key, v);
+                }
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        let sum = app.state.preview.last.clone().expect("w_asub preview finished");
+        assert!(sum.error.is_none(), "w_asub preview failed: {:?}", sum.error);
+        assert!(sum.traces_in > 0 && sum.traces_in == sum.traces_out);
+    }
+
+    #[test]
+    fn trace_edits_from_saved_buffer_save_into_flow() {
+        let mut app = app();
+        app.state.flow = flow_of(&["segd_read", "geomspread_marine", "filter", "tar"]);
+        app.state.focus.source = crate::data::TraceSource::Buffer("02_filtered".into());
+        app.state.viewer.kill_channels.insert(7);
+        app.state.viewer.reverse_channels.insert(30);
+        crate::panes::viewer::apply_trace_edits(&mut app.state);
+        assert_eq!(app.state.viewer.pending_edits(), 0, "marks cleared after saving into flow");
+        let edits = app.state.flow.find_paths(|n| n.tool == "trc_edit");
+        assert_eq!(edits.len(), 1);
+        let p = &app.state.flow.get(&edits[0]).unwrap().params;
+        assert_eq!(p["kill_channels"], serde_json::json!([7]));
+        assert_eq!(p["reverse_channels"], serde_json::json!([30]));
+    }
+
+    #[test]
+    fn practicum_views_render_without_data() {
+        let ctx = egui::Context::default();
+        let mut app = RustSeisApp::with_context(&ctx, false);
+        let input = || egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, vec2(1440.0, 900.0))),
+            ..Default::default()
+        };
+        app.state.geometry.view = crate::panes::geometry::SurveyView::StackingChart;
+        app.state.spectral.left_view = crate::panes::spectral::LeftView::Autocorrelation;
+        app.state.viewer.mode = crate::panes::viewer::PickMode::DeconGate;
+        for doc in [Doc::Survey, Doc::Spectral, Doc::Viewer, Doc::Velocity, Doc::Flow] {
+            app.open(doc);
+            ctx.run_ui(input(), |ui| app.frame(ui)).textures_delta.clear();
+        }
+        app.state.geometry.view = crate::panes::geometry::SurveyView::Fold;
+        app.open(Doc::Survey);
+        ctx.run_ui(input(), |ui| app.frame(ui)).textures_delta.clear();
     }
 }

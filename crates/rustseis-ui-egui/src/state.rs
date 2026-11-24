@@ -3,11 +3,12 @@
 //! for flows, OPF I/O and copilot calls).
 
 use crate::data::{EnsRange, EnsembleIndex, TraceSource, fmt_count, traces_bytes};
-use crate::flowdoc::{FlowDoc, StepPath};
+use crate::flowdoc::{FlowDoc, FlowNode, StepPath};
 use crate::panes::copilot::CopilotState;
 use crate::panes::geometry::GeometryState;
 use crate::panes::inspector::InspectorState;
 use crate::panes::iva::IvaState;
+use crate::panes::preview::PreviewState;
 use crate::panes::project::ProjectState;
 use crate::panes::spectral::SpectralState;
 use crate::panes::statics::StaticsState;
@@ -294,6 +295,9 @@ pub struct AppState {
     pub copilot: CopilotState,
     pub project: ProjectState,
     pub inspector: InspectorState,
+    /// Name of the mute table saved last from the gather view (new mute steps link to it).
+    pub last_mute_table: Option<String>,
+    pub preview: PreviewState,
 }
 
 impl AppState {
@@ -352,6 +356,8 @@ impl AppState {
             copilot: CopilotState::default(),
             project: ProjectState::default(),
             inspector: InspectorState::default(),
+            last_mute_table: None,
+            preview: PreviewState::default(),
         };
         s.log(Level::Info, format!(
             "RustSeis ready · {} processing steps",
@@ -911,12 +917,112 @@ impl AppState {
 
     /// Insert a catalog tool after the selected step (or at the end).
     pub fn insert_tool(&mut self, menu_id: &str) {
-        let Some(desc) = self.catalog.iter().find(|t| t.menu_id == menu_id).cloned() else { return };
+        let Some(node) = self.new_linked_node(menu_id) else { return };
         self.push_flow_undo();
-        let node = self.flow.new_node(&desc.menu_id, desc.default_params.clone());
         let sel = self.flow_sel.clone();
         let path = self.flow.insert_after(sel.as_ref(), node);
         self.flow_sel = Some(path);
+    }
+
+    /// A fresh node for a catalog tool with its table references pointed at this session's tables.
+    pub fn new_linked_node(&mut self, menu_id: &str) -> Option<FlowNode> {
+        let desc = self.catalog.iter().find(|t| t.menu_id == menu_id)?;
+        let mut params = desc.default_params.clone();
+        let tool = desc.menu_id.clone();
+        self.link_tables(&tool, &mut params);
+        Some(self.flow.new_node(&tool, params))
+    }
+
+    /// Velocity table new steps should use: the velocity-analysis table once saved, else the first saved one.
+    pub fn preferred_velocity_table(&self) -> Option<String> {
+        let vels = &self.session()?.context.velocities;
+        if vels.contains_key(&self.iva.table_name) {
+            return Some(self.iva.table_name.clone());
+        }
+        let mut names: Vec<&String> = vels.keys().collect();
+        names.sort();
+        names.first().map(|n| n.to_string())
+    }
+
+    /// Mute table saved most recently in the gather view, else the first saved one.
+    pub fn preferred_mute_table(&self) -> Option<String> {
+        let mutes = &self.session()?.context.mutes;
+        if let Some(n) = self.last_mute_table.as_ref().filter(|n| mutes.contains_key(*n)) {
+            return Some(n.clone());
+        }
+        let mut names: Vec<&String> = mutes.keys().filter(|n| !self.viewer.is_gate_name(n)).collect();
+        names.sort();
+        names.first().map(|n| n.to_string())
+    }
+
+    /// Fill table references of a new step from what the session already holds.
+    pub fn link_tables(&self, tool: &str, params: &mut Value) {
+        if VELOCITY_TOOLS.contains(&tool) {
+            if let Some(v) = self.preferred_velocity_table() {
+                params["velocity_table"] = json!(v);
+            }
+        } else if tool == "mute" {
+            if let Some(m) = self.preferred_mute_table() {
+                params["mute_table"] = json!(m);
+            }
+        } else if tool == "w_srme_v3" {
+            // Keep the predicted multiples so Adaptive Subtraction and the gather view can use them.
+            if params.get("save_model_buffer").is_none_or(|v| v.as_str().is_none_or(str::is_empty)) {
+                params["save_model_buffer"] = json!(SRME_MODEL_BUFFER);
+            }
+        } else if tool == "w_asub" {
+            let model = self
+                .flow
+                .find_paths(|n| n.tool == "w_srme_v3")
+                .last()
+                .and_then(|p| self.flow.get(p))
+                .and_then(|n| n.params.get("save_model_buffer").and_then(|v| v.as_str()).map(str::to_string));
+            params["model_buffer"] = json!(model.unwrap_or_else(|| SRME_MODEL_BUFFER.to_string()));
+        }
+    }
+
+    /// Edit the step of `tool` that `matches` (selected one first, then the first in the flow),
+    /// or add a new one at root index `insert_at` (default: after the selection). Undoable.
+    /// Returns the step path and whether a new step was created.
+    pub fn upsert_flow_step(
+        &mut self,
+        tool: &str,
+        matches: impl Fn(&FlowNode) -> bool,
+        insert_at: Option<usize>,
+        edit: impl FnOnce(&mut FlowNode),
+    ) -> Option<(StepPath, bool)> {
+        let hit = |n: &FlowNode| n.tool == tool && matches(n);
+        let selected = self.flow_sel.clone().filter(|p| self.flow.get(p).is_some_and(hit));
+        let existing = selected.or_else(|| self.flow.find_paths(hit).into_iter().next());
+        let (path, created) = match existing {
+            Some(path) => {
+                self.push_flow_undo();
+                (path, false)
+            }
+            None => {
+                let node = self.new_linked_node(tool)?;
+                self.push_flow_undo();
+                let path = match insert_at {
+                    Some(i) => {
+                        let i = i.min(self.flow.nodes.len());
+                        self.flow.nodes.insert(i, node);
+                        vec![i]
+                    }
+                    None => {
+                        let sel = self.flow_sel.clone();
+                        self.flow.insert_after(sel.as_ref(), node)
+                    }
+                };
+                self.report_uids.clear();
+                (path, true)
+            }
+        };
+        if let Some(n) = self.flow.get_mut(&path) {
+            edit(n);
+        }
+        self.flow.dirty = true;
+        self.flow_sel = Some(path.clone());
+        Some((path, created))
     }
 
     pub fn tool(&self, menu_id: &str) -> Option<&ToolDescriptor> {
@@ -924,6 +1030,11 @@ impl AppState {
         self.catalog.iter().find(|t| t.menu_id == id)
     }
 }
+
+/// Steps that read a velocity table; new ones link to the session's velocity table.
+pub const VELOCITY_TOOLS: &[&str] = &["nmo", "kirtime2dstk", "kirtime2d", "fdmig", "vel_to_depth"];
+/// Buffer SRME stores its predicted multiples in (read by Adaptive Subtraction).
+pub const SRME_MODEL_BUFFER: &str = "srme_model";
 
 pub fn compact_json(v: &Value, max: usize) -> String {
     let s = v.to_string();

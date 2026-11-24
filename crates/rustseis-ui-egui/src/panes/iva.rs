@@ -24,6 +24,10 @@ pub struct IvaState {
     pub functions: BTreeMap<i32, Vec<(f32, f32)>>,
     pub pos: usize,
     pub super_half: usize,
+    /// Analysis-location increment in CDPs; `0` picks about 40 locations along the line.
+    pub cdp_stride: usize,
+    /// Tsvankin–Alkhalifah anellipticity used by the live NMO preview (and copied to the flow).
+    pub nmo_eta: f32,
     pub scan: VelocityScanParams,
     pub nmo_stretch: f32,
     pub apply_nmo: bool,
@@ -69,6 +73,8 @@ impl Default for IvaState {
             functions: BTreeMap::new(),
             pos: 0,
             super_half: 1,
+            cdp_stride: 0,
+            nmo_eta: 0.0,
             scan: VelocityScanParams { v_min_mps: 1400.0, v_max_mps: 4500.0, dv_mps: 25.0, window_ms: 24.0, t_step_ms: 8.0, stretch_mute_pct: 50.0 },
             nmo_stretch: 40.0,
             apply_nmo: true,
@@ -140,8 +146,17 @@ impl IvaState {
     pub fn clear_current(&mut self) {
         self.functions.remove(&self.gather_cdp);
     }
-    fn stride(&self) -> usize {
+    pub fn stride(&self) -> usize {
+        if self.cdp_stride > 0 {
+            return self.cdp_stride;
+        }
         (self.index.ranges.len() / 40).max(self.super_half * 2 + 1).max(1)
+    }
+    /// Replace the picks with a laterally smoothed field (ProMAX Velocity Manipulation).
+    pub fn smooth_field(&mut self, radius: usize) -> usize {
+        let smoothed = self.table().smoothed(radius);
+        self.functions = smoothed.functions.iter().map(|f| (f.cdp, f.picks.clone())).collect();
+        self.functions.len()
     }
     /// Move to the previous / next analysis location.
     pub fn step_location(&mut self, dir: i32) {
@@ -331,12 +346,12 @@ fn load_pending(s: &mut AppState) {
     s.iva.pending_load = None;
 }
 
-pub fn save_table(s: &mut AppState, persist: bool) {
+pub fn save_table(s: &mut AppState, persist: bool) -> bool {
     let vt = s.iva.table();
     let n = vt.functions.len();
     if n == 0 {
         s.toast(Level::Warn, "No velocity picks to save");
-        return;
+        return false;
     }
     match s.dispatch_now(EngineCommand::UpsertVelocityTable(vt)) {
         Ok(_) => {
@@ -345,7 +360,7 @@ pub fn save_table(s: &mut AppState, persist: bool) {
         }
         Err(e) => {
             s.toast(Level::Error, e);
-            return;
+            return false;
         }
     }
     if persist {
@@ -355,6 +370,51 @@ pub fn save_table(s: &mut AppState, persist: bool) {
             s.save_opf_dialog();
         }
     }
+    true
+}
+
+/// Save the velocities and point every NMO / migration / depth-conversion step at them
+/// (NMO also takes the live anisotropy eta when it is non-zero).
+pub fn apply_to_flow(s: &mut AppState) {
+    if !save_table(s, false) {
+        return;
+    }
+    let name = s.iva.table_name.clone();
+    let eta = s.iva.nmo_eta;
+    let paths = s.flow.find_paths(|n| crate::state::VELOCITY_TOOLS.contains(&n.tool.as_str()));
+    if paths.is_empty() {
+        s.toast(Level::Warn, "No NMO or migration step in the flow yet: add one from the Imaging ribbon, it links to these velocities");
+        return;
+    }
+    s.push_flow_undo();
+    for path in &paths {
+        if let Some(n) = s.flow.get_mut(path) {
+            n.params["velocity_table"] = serde_json::json!(name);
+            if n.tool == "nmo" && eta != 0.0 {
+                if !n.params.get("params").is_some_and(|v| v.is_object()) {
+                    n.params["params"] = serde_json::json!({});
+                }
+                n.params["params"]["eta"] = serde_json::json!(eta);
+            }
+        }
+    }
+    // Pause any auto-picking `vaprecom71` that writes to this same table so re-running the flow
+    // does not overwrite the user's manual velocity picks.
+    let precomps = s.flow.find_paths(|n| {
+        n.tool == "vaprecom71"
+            && n.enabled
+            && n.params.get("auto_pick").and_then(|v| v.as_bool()).unwrap_or(true)
+            && n.params.get("save_table").and_then(|v| v.as_str()).unwrap_or("auto_vel") == name
+    });
+    for path in &precomps {
+        if let Some(n) = s.flow.get_mut(path) {
+            n.enabled = false;
+        }
+    }
+    s.flow.dirty = true;
+    let eta_note = if eta != 0.0 { format!(" · NMO eta {eta:.2}") } else { String::new() };
+    let keep_note = if precomps.is_empty() { "" } else { " · auto-pick step paused so your picks stay" };
+    s.toast(Level::Ok, format!("{} flow step{} now use “{name}”{eta_note}{keep_note}", paths.len(), if paths.len() == 1 { "" } else { "s" }));
 }
 
 /// Pick the best pre-stack CDP gather buffer when Active is post-stack (fold < 3).
@@ -479,13 +539,13 @@ fn prepare(s: &mut AppState, ctx: &egui::Context) {
     }
     // Live NMO (inline: a few ms for typical supergathers) and per-pick flatness.
     let picks = s.iva.current_picks();
-    let nkey = hash_of((gkey, picks_hash(&picks), s.iva.nmo_stretch.to_bits(), s.iva.apply_nmo));
+    let nkey = hash_of((gkey, picks_hash(&picks), s.iva.nmo_stretch.to_bits(), s.iva.nmo_eta.to_bits(), s.iva.apply_nmo));
     if nkey != s.iva.nmo_key {
         s.iva.nmo_key = nkey;
         let mut tr = s.iva.gather.clone();
         if s.iva.apply_nmo && !picks.is_empty() {
             let vt = VelocityTable::new("iva_live", vec![VelocityFunction::new(s.iva.gather_cdp, picks.clone())]);
-            let params = NmoParams { stretch_mute_pct: s.iva.nmo_stretch, ..nmo_defaults() };
+            let params = NmoParams { stretch_mute_pct: s.iva.nmo_stretch, eta: s.iva.nmo_eta, ..nmo_defaults() };
             rustseis_imaging::apply_nmo(&mut tr, &vt, &params);
         }
         if let Ok(img) = render_gather_raster(&tr, SeismicColormap::BlueWhiteRed, 98.0, data::MAX_RASTER_SIDE) {
@@ -1076,6 +1136,10 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                     }
                 });
             });
+            widgets::row(ui, &p, "Anisotropy η (live NMO)", |ui| {
+                ui.add(egui::DragValue::new(&mut s.iva.nmo_eta).range(-0.1..=0.5).speed(0.002).fixed_decimals(2))
+                    .on_hover_text("Non-hyperbolic moveout: raise until far-offset hockey sticks flatten. Apply to flow copies it to NMO.");
+            });
             ui.add_space(4.0);
 
             // ---- picks
@@ -1146,8 +1210,24 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                     if cmd_primary(ui, &p, icon::CHECK, "Save").clicked() {
                         save_table(s, false);
                     }
+                    if cmd(ui, &p, icon::FLOW_ARROW, "Apply to flow", false)
+                        .on_hover_text("Save, then set these velocities on every NMO, migration and depth-conversion step")
+                        .clicked()
+                    {
+                        apply_to_flow(s);
+                    }
                     if cmd(ui, &p, icon::DATABASE, "Save to project", false).clicked() {
                         save_table(s, true);
+                    }
+                });
+                let n_loc = s.iva.functions.values().filter(|v| !v.is_empty()).count();
+                ui.add_enabled_ui(n_loc >= 2, |ui| {
+                    if cmd(ui, &p, icon::WAVE_SINE, "Smooth field", false)
+                        .on_hover_text("Average each location with its neighbours along the line (needs two or more picked locations)")
+                        .clicked()
+                    {
+                        let n = s.iva.smooth_field(1);
+                        s.toast(Level::Ok, format!("Smoothed the velocity field across {n} locations · Save to keep it"));
                     }
                 });
                 let r = cmd(ui, &p, icon::FOLDER_OPEN, "Load  ▾", false);
@@ -1166,6 +1246,7 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
 
             // ---- scan settings
             ui.add_space(4.0);
+            let auto_stride = s.iva.stride();
             egui::CollapsingHeader::new(RichText::new("Scan settings").font(crate::theme::font_semibold(12.0)).color(p.text_muted)).id_salt("iva_scan").show(ui, |ui| {
                 let sc = &mut s.iva.scan;
                 egui::Grid::new("scan_grid").num_columns(2).spacing([12.0, 6.0]).show(ui, |ui| {
@@ -1189,6 +1270,14 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                     ui.end_row();
                     ui.label("Corrected-gather stretch");
                     ui.add(egui::DragValue::new(&mut s.iva.nmo_stretch).range(0.0..=200.0).suffix(" %"));
+                    ui.end_row();
+                    ui.label("Analysis step (CDPs)");
+                    ui.horizontal(|ui| {
+                        ui.add(egui::DragValue::new(&mut s.iva.cdp_stride).range(0..=5000)).on_hover_text("0 = about 40 locations along the line");
+                        if s.iva.cdp_stride == 0 {
+                            ui.label(RichText::new(format!("auto · {auto_stride}")).size(11.0).color(p.text_faint));
+                        }
+                    });
                     ui.end_row();
                     ui.label("Constant-velocity strips");
                     ui.add(egui::DragValue::new(&mut s.iva.cvs_count).range(5..=61));

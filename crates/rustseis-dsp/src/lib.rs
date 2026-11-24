@@ -15,7 +15,10 @@ pub use basic::{
     apply_mute_trace, apply_trace_edit, debias_trace, debias_traces, resample_trace, set_trace_length,
     shift_trace_ms,
 };
-pub use decon::{DeconParams, apply_decon, apply_decon_trace};
+pub use decon::{
+    DeconParams, apply_decon, apply_decon_trace, apply_decon_with_gate,
+    compute_average_autocorrelation,
+};
 pub use filter::{
     BandpassParams, FilterPhase, FilterSpecType, TimeVariantBandpassParams, TvwParams, apply_bandpass,
     apply_bandpass_trace, apply_time_variant_bandpass, apply_tvw,

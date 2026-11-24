@@ -98,6 +98,35 @@ impl VelocityTable {
         }
         last.velocity_at(time_ms)
     }
+
+    /// Smooth velocity picks laterally across adjacent CDP functions and gently in time
+    /// (clean-room equivalent of ProMAX Velocity Manipulation lateral/vertical smoothing).
+    pub fn smoothed(&self, lateral_radius: usize) -> Self {
+        if self.functions.len() <= 1 || lateral_radius == 0 {
+            return self.clone();
+        }
+        let n = self.functions.len();
+        let mut out_fns = Vec::with_capacity(n);
+        for (i, f) in self.functions.iter().enumerate() {
+            let lo = i.saturating_sub(lateral_radius);
+            let hi = (i + lateral_radius).min(n - 1);
+            let mut new_picks = Vec::with_capacity(f.picks.len());
+            for &(t_ms, _) in &f.picks {
+                let mut wsum = 0.0f64;
+                let mut vsum = 0.0f64;
+                for j in lo..=hi {
+                    let dist = (j as isize - i as isize).unsigned_abs();
+                    let w = (lateral_radius + 1 - dist) as f64;
+                    vsum += w * self.functions[j].velocity_at(t_ms) as f64;
+                    wsum += w;
+                }
+                let v = if wsum > 0.0 { (vsum / wsum) as f32 } else { f.velocity_at(t_ms) };
+                new_picks.push((t_ms, v));
+            }
+            out_fns.push(VelocityFunction::new(f.cdp, new_picks));
+        }
+        Self::new(self.name.clone(), out_fns)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -189,6 +218,35 @@ pub struct MarineGeometry2D {
     pub source_depth_m: f32,
     /// Streamer depth below sea level (meters).
     pub streamer_depth_m: f32,
+    /// Sail-line azimuth clockwise from North in degrees (`90.0` = East). Used when shot coords are absent.
+    #[serde(default = "default_marine_azimuth")]
+    pub sail_line_azimuth_deg: f64,
+    /// Perpendicular (crossline) offset from source to streamer line (meters).
+    #[serde(default)]
+    pub perp_offset_m: f64,
+    /// Optional starting shot station number (`0` = use trace `FFID`).
+    #[serde(default)]
+    pub first_shot_station: i32,
+    /// X coordinate of first shot when shot coordinates are absent (meters).
+    #[serde(default)]
+    pub first_shot_x: f64,
+    /// Y coordinate of first shot when shot coordinates are absent (meters).
+    #[serde(default)]
+    pub first_shot_y: f64,
+    /// Compute and record sea-level source/receiver datum statics into `SOU_STAT`/`REC_STAT`/`NA_STAT`.
+    #[serde(default)]
+    pub apply_sea_level_static: bool,
+    /// Water velocity used for sea-level static calculation (m/s, ~1481 m/s ≈ 4860 ft/s).
+    #[serde(default = "default_water_vel")]
+    pub water_velocity_mps: f32,
+}
+
+fn default_marine_azimuth() -> f64 {
+    90.0
+}
+
+fn default_water_vel() -> f32 {
+    1481.0
 }
 
 impl Default for MarineGeometry2D {
@@ -201,6 +259,13 @@ impl Default for MarineGeometry2D {
             chan1_is_near: true,
             source_depth_m: 5.0,
             streamer_depth_m: 6.0,
+            sail_line_azimuth_deg: default_marine_azimuth(),
+            perp_offset_m: 0.0,
+            first_shot_station: 0,
+            first_shot_x: 0.0,
+            first_shot_y: 0.0,
+            apply_sea_level_static: false,
+            water_velocity_mps: default_water_vel(),
         }
     }
 }

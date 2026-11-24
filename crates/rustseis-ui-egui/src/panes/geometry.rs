@@ -29,8 +29,24 @@ const COLS: &[(&str, &str, u8)] = &[
     ("XLINE_DIST", "XLINE_DIST", 1),
 ];
 
+/// What the survey map card shows.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum SurveyView {
+    /// Shot / receiver / CDP positions in map coordinates.
+    #[default]
+    Basemap,
+    /// CDP against offset for every trace (ProMAX Trace QC XY graph).
+    StackingChart,
+    /// Traces per CDP along the line.
+    Fold,
+}
+
+/// Most stacking-chart points drawn; above this traces are decimated evenly.
+const CHART_MAX_POINTS: usize = 40_000;
+
 #[derive(Default)]
 pub struct GeometryState {
+    pub view: SurveyView,
     pub source: TraceSource,
     user_picked_source: bool,
     pub scroll_to: Option<usize>,
@@ -47,6 +63,10 @@ struct MapData {
     cdps: Vec<(i32, f64, f64, usize)>,
     crooked: bool,
     has_coords: bool,
+    /// (CDP, OFFSET) per drawn trace, and the trace index each point came from.
+    chart: Vec<[f64; 2]>,
+    chart_idx: Vec<usize>,
+    chart_step: usize,
 }
 
 pub fn table_ui(s: &mut AppState, ui: &mut Ui) {
@@ -139,7 +159,14 @@ fn build_map(traces: &[rustseis_core::Trace]) -> MapData {
     let mut cdp_acc: BTreeMap<i32, (f64, f64, usize)> = BTreeMap::new();
     let mut crooked = false;
     let mut has_coords = false;
-    for t in traces {
+    let chart_step = traces.len().div_ceil(CHART_MAX_POINTS).max(1);
+    let mut chart = Vec::with_capacity(traces.len() / chart_step + 1);
+    let mut chart_idx = Vec::with_capacity(traces.len() / chart_step + 1);
+    for (i, t) in traces.iter().enumerate() {
+        if i % chart_step == 0 {
+            chart.push([t.headers.cdp as f64, t.headers.offset as f64]);
+            chart_idx.push(i);
+        }
         let h = &t.headers;
         if h.sou_x != 0.0 || h.sou_y != 0.0 || h.cdp_x != 0.0 || h.rec_x != 0.0 {
             has_coords = true;
@@ -160,7 +187,7 @@ fn build_map(traces: &[rustseis_core::Trace]) -> MapData {
         }
     }
     let cdps = cdp_acc.into_iter().map(|(c, (x, y, n))| (c, x / n as f64, y / n as f64, n)).collect();
-    MapData { sources, receivers, cdps, crooked, has_coords }
+    MapData { sources, receivers, cdps, crooked, has_coords, chart, chart_idx, chart_step }
 }
 
 /// If Active is post-stack (<= 1 unique FFID), prefer a pre-stack gather buffer for the survey map.
@@ -219,7 +246,7 @@ pub fn basemap_ui(s: &mut AppState, ui: &mut Ui) {
             super::busy_notice(s, ui);
             return;
         }
-        draw_map(s, ui, &p);
+        draw_view(s, ui, &p);
         return;
     };
     let key = (s.rev, Some(s.geometry.source.clone()));
@@ -228,7 +255,112 @@ pub fn basemap_ui(s: &mut AppState, ui: &mut Ui) {
         s.geometry.map = Some(build_map(traces));
         s.geometry.map_key = key;
     }
-    draw_map(s, ui, &p);
+    draw_view(s, ui, &p);
+}
+
+/// View switcher over the map card, then the chosen view.
+fn draw_view(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    widgets::segmented(
+        ui,
+        p,
+        &mut s.geometry.view,
+        &[
+            (SurveyView::Basemap, "Basemap (X, Y)", "Shots, receivers and the CDP line in map coordinates"),
+            (SurveyView::StackingChart, "Stacking chart (CDP vs offset)", "One point per trace: the CDP and offset it lands on"),
+            (SurveyView::Fold, "Fold vs CDP", "How many traces contribute to each CDP"),
+        ],
+    );
+    ui.add_space(4.0);
+    match s.geometry.view {
+        SurveyView::Basemap => draw_map(s, ui, p),
+        SurveyView::StackingChart => draw_stacking_chart(s, ui, p),
+        SurveyView::Fold => draw_fold(s, ui, p),
+    }
+}
+
+/// Focus the gather view and the header table on trace `idx` of the survey source.
+fn focus_survey_trace(s: &mut AppState, idx: usize) {
+    s.focus.source = s.geometry.source.clone();
+    s.focus_trace(idx);
+    s.geometry.scroll_to = Some(idx);
+}
+
+fn draw_stacking_chart(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    let Some(m) = &s.geometry.map else { return };
+    if m.chart.is_empty() {
+        crate::canvas::empty_state(ui, p, icon::CHART_SCATTER, "No traces", "Load data to see its stacking chart.");
+        return;
+    }
+    let cross = s.crosshair.cdp.zip(s.crosshair.offset_m).map(|(c, o)| [c as f64, o as f64]);
+    let resp = Plot::new("stacking_chart")
+        .x_axis_label("CDP")
+        .y_axis_label("Offset (m)")
+        .show_background(false)
+        .show(ui, |pu| {
+            pu.points(Points::new("traces", PlotPoints::from(m.chart.clone())).color(with_alpha(p.accent, 150)).radius(1.0));
+            if let Some(c) = cross {
+                pu.vline(egui_plot::VLine::new("crosshair CDP", c[0]).color(with_alpha(p.crosshair, 160)).width(1.0));
+                pu.points(Points::new("crosshair", PlotPoints::from(vec![c])).color(p.crosshair).radius(6.0).filled(false).shape(MarkerShape::Circle));
+            }
+            pu.pointer_coordinate()
+        });
+    if m.chart_step > 1 {
+        crate::canvas::badge(ui.painter(), resp.response.rect.right_top() + egui::vec2(-8.0, 8.0), &format!("1 in {} traces shown", m.chart_step), p, egui::Align2::RIGHT_TOP);
+    }
+    if resp.response.clicked() {
+        if let Some(pt) = resp.inner {
+            // Nearest in screen space so the CDP and offset axes weigh equally.
+            let to_px = |q: &[f64; 2]| resp.transform.position_from_point(&egui_plot::PlotPoint::new(q[0], q[1]));
+            let target = resp.transform.position_from_point(&pt);
+            let best = m.chart.iter().enumerate().min_by(|a, b| to_px(a.1).distance_sq(target).total_cmp(&to_px(b.1).distance_sq(target))).map(|(i, _)| m.chart_idx[i]);
+            if let Some(idx) = best {
+                focus_survey_trace(s, idx);
+            }
+        }
+    }
+}
+
+fn draw_fold(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    let Some(m) = &s.geometry.map else { return };
+    if m.cdps.is_empty() {
+        crate::canvas::empty_state(ui, p, icon::CHART_BAR, "No CDPs", "Assign geometry so traces carry CDP numbers.");
+        return;
+    }
+    let max_fold = m.cdps.iter().map(|c| c.3).max().unwrap_or(1);
+    let pts: Vec<[f64; 2]> = m.cdps.iter().map(|c| [c.0 as f64, c.3 as f64]).collect();
+    let cross = s.crosshair.cdp;
+    let resp = Plot::new("fold_plot")
+        .x_axis_label("CDP")
+        .y_axis_label("Fold")
+        .include_y(0.0)
+        .include_y(max_fold as f64 * 1.08)
+        .show_background(false)
+        .show(ui, |pu| {
+            let (first, last) = (pts[0][0], pts[pts.len() - 1][0]);
+            let area: Vec<[f64; 2]> = std::iter::once([first, 0.0]).chain(pts.iter().copied()).chain(std::iter::once([last, 0.0])).collect();
+            pu.polygon(egui_plot::Polygon::new("fold area", PlotPoints::from(area)).fill_color(with_alpha(p.accent, 40)).stroke(egui::Stroke::NONE));
+            pu.line(Line::new("fold", PlotPoints::from(pts.clone())).color(p.accent).width(1.6));
+            if let Some(c) = cross {
+                pu.vline(egui_plot::VLine::new("crosshair CDP", c as f64).color(p.crosshair).width(1.2));
+            }
+            pu.pointer_coordinate()
+        });
+    if let Some(c) = cross {
+        if let Some(f) = m.cdps.iter().find(|x| x.0 == c).map(|x| x.3) {
+            crate::canvas::badge(ui.painter(), resp.response.rect.right_top() + egui::vec2(-8.0, 8.0), &format!("CDP {c} · fold {f}"), p, egui::Align2::RIGHT_TOP);
+        }
+    }
+    if resp.response.clicked() {
+        if let Some(pt) = resp.inner {
+            let cdp = m.cdps.iter().min_by(|a, b| (a.0 as f64 - pt.x).abs().total_cmp(&(b.0 as f64 - pt.x).abs())).map(|c| c.0);
+            if let Some(cdp) = cdp {
+                let src = s.geometry.source.clone();
+                if let Some(idx) = s.session().and_then(|sess| src.traces(sess).iter().position(|t| t.headers.cdp == cdp)) {
+                    focus_survey_trace(s, idx);
+                }
+            }
+        }
+    }
 }
 
 fn draw_map(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
@@ -319,9 +451,7 @@ fn draw_map(s: &mut AppState, ui: &mut Ui, p: &crate::theme::Palette) {
             if let Some((cdp, _, _)) = nearest {
                 let src = s.geometry.source.clone();
                 if let Some(idx) = s.session().and_then(|sess| src.traces(sess).iter().position(|t| t.headers.cdp == cdp)) {
-                    s.focus.source = src;
-                    s.focus_trace(idx);
-                    s.geometry.scroll_to = Some(idx);
+                    focus_survey_trace(s, idx);
                 }
             }
         }

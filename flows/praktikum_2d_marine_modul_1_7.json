@@ -1,0 +1,214 @@
+{
+  "name": "Praktikum_2D_Marine_Modul_1_7",
+  "description": "Praktikum Metode Seismik 2026, Modules 1-7 on Data Seismik (NIAS 2D marine): SEG-D input -> geometry -> F-K + band-pass -> trace edit + top mute -> TAR + predictive decon -> CDP sort + velocity analysis -> AGC + NMO + stack -> post-stack Kirchhoff time migration. 40 shots so it runs in seconds; set segd_read max_shots to null for all 1262 shots. Each module ends in a buffer_save checkpoint you can compare in the gather view.",
+  "steps": [
+    {
+      "tool": "segd_read",
+      "label": "Modul 1 · SEG-D input (40 shots)",
+      "params": {
+        "path": "C:\\Kuliah\\Metode Seismik 2025\\Data Seismik",
+        "max_shots": 40,
+        "live_only": true
+      }
+    },
+    {
+      "tool": "trace_len",
+      "params": { "length_ms": 4000.0 }
+    },
+    {
+      "tool": "debias",
+      "params": {}
+    },
+    {
+      "tool": "geomspread_marine",
+      "label": "Modul 2 · Marine geometry",
+      "params": {
+        "near_offset_m": 100.0,
+        "receiver_interval_m": 12.5,
+        "nominal_shot_interval_m": 25.0,
+        "cdp_bin_size_m": 6.25,
+        "chan1_is_near": true,
+        "source_depth_m": 5.0,
+        "streamer_depth_m": 6.0,
+        "sail_line_azimuth_deg": 90.0,
+        "perp_offset_m": 0.0,
+        "first_shot_station": 0,
+        "first_shot_x": 0.0,
+        "first_shot_y": 0.0,
+        "apply_sea_level_static": false,
+        "water_velocity_mps": 1481.0
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "params": { "name": "01_geometry" }
+    },
+    {
+      "tool": "fk_filt",
+      "label": "Modul 3 · F-K filter",
+      "params": {
+        "mode": "RejectLowVelocity",
+        "dx_m": 12.5,
+        "vel_cut_mps": 1350.0,
+        "taper_frac": 0.2,
+        "pedestal": 0.02
+      }
+    },
+    {
+      "tool": "filter",
+      "label": "Modul 3 · Band-pass 10-20-65-75 Hz",
+      "params": {
+        "spec_type": "Ormsby",
+        "phase": "Zero",
+        "freqs": [10.0, 20.0, 65.0, 75.0],
+        "pad_pct": 25.0
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "params": { "name": "02_filtered" }
+    },
+    {
+      "tool": "trc_edit",
+      "label": "Modul 4 · Trace kill / reverse (filled from the gather view)",
+      "enabled": false,
+      "params": {
+        "kill_channels": [],
+        "kill_ffids": [],
+        "kill_tracenos": [],
+        "reverse_channels": [],
+        "reverse_ffids": []
+      }
+    },
+    {
+      "tool": "mute",
+      "label": "Modul 4 · Top mute",
+      "params": {
+        "mute_table": null,
+        "name": "top_mute",
+        "mode": "Top",
+        "key_header": "AOFFSET",
+        "taper_ms": 40.0,
+        "picks": [[100.0, 40.0], [700.0, 450.0], [1288.0, 860.0]]
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "params": { "name": "03_edited" }
+    },
+    {
+      "tool": "tar",
+      "label": "Modul 5 · True amplitude recovery (1/(t·v²))",
+      "params": {
+        "time_power": 0.0,
+        "db_per_sec": 0.0,
+        "spherical": "OneOverTV2",
+        "velocity_pairs": [[0.0, 1480.0], [1000.0, 2000.0], [2000.0, 2600.0], [4000.0, 3200.0]],
+        "velocity_table": null,
+        "inelastic_alpha": 0.0,
+        "max_time_ms": 3800.0
+      }
+    },
+    {
+      "tool": "decon",
+      "label": "Modul 5 · Predictive decon (320 ms operator, 25 ms gap)",
+      "params": {
+        "operator_ms": 320.0,
+        "prediction_lag_ms": 25.0,
+        "white_noise_pct": 0.1,
+        "design_windows_ms": [[200.0, 3500.0]],
+        "design_gate_table": null
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "params": { "name": "04_tar_decon" }
+    },
+    {
+      "tool": "inline_sort",
+      "label": "Modul 6 · Sort to CDP gathers",
+      "params": {
+        "primary": "CDP",
+        "secondary": "AOFFSET",
+        "primary_desc": false,
+        "secondary_desc": false
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "params": { "name": "05_cdp_gathers" }
+    },
+    {
+      "tool": "vaprecom71",
+      "label": "Modul 6 · Velocity analysis (15-CDP supergathers)",
+      "params": {
+        "cdps": [],
+        "cdp_increment": 0,
+        "supergather_cdps": 15,
+        "save_table": "praktikum_vel",
+        "auto_pick": true,
+        "scan": {
+          "v_min_mps": 1500.0,
+          "v_max_mps": 5000.0,
+          "dv_mps": 50.0,
+          "window_ms": 30.0,
+          "t_step_ms": 20.0,
+          "stretch_mute_pct": 50.0
+        }
+      }
+    },
+    {
+      "tool": "agc",
+      "label": "Modul 7 · AGC 500 ms",
+      "params": {
+        "operator_ms": 500.0,
+        "basis": "Rms",
+        "anchor": "Center",
+        "target_amp": 1.0
+      }
+    },
+    {
+      "tool": "nmo",
+      "label": "Modul 7 · NMO",
+      "params": {
+        "velocity_table": "praktikum_vel",
+        "constant_vel_mps": null,
+        "params": {
+          "direction": "Forward",
+          "stretch_mute_pct": 30.0,
+          "stretch_taper_samples": 8,
+          "do_stat": true,
+          "eta": 0.05
+        }
+      }
+    },
+    {
+      "tool": "stack",
+      "label": "Modul 7 · CDP stack",
+      "params": {
+        "method": "Mean",
+        "fold_norm_power": 0.5,
+        "exclude_muted_zeros": true
+      }
+    },
+    {
+      "tool": "buffer_save",
+      "params": { "name": "06_stack" }
+    },
+    {
+      "tool": "kirtime2dstk",
+      "label": "Modul 7 · Post-stack Kirchhoff time migration",
+      "params": {
+        "velocity_table": "praktikum_vel",
+        "constant_vel_mps": null,
+        "params": {
+          "dx_m": 6.25,
+          "max_aperture_m": 1250.0,
+          "max_dip_deg": 30.0,
+          "apply_half_derivative": true,
+          "anti_alias": true
+        }
+      }
+    }
+  ]
+}

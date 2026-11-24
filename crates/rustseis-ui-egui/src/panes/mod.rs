@@ -8,6 +8,7 @@ pub mod geometry;
 pub mod inspector;
 pub mod iva;
 pub mod picks;
+pub mod preview;
 pub mod project;
 pub mod spectral;
 pub mod start;

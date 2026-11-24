@@ -12,6 +12,7 @@ use egui::{Color32, CornerRadius, Pos2, RichText, Stroke, Ui, pos2, vec2};
 use egui_phosphor::regular as icon;
 use rustseis_core::{MuteMode, MuteTable, Trace};
 use rustseis_render::{GatherRenderConfig, SeismicColormap};
+use serde_json::json;
 use std::collections::{BTreeSet, HashMap};
 use std::hash::{Hash, Hasher};
 
@@ -22,6 +23,8 @@ pub enum PickMode {
     Mute,
     FirstBreak,
     Kill,
+    /// Two-time window per key that designs the decon operator (saved as a surgical mute table).
+    DeconGate,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -77,6 +80,31 @@ pub struct ViewerState {
     pub kill_tracenos: BTreeSet<i32>,
     pub kill_channels: BTreeSet<i32>,
     pub reverse_channels: BTreeSet<i32>,
+    /// Also write applied kills / reversals into the flow's `trc_edit` step.
+    pub edits_into_flow: bool,
+    // Decon design gate
+    pub gate_name: String,
+    pub gate_key: String,
+    pub gate_picks: Vec<(f32, f32, f32)>,
+}
+
+/// Mute table names the panel picks by itself; a name the user typed is never replaced.
+const DEFAULT_MUTE_NAMES: &[&str] = &["top_mute", "bottom_mute", "surgical_mute", "ui_top_mute"];
+
+pub fn default_mute_name(mode: MuteMode) -> &'static str {
+    match mode {
+        MuteMode::Top => "top_mute",
+        MuteMode::Bottom => "bottom_mute",
+        MuteMode::Surgical => "surgical_mute",
+    }
+}
+
+pub fn mute_mode_name(mode: MuteMode) -> &'static str {
+    match mode {
+        MuteMode::Top => "Top",
+        MuteMode::Bottom => "Bottom",
+        MuteMode::Surgical => "Surgical",
+    }
 }
 
 impl Default for ViewerState {
@@ -107,7 +135,7 @@ impl Default for ViewerState {
             clip_amp_b: (0, 1.0),
             last_home_key: 0,
             labels_cache: Default::default(),
-            mute_table_name: "ui_top_mute".into(),
+            mute_table_name: "top_mute".into(),
             mute_mode: MuteMode::Top,
             mute_key: "AOFFSET".into(),
             mute_taper_ms: 40.0,
@@ -123,6 +151,10 @@ impl Default for ViewerState {
             kill_tracenos: BTreeSet::new(),
             kill_channels: BTreeSet::new(),
             reverse_channels: BTreeSet::new(),
+            edits_into_flow: true,
+            gate_name: "decon_gate_1".into(),
+            gate_key: "AOFFSET".into(),
+            gate_picks: Vec::new(),
         }
     }
 }
@@ -148,6 +180,37 @@ impl ViewerState {
     }
     pub fn pending_edits(&self) -> usize {
         self.kill_tracenos.len() + self.kill_channels.len() + self.reverse_channels.len()
+    }
+    /// Switch mute mode; a still-default table name follows the mode.
+    pub fn set_mute_mode(&mut self, mode: MuteMode) {
+        if DEFAULT_MUTE_NAMES.contains(&self.mute_table_name.trim()) {
+            self.mute_table_name = default_mute_name(mode).into();
+        }
+        self.mute_mode = mode;
+    }
+    pub fn gate_table(&self) -> MuteTable {
+        MuteTable {
+            name: self.gate_name.clone(),
+            mode: MuteMode::Surgical,
+            key_header: self.gate_key.clone(),
+            taper_ms: 0.0,
+            picks: Vec::new(),
+            surgical_picks: self.gate_picks.clone(),
+        }
+    }
+    pub fn load_gate(&mut self, t: &MuteTable) {
+        self.gate_name = t.name.clone();
+        self.gate_key = t.key_header.clone();
+        self.gate_picks = t.surgical_picks.clone();
+    }
+    /// Force the right-hand compare view to redraw (its buffer was replaced in place).
+    pub fn invalidate_compare(&mut self) {
+        self.raster_b_key = 0;
+        self.labels_cache[1].0 = 0;
+    }
+    /// Mute tables that hold decon design gates rather than mutes.
+    pub fn is_gate_name(&self, name: &str) -> bool {
+        name == self.gate_name || name.starts_with("decon_gate")
     }
 }
 
@@ -1022,8 +1085,14 @@ fn overlays(s: &AppState, painter: &egui::Painter, frame: &canvas::PlotFrame, tr
     let n = traces.len();
     let step = ((n as f32 / frame.rect.width().max(1.0)).ceil() as usize).max(1);
 
-    let show_mute = v.mode == PickMode::Mute || (v.show_overlays && !v.compare);
-    let show_fb = v.mode == PickMode::FirstBreak || (v.show_overlays && !v.compare);
+    // Mute and gate curves are functions of offset: drawn passively only on pre-stack gathers
+    // (never across zero-offset stacked/migrated sections regardless of Group by).
+    let has_offsets = traces.iter().any(|t| t.headers.aoffset > 0.0 || t.headers.offset.abs() > 0.0);
+    let is_offset_key = |k: &str| k.eq_ignore_ascii_case("AOFFSET") || k.eq_ignore_ascii_case("OFFSET");
+    let prestack_mute = s.focus.key != SECTION_KEY && (!is_offset_key(&v.mute_key) || has_offsets);
+    let prestack_gate = s.focus.key != SECTION_KEY && (!is_offset_key(&v.gate_key) || has_offsets);
+    let show_mute = v.mode == PickMode::Mute || (v.show_overlays && !v.compare && prestack_mute);
+    let show_fb = v.mode == PickMode::FirstBreak || (v.show_overlays && !v.compare && has_offsets);
 
     // Mute curve + shaded region
     if show_mute && (!v.mute_picks.is_empty() || !v.surgical_picks.is_empty()) {
@@ -1076,18 +1145,63 @@ fn overlays(s: &AppState, painter: &egui::Painter, frame: &canvas::PlotFrame, tr
             painter.add(egui::Shape::dashed_line(&taper, Stroke::new(1.0, with_alpha(p.pick, 180)), 5.0, 4.0));
         }
         painter.add(egui::Shape::line(top_pts, Stroke::new(2.0, p.pick)));
-        // Control points at the trace whose key is nearest each pick.
+        // Control points at the trace whose key is nearest each pick (skip picks outside this gather's key range).
         if v.mode == PickMode::Mute {
             let keys: Vec<f32> = traces.iter().map(|t| header_f64(t, &v.mute_key) as f32).collect();
+            let (k_lo, k_hi) = key_bounds(&keys);
             let handles: Vec<(f32, Vec<f32>)> = match v.mute_mode {
                 MuteMode::Surgical => v.surgical_picks.iter().map(|(k, a, b)| (*k, vec![*a, *b])).collect(),
                 _ => v.mute_picks.iter().map(|(k, t)| (*k, vec![*t])).collect(),
             };
             for (k, ts) in handles {
+                if k < k_lo || k > k_hi {
+                    continue;
+                }
                 if let Some(i) = nearest_key(&keys, k) {
                     for t in ts {
                         let c = pos2(x_of(i), frame.y_to_screen(t as f64));
                         painter.circle(c, 4.5, p.chrome, Stroke::new(2.0, p.pick));
+                    }
+                }
+            }
+        }
+    }
+
+    // Decon design gate: the reflection window the operator is designed on.
+    let show_gate = v.mode == PickMode::DeconGate || (v.show_overlays && !v.compare && prestack_gate);
+    if show_gate && !v.gate_picks.is_empty() {
+        let table = v.gate_table();
+        let (mut top_pts, mut bot_pts) = (Vec::new(), Vec::new());
+        for i in (0..n).step_by(step) {
+            if !visible(i) {
+                continue;
+            }
+            let k = header_f64(&traces[i], &v.gate_key) as f32;
+            if let Some((a, b)) = table.surgical_window_at(k) {
+                let x = x_of(i);
+                top_pts.push(pos2(x, frame.y_to_screen(a as f64)));
+                bot_pts.push(pos2(x, frame.y_to_screen(b as f64)));
+            }
+        }
+        let band = with_alpha(p.success, 46);
+        for (wa, wb) in top_pts.windows(2).zip(bot_pts.windows(2)) {
+            painter.add(egui::Shape::convex_polygon(vec![wa[0], wa[1], wb[1], wb[0]], band, Stroke::NONE));
+        }
+        if let Some(first) = top_pts.first().copied() {
+            badge(painter, first + vec2(6.0, -4.0), "Decon design gate", p, egui::Align2::LEFT_BOTTOM);
+        }
+        painter.add(egui::Shape::line(top_pts, Stroke::new(1.8, p.success)));
+        painter.add(egui::Shape::line(bot_pts, Stroke::new(1.8, p.success)));
+        if v.mode == PickMode::DeconGate {
+            let keys: Vec<f32> = traces.iter().map(|t| header_f64(t, &v.gate_key) as f32).collect();
+            let (k_lo, k_hi) = key_bounds(&keys);
+            for (k, a, b) in &v.gate_picks {
+                if *k < k_lo || *k > k_hi {
+                    continue;
+                }
+                if let Some(i) = nearest_key(&keys, *k) {
+                    for t in [*a, *b] {
+                        painter.circle(pos2(x_of(i), frame.y_to_screen(t as f64)), 4.5, p.chrome, Stroke::new(2.0, p.success));
                     }
                 }
             }
@@ -1152,6 +1266,18 @@ fn nearest_key(keys: &[f32], k: f32) -> Option<usize> {
     keys.iter().enumerate().min_by(|a, b| (a.1 - k).abs().total_cmp(&(b.1 - k).abs())).map(|(i, _)| i)
 }
 
+/// Range of key values in a gather, with a small tolerance so edge picks stay visible while far
+/// out-of-range picks (e.g. a 2400 m pick on a 1288 m streamer) do not clamp onto the last trace.
+fn key_bounds(keys: &[f32]) -> (f32, f32) {
+    let lo = keys.iter().copied().fold(f32::INFINITY, f32::min);
+    let hi = keys.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+    if !lo.is_finite() || !hi.is_finite() {
+        return (f32::NEG_INFINITY, f32::INFINITY);
+    }
+    let pad = ((hi - lo) * 0.05).max(25.0);
+    (lo - pad, hi + pad)
+}
+
 fn interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsRange) {
     let Some((hx, ht)) = out.hover else {
         if !out.response.dragged() {
@@ -1174,7 +1300,7 @@ fn interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsRange)
                 s.focus_trace(abs);
             }
         }
-        PickMode::Mute => mute_interact(s, out, range, li, ht as f32),
+        PickMode::Mute | PickMode::DeconGate => mute_interact(s, out, range, li, ht as f32),
         PickMode::FirstBreak => {
             let Some(sess) = s.session() else { return };
             let t = &s.focus.source.traces(sess)[abs];
@@ -1189,10 +1315,6 @@ fn interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsRange)
         }
         PickMode::Kill => {
             if resp.clicked() && in_trace {
-                if s.focus.source != TraceSource::Active {
-                    s.toast(Level::Warn, "Switch source to Latest result (Active) to edit traces");
-                    return;
-                }
                 let Some(sess) = s.session() else { return };
                 let h = s.focus.source.traces(sess)[abs].headers.clone();
                 let v = &mut s.viewer;
@@ -1211,14 +1333,19 @@ fn interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsRange)
     }
 }
 
+/// Point editing shared by mute picking and decon-gate picking (a gate is a surgical window).
 fn mute_interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsRange, li: usize, t: f32) {
+    let gate = s.viewer.mode == PickMode::DeconGate;
     let Some(sess) = s.session() else { return };
     let traces = &s.focus.source.traces(sess)[range.start..range.end];
-    let key_vals: Vec<f32> = traces.iter().map(|tr| header_f64(tr, &s.viewer.mute_key) as f32).collect();
+    let key = if gate { &s.viewer.gate_key } else { &s.viewer.mute_key };
+    let key_vals: Vec<f32> = traces.iter().map(|tr| header_f64(tr, key) as f32).collect();
     let k_here = key_vals.get(li).copied().unwrap_or(0.0);
     let frame = &out.frame;
     let pointer: Option<Pos2> = out.response.hover_pos();
-    let v = &mut s.viewer;
+    let surgical = gate || s.viewer.mute_mode == MuteMode::Surgical;
+    let ViewerState { mute_picks, surgical_picks, gate_picks, mute_drag, .. } = &mut s.viewer;
+    let windows: &mut Vec<(f32, f32, f32)> = if gate { gate_picks } else { surgical_picks };
     // Hit-test existing handles in screen space.
     let handle_pos = |k: f32, tt: f32| -> Option<Pos2> {
         nearest_key(&key_vals, k).map(|i| pos2(frame.x_to_screen(i as f64 + 0.5), frame.y_to_screen(tt as f64)))
@@ -1226,89 +1353,186 @@ fn mute_interact(s: &mut AppState, out: &canvas::CanvasOutput, range: data::EnsR
     let mut hit: Option<(usize, u8)> = None;
     if let Some(pt) = pointer {
         let mut best = 9.0f32;
-        match v.mute_mode {
-            MuteMode::Surgical => {
-                for (i, (k, a, b)) in v.surgical_picks.iter().enumerate() {
-                    for (which, tt) in [(0u8, *a), (1u8, *b)] {
-                        if let Some(hp) = handle_pos(*k, tt) {
-                            let d = hp.distance(pt);
-                            if d < best {
-                                best = d;
-                                hit = Some((i, which));
-                            }
-                        }
-                    }
+        let mut consider = |i: usize, which: u8, k: f32, tt: f32| {
+            if let Some(d) = handle_pos(k, tt).map(|hp| hp.distance(pt)) {
+                if d < best {
+                    best = d;
+                    hit = Some((i, which));
                 }
             }
-            _ => {
-                for (i, (k, tt)) in v.mute_picks.iter().enumerate() {
-                    if let Some(hp) = handle_pos(*k, *tt) {
-                        let d = hp.distance(pt);
-                        if d < best {
-                            best = d;
-                            hit = Some((i, 0));
-                        }
-                    }
-                }
+        };
+        if surgical {
+            for (i, (k, a, b)) in windows.iter().enumerate() {
+                consider(i, 0, *k, *a);
+                consider(i, 1, *k, *b);
+            }
+        } else {
+            for (i, (k, tt)) in mute_picks.iter().enumerate() {
+                consider(i, 0, *k, *tt);
             }
         }
     }
     let resp = &out.response;
     if resp.drag_started_by(egui::PointerButton::Primary) {
-        v.mute_drag = hit;
+        *mute_drag = hit;
     }
     if resp.dragged_by(egui::PointerButton::Primary) {
-        if let Some((i, which)) = v.mute_drag {
-            match v.mute_mode {
-                MuteMode::Surgical => {
-                    if let Some(pk) = v.surgical_picks.get_mut(i) {
-                        pk.0 = k_here;
-                        if which == 0 { pk.1 = t.max(0.0) } else { pk.2 = t.max(pk.1 + 1.0) }
-                    }
+        if let Some((i, which)) = *mute_drag {
+            if surgical {
+                if let Some(pk) = windows.get_mut(i) {
+                    pk.0 = k_here;
+                    if which == 0 { pk.1 = t.max(0.0) } else { pk.2 = t.max(pk.1 + 1.0) }
                 }
-                _ => {
-                    if let Some(pk) = v.mute_picks.get_mut(i) {
-                        *pk = (k_here, t.max(0.0));
-                    }
-                }
+            } else if let Some(pk) = mute_picks.get_mut(i) {
+                *pk = (k_here, t.max(0.0));
             }
         }
     }
+    let sort = |m: &mut Vec<(f32, f32)>, w: &mut Vec<(f32, f32, f32)>| {
+        m.sort_by(|a, b| a.0.total_cmp(&b.0));
+        w.sort_by(|a, b| a.0.total_cmp(&b.0));
+    };
     if resp.drag_stopped() {
-        v.mute_drag = None;
-        v.mute_picks.sort_by(|a, b| a.0.total_cmp(&b.0));
-        v.surgical_picks.sort_by(|a, b| a.0.total_cmp(&b.0));
+        *mute_drag = None;
+        sort(mute_picks, windows);
     }
     if resp.clicked() && hit.is_none() {
-        match v.mute_mode {
-            MuteMode::Surgical => v.surgical_picks.push((k_here, t.max(0.0), t.max(0.0) + 120.0)),
-            _ => v.mute_picks.push((k_here, t.max(0.0))),
+        if surgical {
+            // A gate starts as a reflection window; a surgical mute as a short noise window.
+            let len = if gate { 1500.0 } else { 120.0 };
+            windows.push((k_here, t.max(0.0), t.max(0.0) + len));
+        } else {
+            mute_picks.push((k_here, t.max(0.0)));
         }
-        v.mute_picks.sort_by(|a, b| a.0.total_cmp(&b.0));
-        v.surgical_picks.sort_by(|a, b| a.0.total_cmp(&b.0));
+        sort(mute_picks, windows);
     }
     if resp.secondary_clicked() {
         if let Some((i, _)) = hit {
-            match v.mute_mode {
-                MuteMode::Surgical => {
-                    v.surgical_picks.remove(i);
-                }
-                _ => {
-                    v.mute_picks.remove(i);
-                }
+            if surgical {
+                windows.remove(i);
+            } else {
+                mute_picks.remove(i);
             }
         }
     }
 }
 
+/// Root index of the first step whose tool is in `later`: where an earlier-stage step belongs.
+fn insert_before_first(s: &AppState, later: &[&str]) -> Option<usize> {
+    s.flow.nodes.iter().position(|n| later.contains(&n.tool.as_str()))
+}
+
+/// Steps a mute normally comes before (Module 4 precedes TAR, decon and velocity work).
+const AFTER_MUTE: &[&str] = &["tar", "decon", "inline_sort", "vaprecom71", "agc", "nmo", "stack"];
+/// Steps that come after decon in the practicum order.
+const AFTER_DECON: &[&str] = &["inline_sort", "vaprecom71", "agc", "nmo", "stack"];
+/// Steps trace edits come before (right after input, geometry and filtering).
+const AFTER_TRC_EDIT: &[&str] = &["mute", "tar", "decon", "inline_sort", "vaprecom71", "agc", "nmo", "stack"];
+
 /// Save the edited mute table through the command bus.
-pub fn save_mute(s: &mut AppState) {
+pub fn save_mute(s: &mut AppState) -> bool {
     let t = s.viewer.mute_table();
     let name = t.name.clone();
     match s.dispatch_now(rustseis_engine::EngineCommand::UpsertMuteTable(t)) {
-        Ok(_) => s.toast(Level::Ok, format!("Saved mute “{name}”")),
-        Err(e) => s.toast(Level::Error, e),
+        Ok(_) => {
+            s.last_mute_table = Some(name.clone());
+            s.toast(Level::Ok, format!("Saved mute “{name}”"));
+            true
+        }
+        Err(e) => {
+            s.toast(Level::Error, e);
+            false
+        }
     }
+}
+
+/// Save the mute and point a `mute` step of the flow at it: the step already using this table,
+/// else an inline-picks mute of the same mode, else a new step before TAR / decon.
+pub fn add_mute_to_flow(s: &mut AppState) {
+    if !save_mute(s) {
+        return;
+    }
+    let name = s.viewer.mute_table_name.trim().to_string();
+    let mode = mute_mode_name(s.viewer.mute_mode);
+    let label = format!("{mode} Mute ({name})");
+    let at = insert_before_first(s, AFTER_MUTE);
+    let uses_name = |n: &crate::flowdoc::FlowNode| n.params.get("mute_table").and_then(|v| v.as_str()) == Some(name.as_str());
+    let inline_same_mode = |n: &crate::flowdoc::FlowNode| {
+        n.params.get("mute_table").and_then(|v| v.as_str()).is_none_or(|t| t.trim().is_empty())
+            && n.params.get("mode").and_then(|v| v.as_str()) == Some(mode)
+    };
+    let has_named = !s.flow.find_paths(|n| n.tool == "mute" && uses_name(n)).is_empty();
+    let res = s.upsert_flow_step("mute", |n| if has_named { uses_name(n) } else { inline_same_mode(n) }, at, |n| {
+        n.enabled = true;
+        n.params["mute_table"] = json!(name);
+        n.params["mode"] = json!(mode);
+        if n.label.is_none() {
+            n.label = Some(label);
+        }
+    });
+    if let Some((_, created)) = res {
+        s.toast(Level::Ok, if created { format!("Added a {mode} mute step using “{name}”") } else { format!("Mute step now uses “{name}”") });
+    }
+}
+
+/// Save the decon design gate as a surgical mute table.
+pub fn save_gate(s: &mut AppState) -> bool {
+    if s.viewer.gate_picks.is_empty() {
+        s.toast(Level::Warn, "Pick at least one gate window first");
+        return false;
+    }
+    let t = s.viewer.gate_table();
+    let name = t.name.clone();
+    match s.dispatch_now(rustseis_engine::EngineCommand::UpsertMuteTable(t)) {
+        Ok(_) => {
+            s.toast(Level::Ok, format!("Saved decon gate “{name}”"));
+            true
+        }
+        Err(e) => {
+            s.toast(Level::Error, e);
+            false
+        }
+    }
+}
+
+/// Save the gate and make the flow's decon design its operator inside it.
+pub fn apply_gate_to_decon(s: &mut AppState) {
+    if !save_gate(s) {
+        return;
+    }
+    let name = s.viewer.gate_name.trim().to_string();
+    let at = insert_before_first(s, AFTER_DECON);
+    let res = s.upsert_flow_step("decon", |_| true, at, |n| {
+        n.enabled = true;
+        n.params["design_gate_table"] = json!(name);
+    });
+    if let Some((_, created)) = res {
+        s.toast(Level::Ok, if created { format!("Added decon designed in gate “{name}”") } else { format!("Decon now designs in gate “{name}”") });
+    }
+}
+
+/// Merge the pending kills / reversals into the flow's `trc_edit` step (added after input,
+/// geometry and filtering when missing) so re-running the flow keeps them.
+pub fn merge_trace_edits_into_flow(s: &mut AppState) -> bool {
+    if s.viewer.pending_edits() == 0 {
+        return false;
+    }
+    let v = &s.viewer;
+    let add: [(&str, Vec<i32>); 3] = [
+        ("kill_tracenos", v.kill_tracenos.iter().copied().collect()),
+        ("kill_channels", v.kill_channels.iter().copied().collect()),
+        ("reverse_channels", v.reverse_channels.iter().copied().collect()),
+    ];
+    let at = insert_before_first(s, AFTER_TRC_EDIT);
+    let res = s.upsert_flow_step("trc_edit", |_| true, at, |n| {
+        n.enabled = true;
+        for (key, vals) in add {
+            let mut set: BTreeSet<i64> = n.params.get(key).and_then(|x| x.as_array()).map(|a| a.iter().filter_map(|x| x.as_i64()).collect()).unwrap_or_default();
+            set.extend(vals.into_iter().map(i64::from));
+            n.params[key] = json!(set.into_iter().collect::<Vec<_>>());
+        }
+    });
+    res.is_some()
 }
 
 /// Build a FirstBreakTable from the edited picks (geometry from the focus source) and upsert it.
@@ -1340,11 +1564,25 @@ pub fn auto_pick_fb(s: &mut AppState) {
     s.compute.submit("viewer.fb_auto", move || Ok(rustseis_imaging::pick_first_breaks(&mut work, &params, "ui_auto")));
 }
 
-/// Apply pending kills / reversals as an undoable `trc_edit` flow on the active traces.
+/// Apply pending kills / reversals as an undoable `trc_edit` flow on the active traces and,
+/// when "Save into current flow" is on, record them in the flow's `trc_edit` step too.
 pub fn apply_trace_edits(s: &mut AppState) {
-    if s.focus.source != TraceSource::Active {
-        s.toast(Level::Warn, "Trace edits apply to the active trace set — switch the viewer source to Active");
+    if s.viewer.pending_edits() == 0 {
         return;
+    }
+    if s.focus.source != TraceSource::Active {
+        if s.viewer.edits_into_flow && !s.flow.nodes.is_empty() && merge_trace_edits_into_flow(s) {
+            s.viewer.kill_tracenos.clear();
+            s.viewer.kill_channels.clear();
+            s.viewer.reverse_channels.clear();
+            s.toast(Level::Ok, "Trace edits saved to the flow's Trace Kill/Reverse step");
+        } else {
+            s.toast(Level::Warn, "Use Add to flow to record edits from a saved buffer, or switch to Latest result (Active)");
+        }
+        return;
+    }
+    if s.viewer.edits_into_flow && !s.flow.nodes.is_empty() && merge_trace_edits_into_flow(s) {
+        s.log(Level::Info, "Trace edits recorded in the flow's Trace Kill/Reverse step");
     }
     let v = &s.viewer;
     let params = serde_json::json!({

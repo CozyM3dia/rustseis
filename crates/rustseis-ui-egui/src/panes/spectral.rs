@@ -10,12 +10,32 @@ use egui::{Color32, RichText, Stroke, Ui, pos2, vec2};
 use egui_phosphor::regular as icon;
 use egui_plot::{Line, Plot, PlotPoint, PlotPoints, Polygon, Text, VLine};
 use rustseis_core::{Ensemble, Trace};
-use rustseis_dsp::{BandpassParams, FkFilterParams, FkMode, RadonFilterAction, RadonMode, RadonPanel, RadonParams};
+use rustseis_dsp::{BandpassParams, DeconParams, FkFilterParams, FkMode, RadonFilterAction, RadonMode, RadonPanel, RadonParams};
 use rustseis_render::SeismicColormap;
 use serde_json::json;
 use std::hash::{Hash, Hasher};
 
+/// What the top-left card of the board shows.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum LeftView {
+    #[default]
+    Spectrum,
+    /// Average autocorrelation for decon design (Module 5).
+    Autocorrelation,
+}
+
+/// Lags shown on the autocorrelation card.
+const ACF_MAX_LAG_MS: f32 = 400.0;
+/// Predictive decon gap used when switching from spiking.
+const DEFAULT_PREDICTION_LAG_MS: f32 = 24.0;
+
 pub struct SpectralState {
+    pub left_view: LeftView,
+    // Decon design on the autocorrelation
+    pub decon: DeconParams,
+    acf: Option<AcfResult>,
+    acf_key: u64,
+    acf_drag: Option<u8>,
     // 1D spectrum
     pub ormsby: [f32; 4],
     pub preview_filter: bool,
@@ -30,6 +50,7 @@ pub struct SpectralState {
     fk_key: u64,
     fk_extent: Option<RasterExtent>,
     fk_canvas: CanvasState,
+    fk_drag: Option<usize>,
     fk_gather: Option<Raster>,
     fk_gather_canvas: CanvasState,
     // Radon
@@ -46,7 +67,7 @@ pub struct SpectralState {
     preview_requested: bool,
     /// Recompute when the gather on screen changes.
     pub follow_viewer: bool,
-    /// Which tool the user touched last: 0 band-pass, 1 F-K, 2 Radon.
+    /// Which tool the user touched last: 0 band-pass, 1 F-K, 2 Radon, 3 decon.
     pub active: u8,
     fk_kept: Option<f32>,
     radon_removed: Option<f32>,
@@ -55,6 +76,11 @@ pub struct SpectralState {
 impl Default for SpectralState {
     fn default() -> Self {
         Self {
+            left_view: LeftView::Spectrum,
+            decon: DeconParams { operator_ms: 160.0, prediction_lag_ms: DEFAULT_PREDICTION_LAG_MS, ..DeconParams::default() },
+            acf: None,
+            acf_key: 0,
+            acf_drag: None,
             ormsby: [6.0, 12.0, 70.0, 90.0],
             preview_filter: true,
             spec: None,
@@ -67,6 +93,7 @@ impl Default for SpectralState {
             fk_key: 0,
             fk_extent: None,
             fk_canvas: CanvasState::default(),
+            fk_drag: None,
             fk_gather: None,
             fk_gather_canvas: CanvasState::default(),
             radon_source: None,
@@ -224,33 +251,172 @@ fn spectrum_card(s: &mut AppState, ui: &mut Ui) {
     }
 }
 
-/// Update the selected step if it is `tool`, else the first such step, else append one.
+/// Update the selected step if it is `tool`, else the first such step, else add one (undoable).
 fn upsert_step(s: &mut AppState, tool: &str, edit: impl FnOnce(&mut serde_json::Value)) {
-    let sel_is_tool = s.flow_sel.as_ref().and_then(|p| s.flow.get(p)).is_some_and(|n| n.tool == tool);
-    let path = if sel_is_tool {
-        s.flow_sel.clone()
-    } else {
-        s.flow.nodes.iter().position(|n| n.tool == tool).map(|i| vec![i])
-    };
-    match path {
-        Some(pth) => {
-            if let Some(n) = s.flow.get_mut(&pth) {
-                edit(&mut n.params);
-                s.flow.dirty = true;
+    let label = s.tool(tool).map(|t| t.label.clone()).unwrap_or_else(|| tool.to_string());
+    match s.upsert_flow_step(tool, |_| true, None, |n| edit(&mut n.params)) {
+        Some((_, true)) => s.toast(Level::Ok, format!("Added “{label}” to the flow")),
+        Some((_, false)) => s.toast(Level::Ok, format!("Updated “{label}” in the flow")),
+        None => s.toast(Level::Error, format!("`{tool}` is not in the tool library")),
+    }
+}
+
+// ============================================================== autocorrelation (decon QC)
+
+struct AcfResult {
+    key: u64,
+    lags_ms: Vec<f32>,
+    raw: Vec<f32>,
+    /// Autocorrelation after the previewed decon, when it ran.
+    after: Option<Vec<f32>>,
+}
+
+fn acf_card(s: &mut AppState, ui: &mut Ui) {
+    let p = *palette(s.theme);
+    if s.session().is_some() && s.spectral.follow_viewer {
+        if let Some((ens, ekey)) = focus_ensemble(s, 600) {
+            let d = s.spectral.decon.clone();
+            let key = hash_of((ekey, d.operator_ms.to_bits(), d.prediction_lag_ms.to_bits(), d.white_noise_pct.to_bits()));
+            if key != s.spectral.acf_key {
+                s.spectral.acf_key = key;
+                s.compute.submit("spec.acf", move || {
+                    let (lags_ms, raw) = rustseis_dsp::compute_average_autocorrelation(&ens, ACF_MAX_LAG_MS, None);
+                    let mut work = ens;
+                    let after = rustseis_dsp::apply_decon(&mut work, &d).ok().map(|_| rustseis_dsp::compute_average_autocorrelation(&work, ACF_MAX_LAG_MS, None).1);
+                    Ok(AcfResult { key, lags_ms, raw, after })
+                });
             }
-            s.flow_sel = Some(pth);
-            s.toast(Level::Ok, format!("Updated `{tool}` step in the flow"));
-        }
-        None => {
-            s.insert_tool(tool);
-            if let Some(pth) = s.flow_sel.clone() {
-                if let Some(n) = s.flow.get_mut(&pth) {
-                    edit(&mut n.params);
-                }
-            }
-            s.toast(Level::Ok, format!("Added `{tool}` step to the flow"));
         }
     }
+    let Some(acf) = s.spectral.acf.as_ref() else {
+        if !super::busy_notice(s, ui) {
+            canvas::empty_state(ui, &p, icon::WAVE_SINE, "No autocorrelation yet", "Open data or pick a gather in the gather view.");
+        }
+        return;
+    };
+    let to_pts = |v: &[f32]| -> Vec<[f64; 2]> { acf.lags_ms.iter().zip(v).map(|(l, c)| [*l as f64, *c as f64]).collect() };
+    let raw = to_pts(&acf.raw);
+    let after = acf.after.as_deref().map(to_pts);
+    let d = &s.spectral.decon;
+    let markers: Vec<(u8, f32, &str)> = if d.prediction_lag_ms > 0.0 {
+        vec![(0, d.prediction_lag_ms, "gap"), (1, d.operator_ms, "operator")]
+    } else {
+        vec![(1, d.operator_ms, "operator")]
+    };
+    let drag = s.spectral.acf_drag;
+    let resp = Plot::new("acf_plot")
+        .allow_drag(false)
+        .allow_double_click_reset(true)
+        .x_axis_label("lag (ms)")
+        .y_axis_label("correlation")
+        .include_y(-1.0)
+        .include_y(1.0)
+        .include_x(0.0)
+        .include_x(ACF_MAX_LAG_MS as f64)
+        .show_background(false)
+        .show(ui, |pu| {
+            pu.hline(egui_plot::HLine::new("zero", 0.0).color(with_alpha(p.text_muted, 80)).width(1.0));
+            pu.line(Line::new("before", PlotPoints::from(raw)).color(p.text_muted).width(1.4));
+            if let Some(a) = after {
+                pu.line(Line::new("after decon", PlotPoints::from(a)).color(p.accent).width(2.0));
+            }
+            for (id, x, label) in &markers {
+                let w = if drag == Some(*id) { 2.5 } else { 1.4 };
+                pu.vline(VLine::new(*label, *x as f64).color(p.pick).width(w));
+                pu.text(Text::new(*label, PlotPoint::new(*x as f64, 0.92), RichText::new(format!("{label} {x:.0} ms")).size(11.0).color(p.pick)).anchor(egui::Align2::LEFT_CENTER));
+            }
+            pu.pointer_coordinate()
+        });
+    let r = &resp.response;
+    if let Some(ptr) = resp.inner {
+        if r.drag_started() {
+            let px_of = |x: f32| resp.transform.position_from_point(&PlotPoint::new(x as f64, 0.0)).x;
+            let ptr_px = resp.transform.position_from_point(&ptr).x;
+            s.spectral.acf_drag = markers.iter().map(|(id, x, _)| (*id, (px_of(*x) - ptr_px).abs())).filter(|(_, d)| *d < 10.0).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(id, _)| id);
+        }
+        if r.dragged() {
+            let x = (ptr.x as f32).clamp(0.0, ACF_MAX_LAG_MS);
+            let d = &mut s.spectral.decon;
+            match s.spectral.acf_drag {
+                Some(0) => d.prediction_lag_ms = x.max(1.0),
+                Some(1) => d.operator_ms = x.max(8.0),
+                _ => {}
+            }
+            if s.spectral.acf_drag.is_some() {
+                s.spectral.active = 3;
+            }
+        }
+    }
+    if r.drag_stopped() {
+        s.spectral.acf_drag = None;
+    }
+}
+
+/// Decon parameters as `decon` step params (keeps the step's other settings).
+fn decon_into(params: &mut serde_json::Value, d: &DeconParams) {
+    params["operator_ms"] = json!(d.operator_ms);
+    params["prediction_lag_ms"] = json!(d.prediction_lag_ms);
+    params["white_noise_pct"] = json!(d.white_noise_pct);
+}
+
+/// Triangles covering a simple polygon (ear clipping), so concave F-K areas shade correctly.
+fn triangulate(pts: &[egui::Pos2]) -> Vec<[usize; 3]> {
+    let n = pts.len();
+    if n < 3 {
+        return Vec::new();
+    }
+    let cross = |o: egui::Pos2, a: egui::Pos2, b: egui::Pos2| (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    let area: f32 = (0..n).map(|i| cross(egui::Pos2::ZERO, pts[i], pts[(i + 1) % n])).sum();
+    let orient = if area >= 0.0 { 1.0 } else { -1.0 };
+    let mut idx: Vec<usize> = (0..n).collect();
+    let mut out = Vec::with_capacity(n - 2);
+    let mut guard = 0;
+    while idx.len() > 3 && guard < n * n {
+        guard += 1;
+        let m = idx.len();
+        let mut clipped = false;
+        for i in 0..m {
+            let (ia, ib, ic) = (idx[(i + m - 1) % m], idx[i], idx[(i + 1) % m]);
+            let (a, b, c) = (pts[ia], pts[ib], pts[ic]);
+            if cross(a, b, c) * orient <= 0.0 {
+                continue;
+            }
+            let inside = idx.iter().any(|&j| {
+                j != ia && j != ib && j != ic && {
+                    let q = pts[j];
+                    cross(a, b, q) * orient >= 0.0 && cross(b, c, q) * orient >= 0.0 && cross(c, a, q) * orient >= 0.0
+                }
+            });
+            if !inside {
+                out.push([ia, ib, ic]);
+                idx.remove(i);
+                clipped = true;
+                break;
+            }
+        }
+        if !clipped {
+            break; // self-intersecting outline: shade what was clipped so far
+        }
+    }
+    if idx.len() == 3 {
+        out.push([idx[0], idx[1], idx[2]]);
+    }
+    out
+}
+
+fn fill_polygon(painter: &egui::Painter, pts: &[egui::Pos2], color: Color32) {
+    let tris = triangulate(pts);
+    if tris.is_empty() {
+        return;
+    }
+    let mut mesh = egui::Mesh::default();
+    for q in pts {
+        mesh.colored_vertex(*q, color);
+    }
+    for [a, b, c] in tris {
+        mesh.add_triangle(a as u32, b as u32, c as u32);
+    }
+    painter.add(mesh);
 }
 
 // ============================================================== F-K
@@ -387,13 +553,28 @@ fn fk_canvas(s: &mut AppState, ui: &mut Ui, p: &Palette, size: egui::Vec2, exten
         }
         FkMode::RejectPolygon | FkMode::PassPolygon => {
             let pts: Vec<egui::Pos2> = fk.polygon.iter().map(|(f, k)| out.frame.to_screen(*k as f64, *f as f64)).collect();
+            if pts.len() >= 3 {
+                let (fill, word, word_col) = if fk.mode == FkMode::RejectPolygon {
+                    (with_alpha(p.danger, 92), "removed", p.danger)
+                } else {
+                    (with_alpha(p.accent, 76), "kept", p.accent_text)
+                };
+                fill_polygon(&painter, &pts, fill);
+                let c = (pts.iter().fold(egui::Vec2::ZERO, |acc, q| acc + q.to_vec2()) / pts.len() as f32).to_pos2();
+                let font = egui::FontId::proportional(11.0);
+                let g = painter.layout_no_wrap(word.to_string(), font, word_col);
+                let pill = egui::Rect::from_center_size(c, g.size() + vec2(12.0, 5.0));
+                painter.rect(pill, egui::CornerRadius::same(5), with_alpha(p.canvas, 210), Stroke::new(1.0, with_alpha(word_col, 140)), egui::StrokeKind::Inside);
+                painter.galley(pill.center() - g.size() * 0.5, g, word_col);
+            }
             if pts.len() >= 2 {
                 let mut closed = pts.clone();
                 closed.push(pts[0]);
                 painter.add(egui::Shape::line(closed, Stroke::new(1.8, p.pick)));
             }
-            for c in &pts {
-                painter.circle(*c, 4.0, Color32::from_black_alpha(140), Stroke::new(1.8, p.pick));
+            for (i, c) in pts.iter().enumerate() {
+                let r = if s.spectral.fk_drag == Some(i) { 5.5 } else { 4.0 };
+                painter.circle(*c, r, Color32::from_black_alpha(140), Stroke::new(1.8, p.pick));
             }
         }
     }
@@ -406,19 +587,38 @@ fn fk_canvas(s: &mut AppState, ui: &mut Ui, p: &Palette, size: egui::Vec2, exten
         badge(&painter, out.frame.rect.right_bottom() + vec2(-6.0, -6.0), &format!("{f:.1} Hz · {k:.4} cycles/m · apparent {v:.0} m/s"), p, egui::Align2::RIGHT_BOTTOM);
     }
     badge(&painter, out.frame.rect.center_top() + vec2(0.0, 8.0), if s.spectral.fk_show_filtered { "after" } else { "before" }, p, egui::Align2::CENTER_TOP);
-    // Polygon editing
+    // Polygon editing: click adds a corner, drag moves one, right-click removes one.
     if matches!(s.spectral.fk.mode, FkMode::RejectPolygon | FkMode::PassPolygon) {
-        if out.response.clicked() {
-            if let Some((k, f)) = out.hover {
-                s.spectral.fk.polygon.push((f.max(0.0) as f32, k as f32));
+        let resp = &out.response;
+        let near = resp.hover_pos().and_then(|ptr| {
+            s.spectral.fk.polygon.iter().enumerate().map(|(i, (f, k))| (i, out.frame.to_screen(*k as f64, *f as f64).distance(ptr))).filter(|(_, d)| *d < 10.0).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(i, _)| i)
+        });
+        if near.is_some() || s.spectral.fk_drag.is_some() {
+            ui.ctx().set_cursor_icon(egui::CursorIcon::Grab);
+        }
+        if resp.drag_started_by(egui::PointerButton::Primary) {
+            s.spectral.fk_drag = near;
+        }
+        if resp.dragged_by(egui::PointerButton::Primary) {
+            if let (Some(i), Some((k, f))) = (s.spectral.fk_drag, out.hover) {
+                if let Some(v) = s.spectral.fk.polygon.get_mut(i) {
+                    *v = (f.max(0.0) as f32, k as f32);
+                    s.spectral.active = 1;
+                }
             }
         }
-        if out.response.secondary_clicked() {
-            if let Some(ptr) = out.response.hover_pos() {
-                let near = s.spectral.fk.polygon.iter().enumerate().map(|(i, (f, k))| (i, out.frame.to_screen(*k as f64, *f as f64).distance(ptr))).filter(|(_, d)| *d < 10.0).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(i, _)| i);
-                if let Some(i) = near {
-                    s.spectral.fk.polygon.remove(i);
-                }
+        if resp.drag_stopped() {
+            s.spectral.fk_drag = None;
+        }
+        if resp.clicked() && near.is_none() {
+            if let Some((k, f)) = out.hover {
+                s.spectral.fk.polygon.push((f.max(0.0) as f32, k as f32));
+                s.spectral.active = 1;
+            }
+        }
+        if resp.secondary_clicked() {
+            if let Some(i) = near {
+                s.spectral.fk.polygon.remove(i);
             }
         }
     } else if out.response.dragged_by(egui::PointerButton::Primary) {
@@ -637,6 +837,13 @@ pub fn on_compute(s: &mut AppState, ctx: &egui::Context, key: &str, value: Box<d
                 }
             }
         }
+        "spec.acf" => {
+            if let Ok(r) = value.downcast::<AcfResult>() {
+                if r.key == s.spectral.acf_key {
+                    s.spectral.acf = Some(*r);
+                }
+            }
+        }
         "spec.fk" => {
             if let Ok(r) = value.downcast::<FkResult>() {
                 if r.key != s.spectral.fk_key {
@@ -709,12 +916,14 @@ pub fn on_compute(s: &mut AppState, ctx: &egui::Context, key: &str, value: Box<d
 
 // ============================================================== board + inspector
 
-fn card_rect(ui: &mut Ui, p: &Palette, rect: egui::Rect, title: &str, sub: &str) -> egui::Rect {
+fn card_rect(ui: &mut Ui, p: &Palette, rect: egui::Rect, title: &str, sub: &str, reserve_right: f32) -> egui::Rect {
     let painter = ui.painter_at(rect);
     painter.rect(rect, egui::CornerRadius::same(10), p.sunken, Stroke::new(1.0, p.border), egui::StrokeKind::Inside);
     painter.text(rect.left_top() + vec2(12.0, 10.0), egui::Align2::LEFT_TOP, title, crate::theme::font_semibold(12.5), p.text);
     let tw = painter.layout_no_wrap(title.to_string(), crate::theme::font_semibold(12.5), p.text).size().x;
-    painter.text(rect.left_top() + vec2(20.0 + tw, 11.0), egui::Align2::LEFT_TOP, sub, egui::FontId::proportional(11.0), p.text_muted);
+    // Subtitle stops `reserve_right` short of the card edge, leaving room for title-row controls.
+    let sub_clip = egui::Rect::from_min_max(rect.min, egui::pos2(rect.right() - reserve_right, rect.top() + 30.0));
+    painter.with_clip_rect(sub_clip).text(rect.left_top() + vec2(20.0 + tw, 11.0), egui::Align2::LEFT_TOP, sub, egui::FontId::proportional(11.0), p.text_muted);
     egui::Rect::from_min_max(rect.min + vec2(6.0, 32.0), rect.max - vec2(6.0, 6.0))
 }
 
@@ -731,24 +940,51 @@ pub fn board_ui(s: &mut AppState, ui: &mut Ui) {
     let ens = ensemble_title(s);
     let kept = band_kept(s);
     let sub_spec = match kept {
-        Some(k) => format!("{ens} · the filter keeps {:.0}% of the energy", k * 100.0),
+        Some(k) => format!("keeps {:.0}% of the energy", k * 100.0),
         None => ens.clone(),
     };
-    let inner = card_rect(ui, &p, r_spec, "Amplitude spectrum", &sub_spec);
-    let mut u = ui.new_child(egui::UiBuilder::new().max_rect(inner).layout(egui::Layout::top_down(egui::Align::Min)));
-    spectrum_card(s, &mut u);
-    let sub_fk = match s.spectral.fk_kept {
-        Some(k) => format!("cut at {:.0} m/s · keeps {:.0}% of the energy", s.spectral.fk.vel_cut_mps, k * 100.0),
-        None => format!("cut at {:.0} m/s", s.spectral.fk.vel_cut_mps),
+    let acf_view = s.spectral.left_view == LeftView::Autocorrelation;
+    let inner = if acf_view {
+        let d = &s.spectral.decon;
+        let kind = if d.prediction_lag_ms > 0.0 { format!("gap {:.0} ms", d.prediction_lag_ms) } else { "spiking".to_string() };
+        card_rect(ui, &p, r_spec, "Autocorrelation", &format!("{kind} · op {:.0} ms", d.operator_ms), 220.0)
+    } else {
+        card_rect(ui, &p, r_spec, "Amplitude spectrum", &sub_spec, 220.0)
     };
-    let inner = card_rect(ui, &p, r_fk, "Frequency–wavenumber", &sub_fk);
+    {
+        // View switch in the card's title row.
+        let sw = egui::Rect::from_min_max(pos2(r_spec.right() - 210.0, r_spec.top() + 5.0), pos2(r_spec.right() - 8.0, r_spec.top() + 29.0));
+        let mut u = ui.new_child(egui::UiBuilder::new().max_rect(sw).layout(egui::Layout::right_to_left(egui::Align::Center)));
+        widgets::segmented(
+            &mut u,
+            &p,
+            &mut s.spectral.left_view,
+            &[(LeftView::Spectrum, "Spectrum", "Average amplitude spectrum and band-pass design"), (LeftView::Autocorrelation, "Autocorrelation", "Average autocorrelation for choosing decon gap and operator length")],
+        );
+    }
+    let mut u = ui.new_child(egui::UiBuilder::new().max_rect(inner).layout(egui::Layout::top_down(egui::Align::Min)));
+    if acf_view {
+        acf_card(s, &mut u);
+    } else {
+        spectrum_card(s, &mut u);
+    }
+    let fk_desc = match s.spectral.fk.mode {
+        FkMode::RejectPolygon => format!("reject polygon ({} pts)", s.spectral.fk.polygon.len()),
+        FkMode::PassPolygon => format!("keep polygon ({} pts)", s.spectral.fk.polygon.len()),
+        FkMode::RejectLowVelocity | FkMode::PassHighVelocity => format!("cut at {:.0} m/s", s.spectral.fk.vel_cut_mps),
+    };
+    let sub_fk = match s.spectral.fk_kept {
+        Some(k) => format!("{fk_desc} · keeps {:.0}% of the energy", k * 100.0),
+        None => fk_desc,
+    };
+    let inner = card_rect(ui, &p, r_fk, "Frequency–wavenumber", &sub_fk, 8.0);
     let mut u = ui.new_child(egui::UiBuilder::new().max_rect(inner).layout(egui::Layout::top_down(egui::Align::Min)));
     fk_card(s, &mut u);
     let sub_r = match s.spectral.radon_removed {
         Some(r) => format!("multiples zone {:.0} to {:.0} ms · removes {:.0}% of the energy", s.spectral.radon.q_zone_min_ms, s.spectral.radon.q_zone_max_ms, r * 100.0),
         None => format!("multiples zone {:.0} to {:.0} ms · press Preview Radon to see the result", s.spectral.radon.q_zone_min_ms, s.spectral.radon.q_zone_max_ms),
     };
-    let inner = card_rect(ui, &p, r_radon, "Radon", &sub_r);
+    let inner = card_rect(ui, &p, r_radon, "Radon", &sub_r, 8.0);
     let mut u = ui.new_child(egui::UiBuilder::new().max_rect(inner).layout(egui::Layout::top_down(egui::Align::Min)));
     radon_card(s, &mut u);
     ui.allocate_rect(full, egui::Sense::hover());
@@ -821,6 +1057,44 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                 let f = s.spectral.ormsby;
                 upsert_step(s, "filter", |params| params["freqs"] = json!(f));
             }
+
+            // ---- decon
+            ui.add_space(4.0);
+            caps(ui, &p, "DECON", Some("drag lines on the autocorrelation"));
+            {
+                let d = &mut s.spectral.decon;
+                let mut predictive = d.prediction_lag_ms > 0.0;
+                widgets::row(ui, &p, "Type", |ui| {
+                    if widgets::segmented(ui, &p, &mut predictive, &[(false, "Spiking", "Whiten the whole wavelet (no gap)"), (true, "Predictive", "Keep the wavelet up to the gap, remove reverberations after it")]) {
+                        d.prediction_lag_ms = if predictive { DEFAULT_PREDICTION_LAG_MS } else { 0.0 };
+                        s.spectral.active = 3;
+                    }
+                });
+                widgets::row(ui, &p, "Operator length", |ui| {
+                    if ui.add(egui::DragValue::new(&mut d.operator_ms).range(8.0..=1000.0).speed(1.0).suffix(" ms")).changed() {
+                        s.spectral.active = 3;
+                    }
+                });
+                if predictive {
+                    widgets::row(ui, &p, "Prediction gap", |ui| {
+                        if ui.add(egui::DragValue::new(&mut d.prediction_lag_ms).range(1.0..=500.0).speed(0.5).suffix(" ms")).changed() {
+                            s.spectral.active = 3;
+                        }
+                    });
+                }
+                widgets::row(ui, &p, "White noise", |ui| {
+                    ui.add(egui::DragValue::new(&mut d.white_noise_pct).range(0.0..=10.0).speed(0.01).suffix(" %"));
+                });
+            }
+            ui.horizontal_wrapped(|ui| {
+                if s.spectral.left_view != LeftView::Autocorrelation && cmd(ui, &p, icon::WAVE_SINE, "Show autocorrelation", false).clicked() {
+                    s.spectral.left_view = LeftView::Autocorrelation;
+                }
+                if cmd(ui, &p, icon::PLUS, "Add decon to the flow", false).clicked() {
+                    let d = s.spectral.decon.clone();
+                    upsert_step(s, "decon", |params| decon_into(params, &d));
+                }
+            });
 
             // ---- F-K
             ui.add_space(4.0);
@@ -944,9 +1218,46 @@ pub fn add_active_filter_to_flow(s: &mut AppState) {
             let v = serde_json::to_value(&s.spectral.radon).unwrap_or(json!({}));
             upsert_step(s, "radon_filter", |params| params["params"] = v);
         }
+        3 => {
+            let d = s.spectral.decon.clone();
+            upsert_step(s, "decon", |params| decon_into(params, &d));
+        }
         _ => {
             let f = s.spectral.ormsby;
             upsert_step(s, "filter", |params| params["freqs"] = json!(f));
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn area(pts: &[egui::Pos2], tris: &[[usize; 3]]) -> f32 {
+        tris.iter()
+            .map(|[a, b, c]| {
+                let (a, b, c) = (pts[*a], pts[*b], pts[*c]);
+                ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)).abs() * 0.5
+            })
+            .sum()
+    }
+
+    #[test]
+    fn concave_polygon_triangulates_to_its_area() {
+        // L-shape: 2x2 square minus its 1x1 top-right quarter → area 3.
+        let pts = [pos2(0.0, 0.0), pos2(2.0, 0.0), pos2(2.0, 1.0), pos2(1.0, 1.0), pos2(1.0, 2.0), pos2(0.0, 2.0)];
+        let tris = triangulate(&pts);
+        assert_eq!(tris.len(), 4);
+        assert!((area(&pts, &tris) - 3.0).abs() < 1e-4);
+        let mut rev = pts;
+        rev.reverse();
+        assert!((area(&rev, &triangulate(&rev)) - 3.0).abs() < 1e-4, "winding does not matter");
+    }
+
+    #[test]
+    fn degenerate_polygons_do_not_panic() {
+        assert!(triangulate(&[pos2(0.0, 0.0), pos2(1.0, 1.0)]).is_empty());
+        let bowtie = [pos2(0.0, 0.0), pos2(2.0, 2.0), pos2(2.0, 0.0), pos2(0.0, 2.0)];
+        let _ = triangulate(&bowtie);
     }
 }

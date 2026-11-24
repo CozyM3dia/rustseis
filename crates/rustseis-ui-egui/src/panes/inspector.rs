@@ -29,7 +29,7 @@ pub fn enum_choices(tool: &str, key: &str) -> Option<&'static [&'static str]> {
         ("fbpick" | "vsp_slowness", "method") => &["Aic", "ModifiedCoppens"],
         ("autostat" | "pwr_stat_new", "method") => &["Correlation", "MaxPower"],
         ("vsp_wavefield_sep", "method") => &["MedianAlign", "FkDip"],
-        ("stack", "method") => &["Mean", "Median"],
+        ("stack", "method") => &["Mean", "Median", "Diversity"],
         ("fkmig2d", "method") => &["stolt", "phase_shift"],
         ("avo_analysis", "output") => &["Intercept", "Gradient", "Product", "FluidFactor", "Curvature", "AngleStack"],
         (_, "output") => &["Upgoing", "Downgoing", "UpgoingTwoWayAligned"],
@@ -123,12 +123,29 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
                 if node_mut.tool == "python_node" {
                     changed |= python_editor(ui, &p, &mut node_mut.params);
                 }
+                if tool == "decon" {
+                    changed |= decon_type(ui, &p, &mut node_mut.params);
+                }
+                let hidden = hidden_keys(&tool, &node_mut.params);
+                if !hidden.is_empty() {
+                    widgets::hint(ui, &p, icon::LINK, "Using saved mute table · clear it to edit inline picks");
+                }
+                let stash: Vec<(String, Value)> = match node_mut.params.as_object_mut() {
+                    Some(o) => hidden.iter().filter_map(|k| o.remove(*k).map(|v| (k.to_string(), v))).collect(),
+                    None => Vec::new(),
+                };
                 changed |= edit_object(ui, &p, &tool, "", &mut node_mut.params, spec.as_ref(), &names, 0);
+                if let Some(o) = node_mut.params.as_object_mut() {
+                    o.extend(stash);
+                }
                 if crate::flowdoc::is_container(&tool) {
                     widgets::hint(ui, &p, icon::GIT_BRANCH, "Branch steps are edited as nested blocks in the flow.");
                 }
             }
 
+            if !s.inspector.raw_json {
+                super::preview::panel(s, ui, &p, &path);
+            }
             if let Some(sp) = &spec {
                 reference(ui, &p, sp);
             }
@@ -145,6 +162,27 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
             s.flow.dirty = true;
         }
     }
+}
+
+/// Inline fields a step ignores in its current configuration (kept in the params, not shown).
+fn hidden_keys(tool: &str, params: &Value) -> &'static [&'static str] {
+    let uses_table = params.get("mute_table").and_then(|v| v.as_str()).is_some_and(|t| !t.trim().is_empty());
+    if tool == "mute" && uses_table { &["picks", "surgical_picks", "name", "mode", "key_header", "taper_ms"] } else { &[] }
+}
+
+/// Spiking / Predictive switch above the decon settings.
+fn decon_type(ui: &mut Ui, p: &Palette, params: &mut Value) -> bool {
+    let lag = params.get("prediction_lag_ms").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let mut predictive = lag > 0.0;
+    let mut changed = false;
+    ui.horizontal(|ui| {
+        ui.label(RichText::new("Type").color(p.text_muted));
+        if widgets::segmented(ui, p, &mut predictive, &[(false, "Spiking", "No gap: whiten the whole wavelet"), (true, "Predictive", "Gap: keep the wavelet, remove reverberations")]) {
+            params["prediction_lag_ms"] = json!(if predictive { 24.0 } else { 0.0 });
+            changed = true;
+        }
+    });
+    changed
 }
 
 /// Telemetry for a top-level step from the last run, if the flow has not changed shape since.
@@ -190,7 +228,7 @@ impl TableNames {
         match key {
             "velocity_table" => Some(&self.velocities),
             "velocity_grid" => Some(&self.velocity_grids),
-            "mute_table" => Some(&self.mutes),
+            "mute_table" | "design_gate_table" => Some(&self.mutes),
             "model_buffer" => Some(&self.buffers),
             _ => None,
         }
@@ -467,7 +505,7 @@ fn edit_array(ui: &mut Ui, p: &Palette, key: &str, arr: &mut Vec<Value>) -> bool
         return changed;
     }
     let rows_numeric = arr.iter().all(|r| r.as_array().is_some_and(|c| c.iter().all(|x| x.is_number())));
-    if rows_numeric && (!arr.is_empty() || matches!(key, "picks" | "windows" | "gates_ms" | "design_windows_ms" | "time_variant_zone" | "polygon" | "stations" | "slalom_vertices" | "surgical_picks")) {
+    if rows_numeric && (!arr.is_empty() || matches!(key, "picks" | "windows" | "gates_ms" | "design_windows_ms" | "time_variant_zone" | "polygon" | "stations" | "slalom_vertices" | "surgical_picks" | "velocity_pairs" | "eta_profile")) {
         let width = arr.first().and_then(|r| r.as_array()).map(|r| r.len()).unwrap_or(match key {
             "time_variant_zone" | "surgical_picks" => 3,
             "stations" => 4,

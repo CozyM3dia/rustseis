@@ -24,6 +24,7 @@ pub fn inspector_ui(s: &mut AppState, ui: &mut Ui) {
                 PickMode::Mute => mute_panel(s, ui, &p),
                 PickMode::FirstBreak => fb_panel(s, ui, &p),
                 PickMode::Kill => kill_panel(s, ui, &p),
+                PickMode::DeconGate => gate_panel(s, ui, &p),
                 PickMode::Navigate => {}
             }
         });
@@ -45,6 +46,17 @@ fn mute_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
             v
         })
         .unwrap_or_default();
+    widgets::row(ui, p, "Kind", |ui| {
+        let mut mode = s.viewer.mute_mode;
+        let opts = [
+            (MuteMode::Top, "Top", "Silence everything above the curve (first breaks, direct wave)"),
+            (MuteMode::Bottom, "Bottom", "Silence everything below the curve"),
+            (MuteMode::Surgical, "Window", "Surgical: silence a window between two times"),
+        ];
+        if widgets::segmented(ui, p, &mut mode, &opts) {
+            s.viewer.set_mute_mode(mode);
+        }
+    });
     widgets::row(ui, p, "Name", |ui| {
         ui.add(egui::TextEdit::singleline(&mut s.viewer.mute_table_name).font(font_mono(12.0)).desired_width(150.0));
     });
@@ -120,15 +132,97 @@ fn mute_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
             s.viewer.mute_picks.remove(i);
         }
     }
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         ui.add_enabled_ui(n > 0 && !s.is_busy(), |ui| {
             if cmd_primary(ui, p, icon::CHECK, "Save mute").clicked() {
                 viewer::save_mute(s);
+            }
+            if cmd(ui, p, icon::FLOW_ARROW, "Add to flow", false)
+                .on_hover_text("Save the mute and make the flow's mute step use it (adds one before TAR / decon if missing)")
+                .clicked()
+            {
+                viewer::add_mute_to_flow(s);
             }
         });
         if cmd(ui, p, icon::ERASER, "Clear", false).clicked() {
             s.viewer.mute_picks.clear();
             s.viewer.surgical_picks.clear();
+        }
+        let mutes: Vec<&String> = existing.iter().filter(|n| !s.viewer.is_gate_name(n)).collect();
+        if !mutes.is_empty() {
+            let r = cmd(ui, p, icon::FOLDER_OPEN, "Load  ▾", false);
+            egui::Popup::menu(&r).show(|ui| {
+                for name in mutes {
+                    if ui.button(name).clicked() {
+                        if let Some(t) = s.session().and_then(|x| x.context.mutes.get(name)).cloned() {
+                            s.viewer.load_mute(&t);
+                        }
+                    }
+                }
+            });
+        }
+    });
+}
+
+fn gate_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
+    title(ui, p, "Decon design gate", "Click to start a window on a reflection-rich zone below the first breaks, drag its top and bottom, right-click to remove. The operator is designed only inside the green band.");
+    let existing: Vec<String> = s
+        .session()
+        .map(|x| {
+            let mut v: Vec<String> = x.context.mutes.keys().filter(|n| s.viewer.is_gate_name(n)).cloned().collect();
+            v.sort();
+            v
+        })
+        .unwrap_or_default();
+    widgets::row(ui, p, "Name", |ui| {
+        ui.add(egui::TextEdit::singleline(&mut s.viewer.gate_name).font(font_mono(12.0)).desired_width(150.0));
+    });
+    widgets::row(ui, p, "Measured along", |ui| {
+        egui::ComboBox::from_id_salt("gate_key").selected_text(&s.viewer.gate_key).width(110.0).show_ui(ui, |ui| {
+            for k in ["AOFFSET", "OFFSET", "CHAN", "CDP"] {
+                ui.selectable_value(&mut s.viewer.gate_key, k.to_string(), k);
+            }
+        });
+    });
+    let n = s.viewer.gate_picks.len();
+    caps(ui, p, &format!("GATE AGAINST {}", s.viewer.gate_key), Some(&format!("{n} windows")));
+    let mut remove = None;
+    egui::Frame::new().fill(p.sunken).corner_radius(egui::CornerRadius::same(8)).inner_margin(egui::Margin::same(8)).show(ui, |ui| {
+        ui.set_min_width(ui.available_width());
+        if n == 0 {
+            ui.label(RichText::new("No windows yet").size(11.5).color(p.text_muted));
+        }
+        egui::Grid::new("gate_picks").num_columns(3).spacing([12.0, 3.0]).show(ui, |ui| {
+            for (i, (k, a, b)) in s.viewer.gate_picks.iter_mut().enumerate() {
+                ui.add(egui::DragValue::new(k).speed(1.0));
+                ui.horizontal(|ui| {
+                    ui.add(egui::DragValue::new(a).speed(1.0).suffix(" ms"));
+                    ui.add(egui::DragValue::new(b).speed(1.0).suffix(" ms"));
+                });
+                if ui.small_button(icon::X).clicked() {
+                    remove = Some(i);
+                }
+                ui.end_row();
+            }
+        });
+    });
+    if let Some(i) = remove {
+        s.viewer.gate_picks.remove(i);
+    }
+    ui.horizontal_wrapped(|ui| {
+        ui.add_enabled_ui(n > 0 && !s.is_busy(), |ui| {
+            if cmd_primary(ui, p, icon::CHECK, "Save gate").clicked() {
+                viewer::save_gate(s);
+            }
+            if cmd(ui, p, icon::FLOW_ARROW, "Apply to Decon in flow", false)
+                .on_hover_text("Save the gate and set it as the design gate of the flow's decon step")
+                .clicked()
+            {
+                viewer::apply_gate_to_decon(s);
+            }
+        });
+        if cmd(ui, p, icon::ERASER, "Clear", false).clicked() {
+            s.viewer.gate_picks.clear();
         }
         if !existing.is_empty() {
             let r = cmd(ui, p, icon::FOLDER_OPEN, "Load  ▾", false);
@@ -136,7 +230,7 @@ fn mute_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
                 for name in &existing {
                     if ui.button(name).clicked() {
                         if let Some(t) = s.session().and_then(|x| x.context.mutes.get(name)).cloned() {
-                            s.viewer.load_mute(&t);
+                            s.viewer.load_gate(&t);
                         }
                     }
                 }
@@ -226,22 +320,15 @@ fn fb_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
 }
 
 fn kill_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
-    title(ui, p, "Edit traces", "Click traces to mark them. Nothing changes until you press Done; every edit can be undone.");
-    if s.focus.source != crate::data::TraceSource::Active {
-        let (go, _) = widgets::insight(
+    title(ui, p, "Edit traces", "Click traces to mark them. Nothing changes until you press Apply, Add to flow, or Done; every edit can be undone.");
+    let on_active = s.focus.source == crate::data::TraceSource::Active;
+    if !on_active {
+        widgets::hint(
             ui,
             p,
-            "Viewing a saved buffer (read-only)",
-            "Trace edits only apply to Latest result (Active). Switch to Latest result before marking traces.",
-            "Switch to Latest result",
-            "",
+            icon::INFO,
+            "Viewing a saved buffer · mark traces here and press Add to flow (or Done) to record them in your flow's Trace Kill/Reverse step.",
         );
-        if go {
-            s.focus.source = crate::data::TraceSource::Active;
-            s.focus.ens = 0;
-            s.viewer.request_refit = true;
-        }
-        return;
     }
     let fmt = |set: &std::collections::BTreeSet<i32>| -> String {
         if set.is_empty() { "none".into() } else { set.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", ") }
@@ -277,11 +364,47 @@ fn kill_panel(s: &mut AppState, ui: &mut Ui, p: &Palette) {
             s.viewer.kill_tracenos.extend(dead);
         }
     }
-    if cmd(ui, p, icon::ERASER, "Clear marks", false).clicked() {
-        s.viewer.kill_tracenos.clear();
-        s.viewer.kill_channels.clear();
-        s.viewer.reverse_channels.clear();
-    }
+    let has_flow = !s.flow.nodes.is_empty();
+    widgets::row(ui, p, "Save into current flow", |ui| {
+        ui.add_enabled_ui(has_flow, |ui| {
+            widgets::toggle(ui, p, &mut s.viewer.edits_into_flow)
+                .on_hover_text("Done also records these edits in the flow's Trace Kill/Reverse step, so re-running the flow keeps them");
+        });
+    });
+    let pending = s.viewer.pending_edits();
+    ui.horizontal_wrapped(|ui| {
+        if on_active {
+            ui.add_enabled_ui(pending > 0 && !s.is_busy(), |ui| {
+                if cmd_primary(ui, p, icon::CHECK, "Apply").on_hover_text("Apply to the loaded traces (same as Done)").clicked() {
+                    viewer::apply_trace_edits(s);
+                }
+            });
+            ui.add_enabled_ui(pending > 0, |ui| {
+                if cmd(ui, p, icon::FLOW_ARROW, "Add to flow", false)
+                    .on_hover_text("Record the marked edits in the flow's Trace Kill/Reverse step without applying them now")
+                    .clicked()
+                    && viewer::merge_trace_edits_into_flow(s)
+                {
+                    s.toast(Level::Ok, "Trace edits added to the flow's Trace Kill/Reverse step");
+                }
+            });
+        } else {
+            ui.add_enabled_ui(pending > 0, |ui| {
+                if cmd_primary(ui, p, icon::FLOW_ARROW, "Add to flow")
+                    .on_hover_text("Record the marked edits in the flow's Trace Kill/Reverse step")
+                    .clicked()
+                    && viewer::merge_trace_edits_into_flow(s)
+                {
+                    s.toast(Level::Ok, "Trace edits added to the flow's Trace Kill/Reverse step");
+                }
+            });
+        }
+        if cmd(ui, p, icon::ERASER, "Clear marks", false).clicked() {
+            s.viewer.kill_tracenos.clear();
+            s.viewer.kill_channels.clear();
+            s.viewer.reverse_channels.clear();
+        }
+    });
 }
 
 /// Trace header list for the crosshair trace.

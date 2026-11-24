@@ -29,8 +29,12 @@ pub fn assign_marine_geometry_2d(traces: &mut [Trace], geom: &MarineGeometry2D) 
         let dist = dx.hypot(dy).max(1e-6);
         (first.1, first.2, dx / dist, dy / dist)
     } else {
-        (0.0, 0.0, 1.0, 0.0)
+        let az = geom.sail_line_azimuth_deg.to_radians();
+        // Azimuth clockwise from North (+Y): ux = sin(az), uy = cos(az). 90° => (1, 0).
+        (geom.first_shot_x, geom.first_shot_y, az.sin(), az.cos())
     };
+    // Crossline unit vector perpendicular to sail direction (right-hand side)
+    let (px, py) = (uy, -ux);
 
     // Determine max channel count for reversed streamer ordering
     let max_chan = traces.iter().map(|t| t.headers.chan).max().unwrap_or(1).max(1);
@@ -38,6 +42,18 @@ pub fn assign_marine_geometry_2d(traces: &mut [Trace], geom: &MarineGeometry2D) 
     // First pass: compute sou/rec/cdp coords, offsets, and along-line midpoint distance
     let mut min_mid_s = f64::INFINITY;
     let mut mid_s_vals = vec![0.0f64; traces.len()];
+
+    let vw = geom.water_velocity_mps.max(500.0);
+    let src_stat_ms = if geom.apply_sea_level_static {
+        (geom.source_depth_m / vw) * 1000.0
+    } else {
+        0.0
+    };
+    let rec_stat_ms = if geom.apply_sea_level_static {
+        (geom.streamer_depth_m / vw) * 1000.0
+    } else {
+        0.0
+    };
 
     for (idx, tr) in traces.iter_mut().enumerate() {
         let shot_idx = *seen.get(&tr.headers.ffid).unwrap_or(&0);
@@ -53,11 +69,16 @@ pub fn assign_marine_geometry_2d(traces: &mut [Trace], geom: &MarineGeometry2D) 
         } else {
             (max_chan - tr.headers.chan).max(0) as f64
         };
-        let offset = geom.near_offset_m + ch_idx * geom.receiver_interval_m;
+        let inline_offset = geom.near_offset_m + ch_idx * geom.receiver_interval_m;
+        let offset = if geom.perp_offset_m.abs() > 1e-6 {
+            inline_offset.hypot(geom.perp_offset_m)
+        } else {
+            inline_offset
+        };
 
-        // Streamer trails behind the vessel along (-ux, -uy)
-        let rx = sx - offset * ux;
-        let ry = sy - offset * uy;
+        // Streamer trails behind the vessel along (-ux, -uy) with optional perpendicular offset
+        let rx = sx - inline_offset * ux + geom.perp_offset_m * px;
+        let ry = sy - inline_offset * uy + geom.perp_offset_m * py;
         let mx = 0.5 * (sx + rx);
         let my = 0.5 * (sy + ry);
 
@@ -77,8 +98,19 @@ pub fn assign_marine_geometry_2d(traces: &mut [Trace], geom: &MarineGeometry2D) 
         tr.headers.aoffset = offset.abs() as f32;
         tr.headers.depth = geom.source_depth_m;
         tr.headers.rec_dep = geom.streamer_depth_m;
-        tr.headers.sou_sloc = tr.headers.ffid;
+        tr.headers.sou_sloc = if geom.first_shot_station > 0 {
+            geom.first_shot_station + shot_idx as i32
+        } else {
+            tr.headers.ffid
+        };
         tr.headers.rec_sloc = ((mid_s / geom.receiver_interval_m.max(1e-3)).round()) as i32;
+        if geom.apply_sea_level_static {
+            let tot = src_stat_ms + rec_stat_ms;
+            tr.headers.sou_stat = src_stat_ms;
+            tr.headers.rec_stat = rec_stat_ms;
+            tr.headers.na_stat += tot;
+            tr.headers.tot_stat += tot;
+        }
     }
 
     // Second pass: assign CDP bin numbers starting at 1 and populate CDP fold

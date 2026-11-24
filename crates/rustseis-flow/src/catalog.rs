@@ -135,16 +135,22 @@ pub fn tier1_tool_catalog() -> Vec<ToolDescriptor> {
             label: "Trace Muting".into(),
             category: "Editing / Muting / Noise".into(),
             archetype: ToolArchetype::SimpleTrace,
-            description: "Apply Top, Bottom, or Surgical mute with cosine taper and TLIVE/TFULL update.".into(),
-            default_params: json!({"name": "top_mute", "mode": "Top", "key_header": "AOFFSET", "taper_ms": 40.0, "picks": [[0.0, 100.0], [1500.0, 1000.0]]}),
+            description: "Apply Top, Bottom, or Surgical mute from a saved mute table or inline picks with cosine taper.".into(),
+            default_params: json!({"mute_table": null, "name": "top_mute", "mode": "Top", "key_header": "AOFFSET", "taper_ms": 40.0, "picks": [[0.0, 100.0], [1500.0, 1000.0]]}),
         },
         ToolDescriptor {
             menu_id: "tar".into(),
             label: "True Amplitude Recovery".into(),
             category: "Amplitude".into(),
             archetype: ToolArchetype::SimpleTrace,
-            description: "Spherical divergence, t^n, dB/s, and inelastic attenuation recovery.".into(),
-            default_params: serde_json::to_value(TarParams::default()).unwrap(),
+            description: "Spherical divergence (1/dist or 1/t*v^2), t^n, dB/s, and inelastic attenuation recovery.".into(),
+            default_params: {
+                let mut v = serde_json::to_value(TarParams::default()).unwrap();
+                if let Some(o) = v.as_object_mut() {
+                    o.insert("velocity_table".into(), serde_json::Value::Null);
+                }
+                v
+            },
         },
         ToolDescriptor {
             menu_id: "agc".into(),
@@ -199,8 +205,14 @@ pub fn tier1_tool_catalog() -> Vec<ToolDescriptor> {
             label: "Spiking/Predictive Decon".into(),
             category: "Deconvolution".into(),
             archetype: ToolArchetype::SimpleTrace,
-            description: "Wiener-Levinson least-squares spiking or gapped predictive deconvolution.".into(),
-            default_params: serde_json::to_value(DeconParams::default()).unwrap(),
+            description: "Wiener-Levinson least-squares spiking or gapped predictive deconvolution with optional picked design time gate.".into(),
+            default_params: {
+                let mut v = serde_json::to_value(DeconParams::default()).unwrap();
+                if let Some(o) = v.as_object_mut() {
+                    o.insert("design_gate_table".into(), serde_json::Value::Null);
+                }
+                v
+            },
         },
         ToolDescriptor {
             menu_id: "fk_filt".into(),
@@ -223,8 +235,8 @@ pub fn tier1_tool_catalog() -> Vec<ToolDescriptor> {
             label: "Velocity Analysis Precompute".into(),
             category: "Velocity".into(),
             archetype: ToolArchetype::Panel,
-            description: "Compute Taner-Koehler semblance panels (and optional auto-picked velocity table) at selected CDPs.".into(),
-            default_params: json!({"cdps": [], "save_table": "auto_vel", "auto_pick": true, "scan": VelocityScanParams::default()}),
+            description: "Compute Taner-Koehler semblance panels (with optional 2D supergather formation and auto-pick) at selected CDPs.".into(),
+            default_params: json!({"cdps": [], "cdp_increment": 0, "supergather_cdps": 1, "save_table": "auto_vel", "auto_pick": true, "scan": VelocityScanParams::default()}),
         },
         ToolDescriptor {
             menu_id: "nmo".into(),

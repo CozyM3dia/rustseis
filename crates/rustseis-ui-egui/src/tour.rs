@@ -192,6 +192,116 @@ impl Tour {
         Self::new(dir, s)
     }
 
+    /// Practicum tour (`--tour-practicum <dir>`): runs the Modules 1–7 starter flow on the real
+    /// data and captures each practicum control (survey charts, F-K polygon, autocorrelation,
+    /// mute / kill / decon gate panels, velocity analysis, step preview, ribbons).
+    pub fn practicum(dir: impl Into<PathBuf>, flows_dir: &Path) -> Self {
+        use crate::panes::{geometry::SurveyView, spectral::LeftView};
+        use crate::state::Workspace;
+        let flow = flows_dir.join("praktikum_2d_marine_modul_1_7.json");
+        let buf = |n: &str| TraceSource::Buffer(n.to_string());
+        let shot = |name: &str| [Step::Settle, Step::Pause(0.6), Step::Shot(name.into())];
+        let mut s: Vec<Step> = vec![Step::OpenFlow(flow), Step::Run, Step::Settle];
+        s.push(Step::Do(Box::new(|a| {
+            a.stage = Workspace::Process;
+            a.open(Doc::Flow);
+            a.state.flow_sel = Some(vec![9]);
+        })));
+        s.extend(shot("p01_flow_process_ribbon"));
+        let b = buf("01_geometry");
+        s.push(Step::Do(Box::new(move |a| {
+            a.open(Doc::Survey);
+            a.state.geometry.source = b.clone();
+            a.state.focus.source = b.clone();
+            a.state.focus_trace(1500);
+            a.state.geometry.view = SurveyView::StackingChart;
+        })));
+        s.extend(shot("p02_survey_stacking_chart"));
+        s.push(Step::Do(Box::new(|a| a.state.geometry.view = SurveyView::Fold)));
+        s.extend(shot("p03_survey_fold"));
+        let b = buf("01_geometry");
+        s.push(Step::Do(Box::new(move |a| {
+            a.open(Doc::Spectral);
+            let st = &mut a.state;
+            st.focus.source = b.clone();
+            st.focus.key = "FFID".into();
+            st.focus.ens = 20;
+            st.spectral.left_view = LeftView::Autocorrelation;
+            st.spectral.fk.mode = rustseis_dsp::FkMode::RejectPolygon;
+            st.spectral.fk.polygon = vec![(0.0, 0.0), (40.0, -0.03), (40.0, -0.005), (12.0, 0.0), (40.0, 0.005), (40.0, 0.03)];
+        })));
+        s.extend(shot("p04_spectral_autocorr_fk_polygon"));
+        let b = buf("03_edited");
+        s.push(Step::Do(Box::new(move |a| {
+            a.open(Doc::Viewer);
+            let st = &mut a.state;
+            st.focus.source = b.clone();
+            st.focus.key = "FFID".into();
+            st.focus.ens = 20;
+            st.viewer.request_refit = true;
+            st.viewer.mode = PickMode::Mute;
+            st.viewer.mute_picks = vec![(100.0, 60.0), (700.0, 460.0), (1288.0, 860.0)];
+        })));
+        s.extend(shot("p05_viewer_mute_add_to_flow"));
+        s.push(Step::Do(Box::new(|a| {
+            let v = &mut a.state.viewer;
+            v.mode = PickMode::DeconGate;
+            v.gate_picks = vec![(100.0, 250.0, 2200.0), (1288.0, 950.0, 3200.0)];
+        })));
+        s.extend(shot("p06_viewer_decon_gate"));
+        s.push(Step::Do(Box::new(|a| {
+            a.state.viewer.mode = PickMode::Kill;
+            a.state.viewer.kill_channels.extend([7, 8]);
+            a.state.viewer.reverse_channels.insert(30);
+        })));
+        s.extend(shot("p07_viewer_kill_save_into_flow"));
+        let b = buf("05_cdp_gathers");
+        s.push(Step::Do(Box::new(move |a| {
+            a.state.viewer.mode = PickMode::Navigate;
+            a.state.viewer.kill_channels.clear();
+            a.state.viewer.reverse_channels.clear();
+            a.stage = Workspace::Velocity;
+            a.open(Doc::Velocity);
+            a.state.iva.source = b.clone();
+            a.state.iva.select_table("praktikum_vel");
+            a.state.iva.super_half = 7;
+            a.state.iva.nmo_eta = 0.05;
+        })));
+        s.extend([Step::Pause(0.3), Step::Settle]);
+        s.extend(shot("p08_velocity_supergather_eta"));
+        let b = buf("01_geometry");
+        s.push(Step::Do(Box::new(move |a| {
+            a.stage = Workspace::Process;
+            a.open(Doc::Flow);
+            let st = &mut a.state;
+            st.focus.source = b.clone();
+            st.focus.key = "FFID".into();
+            st.focus.ens = 20;
+            st.flow_sel = Some(vec![5]);
+            crate::panes::preview::request(st, &vec![5]);
+        })));
+        s.extend(shot("p09_step_preview_inspector"));
+        s.push(Step::Do(Box::new(|a| {
+            a.open(Doc::Viewer);
+            a.state.viewer.request_refit = true;
+        })));
+        s.extend(shot("p10_step_preview_compare"));
+        s.push(Step::Do(Box::new(|a| {
+            a.stage = Workspace::Imaging;
+            a.open(Doc::Viewer);
+            a.state.viewer.compare = false;
+            a.state.focus.source = TraceSource::Active;
+            a.state.focus.key = crate::data::SECTION_KEY.into();
+            a.state.focus.ens = 0;
+            a.state.viewer.request_refit = true;
+        })));
+        s.extend(shot("p11_imaging_ribbon_migrated"));
+        s.push(Step::Do(Box::new(|a| a.stage = Workspace::Data)));
+        s.extend(shot("p12_data_ribbon_modeling"));
+        s.push(Step::Quit);
+        Self::new(dir, s)
+    }
+
     /// Advance the tour; called once per frame before the UI is drawn.
     pub fn tick(app: &mut RustSeisApp, ctx: &egui::Context) {
         let Some(mut tour) = app.tour.take() else { return };
