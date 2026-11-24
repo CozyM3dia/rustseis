@@ -21,6 +21,7 @@ enum Action {
     Toggle(StepPath),
     Remove(StepPath),
     Duplicate(StepPath),
+    MoveStep { path: StepPath, delta: isize },
     Move { from: StepPath, parent: Vec<usize>, index: usize },
     Insert { parent: Vec<usize>, index: usize, tool: String },
     AddBranch(StepPath),
@@ -69,7 +70,13 @@ fn header(s: &mut AppState, ui: &mut Ui, p: &Palette, reps: &[Option<StepReport>
     ui.horizontal(|ui| {
         let w = ui.available_width().min(520.0);
         let mut name = s.flow.name.replace('_', " ");
-        let r = ui.add(egui::TextEdit::singleline(&mut name).font(crate::theme::font_display(20.0)).frame(egui::Frame::NONE).desired_width(w));
+        let r = ui.add(
+            egui::TextEdit::singleline(&mut name)
+                .hint_text("Flow name")
+                .font(crate::theme::font_display(20.0))
+                .frame(egui::Frame::NONE)
+                .desired_width(w),
+        );
         if r.changed() {
             s.flow.name = name.replace(' ', "_");
             s.flow.dirty = true;
@@ -194,7 +201,7 @@ fn list(
         let mut path = parent.to_vec();
         path.push(i);
         let rep = if depth == 0 { reports.get(i).cloned().flatten() } else { None };
-        card(s, ui, p, node, &path, parent, i, rep.as_ref(), max_ms, actions, depth);
+        card(s, ui, p, node, &path, parent, i, nodes.len(), rep.as_ref(), max_ms, actions, depth);
         if i + 1 < nodes.len() {
             connector(ui, p, node, rep.as_ref());
         }
@@ -233,6 +240,7 @@ fn card(
     path: &StepPath,
     parent: &[usize],
     index: usize,
+    sibling_count: usize,
     rep: Option<&StepReport>,
     max_ms: u128,
     actions: &mut Vec<Action>,
@@ -257,52 +265,61 @@ fn card(
         .stroke(if enabled { Stroke::new(1.0, border) } else { Stroke::NONE })
         .corner_radius(CornerRadius::same(10))
         .inner_margin(Margin { left: 36, right: 10, top: 8, bottom: 8 });
-    let inner = frame.show(ui, |ui| {
-        ui.set_min_width(ui.available_width());
-        if !enabled {
-            ui.multiply_opacity(0.55);
-        }
-        ui.horizontal(|ui| {
-            let handle = ui.dnd_drag_source(egui::Id::unique(("step_drag", node.uid)), StepDrag(path.clone()), |ui| {
-                ui.label(RichText::new(icon::DOTS_SIX_VERTICAL).color(p.text_faint));
-            });
-            handle.response.on_hover_cursor(egui::CursorIcon::Grab).on_hover_text("Drag to reorder");
-            let (ic_rect, _) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::hover());
-            let cat_str = desc.map(|d| d.category.as_str()).unwrap_or("");
-            crate::icons::paint(ui.painter(), ic_rect, crate::icons::for_tool(&node.tool, cat_str), p);
-            let title = node.label.clone().unwrap_or_else(|| desc.map(|d| d.label.clone()).unwrap_or_else(|| node.tool.clone()));
-            ui.label(RichText::new(title).font(crate::theme::font_semibold(13.0)).color(if enabled { p.text } else { p.text_muted }));
-            if !known {
-                chip(ui, "not available", p.danger, with_alpha(p.danger, 24));
-            }
-            if !enabled {
-                chip(ui, "skipped", p.text_muted, p.sunken);
-            }
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                let hovered = ui.rect_contains_pointer(ui.max_rect().expand2(vec2(600.0, 10.0)));
-                if hovered || selected {
-                    if icon_button(ui, p, icon::TRASH, "Remove step", false).clicked() {
-                        actions.push(Action::Remove(path.clone()));
+
+    // Background click sense on the card scope so child widgets (Copy, Delete, Toggle,
+    // drag handle, branch controls, and nested child cards) always receive clicks first.
+    let scoped = ui.scope_builder(
+        egui::UiBuilder::new().id_salt(("step_card", node.uid)).sense(Sense::click()),
+        |ui| {
+            frame.show(ui, |ui| {
+                ui.set_min_width(ui.available_width());
+                if !enabled {
+                    ui.multiply_opacity(0.55);
+                }
+                ui.horizontal(|ui| {
+                    let handle = ui.dnd_drag_source(egui::Id::unique(("step_drag", node.uid)), StepDrag(path.clone()), |ui| {
+                        ui.label(RichText::new(icon::DOTS_SIX_VERTICAL).color(p.text_faint));
+                    });
+                    handle.response.on_hover_cursor(egui::CursorIcon::Grab).on_hover_text("Drag to reorder");
+                    let (ic_rect, _) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::hover());
+                    let cat_str = desc.map(|d| d.category.as_str()).unwrap_or("");
+                    crate::icons::paint(ui.painter(), ic_rect, crate::icons::for_tool(&node.tool, cat_str), p);
+                    let title = node.label.clone().unwrap_or_else(|| desc.map(|d| d.label.clone()).unwrap_or_else(|| node.tool.clone()));
+                    ui.label(RichText::new(title).font(crate::theme::font_semibold(13.0)).color(if enabled { p.text } else { p.text_muted }));
+                    if !known {
+                        chip(ui, "not available", p.danger, with_alpha(p.danger, 24));
                     }
-                    if icon_button(ui, p, icon::COPY, "Duplicate", false).clicked() {
-                        actions.push(Action::Duplicate(path.clone()));
+                    if !enabled {
+                        chip(ui, "skipped", p.text_muted, p.sunken);
                     }
-                }
-                let mut on = enabled;
-                if widgets::toggle(ui, p, &mut on).on_hover_text(if enabled { "Skip this step" } else { "Use this step" }).clicked() {
-                    actions.push(Action::Toggle(path.clone()));
-                }
-                if let Some(r) = rep.filter(|r| r.enabled) {
-                    time_bar(ui, p, r, max_ms, cat_color);
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if delete_icon_button(ui, p, "Remove step").clicked() {
+                            actions.push(Action::Remove(path.clone()));
+                        }
+                        if icon_button(ui, p, icon::COPY, "Duplicate step", false).clicked() {
+                            actions.push(Action::Duplicate(path.clone()));
+                        }
+                        let mut on = enabled;
+                        let tip = if enabled { "Skip this step" } else { "Use this step" };
+                        let tog = widgets::toggle(ui, p, &mut on);
+                        tog.widget_info(|| egui::WidgetInfo::selected(egui::Role::CheckBox, ui.is_enabled(), enabled, tip));
+                        if tog.on_hover_text(tip).clicked() {
+                            actions.push(Action::Toggle(path.clone()));
+                        }
+                        if let Some(r) = rep.filter(|r| r.enabled) {
+                            time_bar(ui, p, r, max_ms, cat_color);
+                        }
+                    });
+                });
+                summary_line(ui, p, node);
+                if is_container(&node.tool) {
+                    branches(s, ui, p, node, path, actions, depth);
                 }
             });
-        });
-        summary_line(ui, p, node);
-        if is_container(&node.tool) {
-            branches(s, ui, p, node, path, actions, depth);
-        }
-    });
-    let rect = inner.response.rect;
+        },
+    );
+    let resp = scoped.response;
+    let rect = resp.rect;
     // Rail node
     let c = pos2(rect.left() + RAIL_X, rect.top() + 20.0);
     if enabled {
@@ -314,12 +331,11 @@ fn card(
     }
     ui.painter().text(c + vec2(0.0, 16.0), Align2::CENTER_TOP, format!("{}", index + 1), font_mono(9.5), p.text_faint);
 
-    let resp = inner.response.interact(Sense::click());
     if resp.clicked() {
         actions.push(Action::Select(path.clone()));
     }
     resp.context_menu(|ui| {
-        ui.set_min_width(170.0);
+        ui.set_min_width(176.0);
         let busy = s.is_busy();
         if ui.add_enabled(!busy && depth == 0, egui::Button::new(format!("{}  Run to here", icon::PLAY))).on_disabled_hover_text("Available on top-level steps while the engine is idle").clicked() {
             actions.push(Action::RunTo(path.clone()));
@@ -332,6 +348,14 @@ fn card(
         }
         if ui.button(format!("{}  Duplicate", icon::COPY)).clicked() {
             actions.push(Action::Duplicate(path.clone()));
+            ui.close();
+        }
+        if ui.add_enabled(index > 0, egui::Button::new(format!("{}  Move up", icon::ARROW_UP))).clicked() {
+            actions.push(Action::MoveStep { path: path.clone(), delta: -1 });
+            ui.close();
+        }
+        if ui.add_enabled(index + 1 < sibling_count, egui::Button::new(format!("{}  Move down", icon::ARROW_DOWN))).clicked() {
+            actions.push(Action::MoveStep { path: path.clone(), delta: 1 });
             ui.close();
         }
         ui.separator();
@@ -362,6 +386,20 @@ fn card(
             }
         }
     }
+}
+
+fn delete_icon_button(ui: &mut Ui, p: &Palette, tooltip: &str) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(26.0, 22.0), Sense::click());
+    let hovered = resp.hovered() && ui.is_enabled();
+    let (fill, stroke, fg) = if hovered {
+        (with_alpha(p.danger, 36), Stroke::new(1.0, with_alpha(p.danger, 150)), p.danger)
+    } else {
+        (egui::Color32::TRANSPARENT, Stroke::NONE, p.text_muted)
+    };
+    ui.painter().rect(rect, CornerRadius::same(crate::theme::RADIUS_SM), fill, stroke, StrokeKind::Inside);
+    ui.painter().text(rect.center(), Align2::CENTER_CENTER, icon::TRASH, egui::FontId::proportional(15.0), fg);
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), tooltip));
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text(tooltip)
 }
 
 fn dashed_rect(painter: &egui::Painter, r: Rect, st: Stroke) {
@@ -485,7 +523,7 @@ fn branches(s: &AppState, ui: &mut Ui, p: &Palette, node: &FlowNode, path: &Step
             });
         ui.add_space(3.0);
     }
-    if node.tool == "flow_split" && icon_button(ui, p, icon::GIT_FORK, "Add parallel branch", false).clicked() {
+    if node.tool == "flow_split" && widgets::cmd(ui, p, icon::GIT_FORK, "Add branch", false).on_hover_text("Add parallel branch").clicked() {
         actions.push(Action::AddBranch(path.clone()));
     }
 }
@@ -510,9 +548,13 @@ fn add_menu(s: &AppState, ui: &mut Ui, p: &Palette, parent: Vec<usize>, index: u
 
 fn json_editor(s: &mut AppState, ui: &mut Ui, p: &Palette) {
     let id = egui::Id::unique("flow_json_text");
-    let mut text: String = ui
-        .data(|d| d.get_temp::<String>(id))
-        .unwrap_or_else(|| serde_json::to_string_pretty(&s.flow.to_spec()).unwrap_or_default());
+    let canonical = serde_json::to_string_pretty(&s.flow.to_spec()).unwrap_or_default();
+    let (cached_base, mut text): (String, String) = ui
+        .data(|d| d.get_temp::<(String, String)>(id))
+        .unwrap_or_else(|| (canonical.clone(), canonical.clone()));
+    if cached_base != canonical {
+        text = canonical.clone();
+    }
     let mut apply = false;
     widgets::body(ui, |ui| {
         ui.horizontal(|ui| {
@@ -520,7 +562,7 @@ fn json_editor(s: &mut AppState, ui: &mut Ui, p: &Palette) {
                 apply = true;
             }
             if ui.button(format!("{}  Revert", icon::ARROW_COUNTER_CLOCKWISE)).clicked() {
-                text = serde_json::to_string_pretty(&s.flow.to_spec()).unwrap_or_default();
+                text = canonical.clone();
             }
             let valid = serde_json::from_str::<rustseis_flow::FlowSpec>(&text);
             match valid {
@@ -550,14 +592,15 @@ fn json_editor(s: &mut AppState, ui: &mut Ui, p: &Palette) {
                 s.flow = crate::flowdoc::FlowDoc::from_spec(&spec, path);
                 s.flow.dirty = true;
                 s.flow_sel = None;
+                s.report_uids.clear();
                 s.toast(Level::Ok, "Flow updated from text");
-                ui.data_mut(|d| d.remove::<String>(id));
+                ui.data_mut(|d| d.remove::<(String, String)>(id));
                 return;
             }
             Err(e) => s.toast(Level::Error, format!("The flow text has a problem: {e}")),
         }
     }
-    ui.data_mut(|d| d.insert_temp(id, text));
+    ui.data_mut(|d| d.insert_temp(id, (canonical, text)));
 }
 
 fn apply(s: &mut AppState, actions: Vec<Action>) {
@@ -582,8 +625,15 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
                     s.push_flow_undo();
                 }
                 s.flow.remove(&p);
-                if s.flow_sel.as_ref().is_some_and(|sel| sel.starts_with(&p)) {
-                    s.flow_sel = None;
+                s.report_uids.clear();
+                if let Some(sel) = s.flow_sel.as_mut() {
+                    if sel.starts_with(&p) {
+                        s.flow_sel = None;
+                    } else if let Some((idx, parent)) = p.split_last() {
+                        if sel.len() >= p.len() && sel[..parent.len()] == *parent && sel[parent.len()] > *idx {
+                            sel[parent.len()] -= 1;
+                        }
+                    }
                 }
             }
             Action::Duplicate(p) => {
@@ -592,6 +642,19 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
                 }
                 if let Some(np) = s.flow.duplicate(&p) {
                     s.flow_sel = Some(np);
+                    s.report_uids.clear();
+                }
+            }
+            Action::MoveStep { path, delta } => {
+                if let Some(&idx) = path.last() {
+                    let target = (idx as isize + delta).max(0) as usize;
+                    if target != idx && s.flow.get(&path).is_some() {
+                        s.push_flow_undo();
+                        if let Some(np) = s.flow.move_within(&path, target) {
+                            s.flow_sel = Some(np);
+                            s.report_uids.clear();
+                        }
+                    }
                 }
             }
             Action::Move { from, parent, index } => {
@@ -630,6 +693,7 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
                     np.push(idx);
                     s.flow_sel = Some(np);
                     s.flow.dirty = true;
+                    s.report_uids.clear();
                 }
             }
             Action::AddBranch(p) => {
@@ -649,9 +713,190 @@ fn apply(s: &mut AppState, actions: Vec<Action>) {
                     if b < n.branches.len() {
                         n.branches.remove(b);
                         s.flow.dirty = true;
+                        s.report_uids.clear();
+                        if let Some(sel) = s.flow_sel.as_mut() {
+                            if sel.len() > p.len() && sel[..p.len()] == *p {
+                                if sel[p.len()] == b {
+                                    s.flow_sel = None;
+                                } else if sel[p.len()] > b {
+                                    sel[p.len()] -= 1;
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use egui_kittest::{Harness, kittest::Queryable};
+    use serde_json::json;
+
+    fn state_with(spec: serde_json::Value) -> AppState {
+        let ctx = egui::Context::default();
+        let mut s = AppState::new(&ctx);
+        let flow: rustseis_flow::FlowSpec = serde_json::from_value(spec).unwrap();
+        s.flow = crate::flowdoc::FlowDoc::from_spec(&flow, None);
+        s
+    }
+
+    fn harness_for(st: AppState, size: egui::Vec2, f: impl FnMut(&mut Ui, &mut AppState) + 'static) -> Harness<'static, AppState> {
+        let mut installed = false;
+        let mut f = f;
+        Harness::builder().with_size(size).build_ui_state(
+            move |ui, s: &mut AppState| {
+                if !installed {
+                    crate::theme::install(ui.ctx(), crate::theme::ThemeMode::Dark, true);
+                    installed = true;
+                }
+                f(ui, s);
+            },
+            st,
+        )
+    }
+
+    #[test]
+    fn flow_card_copy_delete_toggle_buttons_actually_receive_clicks() {
+        let st = state_with(json!({
+            "name": "test_flow",
+            "steps": [
+                {"tool": "agc", "params": {"operator_ms": 500.0}},
+                {"tool": "tar", "params": {}}
+            ]
+        }));
+        let mut h = harness_for(st, vec2(900.0, 600.0), |ui, s| super::ui(s, ui));
+        h.run();
+
+        // Click Copy (Duplicate step) on first card
+        h.get_all_by_label("Duplicate step").next().expect("copy button").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes.len(), 3, "Copy button must duplicate the step");
+        assert_eq!(h.state().flow.nodes[1].tool, "agc");
+        assert_eq!(h.state().flow_sel, Some(vec![1]));
+
+        // Click Toggle on first card -> disables step 0
+        h.get_all_by_label("Skip this step").next().expect("toggle").click();
+        h.run();
+        assert!(!h.state().flow.nodes[0].enabled, "Toggle must disable step 0");
+
+        // Click Toggle again -> re-enables step 0
+        h.get_by_label("Use this step").click();
+        h.run();
+        assert!(h.state().flow.nodes[0].enabled, "Toggle must re-enable step 0");
+
+        // Select last step (index 2), then delete step 0 -> selection must shift cleanly to index 1
+        h.state_mut().flow_sel = Some(vec![2]);
+        h.run();
+        h.get_all_by_label("Remove step").next().expect("delete button").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes.len(), 2, "Delete button must remove the step");
+        assert_eq!(h.state().flow_sel, Some(vec![1]), "Selection must shift when an earlier step is deleted");
+        assert_eq!(h.state().flow.nodes[1].tool, "tar");
+    }
+
+    #[test]
+    fn flow_split_branch_and_nested_card_buttons_work() {
+        let st = state_with(json!({
+            "name": "split_flow",
+            "steps": [
+                {
+                    "tool": "flow_split",
+                    "params": {
+                        "output_branch": 0,
+                        "branches": [
+                            [{"tool": "agc", "params": {}}],
+                            []
+                        ]
+                    }
+                }
+            ]
+        }));
+        let mut h = harness_for(st, vec2(900.0, 700.0), |ui, s| super::ui(s, ui));
+        h.run();
+
+        // Add branch button inside flow_split
+        h.get_by_label("Add branch").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes[0].branches.len(), 3, "Add branch must append a parallel branch");
+
+        // Remove branch button on last branch
+        h.get_all_by_label("Remove branch").last().expect("remove branch").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes[0].branches.len(), 2, "Remove branch must delete branch");
+
+        // Duplicate the nested step inside branch 0 (index 1 of all "Duplicate step" buttons: 0 is outer split, 1 is nested agc)
+        h.get_all_by_label("Duplicate step").nth(1).expect("nested copy button").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes[0].branches[0].len(), 2, "Nested Copy button must not be stolen by outer container card");
+
+        // Delete the nested duplicate inside branch 0
+        h.get_all_by_label("Remove step").nth(1).expect("nested delete button").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes[0].branches[0].len(), 1, "Nested Delete button must work inside container card");
+    }
+
+    #[test]
+    fn flow_card_select_and_context_menu_buttons_work() {
+        let st = state_with(json!({
+            "name": "ctx_flow",
+            "steps": [
+                {"tool": "agc", "params": {}},
+                {"tool": "tar", "params": {}}
+            ]
+        }));
+        let mut h = harness_for(st, vec2(900.0, 600.0), |ui, s| super::ui(s, ui));
+        h.run();
+
+        // Click card title text -> selects step 0
+        let first_label = h.state().tool("agc").unwrap().label.clone();
+        h.get_by_label(&first_label).click();
+        h.run();
+        assert_eq!(h.state().flow_sel, Some(vec![0]), "Clicking card body must select step 0");
+
+        // Right-click step 0 -> Move down via context menu
+        h.get_by_label(&first_label).click_secondary();
+        h.run();
+        h.get_by_label_contains("Move down").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes[0].tool, "tar");
+        assert_eq!(h.state().flow.nodes[1].tool, "agc");
+
+        // Right-click step 1 (agc) -> Move up via context menu
+        h.get_by_label(&first_label).click_secondary();
+        h.run();
+        h.get_by_label_contains("Move up").click();
+        h.run();
+        assert_eq!(h.state().flow.nodes[0].tool, "agc");
+
+        // Right-click step 0 -> Duplicate via context menu
+        h.get_by_label(&first_label).click_secondary();
+        h.run();
+        h.get_by_label(&format!("{}  Duplicate", icon::COPY)).click();
+        h.run();
+        assert_eq!(h.state().flow.nodes.len(), 3);
+
+        // Right-click first card -> Remove via context menu
+        h.get_all_by_label(&first_label).next().unwrap().click_secondary();
+        h.run();
+        h.get_by_label(&format!("{}  Remove", icon::TRASH)).click();
+        h.run();
+        assert_eq!(h.state().flow.nodes.len(), 2);
+    }
+
+    #[test]
+    fn library_quick_add_button_inserts_step() {
+        let ctx = egui::Context::default();
+        let st = AppState::new(&ctx);
+        let first_label = st.catalog.iter().find(|t| t.menu_id == "segd_read").unwrap().label.clone();
+        let mut h = harness_for(st, vec2(340.0, 700.0), |ui, s| crate::panes::catalog::ui(s, ui));
+        h.run();
+        h.get_by_label(&format!("Add {first_label}")).click();
+        h.run();
+        assert_eq!(h.state().flow.nodes.len(), 1, "Library '+' button must insert the tool into the flow");
+        assert_eq!(h.state().flow.nodes[0].tool, "segd_read");
     }
 }

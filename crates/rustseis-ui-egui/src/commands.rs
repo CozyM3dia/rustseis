@@ -347,18 +347,22 @@ fn stage_groups(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
             ribbon::group(ui, p, "Workflow", None, |ui| {
                 large_add_menu(app, ui, p, Icon::FlowBuilder, "Flow", "Branch", &["Flow Control", "Extensibility"]);
                 ribbon::stack(ui, |ui| {
-                    if ribbon::small_button(ui, p, Icon::Undo, "Undo", false, false)
-                        .on_hover_text("Undo last flow edit (Ctrl+Z)")
-                        .clicked()
-                    {
-                        app.state.undo_flow();
-                    }
-                    if ribbon::small_button(ui, p, Icon::Redo, "Redo", false, false)
-                        .on_hover_text("Redo flow edit (Ctrl+Y)")
-                        .clicked()
-                    {
-                        app.state.redo_flow();
-                    }
+                    ui.add_enabled_ui(!app.state.flow_undo.is_empty(), |ui| {
+                        if ribbon::small_button(ui, p, Icon::Undo, "Undo", false, false)
+                            .on_hover_text("Undo last flow edit (Ctrl+Z)")
+                            .clicked()
+                        {
+                            app.state.undo_flow();
+                        }
+                    });
+                    ui.add_enabled_ui(!app.state.flow_redo.is_empty(), |ui| {
+                        if ribbon::small_button(ui, p, Icon::Redo, "Redo", false, false)
+                            .on_hover_text("Redo flow edit (Ctrl+Y)")
+                            .clicked()
+                        {
+                            app.state.redo_flow();
+                        }
+                    });
                     if ribbon::small_button(ui, p, Icon::Toolbox, "All tools", false, false)
                         .on_hover_text("Open searchable Library panel")
                         .clicked()
@@ -974,6 +978,9 @@ fn context_group(app: &mut RustSeisApp, ui: &mut Ui, p: &Palette) {
                         .on_hover_text("Start an empty processing flow")
                         .clicked()
                     {
+                        if app.state.flow.count() > 0 {
+                            app.state.push_flow_undo();
+                        }
                         app.state.flow = Default::default();
                         app.state.flow_sel = None;
                         app.state.report_uids.clear();

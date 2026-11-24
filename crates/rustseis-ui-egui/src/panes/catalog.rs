@@ -100,11 +100,18 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
                     .show(ui, |ui| {
                         for t in tools {
                             let row_id = egui::Id::unique(("tool_drag", &t.menu_id));
-                            let inner = ui.dnd_drag_source(row_id, ToolDrag(t.menu_id.clone()), |ui| {
-                                tool_row(ui, &p, t, color);
-                            });
-                            let resp = inner.response;
-                            if resp.double_clicked() {
+                            let mut add_clicked = false;
+                            let scoped = ui.scope_builder(
+                                egui::UiBuilder::new().id_salt(row_id).sense(egui::Sense::click_and_drag()),
+                                |ui| {
+                                    add_clicked = tool_row(ui, &p, t, color);
+                                },
+                            );
+                            let resp = scoped.response;
+                            if resp.drag_started() {
+                                egui::DragAndDrop::set_payload(ui.ctx(), ToolDrag(t.menu_id.clone()));
+                            }
+                            if resp.double_clicked() || add_clicked {
                                 add = Some(t.menu_id.clone());
                             }
                             resp.on_hover_ui(|ui| {
@@ -121,16 +128,37 @@ pub fn ui(s: &mut AppState, ui: &mut Ui) {
     });
     if let Some(id) = add {
         s.insert_tool(&id);
+        s.doc_request = Some(crate::state::Doc::Flow);
     }
 }
 
-fn tool_row(ui: &mut Ui, p: &Palette, t: &ToolDescriptor, _color: egui::Color32) {
-    let (rect, resp) = ui.allocate_exact_size(egui::vec2(ui.available_width(), 27.0), egui::Sense::click_and_drag());
-    if resp.hovered() {
+fn tool_row(ui: &mut Ui, p: &Palette, t: &ToolDescriptor, _color: egui::Color32) -> bool {
+    let mut clicked_add = false;
+    let (rect, resp) = ui.allocate_exact_size(egui::vec2(ui.available_width(), 27.0), egui::Sense::hover());
+    let row_hovered = resp.hovered() || ui.rect_contains_pointer(rect);
+    if row_hovered {
         ui.painter().rect_filled(rect, egui::CornerRadius::same(6), p.raised);
     }
     let ic_rect = egui::Rect::from_center_size(egui::pos2(rect.left() + 14.0, rect.center().y), egui::vec2(16.0, 16.0));
     crate::icons::paint(ui.painter(), ic_rect, crate::icons::for_tool(&t.menu_id, &t.category), p);
-    let clip = egui::Rect::from_min_max(egui::pos2(rect.left() + 30.0, rect.top()), egui::pos2(rect.right() - 6.0, rect.bottom()));
+    let btn_rect = egui::Rect::from_center_size(egui::pos2(rect.right() - 14.0, rect.center().y), egui::vec2(22.0, 20.0));
+    let clip = egui::Rect::from_min_max(egui::pos2(rect.left() + 30.0, rect.top()), egui::pos2(btn_rect.left() - 4.0, rect.bottom()));
     ui.painter().with_clip_rect(clip).text(egui::pos2(rect.left() + 30.0, rect.center().y), egui::Align2::LEFT_CENTER, &t.label, egui::FontId::proportional(12.5), p.text);
+    let btn_resp = ui.interact(btn_rect, egui::Id::unique(("tool_add_btn", &t.menu_id)), egui::Sense::click());
+    btn_resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), format!("Add {}", t.label)));
+    let btn_resp = btn_resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text("Add step to flow");
+    if btn_resp.hovered() {
+        ui.painter().rect_filled(btn_rect, egui::CornerRadius::same(4), p.accent_soft);
+    }
+    ui.painter().text(
+        btn_rect.center(),
+        egui::Align2::CENTER_CENTER,
+        icon::PLUS,
+        egui::FontId::proportional(12.0),
+        if btn_resp.hovered() { p.accent_text } else if row_hovered { p.text } else { p.text_faint },
+    );
+    if btn_resp.clicked() {
+        clicked_add = true;
+    }
+    clicked_add
 }

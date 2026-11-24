@@ -74,7 +74,8 @@ pub fn icon_button(ui: &mut Ui, p: &Palette, icon: &str, tooltip: &str, active: 
     };
     ui.painter().rect(rect, CornerRadius::same(RADIUS_SM), fill, stroke, StrokeKind::Inside);
     ui.painter().text(rect.center(), Align2::CENTER_CENTER, icon, egui::FontId::proportional(15.0), fg);
-    resp.on_hover_text(tooltip)
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, enabled, tooltip));
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text(tooltip)
 }
 
 /// Text button with leading icon.
@@ -240,6 +241,7 @@ pub fn glass_frame(p: &Palette) -> Frame {
 /// Command-bar button: phosphor icon + label.
 pub fn cmd(ui: &mut Ui, p: &Palette, icon: &str, label: &str, active: bool) -> Response {
     let font = egui::FontId::proportional(12.5);
+    let access_label = label.to_string();
     // A trailing "▾" marks a menu; draw it with the icon font's caret.
     let label = label.replace('▾', egui_phosphor::regular::CARET_DOWN);
     let text = if icon.is_empty() { label } else { format!("{icon}  {label}") };
@@ -257,6 +259,7 @@ pub fn cmd(ui: &mut Ui, p: &Palette, icon: &str, label: &str, active: bool) -> R
     };
     ui.painter().rect(rect, CornerRadius::same(7), fill, stroke, StrokeKind::Inside);
     ui.painter().text(rect.center(), Align2::CENTER_CENTER, text, font, fg);
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, enabled, access_label.as_str()));
     resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
@@ -313,7 +316,8 @@ pub fn toggle(ui: &mut Ui, p: &Palette, on: &mut bool) -> Response {
     let x = egui::lerp(rect.left() + 9.0..=rect.right() - 9.0, t);
     let knob = if *on { p.on_accent } else { p.text_muted };
     ui.painter().circle_filled(pos2(x, rect.center().y), 7.0, knob);
-    resp
+    resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::CheckBox, ui.is_enabled(), *on, ""));
+    resp.on_hover_cursor(egui::CursorIcon::PointingHand)
 }
 
 /// Labelled row with content aligned right.
